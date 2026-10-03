@@ -4,6 +4,10 @@
 gebiet:
   name: Sulzbach-Rosenberg Zentrum
   gemeinde_ags: "09371151"
+  gemeinde_name: Sulzbach-Rosenberg
+  # Aus dem Bauleitplanungsportal Bayern (data/gemeinden.json): für Sulzbach-Rosenberg sind
+  # keine Planumringe im Landesportal, nur der Link zur Stadt.
+  bauleitplanung_url: https://www.suro.city/leben-in-der-stadt/bauen-und-wohnen/bauleitplanung/
   # 2×2-km-Kachel (entspricht der LoD2-Kachel 698_5486)
   bbox: [698000, 5486000, 700000, 5488000]
   crs: EPSG:25832
@@ -31,7 +35,9 @@ hoehen:
 
 bestand:
   dgm_resample: bilinear
-  gebaeude_puffer_m: 0.5
+  # CLAUDE.md nennt 0,5 m. Dachüberstände ragen im DOM aber bis ~1 m über die Hausumringe
+  # hinaus und erzeugten im Sichtcheck Fehltreffer. Deshalb 1,0 m.
+  gebaeude_puffer_m: 1.0
   ndvi_schwelle: 0.25
   hoehe_min_m: 1.8
   hoehe_max_m: 4.5
@@ -39,6 +45,12 @@ bestand:
   flaeche_min_m2: 3
   flaeche_max_m2: 80
   rechteckigkeit_min: 0.7
+  dach_rauigkeit_max_m: 0.15   # RMS zur Ausgleichsebene; Baumkronen liegen deutlich darüber
+  # Ring 1,0–1,6 m um das Objekt: das DOM20 (Bildkorrelation) ist an Kanten ~1 m weit geglättet
+  umfeld_ring_innen_px: 5
+  umfeld_ring_aussen_px: 8
+  umfeld_boden_hoehe_m: 1.0    # darunter gilt ein Pixel als Boden
+  umfeld_boden_anteil_min: 0.5 # Kleinbauten stehen frei: mindestens halber Ring ist Boden
 
 terrain:
   # Höhenraster für die App (CustomHeightmapTerrainProvider)

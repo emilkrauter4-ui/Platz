@@ -1,0 +1,20 @@
+{
+ "name": "Sulzbach-Rosenberg Zentrum",
+ "crs": "EPSG:25832",
+ "origin": [
+  699000.0,
+  5487000.0
+ ],
+ "bbox": [
+  -1000.0,
+  -1000.0,
+  1000.0,
+  1000.0
+ ],
+ "gemeinde": {
+  "name": "Sulzbach-Rosenberg",
+  "ags": "09371151",
+  "bauleitplanung_url": "https://www.suro.city/leben-in-der-stadt/bauen-und-wohnen/bauleitplanung/",
+  "quelle": "Bauleitplanungsportal Bayern (geoportal.bayern.de/bauleitplanungsportal)"
+ }
+}

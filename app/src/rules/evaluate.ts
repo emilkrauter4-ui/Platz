@@ -231,7 +231,7 @@ interface Limit {
   sub: string;
 }
 
-function limitFor(site: Site, k: ObjectKind, o: Placed): Limit {
+function limitFor(k: ObjectKind, o: Placed): Limit {
   if (k === 'gartenhaus') {
     const v = o.w * o.d * o.h;
     const max = L.gartenhaus.maxBruttoRauminhaltM3.wert;
@@ -270,7 +270,7 @@ function building(
   const fp = fps[k];
   const sides = site.plot.sides;
   const inside = insidePolygon(fp, site.plot.boundary);
-  const lim = limitFor(site, k, o);
+  const lim = limitFor(k, o);
   const closest = segs.reduce((a, b) => (b.d < a.d ? b : a));
   const near = segs.filter((s) => s.near);
   const nearSides = [...new Set(near.map((s) => s.side))];
