@@ -1,15 +1,16 @@
-import './style.css';
+import {
+  Cesium3DTileset,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType,
+} from '@cesium/engine';
 import {
   Cartesian2,
   Cartesian3,
-  Cesium3DTileset,
   HeadingPitchRange,
   Math as CMath,
   Matrix4,
-  ScreenSpaceEventHandler,
-  ScreenSpaceEventType,
   BoundingSphere,
-} from 'cesium';
+} from '@cesium/core';
 import {
   area,
   centroid,
@@ -32,13 +33,14 @@ import {
   type Site,
   type Vec2,
 } from './rules';
-import { DATA_URL, inBbox, loadData, near, type Data } from './data';
+import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, localToCartesian, lonLatToLocal, setOrigin } from './scene/coords';
 import { Terrain } from './scene/terrain';
 import { createScene, type Scene } from './scene/viewer';
 import { Renderer, type RenderState } from './scene/render';
 import { assumedWindows, ccw, classifyBuildings, initialObjects, isSimple, sidesFromBoundary, snap } from './site/plot';
 import { searchAddress, wasserschutz, type Place } from './ui/services';
+import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
 const $ = (id: string) => document.getElementById(id)!;
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
@@ -88,6 +90,10 @@ const st: State = {
 };
 
 let data: Data;
+/** Grenze vom Nutzer gesetzt oder für eine Demo-Adresse vorgezeichnet */
+let plotProvenance: Provenance = 'nutzerbestätigt';
+/** Grundrisse und Bestand laden im Hintergrund, sobald die Startansicht steht. */
+let details: Promise<unknown>;
 let terrain: Terrain;
 let scene: Scene;
 let renderer: Renderer;
@@ -127,7 +133,7 @@ function render() {
 
 /** Bildschirmpixel → Meter am Grundstück (für Einrast-Toleranz). */
 function metersPerPixel(p: Vec2): number {
-  const c = localToCartesian(p, terrain.height(p) || 0);
+  const c = localToCartesian(p, terrain.heightOrCoarse(p));
   const v = scene.viewer;
   return v.camera.getPixelSize(new BoundingSphere(c, 1), v.scene.drawingBufferWidth, v.scene.drawingBufferHeight);
 }
@@ -142,7 +148,7 @@ function pickGround(pos: Cartesian2): Vec2 | null {
 
 /* ---------- Kamera ---------- */
 function frame(center: Vec2, radius: number, view: '3d' | 'plan' = st.view, animate = true) {
-  const h = terrain.height(center) || 450;
+  const h = terrain.heightOrCoarse(center);
   const target = localToCartesian(center, h);
   const pitch = view === 'plan' ? -CMath.PI_OVER_TWO + 0.0001 : CMath.toRadians(-38);
   const range = view === 'plan' ? radius * 2.6 : radius * 2.4;
@@ -170,15 +176,29 @@ function showStart(msg?: string) {
   st.step = 'start';
   st.draft = [];
   scene.parzellar.show = false;
-  verdict('Wo steht dein Haus?', msg ?? 'Such deine Adresse oder tipp auf dein Grundstück in der Karte.');
+  const online = navigator.onLine && !new URLSearchParams(location.search).has('offline');
+  verdict(
+    'Wo steht dein Haus?',
+    msg ?? (online ? 'Such deine Adresse oder tipp auf dein Grundstück in der Karte.' : 'Ohne Internet gibt es keine Adresssuche. Tipp auf dein Grundstück oder wähl eine Demo-Adresse.'),
+  );
+  const demos = data.site.demos ?? [];
+  const demoHtml = demos.length
+    ? `<h3 style="font-size:14px;margin:16px 0 2px">Demo-Adressen</h3><ul class="results">${demos
+        .map((d) => `<li><button type="button" data-demo="${esc(d.id)}"><strong>${esc(d.titel)}</strong><br>${esc(d.adresse)}</button></li>`)
+        .join('')}</ul>`
+    : '';
   $('stepBody').innerHTML = `
-    <form class="search" id="searchForm" role="search">
+    <form class="search" id="searchForm" role="search" ${online ? '' : 'hidden'}>
       <label class="sr" for="q" hidden>Adresse</label>
-      <input id="q" name="q" type="search" autocomplete="street-address" placeholder="Straße und Hausnummer" value="${esc(st.address ?? '')}">
+      <input id="q" name="q" type="search" autocomplete="street-address" placeholder="Straße und Hausnummer" value="${esc(st.address ?? (document.getElementById('q') as HTMLInputElement | null)?.value ?? '')}">
       <button type="submit">Suchen</button>
     </form>
     <ul class="results" id="results"></ul>
-    <p class="fine">Daten liegen für 2 × 2 km in ${esc(data.site.gemeinde.name)} vor. Adresssuche: © OpenStreetMap-Mitwirkende (Nominatim).</p>`;
+    ${demoHtml}
+    <p class="fine">Daten liegen für 2 × 2 km in ${esc(data.site.gemeinde.name)} vor.${online ? ' Adresssuche: © OpenStreetMap-Mitwirkende (Nominatim).' : ''}</p>`;
+  document.querySelectorAll<HTMLButtonElement>('[data-demo]').forEach((b) =>
+    b.addEventListener('click', () => startDemo(demos.find((d) => d.id === b.dataset.demo)!)),
+  );
   $('searchForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const q = ($('q') as HTMLInputElement).value.trim();
@@ -203,6 +223,21 @@ function showStart(msg?: string) {
   renderer.updateDim();
 }
 
+/** Demo-Adresse: Grenze ist vorgezeichnet (Label `Demo`), danach geht es direkt ins Prüfen. */
+async function startDemo(d: DemoAdresse) {
+  st.address = d.adresse;
+  await Promise.all([details, terrain.ensure([d.grenze[0][0] - 90, d.grenze[0][1] - 90], [d.grenze[0][0] + 90, d.grenze[0][1] + 90])]);
+  st.draft = d.grenze.map((p) => [p[0], p[1]] as Vec2);
+  plotProvenance = 'Demo';
+  await confirmPlot();
+  if (d.start && st.objs) {
+    const o = st.objs[d.objekt];
+    o.center = d.start;
+    if (d.winkelGrad != null) o.angle = CMath.toRadians(d.winkelGrad);
+  }
+  select(d.objekt);
+}
+
 function choosePlace(p: Place) {
   st.address = p.label.split(',').slice(0, 2).join(',');
   goToPlot(lonLatToLocal(p.lon, p.lat));
@@ -213,7 +248,7 @@ async function goToPlot(p: Vec2) {
     showStart('Hier haben wir noch keine Daten. Die Demo deckt 2 × 2 km rund um die Altstadt ab.');
     return;
   }
-  await terrain.ensure([p[0] - 80, p[1] - 80], [p[0] + 80, p[1] + 80]);
+  await Promise.all([details, terrain.ensure([p[0] - 80, p[1] - 80], [p[0] + 80, p[1] + 80])]);
   st.view = 'plan';
   syncViewButtons();
   frame(p, 22, 'plan');
@@ -263,6 +298,7 @@ function updateGrenzeUI(msg?: string) {
 }
 
 function addBoundaryPoint(p: Vec2) {
+  plotProvenance = 'nutzerbestätigt';
   const tol = Math.max(0.4, 16 * metersPerPixel(p));
   if (st.draft.length >= 3 && Math.hypot(p[0] - st.draft[0][0], p[1] - st.draft[0][1]) < tol) {
     confirmPlot();
@@ -316,7 +352,7 @@ async function confirmPlot() {
 function buildSite() {
   if (!st.plot) return;
   site = {
-    plot: { boundary: st.plot, ...sidesFromBoundary(st.plot), provenance: 'nutzerbestätigt' },
+    plot: { boundary: st.plot, ...sidesFromBoundary(st.plot), provenance: plotProvenance },
     buildings: st.buildings,
     bestand: st.bestand.filter((x) => x.status === 'aktiv'),
     windows: st.windows,
@@ -666,7 +702,7 @@ function openReport() {
   }
   const best = st.bestand.filter((b) => b.status === 'aktiv');
   h += `<h3>Was wir angenommen haben</h3><ul class="plain">
-    <li>Grundstücksgrenze von dir gesetzt (nutzerbestätigt), Flurkarte nur als Hilfslinie</li>
+    <li>${plotProvenance === 'Demo' ? 'Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet (Demo) – nicht amtlich' : 'Grundstücksgrenze von dir gesetzt (nutzerbestätigt), Flurkarte nur als Hilfslinie'}</li>
     <li>${esc(GEBIET_TEXT[st.gebiet.value])} (${esc(st.gebiet.provenance)}), ${st.bereich.value === 'innen' ? 'Innenbereich' : 'Außenbereich'} (${esc(st.bereich.provenance)})</li>
     <li>Gartenhaus ${st.aufenthaltsraum.value ? 'mit' : 'ohne'} Aufenthaltsraum und ${st.feuerstaette.value ? 'mit' : 'ohne'} Feuerstätte (${esc(st.aufenthaltsraum.provenance)})</li>
     <li>Abstandsfläche 0,4 H, mindestens 3 m; Gemeindesatzungen können abweichen</li>
@@ -704,17 +740,63 @@ function openInfo() {
       <li><span class="tg assume">Annahme</span>Gilt nur, wenn es bei dir so ist</li>
       <li><span class="tg open">offen</span>Muss noch jemand prüfen</li>
     </ul>
+    <h3>Offline-Demo</h3>
+    <p id="offState">Prüfe …</p>
+    <div class="btnrow"><button class="sec" id="offBtn" type="button" hidden></button></div>
     <p class="m-fine">Datenquelle: Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (CC BY 4.0)</p>`,
   );
+  void renderOfflineControls();
 }
+
+/* ---------- Offline-Demo ---------- */
+async function renderOfflineControls() {
+  const stateEl = document.getElementById('offState');
+  const btn = document.getElementById('offBtn') as HTMLButtonElement | null;
+  if (!stateEl || !btn) return;
+  let s;
+  try {
+    s = await offlineStatus();
+  } catch {
+    stateEl.textContent = 'In dieser Umgebung nicht verfügbar (die App muss gebaut ausgeliefert werden).';
+    return;
+  }
+  btn.hidden = false;
+  if (s.ready) {
+    stateEl.textContent = `Bereit: alle ${s.files} Dateien der Kachel ${data.site.name} sind auf diesem Gerät. Die App läuft ohne Internet; Luftbild und Flurkarte kommen aus gespeicherten Kacheln.`;
+    btn.textContent = 'Offline-Demo beenden';
+    btn.onclick = async () => {
+      await endOffline();
+      location.reload();
+    };
+  } else {
+    stateEl.textContent = `Lädt Gelände, Gebäude, Luftbild und Flurkarte (≈ 45 MB) auf dieses Gerät, damit die Demo ohne Netz läuft. ${s.cached ? `${s.cached} von ${s.files} Dateien sind schon da.` : ''}`;
+    btn.textContent = 'Offline-Demo vorbereiten';
+    btn.onclick = async () => {
+      btn.disabled = true;
+      try {
+        await prepareOffline((d, t) => (stateEl.textContent = `Lädt … ${d} von ${t} Dateien (${Math.round((100 * d) / t)} %)`));
+        stateEl.textContent = 'Fertig. Die App startet neu im Offline-Modus.';
+        setTimeout(() => location.reload(), 800);
+      } catch (e) {
+        stateEl.textContent = `Abgebrochen: ${(e as Error).message}. Versuch es noch einmal, schon geladene Dateien bleiben erhalten.`;
+        btn.disabled = false;
+      }
+    };
+  }
+}
+
 
 /* ---------- Start ---------- */
 async function main() {
+  registerServiceWorker();
+  if (offlineMode()) $('infoBtn').lastChild!.textContent = ' Offline-Demo';
   try {
-    data = await loadData();
-    setOrigin(data.site.origin);
+    const site = await loadSite();
+    data = { site, buildings: [], bestand: [] };
+    setOrigin(site.origin);
     terrain = await Terrain.load(`${DATA_URL}/terrain`);
-    scene = await createScene($('map'), terrain, DATA_URL, data.site.bbox);
+    // Offline-Demo: Luftbild und Flurkarte aus vorab erzeugten Kacheln statt aus den WMS
+    scene = createScene($('map'), terrain, DATA_URL, site.bbox, await localImagery());
   } catch (e) {
     verdict('Die Karte konnte nicht laden.', 'Lade die Seite neu, um es noch einmal zu versuchen.');
     console.error(e);
@@ -741,15 +823,28 @@ async function main() {
   $('infoBtn').addEventListener('click', openInfo);
 
   // Startansicht: Altstadt schräg von Süden
-  await terrain.ensure([-300, -300], [300, 300]);
   frame([-150, -100], 260, '3d', false);
-  const hideLoading = scene.viewer.scene.postRender.addEventListener(() => {
-    if (scene.viewer.scene.globe.tilesLoaded) {
-      $('loading').hidden = true;
-      hideLoading();
-    }
+  // Grundrisse und Bestand erst laden, wenn die Startansicht steht (oder sobald jemand sucht/tippt),
+  // damit sie auf langsamem Netz nicht mit Cesium und dem Luftbild um Bandbreite konkurrieren.
+  let detailsP: Promise<unknown> | null = null;
+  const startDetails = () => (detailsP ??= loadDetails().then((d) => Object.assign(data, d)));
+  details = new Promise((res) => {
+    const go = () => startDetails().then(res);
+    const off = scene.viewer.scene.postRender.addEventListener(() => {
+      if (scene.viewer.scene.globe.tilesLoaded) {
+        off();
+        go();
+      }
+    });
+    setTimeout(go, 15000);
+    document.addEventListener('focusin', go, { once: true });
+    scene.viewer.canvas.addEventListener('pointerdown', go, { once: true });
   });
-  setTimeout(() => ($('loading').hidden = true), 6000);
+  // Ladehinweis weg, sobald die Karte das erste Bild zeigt
+  const hideLoading = scene.viewer.scene.postRender.addEventListener(() => {
+    $('loading').hidden = true;
+    hideLoading();
+  });
   showStart();
 
   // Test-Schnittstelle für automatisierte Durchläufe (nur mit ?debug)
@@ -758,6 +853,7 @@ async function main() {
       passt: {
         st,
         goToPlot,
+        startDemo: (id: string) => startDemo((data.site.demos ?? []).find((d) => d.id === id)!),
         setBoundary: async (pts: Vec2[]) => {
           st.draft = pts;
           renderer.syncDraftPoints();
@@ -766,7 +862,7 @@ async function main() {
         select,
         update,
         buildings: () => data.buildings,
-        tilesLoaded: () => scene.viewer.scene.globe.tilesLoaded && (scene.tileset?.tilesLoaded ?? true),
+        tilesLoaded: () => scene.viewer.scene.globe.tilesLoaded && !!scene.tileset?.tilesLoaded,
         frame: (c: Vec2, r: number, v: '3d' | 'plan') => frame(c, r, v, false),
       },
     });

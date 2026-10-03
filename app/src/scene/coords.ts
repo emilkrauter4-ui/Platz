@@ -2,12 +2,14 @@
  * Lokale Meter (x = Ost, y = Nord, relativ zur Gebietsmitte in UTM 32N) ↔ geographisch ↔ Cesium.
  * ETRS89 wird für die Darstellung mit WGS84 gleichgesetzt (alle Ebenen nutzen denselben Rahmen).
  */
-import proj4 from 'proj4';
-import { Cartesian3, Cartographic, Math as CMath } from 'cesium';
+import {
+  Cartesian3,
+  Cartographic,
+  Math as CMath,
+} from '@cesium/core';
 import type { Vec2 } from '../rules';
 
-const UTM32 = '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs';
-const conv = proj4('EPSG:4326', UTM32);
+import { forward, inverse } from './utm';
 
 let origin: Vec2 = [0, 0];
 export function setOrigin(o: Vec2) {
@@ -16,12 +18,12 @@ export function setOrigin(o: Vec2) {
 export const getOrigin = () => origin;
 
 export function lonLatToLocal(lon: number, lat: number): Vec2 {
-  const [e, n] = conv.forward([lon, lat]);
+  const [e, n] = forward(lon, lat);
   return [e - origin[0], n - origin[1]];
 }
 
 export function localToLonLat(p: Vec2): [number, number] {
-  const [lon, lat] = conv.inverse([p[0] + origin[0], p[1] + origin[1]]);
+  const [lon, lat] = inverse(p[0] + origin[0], p[1] + origin[1]);
   return [lon, lat];
 }
 

@@ -1,0 +1,21 @@
+{
+ "rect": [
+  11.734364,
+  49.493638,
+  11.762962,
+  49.512263
+ ],
+ "dop": {
+  "minLevel": 12,
+  "maxLevel": 18,
+  "ext": "jpg",
+  "kacheln": 1624
+ },
+ "parzellar": {
+  "minLevel": 13,
+  "maxLevel": 18,
+  "ext": "png",
+  "kacheln": 1623
+ },
+ "quelle": "Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (CC BY 4.0)"
+}

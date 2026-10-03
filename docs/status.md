@@ -59,8 +59,8 @@ Abweichungen von CLAUDE.md:
 - Drei echte Adressen mit echten Eigentümern oder Bauamt durchspielen: steht aus. Die Tests liefen mit einer nach
   Luftbild und Parzellarkarte nachgezeichneten Grenze.
 - Prüfbericht, Quellenangaben, Haftungshinweis: vorhanden.
-- Ladezeit: JS-Bundle 1,2 MB gzip (Cesium), Gelände lädt nur benötigte 250-m-Kacheln (je ~125 kB), Gebäude nur sichtbare
-  Kacheln. **Unter 4 s im Mobilfunknetz ist nicht gemessen** und mit dem vollen Cesium-Bundle fraglich.
+- Ladezeit gemessen und optimiert, siehe `docs/ladezeit.md`: bedienbar nach 1,6 s (Fast 4G) bzw. 6,5 s (Slow 4G) beim
+  ersten Besuch, 0,7 s beim Wiederbesuch. Offline-Demo der Kachel 698_5486 vorhanden (41 MB, Service Worker).
 - Fachliche Prüfung der Grenzwerte (Bauamt/Architekt) steht aus; bis dahin weist der Prüfbericht darauf hin.
 
 ## Bekannte Lücken

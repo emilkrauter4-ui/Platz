@@ -1,3 +1,5 @@
+/* Instrument Sans, selbst gehostet (SIL OFL 1.1, siehe src/fonts/OFL.txt): kein Drittanbieter, offline verfügbar */
+@font-face{font-family:"Instrument Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url("./fonts/instrument-sans-latin.woff2") format("woff2")}
 :root{--bg:#EEF0EC;--surface:#F8F9F6;--ink:#1D2321;--muted:#5C6662;--line:rgba(29,35,33,.13);--soft:#E2E6E0;--red:#C9302A;--ok:#2E7D5B;--warn:#A06410;--focus:#2B59C3;color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121614;--surface:#1A1F1C;--ink:#E7ECE8;--muted:#9AA59F;--line:rgba(231,236,232,.13);--soft:#252C28;--red:#F0605A;--ok:#4CC38A;--warn:#E3A43C;--focus:#8FAEFF;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#121614;--surface:#1A1F1C;--ink:#E7ECE8;--muted:#9AA59F;--line:rgba(231,236,232,.13);--soft:#252C28;--red:#F0605A;--ok:#4CC38A;--warn:#E3A43C;--focus:#8FAEFF;color-scheme:dark}

@@ -61,6 +61,12 @@ def main() -> int:
             enc = np.round((blk - base) * 100).astype("<u2")
             (out / f"{cx}_{cy}.bin").write_bytes(enc.tobytes())
 
+    # Übersicht für grobe Gelände-Kacheln (weite Ansicht): 8 m, ganzes Gebiet in einer Datei.
+    # Sonst lädt Cesium beim Herauszoomen alle 64 Kacheln (4,6 MB) nur für eine grobe Form.
+    step = int(round(8 / res))
+    ov = grid[::step, ::step]
+    (out / "overview.bin").write_bytes(np.round((ov - base) * 100).astype("<u2").tobytes())
+
     ox, oy = origin()
     meta = {
         "crs": "EPSG:25832",
@@ -76,6 +82,7 @@ def main() -> int:
         "base": base,
         "scale": 0.01,
         "undulation_mittel": round(float(und.mean()), 3),
+        "overview": {"step": step * res, "nx": int(ov.shape[1]), "ny": int(ov.shape[0])},
     }
     (out / "terrain.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
     print(f"Terrain: {cols}×{rows} Kacheln à {n} m, Höhen {h_ell.min():.2f} … {h_ell.max():.2f} m (Ellipsoid)")

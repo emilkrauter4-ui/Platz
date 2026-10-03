@@ -6,16 +6,18 @@ import {
   CallbackPositionProperty,
   CallbackProperty,
   ClassificationType,
-  Color,
   ColorMaterialProperty,
   ConstantProperty,
   Entity,
-  PolygonHierarchy,
   PolylineDashMaterialProperty,
   SceneTransforms,
+  type CesiumWidget as Viewer,
+} from '@cesium/engine';
+import {
+  Color,
+  PolygonHierarchy,
   type Cartesian3,
-  type Viewer,
-} from 'cesium';
+} from '@cesium/core';
 import {
   edges,
   footprint,
@@ -84,8 +86,7 @@ export class Renderer {
   }
 
   private ground(p: Vec2): number {
-    const h = this.terrain.height(p);
-    return Number.isFinite(h) ? h : 0;
+    return this.terrain.heightOrCoarse(p);
   }
 
   base(o: Placed): number {

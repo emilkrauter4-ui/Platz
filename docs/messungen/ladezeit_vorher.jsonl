@@ -1,0 +1,6 @@
+
+200 1161
+{"profile":"slow4g","cache":"cold","dcl":6026,"fcp":4696,"ui_ms":26894,"canvas_ms":8178,"szene_fertig_ms":84284,"kB":{"html/css":2,"bundle":1039,"other":31,"data-json":310,"terrain":4638,"tiles3d":1361,"cesium-static":146,"wms":462}}
+{"profile":"fast4g","cache":"cold","dcl":7389,"fcp":7660,"ui_ms":11331,"canvas_ms":7967,"szene_fertig_ms":52886,"kB":{"html/css":2,"bundle":1039,"data-json":310,"terrain":4638,"tiles3d":1361,"cesium-static":146,"other":0,"wms":451}}
+
+[exited with code 0]

@@ -6,6 +6,19 @@ export interface SiteMeta {
   origin: Vec2;
   bbox: [number, number, number, number];
   gemeinde: { name: string; ags: string; bauleitplanung_url: string | null; quelle: string };
+  /** Demo-Adressen mit vorgezeichneter Grenze (Label `Demo`) – siehe docs/demo-adressen.md */
+  demos?: DemoAdresse[];
+}
+
+export interface DemoAdresse {
+  id: string;
+  titel: string;
+  adresse: string;
+  grenze: Vec2[];
+  objekt: 'gartenhaus' | 'carport' | 'waermepumpe';
+  /** optionale Startposition des Objekts (Mitte, lokale Meter) */
+  start?: Vec2;
+  winkelGrad?: number;
 }
 
 export interface BuildingRec {
@@ -34,12 +47,18 @@ export interface Data {
 
 export const DATA_URL = `${import.meta.env.BASE_URL}data`;
 
-export async function loadData(): Promise<Data> {
-  const [site, b, best] = await Promise.all(
-    ['site.json', 'buildings.json', 'bestand.json'].map((f) => fetch(`${DATA_URL}/${f}`).then((r) => r.json())),
-  );
+const json = (f: string) => fetch(`${DATA_URL}/${f}`).then((r) => {
+  if (!r.ok) throw new Error(`${f} fehlt (${r.status})`);
+  return r.json();
+});
+
+/** Gebietsbeschreibung (klein, für den Start nötig). */
+export const loadSite = (): Promise<SiteMeta> => json('site.json');
+
+/** Grundrisse und Bestand (≈ 300 kB komprimiert) – erst nötig, wenn ein Grundstück gewählt wird. */
+export async function loadDetails(): Promise<Pick<Data, 'buildings' | 'bestand'>> {
+  const [b, best] = await Promise.all([json('buildings.json'), json('bestand.json')]);
   return {
-    site,
     buildings: (b.buildings as Omit<BuildingRec, 'c'>[]).map((x) => ({ ...x, c: centroid(x.fp) })),
     bestand: (best.bestand as (Omit<BestandRec, 'conf'> & { c: number })[]).map(({ c, ...x }) => ({ ...x, conf: c })),
   };

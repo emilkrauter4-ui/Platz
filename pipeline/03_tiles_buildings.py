@@ -49,14 +49,19 @@ def triangulate(ring: np.ndarray) -> np.ndarray | None:
 
 
 def glb(positions: dict[str, np.ndarray], normals: dict[str, np.ndarray]) -> bytes:
-    """Minimales GLB mit je einer Primitive pro Flächenart (nicht indiziert, flache Normalen)."""
+    """GLB mit je einer Primitive pro Flächenart (nicht indiziert, flache Normalen).
+
+    KHR_mesh_quantization: Positionen als normierte int16 (Knoten-Skalierung = Ausdehnung,
+    Auflösung < 1 cm), Normalen als normierte int8. Halbiert die Kachelgröße gegenüber float32.
+    """
     bin_parts, views, accessors, prims, mats = [], [], [], [], []
     offset = 0
+    allpos = np.vstack([p for p in positions.values() if len(p)])
+    scale = float(np.abs(allpos).max()) or 1.0
 
-    def add(arr: np.ndarray, target: int) -> int:
+    def add(data: bytes, stride: int) -> int:
         nonlocal offset
-        data = arr.astype("<f4").tobytes()
-        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(data), "target": target})
+        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(data), "byteStride": stride, "target": 34962})
         bin_parts.append(data)
         offset += len(data)
         pad = (-offset) % 4
@@ -68,12 +73,17 @@ def glb(positions: dict[str, np.ndarray], normals: dict[str, np.ndarray]) -> byt
     for kind, pos in positions.items():
         if not len(pos):
             continue
-        pv = add(pos, 34962)
-        accessors.append({"bufferView": pv, "componentType": 5126, "count": len(pos), "type": "VEC3",
-                          "min": pos.min(axis=0).tolist(), "max": pos.max(axis=0).tolist()})
+        q = np.round(pos / scale * 32767).astype("<i2")
+        qp = np.zeros((len(q), 4), "<i2")  # 8-Byte-Schritt (Ausrichtung auf 4 Byte)
+        qp[:, :3] = q
+        pv = add(qp.tobytes(), 8)
+        accessors.append({"bufferView": pv, "componentType": 5122, "normalized": True, "count": len(pos), "type": "VEC3",
+                          "min": (q.min(axis=0) / 32767).tolist(), "max": (q.max(axis=0) / 32767).tolist()})
         pa = len(accessors) - 1
-        nv = add(normals[kind], 34962)
-        accessors.append({"bufferView": nv, "componentType": 5126, "count": len(pos), "type": "VEC3"})
+        qn = np.zeros((len(pos), 4), "<i1")
+        qn[:, :3] = np.round(normals[kind] * 127).astype("<i1")
+        nv = add(qn.tobytes(), 4)
+        accessors.append({"bufferView": nv, "componentType": 5120, "normalized": True, "count": len(pos), "type": "VEC3"})
         na = len(accessors) - 1
         mats.append({"name": kind, "pbrMetallicRoughness": {"baseColorFactor": COLORS[kind], "metallicFactor": 0, "roughnessFactor": 1}})
         prims.append({"attributes": {"POSITION": pa, "NORMAL": na}, "material": len(mats) - 1, "mode": 4})
@@ -81,7 +91,8 @@ def glb(positions: dict[str, np.ndarray], normals: dict[str, np.ndarray]) -> byt
     binary = b"".join(bin_parts)
     gltf = {
         "asset": {"version": "2.0", "generator": "passt-pipeline", "copyright": "Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (CC BY 4.0)"},
-        "scene": 0, "scenes": [{"nodes": [0]}], "nodes": [{"mesh": 0}],
+        "extensionsUsed": ["KHR_mesh_quantization"], "extensionsRequired": ["KHR_mesh_quantization"],
+        "scene": 0, "scenes": [{"nodes": [0]}], "nodes": [{"mesh": 0, "scale": [scale, scale, scale]}],
         "meshes": [{"primitives": prims}], "materials": mats,
         "accessors": accessors, "bufferViews": views, "buffers": [{"byteLength": len(binary)}],
     }

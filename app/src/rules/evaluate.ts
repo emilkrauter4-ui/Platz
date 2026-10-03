@@ -218,7 +218,11 @@ function contextRows(site: Site): Row[] {
   else rows.push({ text: site.demo ? 'Bebauungsplan: in der Demo nicht hinterlegt' : 'Bebauungsplan: noch nicht geprüft', tag: 'offen', kind: 'offen' });
   if (site.demo) rows.push({ text: 'Grundstück und Nachbarhäuser sind erfunden', tag: 'Demo', kind: 'Demo' });
   else {
-    rows.push({ text: 'Grundstücksgrenze von dir gesetzt', tag: site.plot.provenance, kind: site.plot.provenance });
+    rows.push({
+      text: site.plot.provenance === 'Demo' ? 'Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet' : 'Grundstücksgrenze von dir gesetzt',
+      tag: site.plot.provenance,
+      kind: site.plot.provenance,
+    });
     rows.push({ text: 'Gemeindesatzungen können andere Abstände festlegen', tag: 'offen', kind: 'offen' });
   }
   return rows;

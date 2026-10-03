@@ -8,17 +8,19 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "serve": "node scripts/serve.mjs 4173 dist"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
+    "proj4": "^2.22.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",
     "vite-plugin-static-copy": "^4.1.1",
     "vitest": "^5.0.3"
   },
   "dependencies": {
-    "cesium": "^1.146.0",
-    "proj4": "^2.22.0"
+    "@cesium/core": "^0.1.0",
+    "@cesium/engine": "^26.4.0"
   }
 }

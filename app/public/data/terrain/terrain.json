@@ -16,5 +16,10 @@
  "rows": 8,
  "base": 432.0,
  "scale": 0.01,
- "undulation_mittel": 46.446
+ "undulation_mittel": 46.446,
+ "overview": {
+  "step": 8.0,
+  "nx": 250,
+  "ny": 250
+ }
 }
