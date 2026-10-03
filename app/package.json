@@ -1,0 +1,24 @@
+{
+  "name": "passt-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "vite-plugin-static-copy": "^4.1.1",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "cesium": "^1.146.0",
+    "proj4": "^2.22.0"
+  }
+}

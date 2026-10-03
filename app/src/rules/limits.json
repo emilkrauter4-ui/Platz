@@ -1,0 +1,82 @@
+{
+  "_hinweis": "Alle Grenzwerte mit Quelle. Vor jeder öffentlichen Demo von einer Fachperson (Bauamt oder Architekt) prüfen lassen. 'geprueft' wird erst nach dieser Prüfung auf true gesetzt.",
+  "geprueft": false,
+  "gartenhaus": {
+    "maxBruttoRauminhaltM3": {
+      "wert": 75,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
+      "text": "Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sind verfahrensfrei."
+    }
+  },
+  "carport": {
+    "maxFlaecheM2": {
+      "wert": 50,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. b",
+      "text": "Garagen einschließlich überdachter Stellplätze mit einer Fläche bis zu 50 m², außer im Außenbereich, sind verfahrensfrei."
+    }
+  },
+  "abstand": {
+    "faktorH": {
+      "wert": 0.4,
+      "quelle": "BayBO Art. 6 Abs. 5 Satz 1",
+      "text": "Die Tiefe der Abstandsflächen beträgt 0,4 H, mindestens 3 m. Gemeinden können durch Satzung abweichen."
+    },
+    "minM": {
+      "wert": 3,
+      "quelle": "BayBO Art. 6 Abs. 5 Satz 1"
+    }
+  },
+  "grenzbebauung": {
+    "maxMittlereWandhoeheM": {
+      "wert": 3,
+      "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
+      "text": "In den Abstandsflächen zulässig: Garagen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m."
+    },
+    "maxLaengeJeSeiteM": {
+      "wert": 9,
+      "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
+      "text": "Gesamtlänge je Grundstücksgrenze bis 9 m."
+    },
+    "maxLaengeGesamtM": {
+      "wert": 15,
+      "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
+      "text": "Gesamtlänge der Bebauung an allen Grundstücksgrenzen bis 15 m."
+    }
+  },
+  "waermepumpe": {
+    "verfahrensfrei": {
+      "wert": true,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 2",
+      "text": "Wärmepumpen sind verfahrensfrei (Annahme: am Ein- oder Zweifamilienhaus)."
+    },
+    "richtwerteNachtDbA": {
+      "wert": { "rein": 35, "allgemein": 40, "misch": 45 },
+      "quelle": "TA Lärm Nr. 6.1",
+      "text": "Immissionsrichtwerte nachts: reines Wohngebiet 35, allgemeines Wohngebiet 40, Mischgebiet 45 dB(A)."
+    },
+    "richtwirkungQ": {
+      "wert": { "frei": 2, "wand": 4, "ecke": 8 },
+      "quelle": "LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)"
+    },
+    "formel": {
+      "wert": "Lp = Lw + 10·log10(Q) − 11 − 20·log10(r)",
+      "quelle": "LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)"
+    },
+    "knappMargeDb": {
+      "wert": 3,
+      "quelle": "Produktentscheidung Passt. (Ampel gelb, wenn weniger als 3 dB unter dem Richtwert)"
+    },
+    "wandabstandM": {
+      "wert": 0.6,
+      "quelle": "Produktentscheidung Passt. (ab hier gilt das Gerät als an der Wand)"
+    },
+    "quellhoeheM": {
+      "wert": 0.5,
+      "quelle": "Annahme: Schallquelle 0,5 m über Gelände"
+    },
+    "fensterhoeheAnnahmeM": {
+      "wert": 1.6,
+      "quelle": "CLAUDE.md: ohne Eingabe Fassadenmitte auf 1,6 m Höhe"
+    }
+  }
+}

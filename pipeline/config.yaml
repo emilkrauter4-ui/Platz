@@ -1,0 +1,45 @@
+# Passt. – Pipeline-Konfiguration
+# Alle Koordinaten in ETRS89 / UTM 32N (EPSG:25832), in Metern.
+
+gebiet:
+  name: Sulzbach-Rosenberg Zentrum
+  gemeinde_ags: "09371151"
+  # 2×2-km-Kachel (entspricht der LoD2-Kachel 698_5486)
+  bbox: [698000, 5486000, 700000, 5488000]
+  crs: EPSG:25832
+
+pfade:
+  raw: ../data/raw
+  build: ../data/build
+  app_public: ../app/public/data
+
+quellen:
+  lod2: https://download1.bayernwolke.de/a/lod2/citygml/{x}_{y}.gml          # 2-km-Kacheln, x/y in km
+  dgm1: https://download1.bayernwolke.de/a/dgm/dgm1/{x}_{y}.tif              # 1-km-Kacheln
+  dom20: https://download1.bayernwolke.de/a/dom20/DOM/32{x}_{y}_20_DOM.tif   # 1-km-Kacheln
+  dop20: https://download1.bayernwolke.de/a/dop20/data/32{x}_{y}.tif         # 1-km-Kacheln
+  dop20cir_metalink: https://geoservices.bayern.de/services/poly2metalink/metalink/dop20cir
+  hausumringe: https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/093_Oberpfalz_Hausumringe.zip
+
+hoehen:
+  # Amtliche Höhen: Normalhöhen DHHN2016. Cesium braucht Ellipsoidhöhen (GRS80).
+  # h_ellipsoid = H_normal + N (Quasigeoidundulation GCG2016)
+  geoid_grid: de_bkg_gcg2016.tif   # PROJ-Grid (proj-data / cdn.proj.org)
+  # Nur falls das Grid nicht erreichbar ist: konstanter Näherungswert für das Gebiet.
+  # Wird im Ergebnis als "Annahme" markiert.
+  undulation_fallback_m: 47.9
+
+bestand:
+  dgm_resample: bilinear
+  gebaeude_puffer_m: 0.5
+  ndvi_schwelle: 0.25
+  hoehe_min_m: 1.8
+  hoehe_max_m: 4.5
+  oeffnen_px: 2              # morphologisches Öffnen, Strukturelement in Pixeln (20 cm)
+  flaeche_min_m2: 3
+  flaeche_max_m2: 80
+  rechteckigkeit_min: 0.7
+
+terrain:
+  # Höhenraster für die App (CustomHeightmapTerrainProvider)
+  aufloesung_m: 1.0

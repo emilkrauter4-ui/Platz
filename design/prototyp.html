@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Passt. Darf ich das hier hinstellen?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF0EC;--surface:#F8F9F6;--ink:#1D2321;--muted:#5C6662;--line:rgba(29,35,33,.13);--soft:#E2E6E0;--red:#C9302A;--ok:#2E7D5B;--warn:#A06410;--focus:#2B59C3;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121614;--surface:#1A1F1C;--ink:#E7ECE8;--muted:#9AA59F;--line:rgba(231,236,232,.13);--soft:#252C28;--red:#F0605A;--ok:#4CC38A;--warn:#E3A43C;--focus:#8FAEFF;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121614;--surface:#1A1F1C;--ink:#E7ECE8;--muted:#9AA59F;--line:rgba(231,236,232,.13);--soft:#252C28;--red:#F0605A;--ok:#4CC38A;--warn:#E3A43C;--focus:#8FAEFF;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px 8px}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.word{font-weight:700;font-size:24px;letter-spacing:-.03em}
+.tagline{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:430px){.tagline{display:none}}
+.pill{font-size:13px;font-weight:500;background:var(--soft);border:0;border-radius:999px;padding:7px 12px 7px 10px;display:inline-flex;gap:6px;align-items:center;cursor:pointer;min-height:34px;white-space:nowrap}
+.stage{position:relative;min-height:0;overflow:hidden;outline:none}
+.stage:focus-visible{box-shadow:inset 0 0 0 2px var(--focus)}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.viewctl{position:absolute;top:10px;right:12px;display:flex;gap:8px}
+.seg{display:flex;background:var(--surface);border-radius:12px;padding:3px;box-shadow:0 0 0 .5px var(--line)}
+.seg button{font-size:13px;font-weight:600;border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:9px;min-height:34px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.icon{width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:12px;background:var(--surface);box-shadow:0 0 0 .5px var(--line);cursor:pointer}
+.dim{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:12.5px;font-weight:600;background:var(--ink);color:var(--bg);padding:3px 8px;border-radius:7px;pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13.5px;padding:8px 14px;border-radius:999px;transition:opacity .35s;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.hint.gone{opacity:0}
+.sheet{background:var(--surface);border-radius:22px 22px 0 0;padding:20px 18px 10px;max-height:50vh;overflow:auto;box-shadow:0 -.5px 0 var(--line)}
+.verdict{display:grid;grid-template-columns:12px minmax(0,1fr);column-gap:12px}
+.vdot{width:12px;height:12px;border-radius:50%;margin-top:11px;background:var(--ok);transition:background-color .2s}
+.vdot.warn,.d.warn{background:var(--warn)}
+.vdot.bad,.d.bad{background:var(--red)}
+.d.ok{background:var(--ok)}
+.verdict h1{font-size:27px;line-height:1.15;margin:0;font-weight:600;letter-spacing:-.02em}
+.verdict p{grid-column:2;margin:6px 0 0;font-size:15.5px;line-height:1.45;color:var(--muted);max-width:44ch}
+.objects{display:flex;gap:8px;margin:18px 0 6px;overflow-x:auto;scrollbar-width:none}
+.obj{font-size:14.5px;font-weight:500;border:0;background:var(--soft);border-radius:999px;padding:8px 15px 8px 12px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap;min-height:42px}
+.obj[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.obj .d{width:9px;height:9px;border-radius:50%;flex:none}
+.controls{margin-top:10px;display:grid;gap:6px}
+.ctl label{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--muted);margin-top:6px}
+.ctl output{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.ctl input[type=range]{width:100%;accent-color:var(--ink);height:30px;margin:2px 0 0}
+.sec{justify-self:start;font-size:14px;font-weight:500;background:transparent;border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:10px;padding:9px 14px;min-height:40px;cursor:pointer;margin-top:4px}
+details{margin-top:14px}
+summary{font-size:15px;font-weight:600;cursor:pointer;padding:8px 0;list-style-position:inside}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 0;border-top:.5px solid var(--line);font-size:14px;line-height:1.4}
+.tg{flex:none;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);white-space:nowrap}
+.tg.rule{color:var(--ink)}
+.tg.calc{background:var(--soft);box-shadow:none;color:var(--ink)}
+.tg.assume{box-shadow:none;outline:1px dashed var(--line);outline-offset:-1px}
+.tg.open{color:var(--warn)}
+.tg.demo{color:var(--red)}
+.primary{display:block;width:100%;font-size:16px;font-weight:600;background:var(--ink);color:var(--bg);border:0;border-radius:14px;padding:14px;min-height:50px;cursor:pointer;margin-top:16px}
+.fine{font-size:12.5px;color:var(--muted);text-align:center;margin:10px 0 4px}
+.modal{position:fixed;inset:0;background:rgba(10,14,12,.38);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.modal[hidden]{display:none}
+.panel{background:var(--surface);width:100%;max-width:520px;max-height:86%;overflow:auto;border-radius:22px 22px 0 0;padding:22px 20px calc(18px + env(safe-area-inset-bottom,0px))}
+.panel h2{font-size:22px;margin:0 0 4px;letter-spacing:-.015em}
+.panel h3{font-size:15px;margin:20px 0 6px}
+.panel p{font-size:15px;line-height:1.5;margin:8px 0}
+.m-sub{color:var(--muted);font-size:14px!important;margin-top:0!important}
+.rep{padding:12px 0;border-top:.5px solid var(--line)}
+.rep-h{display:flex;align-items:center;gap:8px;font-size:15px}
+.rep-h .d{width:9px;height:9px;border-radius:50%}
+.rep-s{margin-left:auto;font-size:13px;color:var(--muted)}
+.rep-t{color:var(--muted);margin:4px 0 0!important;font-size:14.5px!important}
+.plain{margin:0;padding-left:18px;font-size:14.5px;line-height:1.6}
+.legend{list-style:none;padding:0;margin:0;font-size:14.5px}
+.legend li{display:flex;align-items:center;gap:10px;padding:7px 0}
+.legend .tg{min-width:84px;text-align:center}
+.m-fine{color:var(--muted);font-size:13.5px!important;margin-top:16px!important}
+.close{display:block;width:100%;margin-top:16px;font-size:16px;font-weight:600;border:0;border-radius:14px;padding:13px;min-height:48px;background:var(--soft);cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (min-width:900px){
+ .app{grid-template-columns:minmax(0,1fr) 400px;grid-template-rows:auto minmax(0,1fr)}
+ .bar{grid-column:1/-1}
+ .stage{grid-column:1;grid-row:2}
+ .sheet{grid-column:2;grid-row:2;max-height:none;border-radius:0;box-shadow:-.5px 0 0 var(--line);padding:24px 22px 14px}
+ .modal{align-items:center}
+ .panel{border-radius:22px;padding-bottom:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand"><span class="word">Passt.</span><span class="tagline">Darf ich das hier hinstellen?</span></div>
+    <button class="pill" id="infoBtn" type="button" aria-haspopup="dialog">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8h.01"/></svg>
+      Demo-Grundstück
+    </button>
+  </header>
+
+  <main class="stage" id="stage" tabindex="0" aria-label="3D-Ansicht des Grundstücks. Das ausgewählte Objekt lässt sich ziehen oder mit den Pfeiltasten verschieben.">
+    <canvas id="c"></canvas>
+    <div class="dim" id="dim" hidden></div>
+    <div class="viewctl">
+      <div class="seg" role="group" aria-label="Ansicht">
+        <button type="button" data-view="3d" aria-pressed="true">3D</button>
+        <button type="button" data-view="plan" aria-pressed="false">Plan</button>
+      </div>
+      <button class="icon" id="rotBtn" type="button" aria-label="Ansicht drehen">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/></svg>
+      </button>
+    </div>
+    <div class="hint" id="hint">Zieh das Gartenhaus an eine andere Stelle.</div>
+  </main>
+
+  <section class="sheet" aria-label="Ergebnis">
+    <div class="verdict" aria-live="polite">
+      <span class="vdot" id="vDot" aria-hidden="true"></span>
+      <h1 id="vHead">Lädt …</h1>
+      <p id="vSub"></p>
+    </div>
+    <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">
+      <button class="obj" role="tab" type="button" data-obj="gh"><span class="d"></span>Gartenhaus</button>
+      <button class="obj" role="tab" type="button" data-obj="cp"><span class="d"></span>Carport</button>
+      <button class="obj" role="tab" type="button" data-obj="wp"><span class="d"></span>Wärmepumpe</button>
+    </div>
+    <div class="controls" id="controls"></div>
+    <details open>
+      <summary>So haben wir geprüft</summary>
+      <ul class="rows" id="rows"></ul>
+    </details>
+    <button class="primary" id="reportBtn" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
+    <p class="fine">Orientierung, keine Genehmigung. Verbindlich entscheidet das Bauamt.</p>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h2 id="mTitle"></h2>
+    <div id="mBody"></div>
+    <button class="close" id="mClose" type="button">Schließen</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+if(!window.THREE){$('vHead').textContent='Die 3D-Ansicht konnte nicht laden.';$('vSub').textContent='Lade die Seite neu, um es noch einmal zu versuchen.';return;}
+var T=window.THREE;
+var stage=$('stage'),canvas=$('c');
+function fmt(v,d){d=d==null?2:d;var f=Math.pow(10,d);return (Math.round(v*f)/f).toFixed(d).replace('.',',');}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function reduceMotion(){return window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
+
+/* ---------- Demo-Geometrie in Metern. x = Osten, z = Süden, Straße bei z < 0 ---------- */
+var PLOT=[[0,0],[20,0],[21,28],[0,28]];
+var SIDE=['zur Straße','zum Nachbarn Ost','nach hinten','zum Nachbarn West'];
+var GRENZE=['an der Straßengrenze','an der Grenze zum Nachbarn Ost','an der hinteren Grenze','an der Grenze zum Nachbarn West'];
+var HOUSE={x1:4,x2:14,z1:5,z2:16};
+var NEIGHBORS=[
+  {x1:25,x2:35,z1:4,z2:14,axis:'x',at:25,dir:-1,pos:[6.5,11]},
+  {x1:-14,x2:-4,z1:6,z2:16,axis:'x',at:-4,dir:1,pos:[8.5,13.5]},
+  {x1:4,x2:14,z1:36,z2:46,axis:'z',at:36,dir:-1,pos:[6.5,11.5]}
+];
+var WINDOWS=[];
+NEIGHBORS.forEach(function(n){n.pos.forEach(function(p){[1.6,4.4].forEach(function(y){WINDOWS.push(n.axis==='x'?{x:n.at,z:p,y:y}:{x:p,z:n.at,y:y});});});});
+
+var OBJ={
+  gh:{name:'Gartenhaus',art:'das Gartenhaus',cx:17.5,cz:24.5,w:3,d:3,h:2.5,rot:0},
+  cp:{name:'Carport',art:'den Carport',cx:17,cz:6.25,w:3,d:5.5,h:2.5,rot:0},
+  wp:{name:'Wärmepumpe',art:'die Wärmepumpe',cx:14.33,cz:12.5,w:0.45,d:1,h:0.9,rot:0,lw:58}
+};
+var ORDER=['gh','cp','wp'];
+var selected='gh',hasDragged=false;
+
+/* ---------- Geometrie-Helfer ---------- */
+function dims(o){return o.rot?{wx:o.d,wz:o.w}:{wx:o.w,wz:o.d};}
+function rect(o){var m=dims(o);return {x1:o.cx-m.wx/2,x2:o.cx+m.wx/2,z1:o.cz-m.wz/2,z2:o.cz+m.wz/2};}
+function corners(r){return [[r.x1,r.z1],[r.x2,r.z1],[r.x2,r.z2],[r.x1,r.z2]];}
+function overlap(a,b){var e=0.02;return a.x1<b.x2-e&&a.x2>b.x1+e&&a.z1<b.z2-e&&a.z2>b.z1+e;}
+function seg(i){return [PLOT[i],PLOT[(i+1)%PLOT.length]];}
+function ptSeg(p,a,b){var dx=b[0]-a[0],dz=b[1]-a[1],L=dx*dx+dz*dz,t=L?((p[0]-a[0])*dx+(p[1]-a[1])*dz)/L:0;t=clamp(t,0,1);var q=[a[0]+t*dx,a[1]+t*dz];return {d:Math.hypot(p[0]-q[0],p[1]-q[1]),q:q};}
+function orient(a,b,c){return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);}
+function crosses(a,b,c,d){return orient(a,b,c)*orient(a,b,d)<0&&orient(c,d,a)*orient(c,d,b)<0;}
+function segSeg(a,b,c,d){
+  if(crosses(a,b,c,d))return {d:0,p:a,q:a};
+  var best=null;function t(p,q,dd){if(!best||dd<best.d)best={d:dd,p:p,q:q};}
+  var r=ptSeg(a,c,d);t(a,r.q,r.d);r=ptSeg(b,c,d);t(b,r.q,r.d);r=ptSeg(c,a,b);t(r.q,c,r.d);r=ptSeg(d,a,b);t(r.q,d,r.d);
+  return best;
+}
+function rectSeg(r,a,b){var cs=corners(r),best=null;for(var i=0;i<4;i++){var s=segSeg(cs[i],cs[(i+1)%4],a,b);if(!best||s.d<best.d)best=s;}return best;}
+function projLen(cs,a,b){var ux=b[0]-a[0],uz=b[1]-a[1],L=Math.hypot(ux,uz);var ps=cs.map(function(c){return ((c[0]-a[0])*ux+(c[1]-a[1])*uz)/L;});return Math.max.apply(null,ps)-Math.min.apply(null,ps);}
+function inPoly(p,poly){var c=false;for(var i=0,j=poly.length-1;i<poly.length;j=i++){var xi=poly[i][0],zi=poly[i][1],xj=poly[j][0],zj=poly[j][1];if(((zi>p[1])!==(zj>p[1]))&&(p[0]<(xj-xi)*(p[1]-zi)/(zj-zi)+xi))c=!c;}return c;}
+function rectDist(a,b){var dx=Math.max(0,a.x1-b.x2,b.x1-a.x2),dz=Math.max(0,a.z1-b.z2,b.z1-a.z2);return Math.hypot(dx,dz);}
+
+/* ---------- Prüfregeln (vereinfacht, BayBO) ---------- */
+function evaluate(){
+  var geo={};
+  ['gh','cp'].forEach(function(k){
+    var r=rect(OBJ[k]),cs=corners(r);
+    geo[k]={r:r,cs:cs,sides:PLOT.map(function(_,i){var s=seg(i),m=rectSeg(r,s[0],s[1]);return {i:i,d:m.d,p:m.p,q:m.q,len:projLen(cs,s[0],s[1])};})};
+  });
+  var sideSum=PLOT.map(function(_,i){return ['gh','cp'].reduce(function(a,k){var s=geo[k].sides[i];return a+(s.d<3-1e-6?s.len:0);},0);});
+  var total=sideSum.reduce(function(a,b){return a+b;},0);
+  return {
+    gh:building('gh',geo,sideSum,total,function(o){var v=o.w*o.d*o.h;return {ok:v<=75+1e-9,row:'Ohne Baugenehmigung bis 75 m³ umbauten Raum. Deins: '+fmt(v,1)+' m³',head:'Zu groß für ohne Genehmigung.',sub:'Dein Gartenhaus hat '+fmt(v,1)+' m³ umbauten Raum. Ohne Bauantrag gehen bis 75 m³.'};},'Kein Aufenthaltsraum, keine Feuerstätte, Innenbereich'),
+    cp:building('cp',geo,sideSum,total,function(o){var a=o.w*o.d;return {ok:a<=50+1e-9,row:'Ohne Baugenehmigung bis 50 m² Fläche. Deiner: '+fmt(a,1)+' m²',head:'Zu groß für ohne Genehmigung.',sub:'Dein Carport hat '+fmt(a,1)+' m². Ohne Bauantrag gehen bis 50 m².'};},'Offener Carport im Innenbereich'),
+    wp:heatpump()
+  };
+}
+function building(k,geo,sideSum,total,limit,assume){
+  var o=OBJ[k],g=geo[k],other=k==='gh'?'cp':'gh';
+  var inside=g.cs.every(function(c){return inPoly(c,PLOT);});
+  var lim=limit(o);
+  var closest=g.sides.reduce(function(a,b){return b.d<a.d?b:a;});
+  var near=g.sides.filter(function(s){return s.d<3-1e-6;});
+  var collide=overlap(g.r,HOUSE)?'mit deinem Haus':overlap(g.r,rect(OBJ[other]))?(other==='cp'?'mit dem Carport':'mit dem Gartenhaus'):overlap(g.r,rect(OBJ.wp))?'mit der Wärmepumpe':null;
+  var rows=[{t:lim.row,tag:'BayBO Art. 57',kind:'rule'},{t:'Abstand '+SIDE[closest.i]+': '+fmt(Math.max(0,closest.d))+' m',tag:'berechnet',kind:'calc'}];
+  if(near.length){
+    near.forEach(function(s){var t=GRENZE[s.i];rows.push({t:t.charAt(0).toUpperCase()+t.slice(1)+' belegt: '+fmt(sideSum[s.i],1)+' von 9 m',tag:'BayBO Art. 6',kind:'rule'});});
+    rows.push({t:'So nah an der Grenze nur bis 3 m Wandhöhe. Deine: '+fmt(o.h)+' m',tag:'BayBO Art. 6',kind:'rule'});
+  }else rows.push({t:'Mindestabstand von 3 m eingehalten',tag:'BayBO Art. 6',kind:'rule'});
+  rows.push({t:assume,tag:'Annahme',kind:'assume'});
+  rows.push({t:'Bebauungsplan: in der Demo nicht hinterlegt',tag:'offen',kind:'open'});
+  rows.push({t:'Grundstück und Nachbarhäuser sind erfunden',tag:'Demo',kind:'demo'});
+  var status='ok',head='Passt so.',sub,bad=[];
+  if(!inside){status='bad';head='Steht nicht ganz auf deinem Grundstück.';sub='Schieb '+o.art+' weiter nach innen.';}
+  else if(collide){status='bad';head='Kollidiert '+collide+'.';sub='Such dir eine freie Stelle auf dem Grundstück.';}
+  else if(!lim.ok){status='bad';head=lim.head;sub=lim.sub;}
+  else if(near.length){
+    if(o.h>3+1e-9){status='bad';bad=near.map(function(s){return s.i;});head='Noch '+fmt(3-closest.d)+' m zu nah an der Grenze.';sub='Ab 3 m Wandhöhe gilt der volle Abstand von 3 m. Bau niedriger oder rück weiter von der Grenze weg.';}
+    else{
+      var over=near.filter(function(s){return sideSum[s.i]>9+1e-6;})[0];
+      if(over){status='bad';bad=[over.i];head='Zu viel '+GRENZE[over.i]+'.';sub='Dort stehen jetzt '+fmt(sideSum[over.i],1)+' m direkt an der Grenze, erlaubt sind 9 m. Bau kürzer oder halte 3 m Abstand.';}
+      else if(total>15+1e-6){status='bad';bad=near.map(function(s){return s.i;});head='Zu viel Bebauung an deinen Grenzen.';sub='Zusammen stehen '+fmt(total,1)+' m an den Grenzen, erlaubt sind 15 m.';}
+      else sub='Keine Baugenehmigung nötig. So nah an der Grenze ist das als kleines Nebengebäude erlaubt.';
+    }
+  }else sub='Keine Baugenehmigung nötig, und der Abstand zur Grenze stimmt.';
+  return {status:status,head:head,sub:sub,rows:rows,bad:bad,dim:(inside&&closest.d>0.02)?{p:closest.p,q:closest.q,label:fmt(closest.d)+' m'}:null};
+}
+function heatpump(){
+  var o=OBJ.wp,r=rect(o),cs=corners(r);
+  var inside=cs.every(function(c){return inPoly(c,PLOT);});
+  var collide=overlap(r,HOUSE)?'mit deinem Haus':overlap(r,rect(OBJ.gh))?'mit dem Gartenhaus':overlap(r,rect(OBJ.cp))?'mit dem Carport':null;
+  var atWall=rectDist(r,HOUSE)<0.6,Q=atWall?4:2,best=null;
+  WINDOWS.forEach(function(w){var d=Math.hypot(w.x-o.cx,w.y-0.5,w.z-o.cz);if(!best||d<best.d)best={d:d,w:w};});
+  var lp=o.lw+10*Math.log10(Q)-11-20*Math.log10(Math.max(0.5,best.d));
+  var r40=Math.pow(10,(o.lw+10*Math.log10(Q)-11-40)/20),L=Math.round(lp);
+  var rows=[
+    {t:'Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus',tag:'BayBO',kind:'rule'},
+    {t:'Nachts am nächsten Fenster: '+L+' dB(A). Richtwert: 40 dB(A)',tag:'TA Lärm',kind:'rule'},
+    {t:'Abstand zum nächsten Nachbarfenster: '+fmt(best.d,1)+' m',tag:'berechnet',kind:'calc'},
+    {t:(atWall?'Gerät steht an der Hauswand':'Gerät steht frei')+', allgemeines Wohngebiet',tag:'Annahme',kind:'assume'},
+    {t:'Vereinfachtes Schallmodell, ersetzt keine Schallprognose',tag:'Annahme',kind:'assume'},
+    {t:'Grundstück und Nachbarhäuser sind erfunden',tag:'Demo',kind:'demo'}
+  ];
+  var status,head,sub;
+  if(!inside){status='bad';head='Steht nicht ganz auf deinem Grundstück.';sub='Schieb die Wärmepumpe weiter nach innen.';}
+  else if(collide){status='bad';head='Kollidiert '+collide+'.';sub='Such dir eine freie Stelle auf dem Grundstück.';}
+  else if(lp>40){status='bad';head='Nachts zu laut für die Nachbarn.';sub='Am nächsten Fenster kommen etwa '+L+' dB(A) an, erlaubt sind 40. Stell sie weiter weg oder nimm ein leiseres Gerät.';}
+  else if(lp>37){status='warn';head='Knapp, aber im Rahmen.';sub='Nachts etwa '+L+' dB(A) am nächsten Nachbarfenster. Der Richtwert liegt bei 40.';}
+  else{status='ok';head='Passt so.';sub='Keine Baugenehmigung nötig. Nachts kommen am nächsten Nachbarfenster etwa '+L+' dB(A) an.';}
+  return {status:status,head:head,sub:sub,rows:rows,bad:[],r40:r40,dim:{p:[o.cx,o.cz],q:[best.w.x,best.w.z],label:L+' dB(A)'}};
+}
+
+/* ---------- Szene ---------- */
+var PAL={
+  light:{bg:0xEEF0EC,ground:0xE1E4DE,plot:0xD3DDCD,street:0xC9CDC8,walk:0xD9DCD6,house:0xFBFBF9,roof:0xEEF0EC,stone:0xF7F7F4,balsa:0xD8B98E,balsaDark:0xC29E70,white:0xF3F3F0,win:0x55605B,tree:0xC4D2BC,trunk:0xB4AA98,red:0xC9302A,ok:0x2E7D5B,warn:0xA06410,ink:0x1D2321,edge:0x1D2321,edgeOp:0.22,band:0x1D2321,bandOp:0.05,sky:0xFFFFFF,gnd:0xC5CAC2,hemi:0.62,sun:0.55},
+  dark:{bg:0x121614,ground:0x171C19,plot:0x1E2923,street:0x242927,walk:0x1C211E,house:0x3B423E,roof:0x343B37,stone:0x8E9691,balsa:0xC4A174,balsaDark:0xA6855B,white:0x5C645F,win:0x0D110F,tree:0x2B3A30,trunk:0x4A453D,red:0xF0605A,ok:0x4CC38A,warn:0xE3A43C,ink:0xE7ECE8,edge:0xE7ECE8,edgeOp:0.16,band:0xE7ECE8,bandOp:0.05,sky:0xB8C2BC,gnd:0x1E2420,hemi:0.55,sun:0.45}
+};
+function isDark(){var t=document.documentElement.getAttribute('data-theme');if(t==='dark')return true;if(t==='light')return false;return window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function pal(){return isDark()?PAL.dark:PAL.light;}
+
+var renderer=new T.WebGLRenderer({canvas:canvas,antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+var scene=new T.Scene();scene.fog=new T.Fog(0xffffff,60,150);
+var camera=new T.PerspectiveCamera(30,1,1,800);
+var TARGET=new T.Vector3(10.5,0,15);
+var cam={az:2.618,el:0.72,R:80,view:'3d'};
+
+var M={};
+['ground','plot','street','walk','house','roof','stone','balsa','balsaDark','white','tree','trunk'].forEach(function(n){M[n]=new T.MeshLambertMaterial({color:0xffffff});});
+M.win=new T.MeshBasicMaterial({color:0});
+M.red=new T.MeshBasicMaterial({color:0xff0000});
+M.edge=new T.LineBasicMaterial({color:0,transparent:true,opacity:.2});
+M.line=new T.LineBasicMaterial({color:0,transparent:true,opacity:.18});
+var objEdge={gh:new T.LineBasicMaterial({transparent:true}),cp:new T.LineBasicMaterial({transparent:true}),wp:new T.LineBasicMaterial({transparent:true})};
+var bandMats=PLOT.map(function(){return new T.MeshBasicMaterial({transparent:true,opacity:.05,side:T.DoubleSide,depthWrite:false});});
+var soundMat=new T.MeshBasicMaterial({transparent:true,opacity:.14,depthWrite:false,side:T.DoubleSide});
+var soundRingMat=new T.MeshBasicMaterial({transparent:true,opacity:.7,depthWrite:false,side:T.DoubleSide});
+var dimMat=new T.MeshBasicMaterial({depthWrite:false,depthTest:false});
+
+function withEdges(mesh,mat){mesh.add(new T.LineSegments(new T.EdgesGeometry(mesh.geometry,20),mat||M.edge));return mesh;}
+function box(w,h,d,mat,edgeMat){var m=new T.Mesh(new T.BoxGeometry(w,h,d),mat);m.castShadow=true;m.receiveShadow=true;return withEdges(m,edgeMat);}
+function flat(pts,y,mat){var g=new T.BufferGeometry(),pos=[];pts.forEach(function(p){pos.push(p[0],y,p[1]);});g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();var m=new T.Mesh(g,mat);return m;}
+function plane(x1,z1,x2,z2,y,mat){var m=flat([[x1,z1],[x2,z1],[x2,z2],[x1,z2]],y,mat);m.receiveShadow=true;return m;}
+function windowAt(x,y,z,normal,w,h){var m=new T.Mesh(new T.PlaneGeometry(w||1,h||1.2),M.win);m.position.set(x,y,z);if(normal==='+x')m.rotation.y=Math.PI/2;else if(normal==='-x')m.rotation.y=-Math.PI/2;else if(normal==='-z')m.rotation.y=Math.PI;return m;}
+function house(x1,z1,x2,z2,wallH,roofH){
+  var g=new T.Group(),w=x2-x1,d=z2-z1,cx=(x1+x2)/2,cz=(z1+z2)/2,ov=0.35;
+  var body=box(w,wallH,d,M.house);body.position.set(cx,wallH/2,cz);g.add(body);
+  var s=new T.Shape();s.moveTo(-w/2-ov,0);s.lineTo(w/2+ov,0);s.lineTo(0,roofH);s.lineTo(-w/2-ov,0);
+  var rg=new T.ExtrudeGeometry(s,{depth:d+ov*2,bevelEnabled:false});rg.translate(0,0,-(d+ov*2)/2);
+  var roof=new T.Mesh(rg,M.roof);roof.position.set(cx,wallH,cz);roof.castShadow=true;roof.receiveShadow=true;withEdges(roof);g.add(roof);
+  return g;
+}
+function tree(x,z,r){var g=new T.Group();var tr=new T.Mesh(new T.CylinderGeometry(0.11,0.13,2.4,10),M.trunk);tr.position.y=1.2;tr.castShadow=true;g.add(tr);var cr=new T.Mesh(new T.SphereGeometry(r||1.5,24,16),M.tree);cr.position.y=2.4+(r||1.5)*0.8;cr.castShadow=true;cr.receiveShadow=true;g.add(cr);g.position.set(x,0,z);return g;}
+
+var ground=new T.Mesh(new T.PlaneGeometry(420,420),M.ground);ground.rotation.x=-Math.PI/2;ground.position.set(TARGET.x,0,TARGET.z);ground.receiveShadow=true;scene.add(ground);
+scene.add(plane(-80,-9,100,-1.6,0.004,M.street));
+scene.add(plane(-80,-1.6,100,-0.15,0.006,M.walk));
+var plotMesh=flat(PLOT,0.01,M.plot);plotMesh.receiveShadow=true;scene.add(plotMesh);
+scene.add(plane(8.4,0,9.6,5,0.014,M.walk));
+(function(){var segs=[[-22,0,-22,52],[42,0,43.5,52],[-22,28,0,28],[21,28,43,28],[0,28,0,52],[21,28,21.8,52],[-22,52,43.5,52],[-22,0,0,0],[20,0,42,0]],pos=[];segs.forEach(function(s){pos.push(s[0],0.02,s[1],s[2],0.02,s[3]);});var g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));scene.add(new T.LineSegments(g,M.line));})();
+
+scene.add(house(HOUSE.x1,HOUSE.z1,HOUSE.x2,HOUSE.z2,6,3.6));
+[[5.6,1.6],[12.4,1.6],[5.6,4.4],[9,4.4],[12.4,4.4]].forEach(function(p){scene.add(windowAt(p[0],p[1],HOUSE.z1-0.02,'-z'));});
+scene.add(windowAt(9,1.05,HOUSE.z1-0.02,'-z',1.1,2.1));
+[[7.5,1.6],[7.5,4.4],[13.5,4.4]].forEach(function(p){scene.add(windowAt(HOUSE.x2+0.02,p[1],p[0],'+x'));});
+NEIGHBORS.forEach(function(n){
+  scene.add(house(n.x1,n.z1,n.x2,n.z2,6,3.4));
+  n.pos.forEach(function(p){[1.6,4.4].forEach(function(y){
+    if(n.axis==='x')scene.add(windowAt(n.at+n.dir*0.02,y,p,n.dir>0?'+x':'-x'));
+    else scene.add(windowAt(p,y,n.at-0.02,'-z'));
+  });});
+});
+[[2.6,22.5,1.6],[6.2,25.6,1.3],[-18,22,1.7],[38,22,1.5],[-10,40,1.8],[30,44,1.6],[24.5,-0.8,1.2],[-6,-0.8,1.2]].forEach(function(t){scene.add(tree(t[0],t[1],t[2]));});
+
+(function(){
+  PLOT.forEach(function(p){
+    var s=new T.Mesh(new T.CylinderGeometry(0.14,0.14,0.34,14),M.stone);s.position.set(p[0],0.17,p[1]);s.castShadow=true;scene.add(s);
+    var c=new T.Mesh(new T.CylinderGeometry(0.145,0.145,0.12,14),M.red);c.position.set(p[0],0.4,p[1]);scene.add(c);
+  });
+  var pos=[],idx=[],n=0,w=0.07;
+  PLOT.forEach(function(_,i){
+    var s=seg(i),ax=s[0][0],az=s[0][1],bx=s[1][0],bz=s[1][1],L=Math.hypot(bx-ax,bz-az),ux=(bx-ax)/L,uz=(bz-az)/L,nx=-uz*w,nz=ux*w;
+    for(var t=0.25;t<L-0.2;t+=0.9){var e=Math.min(L-0.2,t+0.5),p1=[ax+ux*t,az+uz*t],p2=[ax+ux*e,az+uz*e];
+      pos.push(p1[0]-nx,0.03,p1[1]-nz,p2[0]-nx,0.03,p2[1]-nz,p2[0]+nx,0.03,p2[1]+nz,p1[0]+nx,0.03,p1[1]+nz);idx.push(n,n+1,n+2,n,n+2,n+3);n+=4;}
+  });
+  var g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setIndex(idx);scene.add(new T.Mesh(g,M.red));
+})();
+
+var cx0=PLOT.reduce(function(a,p){return a+p[0];},0)/PLOT.length,cz0=PLOT.reduce(function(a,p){return a+p[1];},0)/PLOT.length;
+var bands=PLOT.map(function(_,i){
+  var s=seg(i),a=s[0],b=s[1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),nx=-(b[1]-a[1])/L,nz=(b[0]-a[0])/L;
+  if(nx*(cx0-a[0])+nz*(cz0-a[1])<0){nx=-nx;nz=-nz;}
+  var m=flat([a,b,[b[0]+nx*3,b[1]+nz*3],[a[0]+nx*3,a[1]+nz*3]],0.02,bandMats[i]);m.renderOrder=1;scene.add(m);return m;
+});
+
+var soundDisc=new T.Mesh(new T.CircleGeometry(1,72).rotateX(-Math.PI/2),soundMat);soundDisc.renderOrder=2;scene.add(soundDisc);
+var soundRing=new T.Mesh(new T.RingGeometry(0.985,1,96).rotateX(-Math.PI/2),soundRingMat);soundRing.renderOrder=2;scene.add(soundRing);
+var dimMesh=new T.Mesh(new T.BufferGeometry(),dimMat);dimMesh.renderOrder=5;scene.add(dimMesh);
+var dimMid=null;
+
+var hemi=new T.HemisphereLight(0xffffff,0xcccccc,0.6);scene.add(hemi);
+var sun=new T.DirectionalLight(0xffffff,0.55);sun.position.set(TARGET.x-28,46,TARGET.z+34);sun.target.position.copy(TARGET);scene.add(sun);scene.add(sun.target);
+sun.castShadow=true;(function(){var sz=window.innerWidth<700?1024:2048;sun.shadow.mapSize.set(sz,sz);var sc=sun.shadow.camera;sc.left=-50;sc.right=50;sc.top=50;sc.bottom=-50;sc.near=1;sc.far=170;sun.shadow.bias=-0.0006;sun.shadow.normalBias=0.03;})();
+
+/* ---------- Objekte ---------- */
+var BUILD={
+  gh:function(o){var m=dims(o),g=new T.Group();
+    var body=box(m.wx,o.h,m.wz,M.balsa,objEdge.gh);body.position.y=o.h/2;g.add(body);
+    var roof=box(m.wx+0.3,0.12,m.wz+0.3,M.balsaDark,objEdge.gh);roof.position.y=o.h+0.06;g.add(roof);
+    var dh=Math.min(1.9,o.h-0.3),door=new T.Mesh(new T.PlaneGeometry(0.85,dh),M.win);
+    if(!o.rot){door.position.set(0,dh/2,-m.wz/2-0.01);door.rotation.y=Math.PI;}else{door.position.set(-m.wx/2-0.01,dh/2,0);door.rotation.y=-Math.PI/2;}
+    g.add(door);return g;},
+  cp:function(o){var m=dims(o),g=new T.Group(),ins=0.12;
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(s){var p=box(0.12,o.h,0.12,M.balsa,objEdge.cp);p.position.set(s[0]*(m.wx/2-ins),o.h/2,s[1]*(m.wz/2-ins));g.add(p);});
+    var roof=box(m.wx+0.2,0.16,m.wz+0.2,M.balsaDark,objEdge.cp);roof.position.y=o.h+0.08;g.add(roof);
+    var along=m.wz>=m.wx,cl=Math.min(4.3,(along?m.wz:m.wx)-0.6),cw=Math.min(1.8,(along?m.wx:m.wz)-0.6);
+    if(cl>2.5&&cw>1.2){var b=box(along?cw:cl,0.75,along?cl:cw,M.white);b.position.y=0.55;g.add(b);
+      var c=box(along?cw*0.9:cl*0.5,0.55,along?cl*0.5:cw*0.9,M.white);c.position.y=1.2;if(along)c.position.z=0.2;else c.position.x=0.2;g.add(c);}
+    return g;},
+  wp:function(o){var m=dims(o),g=new T.Group();
+    var body=box(m.wx,o.h,m.wz,M.white,objEdge.wp);body.position.y=o.h/2;g.add(body);
+    var fan=new T.Mesh(new T.CircleGeometry(0.3,40),M.win);fan.position.set(m.wx/2+0.01,o.h/2,0);fan.rotation.y=Math.PI/2;g.add(fan);
+    return g;}
+};
+var groups={};
+function rebuild(k){
+  var old=groups[k];if(old){scene.remove(old);old.traverse(function(n){if(n.geometry)n.geometry.dispose();});}
+  var g=BUILD[k](OBJ[k]);g.traverse(function(n){if(n.isMesh)n.userData.key=k;});g.position.set(OBJ[k].cx,0,OBJ[k].cz);scene.add(g);groups[k]=g;
+}
+ORDER.forEach(rebuild);
+
+function setDim(d){
+  if(!d){dimMesh.visible=false;dimMid=null;return;}
+  var a=d.p,b=d.q,L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L*0.045,nz=(b[0]-a[0])/L*0.045,y=0.08,pos=[],idx=[];
+  pos.push(a[0]-nx,y,a[1]-nz,b[0]-nx,y,b[1]-nz,b[0]+nx,y,b[1]+nz,a[0]+nx,y,a[1]+nz);idx.push(0,1,2,0,2,3);
+  [a,b].forEach(function(p){var base=pos.length/3;pos.push(p[0],y,p[1]);for(var i=0;i<=20;i++){var t=i/20*Math.PI*2;pos.push(p[0]+Math.cos(t)*0.13,y,p[1]+Math.sin(t)*0.13);}for(var j=1;j<=20;j++)idx.push(base,base+j,base+j+1);});
+  dimMesh.geometry.dispose();var g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setIndex(idx);dimMesh.geometry=g;dimMesh.visible=true;
+  dimMid={x:(a[0]+b[0])/2,z:(a[1]+b[1])/2,label:d.label};
+}
+
+/* ---------- Kamera und Rendern ---------- */
+function fitR(view){var w=stage.clientWidth||1,h=stage.clientHeight||1,a=w/h,vis=Math.max(38,32/a);return vis/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*((view||cam.view)==='plan'?1:0.9);}
+function applyCam(){var ce=Math.cos(cam.el);camera.position.set(TARGET.x+Math.sin(cam.az)*ce*cam.R,TARGET.y+Math.sin(cam.el)*cam.R,TARGET.z+Math.cos(cam.az)*ce*cam.R);camera.lookAt(TARGET);scene.fog.near=cam.R*0.8;scene.fog.far=cam.R*2.1;}
+var dimEl=$('dim'),tmp=new T.Vector3(),pending=false;
+function updateLabel(){
+  if(!dimMid){dimEl.hidden=true;return;}
+  tmp.set(dimMid.x,0.1,dimMid.z).project(camera);
+  if(tmp.z>1){dimEl.hidden=true;return;}
+  dimEl.hidden=false;dimEl.textContent=dimMid.label;
+  dimEl.style.transform='translate('+((tmp.x+1)/2*stage.clientWidth)+'px,'+((1-tmp.y)/2*stage.clientHeight)+'px) translate(-50%,-50%)';
+}
+function draw(){renderer.render(scene,camera);updateLabel();}
+function requestRender(){if(pending)return;pending=true;requestAnimationFrame(function(){pending=false;draw();});}
+var anim=0;
+function animateTo(az,el,view){
+  cam.view=view;var R=fitR(view);cancelAnimationFrame(anim);
+  if(reduceMotion()){cam.az=az;cam.el=el;cam.R=R;applyCam();requestRender();return;}
+  var s={az:cam.az,el:cam.el,R:cam.R},t0=performance.now(),D=520;
+  function step(t){var k=Math.min(1,(t-t0)/D);k=1-Math.pow(1-k,3);cam.az=s.az+(az-s.az)*k;cam.el=s.el+(el-s.el)*k;cam.R=s.R+(R-s.R)*k;applyCam();draw();if(k<1)anim=requestAnimationFrame(step);}
+  anim=requestAnimationFrame(step);
+}
+function resize(){var w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();cam.R=fitR();applyCam();requestRender();}
+
+/* ---------- Zustand -> Szene und Oberfläche ---------- */
+var RES=null;
+var WORD={ok:'passt',warn:'knapp',bad:'passt nicht'};
+function update(){
+  RES=evaluate();var p=pal();
+  ORDER.forEach(function(k){groups[k].position.set(OBJ[k].cx,0,OBJ[k].cz);objEdge[k].color.setHex(p.ink);objEdge[k].opacity=k===selected?0.85:0.28;});
+  var bad={};['gh','cp'].forEach(function(k){RES[k].bad.forEach(function(i){bad[i]=1;});});
+  bandMats.forEach(function(m,i){if(bad[i]){m.color.setHex(p.red);m.opacity=0.22;}else{m.color.setHex(p.band);m.opacity=p.bandOp;}});
+  var w=RES.wp,sc=Math.max(0.3,w.r40),col=w.status==='bad'?p.red:w.status==='warn'?p.warn:p.ok;
+  soundDisc.visible=soundRing.visible=selected==='wp';
+  soundDisc.position.set(OBJ.wp.cx,0.035,OBJ.wp.cz);soundRing.position.set(OBJ.wp.cx,0.04,OBJ.wp.cz);
+  soundDisc.scale.set(sc,1,sc);soundRing.scale.set(sc,1,sc);soundMat.color.setHex(col);soundRingMat.color.setHex(col);
+  dimMat.color.setHex(p.ink);setDim(RES[selected].dim);
+  renderUI();requestRender();
+}
+function renderUI(){
+  var r=RES[selected];
+  $('vDot').className='vdot '+r.status;$('vHead').textContent=r.head;$('vSub').textContent=r.sub;
+  ORDER.forEach(function(k){var b=document.querySelector('[data-obj="'+k+'"]');b.setAttribute('aria-selected',String(k===selected));b.querySelector('.d').className='d '+RES[k].status;b.setAttribute('aria-label',OBJ[k].name+', '+WORD[RES[k].status]);});
+  $('rows').innerHTML=r.rows.map(function(x){return '<li><span>'+esc(x.t)+'</span><span class="tg '+x.kind+'">'+esc(x.tag)+'</span></li>';}).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('#controls output'),function(out){out.textContent=valText(out.getAttribute('data-k'));});
+}
+var CTL={
+  gh:[{k:'w',l:'Breite',min:2,max:6,step:0.1},{k:'d',l:'Tiefe',min:2,max:6,step:0.1},{k:'h',l:'Wandhöhe',min:2,max:3.6,step:0.05}],
+  cp:[{k:'w',l:'Breite',min:2.5,max:6.5,step:0.1},{k:'d',l:'Länge',min:4,max:9,step:0.1},{k:'h',l:'Höhe',min:2.2,max:3.4,step:0.05}],
+  wp:[{k:'lw',l:'Lautstärke nachts laut Datenblatt',min:48,max:68,step:1}]
+};
+function valText(k){var o=OBJ[selected];return k==='lw'?Math.round(o.lw)+' dB(A)':fmt(o[k],k==='h'?2:1)+' m';}
+function buildControls(){
+  var c=$('controls'),o=OBJ[selected];
+  var h=CTL[selected].map(function(s,i){return '<div class="ctl"><label for="s'+i+'"><span>'+s.l+'</span><output data-k="'+s.k+'" for="s'+i+'"></output></label><input id="s'+i+'" type="range" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+o[s.k]+'" data-k="'+s.k+'"></div>';}).join('');
+  if(selected!=='wp')h+='<button class="sec" id="rotObj" type="button">Um 90° drehen</button>';
+  c.innerHTML=h;
+  Array.prototype.forEach.call(c.querySelectorAll('input'),function(inp){inp.addEventListener('input',function(){o[inp.getAttribute('data-k')]=parseFloat(inp.value);if(selected!=='wp')rebuild(selected);update();});});
+  var rb=$('rotObj');if(rb)rb.addEventListener('click',function(){rotateSelected();});
+}
+function rotateSelected(){if(selected==='wp')return;var o=OBJ[selected];o.rot=o.rot?0:1;rebuild(selected);update();}
+var hintEl=$('hint');
+function select(k){selected=k;buildControls();if(!hasDragged)hintEl.textContent='Zieh '+OBJ[k].art+' an eine andere Stelle.';update();}
+Array.prototype.forEach.call(document.querySelectorAll('[data-obj]'),function(b){b.addEventListener('click',function(){select(b.getAttribute('data-obj'));});});
+
+/* ---------- Ziehen ---------- */
+var ray=new T.Raycaster(),ndc=new T.Vector2(),gplane=new T.Plane(new T.Vector3(0,1,0),0),hit=new T.Vector3(),drag=null;
+function setRay(e){var r=canvas.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);}
+function pickable(){var a=[];ORDER.forEach(function(k){groups[k].traverse(function(n){if(n.isMesh)a.push(n);});});return a;}
+canvas.addEventListener('pointerdown',function(e){
+  setRay(e);var hits=ray.intersectObjects(pickable(),false);if(!hits.length)return;
+  var k=hits[0].object.userData.key;if(k!==selected)select(k);
+  if(ray.ray.intersectPlane(gplane,hit)){drag={k:k,ox:OBJ[k].cx-hit.x,oz:OBJ[k].cz-hit.z,id:e.pointerId};canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';if(!hasDragged){hasDragged=true;hintEl.classList.add('gone');}}
+  e.preventDefault();
+});
+canvas.addEventListener('pointermove',function(e){
+  if(!drag){if(e.pointerType==='mouse'){setRay(e);canvas.style.cursor=ray.intersectObjects(pickable(),false).length?'grab':'';}return;}
+  setRay(e);if(ray.ray.intersectPlane(gplane,hit)){var o=OBJ[drag.k];o.cx=clamp(Math.round((hit.x+drag.ox)*20)/20,-30,50);o.cz=clamp(Math.round((hit.z+drag.oz)*20)/20,-6,50);update();}
+});
+function endDrag(){if(!drag)return;try{canvas.releasePointerCapture(drag.id);}catch(_){}drag=null;canvas.style.cursor='';}
+canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',endDrag);
+stage.addEventListener('keydown',function(e){
+  if(e.target!==stage)return;
+  if(e.key==='r'||e.key==='R'){rotateSelected();e.preventDefault();return;}
+  var keys={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]},m=keys[e.key];if(!m)return;
+  var step=e.shiftKey?0.5:0.1,right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0),fwd=new T.Vector3();camera.getWorldDirection(fwd);
+  right.y=0;fwd.y=0;right.normalize();fwd.normalize();
+  var o=OBJ[selected];o.cx=clamp(o.cx+(right.x*m[0]+fwd.x*m[1])*step,-30,50);o.cz=clamp(o.cz+(right.z*m[0]+fwd.z*m[1])*step,-6,50);
+  e.preventDefault();update();
+});
+
+/* ---------- Ansicht ---------- */
+var viewBtns=document.querySelectorAll('[data-view]');
+Array.prototype.forEach.call(viewBtns,function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-view');Array.prototype.forEach.call(viewBtns,function(x){x.setAttribute('aria-pressed',String(x===b));});animateTo(cam.az,v==='plan'?1.5605:0.72,v);});});
+$('rotBtn').addEventListener('click',function(){animateTo(cam.az+Math.PI/2,cam.el,cam.view);});
+
+/* ---------- Dialoge ---------- */
+var modal=$('modal'),lastFocus=null;
+function openModal(title,html){lastFocus=document.activeElement;$('mTitle').textContent=title;$('mBody').innerHTML=html;modal.hidden=false;$('mClose').focus();}
+function closeModal(){modal.hidden=true;if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+$('mClose').addEventListener('click',closeModal);
+modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeModal();});
+$('reportBtn').addEventListener('click',function(){
+  var today=new Date().toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
+  var h='<p class="m-sub">Demo-Grundstück in Sulzbach-Rosenberg, erstellt am '+esc(today)+'</p>';
+  ORDER.forEach(function(k){var r=RES[k];h+='<div class="rep"><div class="rep-h"><span class="d '+r.status+'"></span><strong>'+OBJ[k].name+'</strong><span class="rep-s">'+WORD[r.status]+'</span></div><p class="rep-t">'+esc(r.head)+' '+esc(r.sub)+'</p></div>';});
+  h+='<h3>Was wir angenommen haben</h3><ul class="plain"><li>Innenbereich, allgemeines Wohngebiet</li><li>Gartenhaus ohne Aufenthaltsraum und ohne Feuerstätte</li><li>Abstandsfläche 0,4 H, mindestens 3 m</li><li>Schall vereinfacht, ohne Zuschläge</li></ul>';
+  h+='<p class="m-fine">Orientierung, keine Genehmigung. Verbindlich entscheidet das Bauamt.</p>';
+  openModal('Prüfbericht',h);
+});
+$('infoBtn').addEventListener('click',function(){
+  openModal('Woher die Daten kommen','<p>Grundstück und Nachbarhäuser sind erfunden, damit du gefahrlos ausprobieren kannst. In der echten App kämen die Gebäude aus den offenen 3D-Daten der Bayerischen Vermessungsverwaltung und die Grenzen aus dem Kataster.</p><h3>So liest du die Hinweise</h3><ul class="legend"><li><span class="tg rule">BayBO</span>Regel aus der Bauordnung</li><li><span class="tg calc">berechnet</span>An deinem Grundstück gemessen</li><li><span class="tg assume">Annahme</span>Gilt nur, wenn es bei dir so ist</li><li><span class="tg open">offen</span>Muss noch jemand prüfen</li><li><span class="tg demo">Demo</span>Erfundene Daten</li></ul>');
+});
+
+/* ---------- Farbschema ---------- */
+function applyTheme(){
+  var p=pal();scene.background=new T.Color(p.bg);scene.fog.color.setHex(p.bg);
+  ['ground','plot','street','walk','house','roof','stone','balsa','balsaDark','white','tree','trunk'].forEach(function(n){M[n].color.setHex(p[n]);});
+  M.win.color.setHex(p.win);M.red.color.setHex(p.red);M.edge.color.setHex(p.edge);M.edge.opacity=p.edgeOp;M.line.color.setHex(p.edge);M.line.opacity=p.edgeOp*0.8;
+  hemi.color.setHex(p.sky);hemi.groundColor.setHex(p.gnd);hemi.intensity=p.hemi;sun.intensity=p.sun;
+  update();
+}
+var mq=window.matchMedia('(prefers-color-scheme: dark)');
+if(mq.addEventListener)mq.addEventListener('change',applyTheme);else if(mq.addListener)mq.addListener(applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- Start ---------- */
+buildControls();applyTheme();
+if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);else window.addEventListener('resize',resize);
+resize();
+})();
+</script>
+</body>
+</html>
