@@ -1,0 +1,169 @@
+{
+ "grenze": {
+  "adresse": "Fröschau 41, 92237 Sulzbach-Rosenberg",
+  "bestand": [
+   {
+    "id": "BESTAND_631",
+    "h": 2.23
+   }
+  ],
+  "denkmal": [],
+  "wsg": [],
+  "res": {
+   "gartenhaus": {
+    "status": "ok",
+    "head": "Passt so.",
+    "sub": "Keine Baugenehmigung nötig. So nah an der Grenze ist das als kleines Nebengebäude erlaubt.",
+    "rows": [
+     "[BayBO Art. 57] Ohne Baugenehmigung bis 75 m³ umbauten Raum. Deins: 22,5 m³",
+     "[berechnet] Abstand nach Südwesten: 0,25 m",
+     "[BayBO Art. 6] An der Südwestgrenze belegt: 7,7 von 9 m",
+     "[erkannt] Davon bestehende Kleinbauten: 4,7 m",
+     "[BayBO Art. 6] So nah an der Grenze nur bis 3 m Wandhöhe. Deine: 2,67 m",
+     "[Annahme] Kein Aufenthaltsraum, keine Feuerstätte, Innenbereich",
+     "[amtlich] Wandhöhe über dem Gelände gemessen (DGM1)",
+     "[offen] Bebauungsplan: noch nicht geprüft",
+     "[Demo] Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet",
+     "[offen] Gemeindesatzungen können andere Abstände festlegen"
+    ]
+   },
+   "carport": {
+    "status": "ok",
+    "head": "Passt so.",
+    "sub": "Keine Baugenehmigung nötig, und der Abstand zur Grenze stimmt.",
+    "rows": [
+     "[BayBO Art. 57] Ohne Baugenehmigung bis 50 m² Fläche. Deiner: 16,5 m²",
+     "[berechnet] Abstand nach Nordwesten: 7,85 m",
+     "[BayBO Art. 6] Mindestabstand von 3 m eingehalten",
+     "[Annahme] Offener Carport im Innenbereich",
+     "[amtlich] Wandhöhe über dem Gelände gemessen (DGM1)",
+     "[offen] Bebauungsplan: noch nicht geprüft",
+     "[Demo] Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet",
+     "[offen] Gemeindesatzungen können andere Abstände festlegen"
+    ]
+   },
+   "waermepumpe": {
+    "status": "ok",
+    "head": "Passt so.",
+    "sub": "Keine Baugenehmigung nötig. Nachts kommen am nächsten Nachbarfenster etwa 34 dB(A) an.",
+    "rows": [
+     "[BayBO Art. 57] Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus",
+     "[TA Lärm] Nachts am nächsten Fenster: 34 dB(A). Richtwert: 40 dB(A)",
+     "[berechnet] Abstand zum nächsten Nachbarfenster: 12,0 m",
+     "[Annahme] Fensterlage angenommen: Fassadenmitte auf 1,6 m",
+     "[Annahme] Gerät steht in einer Hausecke, allgemeines Wohngebiet",
+     "[Annahme] Vereinfachtes Schallmodell, ersetzt keine Schallprognose"
+    ]
+   }
+  }
+ },
+ "hang": {
+  "adresse": "Am Schützenheim 3, 92237 Sulzbach-Rosenberg",
+  "bestand": [],
+  "denkmal": [],
+  "wsg": [],
+  "res": {
+   "gartenhaus": {
+    "status": "bad",
+    "head": "Noch 2,52 m zu nah an der Grenze.",
+    "sub": "Ab 3 m Wandhöhe gilt der volle Abstand von 3 m. Bau niedriger oder rück weiter von der Grenze weg.",
+    "rows": [
+     "[BayBO Art. 57] Ohne Baugenehmigung bis 75 m³ umbauten Raum. Deins: 25,7 m³",
+     "[berechnet] Abstand nach Südwesten: 0,48 m",
+     "[BayBO Art. 6] An der Südwestgrenze belegt: 3,0 von 9 m",
+     "[BayBO Art. 6] So nah an der Grenze nur bis 3 m Wandhöhe. Deine: 3,01 m",
+     "[Annahme] Kein Aufenthaltsraum, keine Feuerstätte, Innenbereich",
+     "[amtlich] Wandhöhe über dem Gelände gemessen (DGM1)",
+     "[offen] Bebauungsplan: noch nicht geprüft",
+     "[Demo] Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet",
+     "[offen] Gemeindesatzungen können andere Abstände festlegen"
+    ]
+   },
+   "carport": {
+    "status": "ok",
+    "head": "Passt so.",
+    "sub": "Keine Baugenehmigung nötig, und der Abstand zur Grenze stimmt.",
+    "rows": [
+     "[BayBO Art. 57] Ohne Baugenehmigung bis 50 m² Fläche. Deiner: 16,5 m²",
+     "[berechnet] Abstand nach Nordwesten: 9,28 m",
+     "[BayBO Art. 6] Mindestabstand von 3 m eingehalten",
+     "[Annahme] Offener Carport im Innenbereich",
+     "[amtlich] Wandhöhe über dem Gelände gemessen (DGM1)",
+     "[offen] Bebauungsplan: noch nicht geprüft",
+     "[Demo] Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet",
+     "[offen] Gemeindesatzungen können andere Abstände festlegen"
+    ]
+   },
+   "waermepumpe": {
+    "status": "ok",
+    "head": "Passt so.",
+    "sub": "Keine Baugenehmigung nötig. Nachts kommen am nächsten Nachbarfenster etwa 34 dB(A) an.",
+    "rows": [
+     "[BayBO Art. 57] Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus",
+     "[TA Lärm] Nachts am nächsten Fenster: 34 dB(A). Richtwert: 40 dB(A)",
+     "[berechnet] Abstand zum nächsten Nachbarfenster: 8,5 m",
+     "[Annahme] Fensterlage angenommen: Fassadenmitte auf 1,6 m",
+     "[Annahme] Gerät steht an der Hauswand, allgemeines Wohngebiet",
+     "[Annahme] Vereinfachtes Schallmodell, ersetzt keine Schallprognose"
+    ]
+   }
+  }
+ },
+ "waermepumpe": {
+  "adresse": "Carl-Orff-Straße 1, 92237 Sulzbach-Rosenberg",
+  "bestand": [
+   {
+    "id": "BESTAND_785",
+    "h": 2.38
+   }
+  ],
+  "denkmal": [],
+  "wsg": [],
+  "res": {
+   "gartenhaus": {
+    "status": "ok",
+    "head": "Passt so.",
+    "sub": "Keine Baugenehmigung nötig, und der Abstand zur Grenze stimmt.",
+    "rows": [
+     "[BayBO Art. 57] Ohne Baugenehmigung bis 75 m³ umbauten Raum. Deins: 22,5 m³",
+     "[berechnet] Abstand nach Osten: 3,07 m",
+     "[BayBO Art. 6] Mindestabstand von 3 m eingehalten",
+     "[Annahme] Kein Aufenthaltsraum, keine Feuerstätte, Innenbereich",
+     "[amtlich] Wandhöhe über dem Gelände gemessen (DGM1)",
+     "[offen] Bebauungsplan: noch nicht geprüft",
+     "[Demo] Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet",
+     "[offen] Gemeindesatzungen können andere Abstände festlegen"
+    ]
+   },
+   "carport": {
+    "status": "bad",
+    "head": "Noch 0,28 m zu nah an der Grenze.",
+    "sub": "Ab 3 m Wandhöhe gilt der volle Abstand von 3 m. Bau niedriger oder rück weiter von der Grenze weg.",
+    "rows": [
+     "[BayBO Art. 57] Ohne Baugenehmigung bis 50 m² Fläche. Deiner: 16,5 m²",
+     "[berechnet] Abstand nach Osten: 2,72 m",
+     "[BayBO Art. 6] An der Ostgrenze belegt: 5,5 von 9 m",
+     "[BayBO Art. 6] So nah an der Grenze nur bis 3 m Wandhöhe. Deine: 3,56 m",
+     "[Annahme] Offener Carport im Innenbereich",
+     "[amtlich] Wandhöhe über dem Gelände gemessen (DGM1)",
+     "[offen] Bebauungsplan: noch nicht geprüft",
+     "[Demo] Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet",
+     "[offen] Gemeindesatzungen können andere Abstände festlegen"
+    ]
+   },
+   "waermepumpe": {
+    "status": "bad",
+    "head": "Nachts zu laut für die Nachbarn.",
+    "sub": "Am nächsten Fenster kommen etwa 41 dB(A) an, erlaubt sind 40. Stell sie weiter weg oder nimm ein leiseres Gerät.",
+    "rows": [
+     "[BayBO Art. 57] Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus",
+     "[TA Lärm] Nachts am nächsten Fenster: 41 dB(A). Richtwert: 40 dB(A)",
+     "[berechnet] Abstand zum nächsten Nachbarfenster: 3,9 m",
+     "[Annahme] Fensterlage angenommen: Fassadenmitte auf 1,6 m",
+     "[Annahme] Gerät steht an der Hauswand, allgemeines Wohngebiet",
+     "[Annahme] Vereinfachtes Schallmodell, ersetzt keine Schallprognose"
+    ]
+   }
+  }
+ }
+}

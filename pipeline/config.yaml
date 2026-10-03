@@ -24,6 +24,8 @@ quellen:
   dop20: https://download1.bayernwolke.de/a/dop20/data/32{x}_{y}.tif         # 1-km-Kacheln
   dop20cir_metalink: https://geoservices.bayern.de/services/poly2metalink/metalink/dop20cir
   hausumringe: https://geodaten.bayern.de/odd/m/3/daten/hausumringe/bezirk/data/093_Oberpfalz_Hausumringe.zip
+  laser_metalink: https://geoservices.bayern.de/services/poly2metalink/metalink/laser   # LAZ, 1-km-Kacheln
+  tn: https://download1.bayernwolke.de/a/tn/lkr/tn_09371.zip   # ALKIS Tatsächliche Nutzung, Landkreis Amberg-Sulzbach
 
 hoehen:
   # Amtliche Höhen: Normalhöhen DHHN2016. Cesium braucht Ellipsoidhöhen (GRS80).
@@ -45,13 +47,53 @@ bestand:
   flaeche_min_m2: 3
   flaeche_max_m2: 80
   rechteckigkeit_min: 0.7
-  dach_rauigkeit_max_m: 0.15   # RMS zur Ausgleichsebene; Baumkronen liegen deutlich darüber
+  # v1-Filter (Ebenheit, Freistand) sind aus: sie verwarfen alle 20 Referenz-Kleinbauten (Satteldächer
+  # sind keine Ebene, Schuppen stehen oft an Hecken). Ersetzt durch Laser-Bestätigung, siehe docs/status.md.
+  dach_rauigkeit_max_m: null
   # Ring 1,0–1,6 m um das Objekt: das DOM20 (Bildkorrelation) ist an Kanten ~1 m weit geglättet
   umfeld_ring_innen_px: 5
   umfeld_ring_aussen_px: 8
   umfeld_boden_hoehe_m: 1.0    # darunter gilt ein Pixel als Boden
-  umfeld_boden_anteil_min: 0.5 # Kleinbauten stehen frei: mindestens halber Ring ist Boden
+  umfeld_boden_anteil_min: null # v1: Kleinbauten stehen frei (mind. halber Ring Boden); null = aus
+  # v2: zweite Epoche aus Laserdaten (02a_laser.py, Befliegung März 2025, laubfrei)
+  laser_band_m: [1.5, 5.0]     # etwas weiter als beim DOM: andere Epoche, andere Glättung
+  laser_toleranz_px: 2         # 0,4 m Lagetoleranz zwischen den Epochen
+  laser_bestaetigung_min: 0.5  # Anteil der Objektfläche, der auch im Laser-nDSM im Band liegt (null = aus)
+  laser_einzelecho_min: 0.5    # Laserzelle zählt nur, wenn ≥ 50 % Einzelechos (Dach statt Strauch); null = aus
+  laser_pixelweise: true       # Laser-Bedingung schon vor der Fleckbildung anwenden
+  umriss_schrumpfen_m: 0.5     # DOM-Kantenglättung ausgleichen (Pavillon Fröschau 41: 5,5 m statt ~3,5 m)
+  anbau_kontakt_max: 0.25      # Flecken, deren Rand zu > 25 % am Gebäudepuffer liegt, sind Dachteile/Anbauten
+  # ALKIS Tatsächliche Nutzung: Verkehrsflächen ausmaskieren (geparkte Autos)
+  verkehr_maskieren: true
+  verkehr_klassen: [Straßenverkehr, Weg, Platz, Bahnverkehr]
 
 terrain:
   # Höhenraster für die App (CustomHeightmapTerrainProvider)
   aufloesung_m: 1.0
+
+# Demo-Adressen (Meilenstein 5). Grenzen mit demo_grenze.py aus der Parzellarkarte abgeleitet und in der App
+# als `Demo` gekennzeichnet, nicht als amtliche Flurstücksgrenze. Lokale Meter relativ zur Gebietsmitte.
+# Vor einer öffentlichen Demo: Einverständnis der Eigentümer einholen (es sind echte Wohnadressen).
+demos:
+  - id: grenze
+    titel: Gartenhaus an der Grenze
+    adresse: Fröschau 41, 92237 Sulzbach-Rosenberg
+    objekt: gartenhaus
+    start: [347.33, -266.81]   # an der Südwestgrenze, auf der auch der bestehende Pavillon steht
+    winkelGrad: -29.1
+    grenze: [[369.0, -228.4], [352.4, -250.4], [340.3, -264.9], [357.9, -274.7], [383.0, -250.3], [374.6, -235.5]]
+  - id: hang
+    titel: Hanglage
+    adresse: Am Schützenheim 3, 92237 Sulzbach-Rosenberg
+    objekt: gartenhaus
+    start: [299.67, 160.65]    # an der talseitigen Südwestgrenze (Gelände 434 → 431 m)
+    winkelGrad: -51.5
+    hoehe: 2.85                # auf ebenem Boden erlaubt, am Hang über 3 m mittlere Wandhöhe
+    grenze: [[315.2, 187.7], [290.5, 169.0], [305.7, 149.9], [326.9, 165.9]]
+  - id: waermepumpe
+    titel: Wärmepumpe nah am Nachbarn
+    adresse: Carl-Orff-Straße 1, 92237 Sulzbach-Rosenberg
+    objekt: waermepumpe
+    start: [76.8, -916.65]     # Gartenseite an der Hauswand, direkt an der Grenze zur Nachbarhälfte 1a
+    winkelGrad: 84
+    grenze: [[77.4, -896.6], [74.6, -923.3], [87.6, -925.0], [90.4, -899.4]]

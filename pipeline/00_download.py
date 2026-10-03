@@ -69,6 +69,19 @@ def main() -> int:
         ex, ny = (int(v) // 1000 for v in Path(name).stem.split("_"))
         fetch(url, raw / "dop20cir" / f"{ex}_{ny}.tif")
 
+    print("Laserpunkte LAZ (über poly2metalink)")
+    req = urllib.request.Request(q["laser_metalink"], data=wkt.encode(), headers=UA)
+    with urllib.request.urlopen(req, timeout=120) as r:
+        meta = ET.fromstring(r.read())
+    for f in meta.findall("m:file", ns):
+        fetch(f.find("m:url", ns).text, raw / "laser" / f.get("name"))
+
+    print("ALKIS Tatsächliche Nutzung (Landkreis)")
+    z = fetch(q["tn"], raw / "tn" / "tn_09371.zip")
+    if not (raw / "tn" / "data").exists():
+        with zipfile.ZipFile(z) as zf:
+            zf.extractall(raw / "tn" / "data")
+
     print("Hausumringe (Regierungsbezirk Oberpfalz)")
     z = fetch(q["hausumringe"], raw / "hausumringe" / "093_Oberpfalz_Hausumringe.zip")
     out = raw / "hausumringe" / "shp"

@@ -47,6 +47,8 @@ export interface RenderState {
   bestand: (Bestand & { status: 'aktiv' | 'entfernt' })[];
   windows: NeighborWindow[];
   dark: boolean;
+  /** fotorealistisches DOM-Mesh statt LoD2 anzeigen */
+  mesh: boolean;
 }
 
 const KEY = 'passtKey';
@@ -79,6 +81,11 @@ export class Renderer {
     this.buildDraft();
     this.buildObjects();
     this.buildDim();
+  }
+
+  /** Bodenlinien und -flächen liegen auf dem Gelände, mit Foto-Mesh auch auf dem Mesh. */
+  private cls() {
+    return new CallbackProperty(() => (this.s().mesh ? ClassificationType.BOTH : ClassificationType.TERRAIN), false);
   }
 
   private pal(): Palette {
@@ -115,7 +122,7 @@ export class Renderer {
         }, false),
         width: 3,
         clampToGround: true,
-        classificationType: ClassificationType.TERRAIN,
+        classificationType: this.cls(),
         material: this.color(() => Color.fromCssColorString(this.pal().red)),
       },
     });
@@ -158,7 +165,7 @@ export class Renderer {
           positions: this.cart([...plot, plot[0]]),
           width: 4,
           clampToGround: true,
-          classificationType: ClassificationType.TERRAIN,
+          classificationType: this.cls(),
           material: new PolylineDashMaterialProperty({ color: Color.fromCssColorString(this.pal().red), dashLength: 18 }),
         },
       }),
@@ -179,7 +186,7 @@ export class Renderer {
         v.entities.add({
           polygon: {
             hierarchy: new PolygonHierarchy(this.cart(band)),
-            classificationType: ClassificationType.TERRAIN,
+            classificationType: this.cls(),
             material: this.color(() => {
               const bad = segmentSideBad().has(i);
               return Color.fromCssColorString(bad ? this.pal().red : this.pal().band).withAlpha(bad ? 0.32 : 0.1);
@@ -242,7 +249,7 @@ export class Renderer {
       ellipse: {
         semiMajorAxis: new CallbackProperty(() => Math.max(0.3, st().res?.waermepumpe.rLimit ?? 1), false),
         semiMinorAxis: new CallbackProperty(() => Math.max(0.3, st().res?.waermepumpe.rLimit ?? 1), false),
-        classificationType: ClassificationType.TERRAIN,
+        classificationType: this.cls(),
         material: this.color(() => {
           const r = st().res?.waermepumpe.status;
           const c = r === 'bad' ? this.pal().red : r === 'warn' ? this.pal().warn : this.pal().ok;
@@ -307,7 +314,7 @@ export class Renderer {
         }, false),
         width: 3,
         clampToGround: true,
-        classificationType: ClassificationType.TERRAIN,
+        classificationType: this.cls(),
         material: this.color(() => Color.fromCssColorString(this.pal().ink)),
       },
     });

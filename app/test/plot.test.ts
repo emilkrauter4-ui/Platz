@@ -58,6 +58,23 @@ describe('Kontext', () => {
   });
 });
 
+describe('Nachbarfenster beim Doppelhaus', () => {
+  it('nimmt kein Fenster in der Brandwand an, sondern in der nächsten freien Fassade', () => {
+    // eigene Hälfte x 10–18, Nachbarhälfte x 2–10, gemeinsame Wand bei x = 10
+    const plot: Vec2[] = [[10, 0], [22, 0], [22, -30], [10, -30]];
+    const bs = classifyBuildings(plot, [
+      { id: 'eigen', fp: [[10, -5], [18, -5], [18, -15], [10, -15]] },
+      { id: 'nachbar', fp: [[2, -5], [10, -5], [10, -15], [2, -15]] },
+    ]);
+    const w = assumedWindows(plot, bs);
+    expect(w).toHaveLength(1);
+    expect(w[0].pos[0]).not.toBe(10); // nicht auf der Brandwand
+    // Vorder- oder Rückfassade (beide 4 m vom Grundstück), jedenfalls in der Mitte einer freien Fassade
+    expect(w[0].pos[0]).toBe(6);
+    expect([-5, -15]).toContain(w[0].pos[1]);
+  });
+});
+
 describe('Einrasten und Plausibilität', () => {
   const fps: Vec2[][] = [[[5, -5], [15, -5], [15, -15], [5, -15]]];
   it('rastet zuerst auf Ecken, dann auf Kanten ein', () => {

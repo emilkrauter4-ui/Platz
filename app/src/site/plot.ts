@@ -90,24 +90,25 @@ export function classifyBuildings(boundary: Vec2[], buildings: { id: string; fp:
 }
 
 /**
- * Ohne Eingabe: je Nachbarhaus ein Fenster in der Mitte der dem Grundstück zugewandten Fassade,
+ * Ohne Eingabe: je Nachbarhaus ein Fenster in der Mitte der dem Grundstück nächsten Fassade,
  * auf 1,6 m Höhe (Label `Annahme`). Nur Häuser bis `radius` Meter vom Grundstück.
+ * Brandwände (Fassaden, an die ein anderes Gebäude anschließt, z. B. beim Doppelhaus) haben keine Fenster.
  */
 export function assumedWindows(boundary: Vec2[], buildings: Building[], radius = 35): (NeighborWindow & { buildingId: string })[] {
-  const c = centroid(boundary);
   const out: (NeighborWindow & { buildingId: string })[] = [];
+  const toPlot = (m: Vec2) => (pointInPolygon(m, boundary) ? 0 : Math.min(...edges(boundary).map(([a, e]) => pointSegment(m, a, e).d)));
   for (const b of buildings) {
     if (b.own) continue;
     let best: { d: number; m: Vec2 } | null = null;
     for (const [a, e] of edges(b.footprint)) {
       if (Math.hypot(e[0] - a[0], e[1] - a[1]) < 2) continue; // kein Fenster in Mini-Kanten
       const m: Vec2 = [(a[0] + e[0]) / 2, (a[1] + e[1]) / 2];
-      const d = Math.hypot(m[0] - c[0], m[1] - c[1]);
+      const brandwand = buildings.some((o) => o !== b && edges(o.footprint).some(([p, q]) => pointSegment(m, p, q).d < 0.5));
+      if (brandwand) continue;
+      const d = toPlot(m);
       if (!best || d < best.d) best = { d, m };
     }
-    if (!best) continue;
-    const toPlot = Math.min(...edges(boundary).map(([a, e]) => pointSegment(best!.m, a, e).d));
-    if (toPlot > radius) continue;
+    if (!best || best.d > radius) continue;
     out.push({ pos: best.m, z: LIM.waermepumpe.fensterhoeheAnnahmeM.wert, provenance: 'Annahme', buildingId: b.id });
   }
   return out;
@@ -229,4 +230,28 @@ export function isSimple(poly: Vec2[]): boolean {
     }
   }
   return true;
+}
+
+/**
+ * Objekt an die Stelle rücken, die am weitesten von allen Grenzen entfernt und frei ist
+ * (für Demos: das gerade nicht gezeigte Nebengebäude soll die Grenzbebauung nicht verfälschen).
+ */
+export function awayFromBoundary(o: Placed, boundary: Vec2[], obstacles: Vec2[][]): Placed {
+  const b = ccw(boundary);
+  const xs = b.map((p) => p[0]);
+  const ys = b.map((p) => p[1]);
+  let best = o;
+  let bd = -Infinity;
+  for (let x = Math.min(...xs); x <= Math.max(...xs); x += 0.5) {
+    for (let y = Math.min(...ys); y <= Math.max(...ys); y += 0.5) {
+      const cand = { ...o, center: [x, y] as Vec2 };
+      if (!free(cand, b, obstacles)) continue;
+      const d = Math.min(...footprint(cand).flatMap((p) => edges(b).map(([a, c]) => pointSegment(p, a, c).d)));
+      if (d > bd) {
+        bd = d;
+        best = cand;
+      }
+    }
+  }
+  return best;
 }

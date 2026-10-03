@@ -34,7 +34,7 @@ function offlineManifest() {
       ];
       const offline = files.filter(
         (f) =>
-          (f.startsWith('data/') || f.startsWith('cesium/Workers/') || f.startsWith('cesium/Assets/IAU2006_XYS/') ||
+          !f.startsWith('data/mesh/') && (f.startsWith('data/') || f.startsWith('cesium/Workers/') || f.startsWith('cesium/Assets/IAU2006_XYS/') ||
             f === 'cesium/Assets/approximateTerrainHeights.json') && !shell.includes(f),
       );
       writeFileSync(join(dist, 'precache.json'), JSON.stringify(shell));
@@ -67,6 +67,12 @@ export default defineConfig({
       ],
     }),
   ],
+  // Dev-Server: dieselbe LfU-Abfrage wie scripts/serve.mjs (der LfU-Dienst sendet keinen CORS-Header)
+  server: {
+    proxy: {
+      '/proxy/lfu-wsg': { target: 'https://www.lfu.bayern.de', changeOrigin: true, rewrite: (p) => p.replace('/proxy/lfu-wsg', '/gdi/wms/wasser/wsg') },
+    },
+  },
   build: { chunkSizeWarningLimit: 6000 },
   test: { include: ['test/**/*.test.ts'] },
 });

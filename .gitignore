@@ -6,3 +6,6 @@ data/build/
 __pycache__/
 .venv/
 .DS_Store
+
+# DOM-Mesh (184 MB) wird mit pipeline/06_mesh.py erzeugt und nicht eingecheckt
+app/public/data/mesh/

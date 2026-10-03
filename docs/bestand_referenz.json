@@ -1,0 +1,498 @@
+{
+ "beschreibung": "Bekannte Kleinbauten ohne Hausumring, von Hand auf dem DOP20 (Befliegung 16.09.2023) gesichtet. Vorgehen: 36 zufällige Ausschnitte 60 × 60 m um Wohnhäuser (davon 26 in locker bebauten Gebieten), darin Bauten ohne Umring markiert, Koordinaten auf 5-m-Raster abgelesen (Unsicherheit ±1 m), danach jeden Punkt mit Fadenkreuz kontrolliert. 39 Kandidaten markiert, 20 eindeutig bestätigt; unklare Fälle (Baum, Auto, Terrasse) verworfen.",
+ "positiv": [
+  {
+   "id": "R1",
+   "xy": [
+    698972.5,
+    5486844.5
+   ],
+   "art": "Schuppen, braunes Dach"
+  },
+  {
+   "id": "R2",
+   "xy": [
+    699232,
+    5487026.8
+   ],
+   "art": "Gartenhaus, helles Dach"
+  },
+  {
+   "id": "R5",
+   "xy": [
+    698737.7,
+    5486160.3
+   ],
+   "art": "Schuppen, graues Dach"
+  },
+  {
+   "id": "R7",
+   "xy": [
+    698783,
+    5486185.5
+   ],
+   "art": "Garage/Schuppen, braunes Dach"
+  },
+  {
+   "id": "R8",
+   "xy": [
+    698515,
+    5487463.3
+   ],
+   "art": "Nebengebäude, braunes Dach"
+  },
+  {
+   "id": "R9",
+   "xy": [
+    698535,
+    5487467.5
+   ],
+   "art": "Schuppen, hell"
+  },
+  {
+   "id": "R11",
+   "xy": [
+    698592,
+    5486581.5
+   ],
+   "art": "Schuppen, graues Dach"
+  },
+  {
+   "id": "R13",
+   "xy": [
+    699413,
+    5486875.5
+   ],
+   "art": "Schuppen, weißes Dach"
+  },
+  {
+   "id": "R14",
+   "xy": [
+    699414.5,
+    5486881.3
+   ],
+   "art": "Gartenpavillon"
+  },
+  {
+   "id": "R15",
+   "xy": [
+    699430,
+    5486880
+   ],
+   "art": "Gewächshaus"
+  },
+  {
+   "id": "R16",
+   "xy": [
+    699399,
+    5486879
+   ],
+   "art": "Nebengebäude, dunkles Dach"
+  },
+  {
+   "id": "R18",
+   "xy": [
+    699629,
+    5486786.8
+   ],
+   "art": "Gartenpavillon, quadratisch"
+  },
+  {
+   "id": "R19",
+   "xy": [
+    699765.5,
+    5486611
+   ],
+   "art": "Carport/Garage, graues Dach"
+  },
+  {
+   "id": "A5",
+   "xy": [
+    699276,
+    5487143.7
+   ],
+   "art": "Nebengebäude/Garage, graues Dach"
+  },
+  {
+   "id": "B1",
+   "xy": [
+    699652,
+    5486385.7
+   ],
+   "art": "Garage/Carport, weißes Dach"
+  },
+  {
+   "id": "B3",
+   "xy": [
+    699617.5,
+    5486388.7
+   ],
+   "art": "Schuppen, graues Dach"
+  },
+  {
+   "id": "B5",
+   "xy": [
+    699631.5,
+    5486375.8
+   ],
+   "art": "Schuppen, dunkles Dach"
+  },
+  {
+   "id": "D1",
+   "xy": [
+    698976.8,
+    5486888.8
+   ],
+   "art": "Schuppen, graues Dach"
+  },
+  {
+   "id": "D3",
+   "xy": [
+    699013,
+    5486904.7
+   ],
+   "art": "Nebengebäude, dunkles Dach"
+  },
+  {
+   "id": "D6",
+   "xy": [
+    699357.5,
+    5486729.2
+   ],
+   "art": "Gartenpavillon, rotes Dach"
+  }
+ ],
+ "praezision": {
+  "v4l (gewählt)": {
+   "datei": "bestand_v4l.geojson",
+   "stichprobe": [
+    {
+     "id": "BESTAND_408",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_641",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_818",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_505",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_554",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_470",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_667",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_241",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_684",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_636",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_260",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_121",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_249",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_533",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_134",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_97",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_832",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_456",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_566",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_727",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_841",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_501",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_99",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_710",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_657",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_427",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_415",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_309",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_562",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_466",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_418",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_577",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_645",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_698",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_654",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_859",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_745",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_175",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_6",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_786",
+     "kleinbau": true
+    }
+   ]
+  },
+  "v3s": {
+   "datei": "bestand_v3s.geojson",
+   "stichprobe": [
+    {
+     "id": "BESTAND_1190",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_398",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1104",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_734",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_956",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_99",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1358",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1031",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_439",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1232",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_454",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_590",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_994",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_434",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_673",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_896",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_144",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_522",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_395",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_329",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_789",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_1320",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_960",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_838",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_405",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_401",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_1385",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_815",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_115",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_876",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_906",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_924",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_73",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1080",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_667",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_412",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_486",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1012",
+     "kleinbau": false
+    },
+    {
+     "id": "BESTAND_1289",
+     "kleinbau": true
+    },
+    {
+     "id": "BESTAND_1251",
+     "kleinbau": false
+    }
+   ]
+  },
+  "hinweis": "Je 40 zufällige Treffer (qa_bestand.py bogen, Seeds 301/402 bzw. 101/202), von Hand am DOP20 beurteilt. Unklare Fälle als nein gewertet."
+ }
+}

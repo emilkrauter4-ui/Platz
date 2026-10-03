@@ -16,5 +16,103 @@
   "ags": "09371151",
   "bauleitplanung_url": "https://www.suro.city/leben-in-der-stadt/bauen-und-wohnen/bauleitplanung/",
   "quelle": "Bauleitplanungsportal Bayern (geoportal.bayern.de/bauleitplanungsportal)"
- }
+ },
+ "demos": [
+  {
+   "id": "grenze",
+   "titel": "Gartenhaus an der Grenze",
+   "adresse": "Fröschau 41, 92237 Sulzbach-Rosenberg",
+   "objekt": "gartenhaus",
+   "start": [
+    347.33,
+    -266.81
+   ],
+   "winkelGrad": -29.1,
+   "grenze": [
+    [
+     369.0,
+     -228.4
+    ],
+    [
+     352.4,
+     -250.4
+    ],
+    [
+     340.3,
+     -264.9
+    ],
+    [
+     357.9,
+     -274.7
+    ],
+    [
+     383.0,
+     -250.3
+    ],
+    [
+     374.6,
+     -235.5
+    ]
+   ]
+  },
+  {
+   "id": "hang",
+   "titel": "Hanglage",
+   "adresse": "Am Schützenheim 3, 92237 Sulzbach-Rosenberg",
+   "objekt": "gartenhaus",
+   "start": [
+    299.67,
+    160.65
+   ],
+   "winkelGrad": -51.5,
+   "hoehe": 2.85,
+   "grenze": [
+    [
+     315.2,
+     187.7
+    ],
+    [
+     290.5,
+     169.0
+    ],
+    [
+     305.7,
+     149.9
+    ],
+    [
+     326.9,
+     165.9
+    ]
+   ]
+  },
+  {
+   "id": "waermepumpe",
+   "titel": "Wärmepumpe nah am Nachbarn",
+   "adresse": "Carl-Orff-Straße 1, 92237 Sulzbach-Rosenberg",
+   "objekt": "waermepumpe",
+   "start": [
+    76.8,
+    -916.65
+   ],
+   "winkelGrad": 84,
+   "grenze": [
+    [
+     77.4,
+     -896.6
+    ],
+    [
+     74.6,
+     -923.3
+    ],
+    [
+     87.6,
+     -925.0
+    ],
+    [
+     90.4,
+     -899.4
+    ]
+   ]
+  }
+ ]
 }

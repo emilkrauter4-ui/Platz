@@ -8,3 +8,5 @@ shapely>=2.0
 lxml
 mapbox_earcut
 pillow
+laspy[lazrs]
+DracoPy

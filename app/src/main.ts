@@ -17,6 +17,7 @@ import {
   edges,
   evaluate,
   fmt,
+  footprint,
   GEBIET_TEXT,
   LIMITS,
   NAMES,
@@ -38,8 +39,8 @@ import { cartesianToLocal, localToCartesian, lonLatToLocal, setOrigin } from './
 import { Terrain } from './scene/terrain';
 import { createScene, type Scene } from './scene/viewer';
 import { Renderer, type RenderState } from './scene/render';
-import { assumedWindows, ccw, classifyBuildings, initialObjects, isSimple, sidesFromBoundary, snap } from './site/plot';
-import { searchAddress, wasserschutz, type Place } from './ui/services';
+import { assumedWindows, awayFromBoundary, ccw, classifyBuildings, initialObjects, isSimple, sidesFromBoundary, snap } from './site/plot';
+import { denkmaeler, searchAddress, wasserschutz, type Denkmal, type Place } from './ui/services';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -61,7 +62,10 @@ interface State extends RenderState {
   bereich: { value: 'innen' | 'aussen'; provenance: Provenance };
   aufenthaltsraum: { value: boolean; provenance: Provenance };
   feuerstaette: { value: boolean; provenance: Provenance };
-  wsg: string[] | null;
+  /** undefined = wird abgefragt, null = nicht abfragbar */
+  wsg: string[] | null | undefined;
+  /** Denkmäler am Grundstück (BLfD); undefined = wird abgefragt, null = nicht abfragbar */
+  denkmal: Denkmal[] | null | undefined;
   view: '3d' | 'plan';
   heading: number;
   hasDragged: boolean;
@@ -77,6 +81,7 @@ const st: State = {
   bestand: [],
   windows: [],
   dark: false,
+  mesh: false,
   address: null,
   buildings: [],
   gebiet: { value: 'allgemein', provenance: 'Annahme' },
@@ -84,6 +89,7 @@ const st: State = {
   aufenthaltsraum: { value: false, provenance: 'Annahme' },
   feuerstaette: { value: false, provenance: 'Annahme' },
   wsg: null,
+  denkmal: null,
   view: '3d',
   heading: 0,
   hasDragged: false,
@@ -229,12 +235,23 @@ async function startDemo(d: DemoAdresse) {
   await Promise.all([details, terrain.ensure([d.grenze[0][0] - 90, d.grenze[0][1] - 90], [d.grenze[0][0] + 90, d.grenze[0][1] + 90])]);
   st.draft = d.grenze.map((p) => [p[0], p[1]] as Vec2);
   plotProvenance = 'Demo';
+  if (d.blickGrad != null) st.heading = CMath.toRadians(d.blickGrad);
   await confirmPlot();
   if (d.start && st.objs) {
     const o = st.objs[d.objekt];
     o.center = d.start;
     if (d.winkelGrad != null) o.angle = CMath.toRadians(d.winkelGrad);
+    if (d.hoehe != null) o.h = d.hoehe;
+    // Das jeweils andere Nebengebäude von den Grenzen wegrücken, damit es die Grenzbebauung nicht verfälscht
+    const other = d.objekt === 'carport' ? 'gartenhaus' : 'carport';
+    const obstacles = [
+      ...st.buildings.map((b) => b.footprint),
+      ...st.bestand.map((b) => b.footprint),
+      ...(['gartenhaus', 'carport', 'waermepumpe'] as const).filter((k) => k !== other).map((k) => footprint(st.objs![k])),
+    ];
+    st.objs[other] = awayFromBoundary(st.objs[other], st.plot!, obstacles);
   }
+
   select(d.objekt);
 }
 
@@ -335,9 +352,14 @@ async function confirmPlot() {
   st.view = '3d';
   syncViewButtons();
   scene.parzellar.show = false;
-  st.wsg = null;
+  st.wsg = undefined;
+  st.denkmal = undefined;
   wasserschutz(c).then((w) => {
     st.wsg = w;
+    if (st.step === 'pruefen') renderSheet();
+  });
+  denkmaeler([c, ...b]).then((d) => {
+    st.denkmal = d;
     if (st.step === 'pruefen') renderSheet();
   });
   buildSite();
@@ -462,6 +484,7 @@ function renderSheet() {
       ${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${NAMES[k].name}</button>`).join('')}
     </div>
     <div class="controls" id="controls">${ctl}</div>
+    ${st.denkmal?.length ? `<p class="warnbox">Denkmalschutz: ${st.denkmal.map((d) => `${esc(d.art)}${d.bezeichnung ? ` „${esc(d.bezeichnung)}“` : ''} (${esc(d.aktennummer)})`).join('; ')}. Hier kann auch ein kleines Nebengebäude oder eine Wärmepumpe eine denkmalrechtliche Erlaubnis brauchen (Art. 6 BayDSchG). ${tag('amtlich', 'amtlich')} <span class="attr">© BLfD</span></p>` : ''}
     ${st.wsg?.length ? `<p class="warnbox">Das Grundstück liegt in einem Trinkwasserschutzgebiet (${esc(st.wsg.join(', '))}). Dort gelten eigene Auflagen. ${tag('amtlich', 'amtlich')}</p>` : ''}
     <details open>
       <summary>So haben wir geprüft</summary>
@@ -477,8 +500,8 @@ function renderSheet() {
       <h3 style="font-size:14px;margin:14px 0 4px">Bestehende Kleinbauten auf deinem Grundstück</h3>
       ${bestHtml}
       <div class="field"><span>Bebauungsplan ${tag('offen', 'offen')}</span>${data.site.gemeinde.bauleitplanung_url ? `<a href="${esc(data.site.gemeinde.bauleitplanung_url)}" target="_blank" rel="noopener">Pläne der Stadt</a>` : 'unbekannt'}</div>
-      <div class="field"><span>Trinkwasserschutzgebiet ${st.wsg === null ? tag('offen', 'offen') : tag('amtlich', 'amtlich')}</span><span>${st.wsg === null ? 'nicht abfragbar' : st.wsg.length ? 'ja' : 'nein'}</span></div>
-      <div class="field"><span>Denkmal in der Nähe ${tag('offen', 'offen')}</span><a href="https://geoportal.bayern.de/denkmalatlas/" target="_blank" rel="noopener">Denkmal-Atlas</a></div>
+      <div class="field"><span>Trinkwasserschutzgebiet ${st.wsg == null ? tag('offen', 'offen') : tag('amtlich', 'amtlich')}</span><span>${st.wsg === undefined ? 'wird abgefragt …' : st.wsg === null ? 'nicht abfragbar' : st.wsg.length ? 'ja' : 'nein'}</span></div>
+      <div class="field"><span>Denkmal ${st.denkmal == null ? tag('offen', 'offen') : tag('amtlich', 'amtlich')}</span><span>${st.denkmal === undefined ? 'wird abgefragt …' : st.denkmal === null ? 'nicht abfragbar' : st.denkmal.length ? 'ja, siehe Hinweis' : 'nein'} · <a href="https://geoportal.bayern.de/denkmalatlas/" target="_blank" rel="noopener">Denkmal-Atlas</a></span></div>
     </details>
     <div class="btnrow">
       <button class="primary" id="reportBtn" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
@@ -665,6 +688,16 @@ function setupView() {
       }
     }),
   );
+  $('meshBtn').addEventListener('click', async () => {
+    const b = $('meshBtn');
+    const want = b.getAttribute('aria-pressed') !== 'true';
+    const ok = await scene.setMesh(want);
+    st.mesh = want && ok;
+    b.setAttribute('aria-pressed', String(st.mesh));
+    if (want && !ok) hint('Das Foto-Mesh ist in dieser Ausgabe nicht enthalten.');
+    renderer.syncPlot(badSegments);
+    render();
+  });
   $('rotBtn').addEventListener('click', () => {
     st.heading = (scene.viewer.camera.heading + Math.PI / 2) % (2 * Math.PI);
     if (st.plot || st.draft.length) plotFrame();
@@ -710,6 +743,8 @@ function openReport() {
     <li>${best.length} bestehende Kleinbauten mitgezählt (${best.filter((b) => b.provenance === 'erkannt').length} automatisch erkannt)</li>
     <li>Nachbarfenster: ${st.windows.filter((w) => w.provenance !== 'Annahme').length} von dir gesetzt, ${st.windows.filter((w) => w.provenance === 'Annahme').length} angenommen (Fassadenmitte, 1,6 m)</li>
     <li>Schall vereinfacht nach LAI-Leitfaden, ohne Zuschläge</li>
+    <li>Denkmal: ${st.denkmal == null ? 'nicht abgefragt (offen)' : st.denkmal.length ? st.denkmal.map((d) => `${esc(d.art)} ${esc(d.aktennummer)}`).join(', ') + ' (amtlich, © BLfD)' : 'kein Denkmal am Grundstück (amtlich, © BLfD)'}</li>
+    <li>Trinkwasserschutzgebiet: ${st.wsg == null ? 'nicht abgefragt (offen)' : st.wsg.length ? esc(st.wsg.join(', ')) : 'nein'}${st.wsg != null ? ' (amtlich, Datenquelle: Bayerisches Landesamt für Umwelt)' : ''}</li>
     <li>Bebauungsplan nicht geprüft${data.site.gemeinde.bauleitplanung_url ? ` – <a href="${esc(data.site.gemeinde.bauleitplanung_url)}" target="_blank" rel="noopener">Pläne der Stadt</a>` : ''}</li>
   </ul>`;
   if (!LIMITS.geprueft) h += `<p class="m-fine">Die Grenzwerte sind noch nicht von einer Fachperson geprüft.</p>`;
@@ -727,7 +762,8 @@ function openInfo() {
       <li>Digitales Geländemodell DGM1, umgerechnet mit dem Quasigeoid GCG2016 (BKG)</li>
       <li>Luftbild DOP20 und Parzellarkarte (Kartendienste)</li>
       <li>Bestehende Kleinbauten: aus DOM20, DGM1 und DOP20 CIR selbst erkannt</li>
-      <li>Wasserschutzgebiete: Bayerisches Landesamt für Umwelt (Abfrage)</li>
+      <li>Wasserschutzgebiete: Datenquelle Bayerisches Landesamt für Umwelt, www.lfu.bayern.de (CC BY 4.0, Abfrage)</li>
+      <li>Denkmäler: © BLfD (CC BY-ND 4.0, nur Abfrage, unverändert angezeigt)</li>
       <li>Adresssuche: © OpenStreetMap-Mitwirkende, Nominatim</li>
     </ul>
     <h3>So liest du die Hinweise</h3>
@@ -864,6 +900,19 @@ async function main() {
         buildings: () => data.buildings,
         tilesLoaded: () => scene.viewer.scene.globe.tilesLoaded && !!scene.tileset?.tilesLoaded,
         frame: (c: Vec2, r: number, v: '3d' | 'plan') => frame(c, r, v, false),
+        setMesh: async (on: boolean) => {
+          st.mesh = on && (await scene.setMesh(on));
+          renderer.syncPlot(badSegments);
+          return st.mesh;
+        },
+        meshLoaded: () => {
+          const prims = scene.viewer.scene.primitives;
+          for (let i = 0; i < prims.length; i++) {
+            const p = prims.get(i);
+            if (p !== scene.tileset && p.tilesLoaded !== undefined && p.show) return p.tilesLoaded;
+          }
+          return true;
+        },
       },
     });
   }

@@ -19,7 +19,25 @@ Abweichungen von CLAUDE.md:
   Die Pipeline nutzt das Grid und bricht ab, falls es nicht greift; es gibt keinen stillen Konstantwert.
 - LoD2 → 3D Tiles ohne Py3DTilers/3DCityDB, mit ~200 Zeilen Python (Format ist einfach, keine Datenbank nötig).
 - Luftbild und Parzellarkarte kommen direkt aus den amtlichen WMS (CORS freigegeben), statt lokal gekachelt.
-- DOM-Mesh (SLPK) noch nicht eingebunden. Beide Wege (I3SDataProvider, tile-converter) sind offen.
+- DOM-Mesh: eigene Umwandlung, weil beide vorgeschlagenen Wege am Koordinatensystem scheitern (siehe unten).
+
+### DOM-Mesh (Los 123028_1, Befliegung 2023)
+
+- Die SLPK-Datei ist 49 GB groß (390 km²). `pipeline/slpk_remote.py` liest per HTTP-Range nur das Inhaltsverzeichnis
+  (228 936 Einträge, 32 MB) und die 567 Knoten, die das Gebiet schneiden (Ebene 9–14).
+- **Beide vorgeschlagenen Wege funktionieren mit diesem Datensatz nicht:**
+  - Cesium `I3SDataProvider` bricht ab: `I3SLayer.load` → „Unsupported spatial reference: 25832“ (nur wkid 4326).
+  - loaders.gl / `tile-converter` 4.3.3 rechnet OBB und Vertex-Positionen fest als Länge/Breite um
+    (`Ellipsoid.WGS84.cartographicToCartesian` in `parse-i3s.js` und `parse-i3s-tile-content.js`).
+- Stabiler Weg: **eigene Umwandlung** `pipeline/06_mesh.py` – unkomprimierte I3S-Geometrie (Positionen relativ zur
+  OBB-Mitte, UTM + DHHN2016) über GCG2016 nach ECEF, Draco-kodiert, JPEG-Textur unverändert, 3D Tiles 1.1 mit
+  REPLACE-Verfeinerung (geometricError aus der I3S-Schwelle `maxScreenThresholdSQ`). 567 Kacheln, 8,4 Mio. Dreiecke.
+- In der App: Kamera-Knopf „Foto-3D“ blendet das Mesh statt LoD2 ein; Grenzlinien und Bänder legen sich dann aufs Mesh.
+  Lage stimmt mit Gelände und LoD2 überein (Screenshot-Kontrolle).
+- **Nicht im Git und nicht in der Offline-Demo: 184 MB** (Texturen ≈ 190 kB je Knoten, Geometrie ≈ 170 kB, weil
+  DracoPy Texturkoordinaten nicht quantisiert). Erzeugen: `python3 06_mesh.py baum && python3 06_mesh.py kacheln`
+  (≈ 10 min). Ohne Mesh meldet der Knopf „nicht enthalten“. Verkleinerung möglich (Original-Draco aus dem SLPK mit
+  affiner Knotenmatrix, Texturen der feinsten Ebene auf 512 px) – noch nicht umgesetzt.
 
 ## Meilenstein 2 – Grundstück: **erreicht (technisch), mit echten Adressen noch zu testen**
 
@@ -41,32 +59,68 @@ Abweichungen von CLAUDE.md:
   Wandhöhe so 2,62 m an der Grenzwand.
 - Nachbarfenster: ohne Eingabe Fassadenmitte auf 1,6 m (`Annahme`); Tipp auf die Nachbarfassade setzt ein Fenster (`nutzerbestätigt`).
 
-## Meilenstein 4 – Bestand: **erreicht, Qualität mäßig**
+## Meilenstein 4 – Bestand: **erreicht, Qualität jetzt gemessen**
 
-- `02_bestand.py` nach CLAUDE.md, plus zwei Filter aus dem Sichtcheck: Ebenheit des Dachs (RMS zur Ausgleichsebene
-  ≤ 0,15 m) und freier Stand (Ring 1,0–1,6 m um das Objekt mindestens zur Hälfte Boden). Gebäudepuffer 1,0 m statt 0,5 m,
-  weil Dachüberstände im DOM bis ~1 m über die Hausumringe ragen.
-- Ergebnis: 78 Objekte im Gebiet (ohne die Zusatzfilter waren es 3319, fast nur Fehltreffer).
-- **Trefferquote im Sichtcheck: 18 von 40 Stichproben echte Kleinbauten (≈ 45 %).** Fehltreffer: Autos und Transporter,
-  Container, einzelne Hecken. Siehe `docs/bestand_stichprobe_1.jpg` und `_2.jpg`. Die Vollständigkeit (Recall) ist
-  nicht gemessen; viele Garagen und Schuppen stehen ohnehin in den Hausumringen.
-- In der App erscheinen erkannte Kleinbauten als eigene Objekte (Label `erkannt`), zählen bei 9 m/15 m mit und lassen sich
-  mit „Stimmt" (`nutzerbestätigt`) oder „Gibt es nicht" verwerfen.
-- Verbesserungsidee: Straßenflächen aus dem Basis-DLM (frei) maskieren, um geparkte Autos auszuschließen.
+Messgrundlage (`docs/bestand_referenz.json`, `pipeline/qa_bestand.py`):
+- **Trefferquote**: 20 bekannte Kleinbauten ohne Hausumring, von Hand am DOP20 gefunden (36 Zufallsausschnitte um
+  Wohnhäuser, jeder Punkt mit Fadenkreuz kontrolliert). Treffer = erkanntes Objekt < 1 m vom Punkt.
+  Ehrliche Einschränkung: 2 der 20 haben im DOM20 und im Laser keine Höhe (vermutlich Fehlurteile meinerseits, R1/R18),
+  ein Gewächshaus ist zu niedrig und aus Glas (R15). Höchstens 15–17 sind mit Höhendaten überhaupt auffindbar.
+- **Präzision**: 40 zufällige Treffer je Variante, von Hand am DOP20 beurteilt; Unklares zählt als „nein“.
 
-## Meilenstein 5 – Demo-fertig: **offen**
+| Variante | erkannte Objekte | Trefferquote (20 bekannte) | Präzision (40 Stichproben) |
+|---|---|---|---|
+| v1 (erster Stand: Ebenheit + Freistand) | 78 | **0 / 20** | 18 / 40 (45 %) |
+| nur DOM20 + Verkehrsmaske | 2755 | 8 / 20 | nicht gemessen (fast nur Vegetation) |
+| DOM20 + Laser-Höhe | 2184 | 8 / 20 | – |
+| DOM20 + Laser (Höhe + Einzelecho) | 1228 | 8 / 20 | – |
+| v3s: Laser schon pixelweise vor der Fleckbildung | 1387 | 10 / 20 | 11 / 40 (28 %) |
+| **v4l (gewählt)**: v3s + Anbau-Filter | **890** | **9 / 20 (45 %)** | **22 / 40 (55 %)** |
 
-- Drei echte Adressen mit echten Eigentümern oder Bauamt durchspielen: steht aus. Die Tests liefen mit einer nach
-  Luftbild und Parzellarkarte nachgezeichneten Grenze.
-- Prüfbericht, Quellenangaben, Haftungshinweis: vorhanden.
-- Ladezeit gemessen und optimiert, siehe `docs/ladezeit.md`: bedienbar nach 1,6 s (Fast 4G) bzw. 6,5 s (Slow 4G) beim
-  ersten Besuch, 0,7 s beim Wiederbesuch. Offline-Demo der Kachel 698_5486 vorhanden (41 MB, Service Worker).
-- Fachliche Prüfung der Grenzwerte (Bauamt/Architekt) steht aus; bis dahin weist der Prüfbericht darauf hin.
+Was v4l macht (`pipeline/02_bestand.py`, Schwellen in `config.yaml`):
+1. nDSM aus DOM20 − DGM1 (wie CLAUDE.md), Höhenband 1,8–4,5 m, NDVI ≤ 0,25, Gebäude maskiert (Puffer 1,0 m).
+2. **Verkehrsflächen aus ALKIS Tatsächliche Nutzung** maskiert (Straßenverkehr, Weg, Platz, Bahnverkehr, Parkplatz;
+   362 Flächen im Gebiet, CC BY 4.0).
+3. **Zweite Epoche aus Laserdaten** (`02a_laser.py`, LAZ, Befliegung 8. März 2025, laubfrei): Ein Pixel zählt nur, wenn auch
+   der Laser dort 1,5–5 m Höhe zeigt **und** ≥ 50 % Einzelechos (Dach) statt Mehrfachechos (Strauch, Baum).
+   Laserklasse 6 „Gebäude“ hilft nicht – Schuppen sind dort als Klasse 20 erfasst.
+4. Fläche 3–80 m², Rechteckigkeit ≥ 0,7; Anbau-Filter: Flecken, deren Rand zu > 25 % am Gebäudepuffer liegt, werden
+   verworfen (Dachüberstände, Gauben, Anbauten).
+5. Umriss um 0,5 m verkleinert (DOM20-Kantenglättung; sonst zählte der Pavillon Fröschau 41 mit 5,5 statt ~3,5 m).
+
+Erkenntnisse:
+- Die v1-Filter aus dem ersten Durchlauf waren falsch kalibriert: Satteldächer sind keine Ebene, Schuppen stehen oft an
+  Hecken. v1 sah präzise aus, fand aber keinen einzigen bekannten Kleinbau.
+- Die Laser-Bestätigung mit Einzelecho-Anteil verdoppelt die Präzision, ohne Treffer zu kosten.
+- Beide Epochen zu verlangen heißt: Bauten, die zwischen Sept. 2023 und März 2025 entstanden oder verschwunden sind,
+  fehlen (R8 liegt im Laser nicht mehr im Höhenband).
+- Restliche Fehltreffer: Autos in privaten Einfahrten (TN kennt nur öffentliche Verkehrsflächen), Trampoline,
+  Schatten unter Bäumen, Dachteile bei Hausumringen ohne Überstand.
+- In der App bleiben erkannte Objekte `erkannt` mit „Stimmt“/„Gibt es nicht“ – bei 55 % Präzision ist das nötig.
+
+## Meilenstein 5 – Demo-fertig: **weitgehend erreicht**
+
+- **Ladezeit** (`docs/ladezeit.md`): Startfrage nach 0,2–0,4 s, bedienbar nach 1,6 s (Fast 4G) bzw. 6,5 s (Slow 4G),
+  Wiederbesuch 0,7 s. Unter 4 s auf Slow 4G beim ersten Besuch nicht erreicht (Cesium-Kern ≈ 960 kB).
+- **Offline-Demo** der Kachel 698_5486: 41 MB, per Service Worker, getestet ohne Netz.
+- **Drei Demo-Adressen** (`docs/demo-adressen.md`, mit Screenshots): Fröschau 41 (Gartenhaus an der Grenze, erkannter
+  Pavillon zählt mit), Am Schützenheim 3 (Hanglage: 2,85 m werden 3,01 m), Carl-Orff-Straße 1 (Wärmepumpe an der
+  Doppelhaushälfte, 41 dB(A)). Beim Durchspielen gefunden und behoben: angenommenes Fenster auf der Brandwand.
+- **Denkmal** (`geoservices.bayern.de/od/wms/gdi/v1/denkmal`, CC BY-ND 4.0, „© BLfD“): offener Dienst gefunden; Abfrage per
+  GetFeatureInfo am Schwerpunkt und an den Ecken des Grundstücks, unverändert als Warnhinweis gezeigt
+  (Altstadt: Ensemble „Altstadt Sulzbach“ E-3-71-151-1, Bodendenkmal D-3-6436-0022).
+- **Wasserschutzgebiete** (LfU): Lizenz laut Geoportal-Metadaten CC BY 4.0 → Abfrage über eigenen Proxy
+  (`app/scripts/serve.mjs`, `/proxy/lfu-wsg`, nur GetFeatureInfo auf `twsg`). Der Dienst liefert ungültiges JSON
+  (überzähliges Komma) – wird tolerant gelesen (Test). Im Gebiet liegt kein Schutzgebiet; Positivtest außerhalb:
+  „Sulzbach-Rosenberg, festgesetzt am 13.05.2002“.
+- Offen: echte Eigentümer bzw. Bauamt einbinden, Einverständnis für die Demo-Adressen, fachliche Prüfung der Grenzwerte.
 
 ## Bekannte Lücken
 
-- LfU-Wasserschutzgebiete: GetFeatureInfo sendet keinen CORS-Header → im Browser „nicht abfragbar".
-- Denkmäler: nur Link zum Denkmal-Atlas.
+- LfU-Proxy läuft nur mit `scripts/serve.mjs` bzw. dem Vite-Dev-Server; reines statisches Hosting braucht eine
+  Proxy-Regel (oder die Schutzgebiete vorab in der Pipeline laden – CC BY 4.0 erlaubt das).
+- Denkmal-/Wasserschutzabfrage: fällt ein Abfragepunkt aus, zählen die übrigen; erst wenn alle ausfallen: „nicht abfragbar“.
+- DOM-Mesh nicht im Repo (184 MB), siehe oben.
 - Bebauungsplan: für Sulzbach-Rosenberg keine Umringe im Landesportal, nur Link zur Stadt.
 - Mittlere Wandhöhe bei Satteldach-Giebeln wird noch nicht berücksichtigt (Gartenhaus als Flachdach-Kubus).
 - Kein Undo für verschobene Objekte, kein Speichern.

@@ -25,6 +25,7 @@ npm run serve     # http://localhost:4173
 ```
 
 Offline-Demo: in der App „Amtliche Daten" → „Offline-Demo vorbereiten" (≈ 41 MB). Details: `docs/ladezeit.md`.
+Demo-Adressen: `docs/demo-adressen.md`. `npm run serve` enthält auch den Proxy für die LfU-Wasserschutzabfrage.
 
 ## Daten neu erzeugen
 
@@ -33,9 +34,12 @@ cd pipeline
 pip install -r requirements.txt
 python3 00_download.py     # ≈ 1,2 GB nach data/raw
 python3 01_buildings.py    # buildings.geojson
+python3 02a_laser.py       # Laser-nDSM (zweite Epoche)
 python3 02_bestand.py      # bestand.geojson
+python3 qa_bestand.py messen   # Trefferquote gegen docs/bestand_referenz.json
 ./03_tiles.sh              # Gelände, 3D Tiles, App-Dateien
 python3 05_offline_tiles.py # Luftbild/Flurkarte als Kacheln für die Offline-Demo
+python3 06_mesh.py baum && python3 06_mesh.py kacheln   # optional: DOM-Mesh (184 MB, nicht im Repo)
 ```
 
 Gebiet und Schwellwerte: `pipeline/config.yaml`. Stand und Messwerte: `docs/status.md`. Lizenzen: `docs/attributions.md`.

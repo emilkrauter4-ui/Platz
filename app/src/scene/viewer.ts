@@ -34,6 +34,8 @@ export interface Scene {
   /** 3D-Gebäude; lädt im Hintergrund, damit die Oberfläche nicht darauf wartet */
   tileset: Cesium3DTileset | null;
   tilesetReady: Promise<Cesium3DTileset | null>;
+  /** Foto-Mesh (DOM-Mesh) ein/aus; lädt beim ersten Einschalten. Ergebnis false = nicht vorhanden. */
+  setMesh(on: boolean): Promise<boolean>;
   parzellar: ImageryLayer;
   setTheme(dark: boolean): void;
 }
@@ -141,6 +143,23 @@ export function createScene(
         return null;
       }),
     setTheme: () => {},
+    setMesh: async () => false,
+  };
+
+  let mesh: Cesium3DTileset | null | undefined;
+  result.setMesh = async (on: boolean) => {
+    if (on && mesh === undefined) {
+      try {
+        mesh = await Cesium3DTileset.fromUrl(`${dataUrl}/mesh/tileset.json`, { maximumScreenSpaceError: 16, shadows: ShadowMode.DISABLED });
+        scene.primitives.add(mesh);
+      } catch {
+        mesh = null; // Mesh nicht erzeugt (pipeline/06_mesh.py) oder nicht ausgeliefert
+      }
+    }
+    if (mesh) mesh.show = on;
+    if (result.tileset) result.tileset.show = !(on && mesh);
+    scene.requestRender();
+    return !!mesh;
   };
 
   result.setTheme = (d: boolean) => {

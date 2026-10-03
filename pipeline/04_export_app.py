@@ -66,6 +66,7 @@ def main() -> int:
             "bauleitplanung_url": cfg()["gebiet"].get("bauleitplanung_url"),
             "quelle": "Bauleitplanungsportal Bayern (geoportal.bayern.de/bauleitplanungsportal)",
         },
+        "demos": cfg().get("demos", []),
     }
     (out / "site.json").write_text(json.dumps(site, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"App-Daten: {len(rows)} Gebäude, {len(best)} Bestand")

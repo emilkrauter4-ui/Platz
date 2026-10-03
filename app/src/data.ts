@@ -19,6 +19,10 @@ export interface DemoAdresse {
   /** optionale Startposition des Objekts (Mitte, lokale Meter) */
   start?: Vec2;
   winkelGrad?: number;
+  /** optionale Wandhöhe des Startobjekts */
+  hoehe?: number;
+  /** optionale Blickrichtung der Kamera (0 = nach Norden) */
+  blickGrad?: number;
 }
 
 export interface BuildingRec {

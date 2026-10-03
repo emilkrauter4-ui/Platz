@@ -12,26 +12,27 @@ Lizenzen geprüft am 3. Oktober 2026 im Katalog `geodaten.bayern.de/opengeodata/
 | Hausumringe (Regierungsbezirk Oberpfalz) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Grundrisse für Abstände und Kollisionen | ja: zugeschnitten, mit LoD2 verknüpft |
 | DGM1 (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Gelände, Wandhöhe über Gelände, Bestandserkennung | ja: Ellipsoidhöhen, 250-m-Kacheln |
 | DOM20 (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Erkennung bestehender Kleinbauten | nur ausgewertet |
-| DOP20 RGB (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Qualitätscheck Bestand (`docs/bestand_stichprobe_*.jpg`) | Ausschnitte |
+| DOP20 RGB (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Qualitätscheck Bestand (Kontaktbögen aus `pipeline/qa_bestand.py`), Offline-Kacheln, Screenshots in `docs/demo` | Ausschnitte, umprojiziert |
 | DOP20 CIR (über poly2metalink) | Bayerische Vermessungsverwaltung | CC BY 4.0 | NDVI-Vegetationsfilter | nur ausgewertet |
 | DOP20 WMS `by_dop20c` | Bayerische Vermessungsverwaltung | CC BY 4.0 (AccessConstraints) | Luftbild in der App, unverändert angezeigt | nein |
 | Parzellarkarte WMS `by_alkis_parzellarkarte_umr_gelb` | Bayerische Vermessungsverwaltung | CC BY 4.0 (AccessConstraints) | Hilfslinie beim Grenze-Setzen, unverändert angezeigt | nein |
 | Quasigeoid GCG2016 (`de_bkg_gcg2016.tif`, PROJ-CDN) | © Bundesamt für Kartographie und Geodäsie (BKG) | CC BY 4.0 | Normalhöhe → Ellipsoidhöhe | nein |
-| Trinkwasserschutzgebiete WMS `twsg` | Bayerisches Landesamt für Umwelt | **noch zu klären** (AccessConstraints leer) | nur GetFeatureInfo-Abfrage für einen Warnhinweis | nein |
+| Laserpunkte (LAZ), 4 × 1 km, Befliegung März 2025 | Bayerische Vermessungsverwaltung | CC BY 4.0 | zweite Epoche für die Bestandserkennung | ja: zu nDSM gerastert |
+| ALKIS Tatsächliche Nutzung (Landkreis Amberg-Sulzbach) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Verkehrsflächen ausmaskieren | nur ausgewertet |
+| DOM-Mesh SLPK, Los 123028_1 | Bayerische Vermessungsverwaltung | CC BY 4.0 | Foto-3D-Ansicht (optional, nicht im Repo) | ja: Ausschnitt nach 3D Tiles umgewandelt, Texturen unverändert |
+| Trinkwasserschutzgebiete WMS `twsg` | Bayerisches Landesamt für Umwelt | **CC BY 4.0** (Geoportal-Metadaten 7d264700-d887-11e0-b7aa-0000779eba3a); Quellenangabe „Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de“ | GetFeatureInfo über eigenen Proxy, Warnhinweis | nein |
+| Denkmal-Daten WMS (`od/wms/gdi/v1/denkmal`) | Bayerisches Landesamt für Denkmalpflege | **CC BY-ND 4.0**, Namensnennung „© BLfD“ (Metadaten 224e744a-ee17-426d-969c-e3f29244cf17) | nur GetFeatureInfo; Bezeichnung und Aktennummer unverändert angezeigt, keine gekürzten Texte | nein |
 | Bauleitplanungsportal (`data/gemeinden.json`) | Landesportal Bayern (LDBV) | Nutzungsbedingungen des Portals | nur Link zur Stadt-Seite | nein |
 | Adresssuche Nominatim | © OpenStreetMap-Mitwirkende | ODbL | Geokodierung, max. 1 Anfrage/s, nur auf Absenden | nein |
-| Schrift Instrument Sans | Google Fonts | SIL OFL 1.1 | Oberfläche | nein |
+| Schrift Instrument Sans | The Instrument Sans Project Authors | SIL OFL 1.1 (`app/src/fonts/OFL.txt`) | Oberfläche, selbst gehostet | nein |
 | CesiumJS | Cesium GS | Apache 2.0 | 3D-Szene, **ohne** ion-Token und ion-Dienste | nein |
 
 ## Nicht verwendet
 
 - Google Photorealistic 3D Tiles und andere nicht-amtliche 3D-Daten (Grundsatz 1).
 - ALKIS-Flurstücke mit Grenzpunkten (kostenpflichtig). Die Grenze setzt der Nutzer selbst (`nutzerbestätigt`).
-- DOM-Mesh (SLPK/I3S): noch nicht eingebunden, siehe `docs/status.md`.
-- Denkmäler (BLfD): kein öffentlich erreichbarer WMS-Endpunkt gefunden; die App verlinkt den Denkmal-Atlas (Label `offen`).
 
 ## Offene Punkte
 
-- LfU-Wasserschutzgebiete: Lizenz schriftlich bestätigen lassen. Der Dienst sendet bei GetFeatureInfo
-  keinen CORS-Header, die Abfrage scheitert im Browser deshalb derzeit (Anzeige: „nicht abfragbar", `offen`).
-  Lösung: kleiner Proxy oder Abfrage in der Pipeline.
+- Demo-Adressen sind echte Wohnadressen: vor einer öffentlichen Demo Einverständnis einholen.
+- Parzellarkarte für Demo-Grenzen vektorisiert (`pipeline/demo_grenze.py`): CC BY 4.0 erlaubt Bearbeitung; in der App als `Demo` gekennzeichnet.
