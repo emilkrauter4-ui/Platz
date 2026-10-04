@@ -179,25 +179,51 @@ def dev():
     return rows, details
 
 
-def test():
+def test_kandidaten() -> tuple[dict, float]:
+    """Kandidaten und Merkmale der Test-Grundstücke. Hängen nicht vom Modell ab; zwischengespeichert, solange
+    08_garten.py (Kandidaten, Merkmale) unverändert ist – so messen alte und neue Modellversion exakt gleich."""
+    import hashlib
     if not ref_mod.test_gueltig():
         raise SystemExit("Test-Set wurde nach dem Einfrieren verändert (Prüfsumme passt nicht) – Auswertung abgebrochen.")
     split = json.loads((ref_mod.REF / "split.json").read_text())
-    m = pickle.loads(g8.MODELL.read_bytes())
+    schluessel = hashlib.sha256((Path(__file__).resolve().parent / "08_garten.py").read_bytes() + json.dumps(split["test"]).encode()).hexdigest()
+    cp = build_dir() / "test_kandidaten.pkl"
+    if cp.exists():
+        c = pickle.loads(cp.read_bytes())
+        if c.get("schluessel") == schluessel:
+            return c["cache"], c["dauer"]
     gs, _ = g8.referenz()
-    cache, proba = {}, {}
+    cache = {}
     t0 = time.time()
     for pid in split["test"]:
         s, kand = g8.ausschnitt(g8._rahmen(gs[pid]["geom"]), gs[pid]["geom"])
         cache[pid] = [{k: v for k, v in c.items() if k != "maske"} for c in kand]
-        X = np.array([[c["merkmale"][k] for k in m["spalten"]] for c in kand], np.float32)
-        proba[pid] = g8.mit_regeln(m["modell"].predict_proba(X), m["klassen"], kand) if len(X) else np.zeros((0, len(m["klassen"])))
         print(f"  {pid}: {len(kand)} Kandidaten", flush=True)
     dauer = (time.time() - t0) / len(split["test"])
+    cp.write_bytes(pickle.dumps({"schluessel": schluessel, "cache": cache, "dauer": dauer}))
+    return cache, dauer
+
+
+def test_messen(m: dict) -> tuple[list[dict], list, dict, dict, float]:
+    """Ein Modell (dict wie garten_modell.pkl) auf dem eingefrorenen Test-Set messen. Schreibt nichts."""
+    split = json.loads((ref_mod.REF / "split.json").read_text())
+    cache, dauer = test_kandidaten()
+    proba = {}
+    for pid in split["test"]:
+        kand = cache[pid]
+        X = np.array([[c["merkmale"][k] for k in m["spalten"]] for c in kand], np.float32)
+        proba[pid] = g8.mit_regeln(m["modell"].predict_proba(X), m["klassen"], kand) if len(X) else np.zeros((0, len(m["klassen"])))
     stat, details = auswerten(split["test"], cache, proba, m["klassen"], m["schwellen"])
     rows = tabelle(stat)
     st2, _ = auswerten(split["test"], cache, proba, m["klassen"], m["schwellen"], mit_massen=False, sammel=True)
     rows += [x for x in tabelle(st2) if x["klasse"] == "nebengebaeude"]
+    return rows, details, cache, proba, dauer
+
+
+def test():
+    split = json.loads((ref_mod.REF / "split.json").read_text())
+    m = pickle.loads(g8.MODELL.read_bytes())
+    rows, details, cache, proba, dauer = test_messen(m)
     konf = json.loads((Path(__file__).resolve().parent.parent / "app" / "src" / "rules" / "limits.json").read_text())["bestand"]["konfidenzMin"]["wert"]
     st3, _ = auswerten(split["test"], cache, proba, m["klassen"], m["schwellen"], mit_massen=False, sammel=True, konf_min=konf)
     neben_konf = [{"konfidenz_min": konf, **x} for x in tabelle(st3) if x["klasse"] == "nebengebaeude"]

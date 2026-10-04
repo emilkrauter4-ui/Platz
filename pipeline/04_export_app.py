@@ -77,7 +77,11 @@ def main() -> int:
             if r:
                 p = f["properties"]
                 best.append({"id": p["id"], "fp": r, "h": p["hoehe"], "a": p["flaeche"], "c": p["konfidenz"]})
-    (out / "bestand.json").write_text(json.dumps({"origin": [ox, oy], "label": "erkannt", "version": 2 if gp.exists() else 1, "bestand": best}, separators=(",", ":")), encoding="utf-8")
+    modell = None
+    if gp.exists():
+        modell = max((f["properties"].get("modell_version") or 0 for f in json.loads(gp.read_text(encoding="utf-8"))["features"]), default=None)
+    (out / "bestand.json").write_text(json.dumps({"origin": [ox, oy], "label": "erkannt", "version": 2 if gp.exists() else 1,
+                                                  "modell": modell, "bestand": best}, separators=(",", ":")), encoding="utf-8")
 
     x0, y0, x1, y1 = cfg()["gebiet"]["bbox"]
     site = {

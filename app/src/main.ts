@@ -66,7 +66,7 @@ import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neue
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, getOrigin, localToCartesian, localToLonLat, lonLatToLocal, setOrigin } from './scene/coords';
 import { abgelaufen, dekodieren, kodieren, linkIdAus, neuerSchluessel, projektHash, VERSION, type Vorhaben } from './nachbar/link';
-import { apiSpeicher, type NachbarAntwort } from './speicher';
+import { apiLernSpeicher, apiSpeicher, kachelAus, type LernAktion, type NachbarAntwort } from './speicher';
 import { Terrain } from './scene/terrain';
 import { createScene, type Scene } from './scene/viewer';
 import { Renderer, type RenderState } from './scene/render';
@@ -683,15 +683,20 @@ function renderSheet() {
       const it = st.bestand.find((x) => x.id === b.dataset.bok)!;
       it.status = 'aktiv';
       it.provenance = 'nutzerbestätigt';
+      lernBeitrag('bestaetigt', it);
       afterContextChange();
     }),
   );
   document.querySelectorAll<HTMLButtonElement>('[data-bno]').forEach((b) =>
     b.addEventListener('click', () => {
-      st.bestand.find((x) => x.id === b.dataset.bno)!.status = 'entfernt';
+      const it = st.bestand.find((x) => x.id === b.dataset.bno)!;
+      it.status = 'entfernt';
+      lernBeitrag('verworfen', it);
       afterContextChange();
     }),
   );
+  document.getElementById('lernBox')?.addEventListener('change', (e) => setLernEinwilligung((e.target as HTMLInputElement).checked));
+  document.getElementById('lernInfo')?.addEventListener('click', openLernInfo);
   document.querySelectorAll<HTMLButtonElement>('[data-kante]').forEach((b) =>
     b.addEventListener('click', () => {
       const it = st.bestand.find((x) => x.id === b.dataset.kante)!;
@@ -1356,6 +1361,47 @@ async function openAntrag() {
   document.getElementById('aJson')?.addEventListener('click', () => speichern(JSON.stringify(paket, null, 2), 'application/json', `${name}.json`));
 }
 
+/* ---------- Lernschleife (Phase 4.2): nur mit Einwilligung ---------- */
+const lernSpeicher = apiLernSpeicher();
+const LERN_EIN = 'passt.lernen.einwilligung';
+const LERN_IDS = 'passt.lernen.ids';
+function lernEinwilligung(): boolean {
+  try { return localStorage.getItem(LERN_EIN) === '1'; } catch { return false; }
+}
+function setLernEinwilligung(an: boolean) {
+  try { if (an) localStorage.setItem(LERN_EIN, '1'); else localStorage.removeItem(LERN_EIN); } catch { /* egal */ }
+  hint(an ? 'Danke. Ab jetzt zählen deine Korrekturen – nur Umriss, Art und Kachel.' : 'Einwilligung zurückgenommen. Es wird nichts mehr gesendet.');
+}
+function lernIds(): string[] {
+  try { return JSON.parse(localStorage.getItem(LERN_IDS) ?? '[]'); } catch { return []; }
+}
+function lernBeitrag(aktion: LernAktion, b: Bestand) {
+  if (!lernEinwilligung() || b.footprint.length < 3 || b.footprint.length > 64) return;
+  const u = getOrigin();
+  const geometrie = b.footprint.map((p) => [Math.round((p[0] + u[0]) * 10) / 10, Math.round((p[1] + u[1]) * 10) / 10] as [number, number]);
+  const eintrag = { aktion, klasse: b.kind ?? 'kleinbau', geometrie, kachel: kachelAus(geometrie[0][0], geometrie[0][1]), modell: data.modell ?? null };
+  lernSpeicher.beitragen([eintrag]).then((ids) => {
+    try { localStorage.setItem(LERN_IDS, JSON.stringify([...lernIds(), ...ids.filter((x): x is string => !!x)])); } catch { /* egal */ }
+  }).catch(() => { /* ohne Server (statisches Hosting): still nichts senden */ });
+}
+function openLernInfo() {
+  const n = lernIds().length;
+  openModal('Erkennung verbessern', `
+    <p>Passt. erkennt Gartenhäuser, Pools oder Hecken automatisch – und liegt manchmal daneben. Wenn du zustimmst, schickt Passt. bei „Stimmt“, „Gibt es nicht“, „Umriss nachziehen“ und „Objekt einzeichnen“ diese Angaben an den Passt.-Server:</p>
+    <ul class="plain"><li>den Umriss des Objekts (Koordinaten, auf 10 cm gerundet)</li><li>die Art des Objekts (z. B. Gartenhaus)</li><li>die 1-km-Kachel, in der es liegt</li><li>was du getan hast (bestätigt, verworfen, nachgezogen, neu) und welche Version der Erkennung es war</li></ul>
+    <p><b>Nicht</b> gesendet werden Adresse, Grundstücksgrenze und Name. Der Server speichert weder deine IP-Adresse noch den Zeitpunkt.</p>
+    <p class="m-fine">Ehrlich gesagt: Über die Koordinaten lässt sich ein Umriss einem Grundstück zuordnen. Deshalb nur mit deiner Zustimmung, und du kannst deine Beiträge jederzeit löschen. Neue Versionen der Erkennung werden nur freigegeben, wenn sie auf einem festen Prüfdatensatz mindestens so gut sind wie die alte.</p>
+    <div class="btnrow"><button class="sec" id="lernLoeschen" type="button" ${n ? '' : 'disabled'}>Meine Beiträge löschen (${n})</button></div>
+    <p class="m-fine" id="lernMeldung"></p>`);
+  document.getElementById('lernLoeschen')?.addEventListener('click', async () => {
+    try {
+      const weg = await lernSpeicher.loeschen(lernIds());
+      try { localStorage.removeItem(LERN_IDS); } catch { /* egal */ }
+      $('lernMeldung').textContent = weg === 1 ? 'Ein Beitrag gelöscht.' : `${weg} Beiträge gelöscht.`;
+    } catch (e) { $('lernMeldung').textContent = (e as Error).message; }
+  });
+}
+
 /* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */
 type GeraetRow = [string, string, number, string, number | null];
 let geraete: Promise<{ quelle: string; geraete: GeraetRow[] }> | null = null;
@@ -1414,6 +1460,7 @@ function bestandHtml(): string {
       ${!weg ? `<button type="button" data-bno="${b.id}">Gibt es nicht</button>` : `<button type="button" data-bok="${b.id}">Doch</button>`}</span></li>`;
   };
   let h = '<p class="fine" style="text-align:left">Aus Luftbild 2023 und Laserdaten 2025 erkannt. Bestehende Gebäude an der Grenze zählen bei den 9 m und 15 m mit. Bitte prüfen.</p>';
+  h += `<label class="fine" style="display:flex;gap:8px;align-items:flex-start;text-align:left;margin:6px 0"><input type="checkbox" id="lernBox" ${lernEinwilligung() ? 'checked' : ''}> <span>Meine Korrekturen dürfen die Erkennung verbessern: nur Umriss, Art des Objekts und 1-km-Kachel, ohne Adresse und Grenze. <button class="link" type="button" id="lernInfo">Was genau?</button></span></label>`;
   sides.forEach((sd, i) => {
     h += `<h3 style="font-size:14px;margin:12px 0 4px">${esc(cap(sd.grenze))}</h3>`;
     h += seiten[i].length
@@ -1475,10 +1522,12 @@ function renderEditSheet() {
     if (st.kante) {
       const i = st.bestand.findIndex((x) => x.id === st.kante!.id);
       st.bestand[i] = { ...nachgezogen(st.bestand[i], ccw(st.kante.fp)), status: 'aktiv' };
+      lernBeitrag('nachgezogen', st.bestand[i]);
     } else if (st.zeichnen && st.zeichnen.length >= 4) {
       const k = ($('eKl') as HTMLSelectElement).value as GartenKlasse;
       const h = Math.max(0, parseFloat(($('eH') as HTMLInputElement).value.replace(',', '.')) || 0);
       st.bestand.push({ ...neuesObjekt(`neu-${Date.now()}`, ccw(st.zeichnen), k, h), status: 'aktiv' });
+      lernBeitrag('neu', st.bestand[st.bestand.length - 1]);
     }
     endEdit();
   });

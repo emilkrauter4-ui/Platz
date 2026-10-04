@@ -57,3 +57,35 @@ export function apiSpeicher(basis = `${import.meta.env.BASE_URL ?? '/'}api/nachb
     allesLoeschen: (link, schluessel) => post<void>(`/link/${encodeURIComponent(link)}/loeschen`, { schluessel }),
   };
 }
+
+/* ---------- Lernschleife (Phase 4.2) ---------- */
+
+export type LernAktion = 'bestaetigt' | 'verworfen' | 'nachgezogen' | 'neu';
+
+/** Ein Beitrag: nur Geometrie (EPSG:25832, 0,1 m), Klasse, 1-km-Kachel, Art der Rückmeldung und Modellversion. */
+export interface LernEintrag {
+  aktion: LernAktion;
+  klasse: string;
+  geometrie: [number, number][];
+  kachel: string;
+  modell: number | null;
+}
+
+export interface LernSpeicher {
+  /** liefert je Eintrag die Kennung (null = abgelehnt) */
+  beitragen(eintraege: LernEintrag[]): Promise<(string | null)[]>;
+  loeschen(ids: string[]): Promise<number>;
+}
+
+/** Heute: JSONL-Datei im eigenen Node-Server (scripts/lern-api.mjs). Später nur diese Implementierung tauschen. */
+export function apiLernSpeicher(basis = `${import.meta.env.BASE_URL ?? '/'}api/lernen`.replace(/\/\//g, '/')): LernSpeicher {
+  return {
+    beitragen: async (eintraege) => (await rufe<{ ids: (string | null)[] }>(basis, { method: 'POST', body: JSON.stringify({ eintraege }) })).ids,
+    loeschen: async (ids) => (await rufe<{ geloescht: number }>(`${basis}/loeschen`, { method: 'POST', body: JSON.stringify({ ids }) })).geloescht,
+  };
+}
+
+/** 1-km-Kachel (wie die Kacheln der Vermessungsverwaltung): „EEE_NNNN“ in km. */
+export function kachelAus(e: number, n: number): string {
+  return `${Math.floor(e / 1000)}_${Math.floor(n / 1000)}`;
+}

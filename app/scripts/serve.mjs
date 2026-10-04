@@ -11,6 +11,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import { createBrotliCompress, createGzip, constants } from 'node:zlib';
 import { nachbarApi } from './nachbar-api.mjs';
 import { arApi } from './ar-modell.mjs';
+import { lernApi } from './lern-api.mjs';
 
 const port = +(process.argv[2] || 4173);
 const root = resolve(process.argv[3] || 'dist');
@@ -51,6 +52,7 @@ createServer((req, res) => {
   if (path.endsWith('/proxy/lfu-wsg')) return void lfuProxy(req, res);
   if (path.includes('/api/nachbar/')) return void nachbarApi(req, res);
   if (path.includes('/api/ar/')) return void arApi(req, res);
+  if (path.includes('/api/lernen')) return void lernApi(req, res);
   let file = normalize(join(root, path));
   if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');

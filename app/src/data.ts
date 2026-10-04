@@ -41,6 +41,8 @@ export interface Data {
   site: SiteMeta;
   buildings: BuildingRec[];
   bestand: BestandRec[];
+  /** Version des Erkennungsmodells, aus dem bestand.json stammt (für die Lernschleife) */
+  modell?: number | null;
 }
 
 export const DATA_URL = `${import.meta.env.BASE_URL}data`;
@@ -54,11 +56,12 @@ const json = (f: string) => fetch(`${DATA_URL}/${f}`).then((r) => {
 export const loadSite = (): Promise<SiteMeta> => json('site.json');
 
 /** Grundrisse und Bestand (≈ 300 kB komprimiert) – erst nötig, wenn ein Grundstück gewählt wird. */
-export async function loadDetails(): Promise<Pick<Data, 'buildings' | 'bestand'>> {
+export async function loadDetails(): Promise<Pick<Data, 'buildings' | 'bestand' | 'modell'>> {
   const [b, best] = await Promise.all([json('buildings.json'), json('bestand.json')]);
   return {
     buildings: (b.buildings as Omit<BuildingRec, 'c'>[]).map((x) => ({ ...x, c: centroid(x.fp) })),
     bestand: (best.bestand as (Omit<BestandRec, 'conf'> & { c: number })[]).map(({ c, ...x }) => ({ ...x, conf: c })),
+    modell: typeof best.modell === 'number' ? best.modell : null,
   };
 }
 

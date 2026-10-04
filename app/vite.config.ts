@@ -18,6 +18,11 @@ function nachbarApiDev() {
     apply: 'serve' as const,
     configureServer(server: { middlewares: { use: (fn: (req: never, res: never, next: () => void) => void) => void } }) {
       server.middlewares.use(async (req: { url?: string }, res, next) => {
+        if (req.url?.includes('/api/lernen')) {
+          // @ts-expect-error reines JS-Modul ohne Typen
+          const { lernApi } = await import('./scripts/lern-api.mjs');
+          return void lernApi(req, res);
+        }
         if (req.url?.includes('/api/ar/')) {
           const { arApi } = await import('./scripts/ar-modell.mjs');
           return void arApi(req, res);
