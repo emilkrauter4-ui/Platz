@@ -10,7 +10,9 @@
  "cesium/Workers/createGeometry.js",
  "cesium/Workers/createGroundPolylineGeometry.js",
  "cesium/Workers/createPolygonGeometry.js",
+ "cesium/Workers/createRectangleGeometry.js",
  "cesium/Workers/createVerticesFromHeightmap.js",
+ "cesium/Workers/createWallGeometry.js",
  "cesium/Workers/incrementallyBuildTerrainPicker.js",
  "cesium/Workers/transferTypedArrayTest.js"
 ]

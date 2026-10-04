@@ -102,6 +102,56 @@ const st: State = {
   zeichnen: null,
   showAF: true,
 };
+/** „Wo darf es hin?“: an/aus, letztes Ergebnis. Rechnet im Web Worker (lazy geladen). */
+const zonenSt: { an: boolean; laeuft: boolean; erg: null | { beste: { p: Vec2; angle: number; farbe: number } | null; ms: number; msGesamt: number; pruefungen: number; k: ObjectKind } } = { an: false, laeuft: false, erg: null };
+let zonenTimer: ReturnType<typeof setTimeout> | null = null;
+let zonenLayer: import('./scene/zonen').ZonenLayer | null = null;
+
+function zonenNeu(sofort = false) {
+  if (!zonenSt.an || !site || !st.objs || st.selected === 'waermepumpe') return;
+  if (zonenTimer) clearTimeout(zonenTimer);
+  zonenTimer = setTimeout(async () => {
+    const k = st.selected as 'gartenhaus' | 'carport';
+    zonenSt.laeuft = true;
+    const z = await import('./scene/zonen');
+    zonenLayer ??= new z.ZonenLayer(scene.viewer);
+    const r = await z.berechneZonen(site!, st.objs!, k);
+    zonenSt.laeuft = false;
+    if (!zonenSt.an || st.selected !== k) return;
+    zonenLayer.zeige(r.feld, r.geo.nx, r.geo.ny, r.rect);
+    zonenSt.erg = { beste: r.beste, ms: r.ms, msGesamt: r.msGesamt, pruefungen: r.pruefungen, k };
+    zonenInfo();
+    render();
+  }, sofort ? 0 : 250);
+}
+
+function zonenAus() {
+  zonenSt.an = false;
+  zonenSt.erg = null;
+  zonenLayer?.weg();
+}
+
+/** Text unter dem Knopf: Legende, beste Stelle mit Knopf „Hierhin setzen“. */
+function zonenInfo() {
+  const el = document.getElementById('zonenInfo');
+  if (!el) return;
+  const e = zonenSt.erg;
+  if (!zonenSt.an) { el.innerHTML = ''; return; }
+  if (!e || e.k !== st.selected) { el.innerHTML = '<p class="fine" style="text-align:left">Rechne …</p>'; return; }
+  const o = st.objs![st.selected];
+  const d = e.beste ? Math.hypot(e.beste.p[0] - o.center[0], e.beste.p[1] - o.center[1]) : 0;
+  el.innerHTML = `<p class="fine" style="text-align:left"><span style="color:var(--ok)">■</span> passt so · <span style="color:var(--warn)">■</span> passt gedreht · <span style="color:var(--red)">■</span> geht nicht – für ${esc(NAMES[st.selected].art)} in der jetzigen Größe. ${tag('berechnet', 'berechnet')} <span style="opacity:.6">(${Math.round(e.msGesamt)} ms)</span></p>
+    ${e.beste ? (d < 0.3 && e.beste.farbe === 1 ? '<p class="fine" style="text-align:left">Die jetzige Stelle passt.</p>' : `<p class="fine" style="text-align:left">Nächste passende Stelle: ${fmt(d, 1)} m entfernt${e.beste.farbe === 2 ? ', gedreht' : ''}. <button class="link" type="button" id="zonenHin">Hierhin setzen</button></p>`) : '<p class="fine" style="text-align:left">Auf diesem Grundstück passt es in dieser Größe nirgends. Mach es kleiner oder niedriger.</p>'}`;
+  document.getElementById('zonenHin')?.addEventListener('click', () => {
+    const b = zonenSt.erg?.beste;
+    if (!b) return;
+    const ob = st.objs![st.selected];
+    ob.center = [b.p[0], b.p[1]];
+    ob.angle = b.angle > Math.PI / 2 ? b.angle - Math.PI : b.angle;
+    renderSheet();
+  });
+}
+
 /** Grenzseite, für die gerade ein Objekt eingezeichnet wird (nur für den Hinweistext). */
 let zeichnenSeite: number | null = null;
 
@@ -200,6 +250,7 @@ function plotFrame(animate = true) {
 
 /* ---------- Schritt 1: Adresse ---------- */
 function showStart(msg?: string) {
+  zonenAus();
   st.step = 'start';
   st.draft = [];
   scene.parzellar.show = false;
@@ -350,6 +401,7 @@ function addBoundaryPoint(p: Vec2) {
 }
 
 async function confirmPlot() {
+  zonenAus();
   const b = ccw(st.draft);
   if (b.length < 3) return;
   if (!isSimple(b)) return updateGrenzeUI('Die Grenzlinien kreuzen sich. Lösch den letzten Punkt und setz ihn neu.');
@@ -423,6 +475,7 @@ function badSegments(): Set<number> {
 function update() {
   if (!site || !st.objs) return;
   st.res = evaluate(site, st.objs);
+  zonenNeu();
   renderer.updateDim();
   renderVerdict();
   render();
@@ -473,6 +526,7 @@ function valText(k: string) {
 
 function select(k: ObjectKind) {
   st.selected = k;
+  if (k === 'waermepumpe') zonenAus();
   renderSheet();
   if (!st.hasDragged) hint(`Zieh ${NAMES[k].art} an eine andere Stelle.`);
   else if (k === 'waermepumpe') hint('Tipp auf die Fassade des Nachbarhauses, um sein Fenster zu setzen.');
@@ -506,7 +560,8 @@ function renderSheet() {
       <summary>Steht hier schon etwas?</summary>
       ${bestHtml}
     </details>
-    ${st.selected !== 'waermepumpe' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="afBox" ${st.showAF ? 'checked' : ''}> Abstandsflächen am Boden zeigen (BayBO Art. 6)</label>` : ''}
+    ${st.selected !== 'waermepumpe' ? `<div class="btnrow" style="margin-top:10px"><button class="sec" id="zonenBtn" type="button" aria-pressed="${zonenSt.an}">${zonenSt.an ? 'Zonen ausblenden' : 'Wo darf es hin?'}</button></div><div id="zonenInfo"></div>
+    <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="afBox" ${st.showAF ? 'checked' : ''}> Abstandsflächen am Boden zeigen (BayBO Art. 6)</label>` : ''}
     <details open>
       <summary>So haben wir geprüft</summary>
       <ul class="rows" id="rows"></ul>
@@ -571,6 +626,12 @@ function renderSheet() {
       startEdit();
     }),
   );
+  document.getElementById('zonenBtn')?.addEventListener('click', () => {
+    if (zonenSt.an) zonenAus();
+    else { zonenSt.an = true; zonenSt.erg = null; zonenNeu(true); }
+    renderSheet();
+  });
+  zonenInfo();
   document.getElementById('afBox')?.addEventListener('change', (e) => {
     st.showAF = (e.target as HTMLInputElement).checked;
     render();
@@ -1063,6 +1124,7 @@ async function main() {
     Object.assign(window, {
       passt: {
         st,
+        zonen: zonenSt,
         goToPlot,
         startDemo: (id: string) => startDemo((data.site.demos ?? []).find((d) => d.id === id)!),
         setBoundary: async (pts: Vec2[]) => {

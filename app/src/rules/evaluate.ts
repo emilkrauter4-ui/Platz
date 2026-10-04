@@ -24,7 +24,11 @@ import type { Bestand, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status
 
 export const LIMITS = L;
 
+/** Während der Zonen-Rechnung werden keine Texte gebraucht: fmt() liefert dann sofort einen leeren Text. */
+let OHNE_TEXT = false;
+
 export function fmt(v: number, d = 2): string {
+  if (OHNE_TEXT) return '';
   const f = 10 ** d;
   return (Math.round(v * f) / f).toFixed(d).replace('.', ',');
 }
@@ -160,6 +164,16 @@ function sideSums(site: Site, cons: Contributor[]): number[] {
   return sums;
 }
 
+/** Wandhöhen je Grenzstrecke aus den einmal berechneten Wänden des Objekts (Abs. 7 und Abs. 4). */
+function wandFuer(site: Site, o: Placed, fp: Vec2[]) {
+  const ws = waende(site, o);
+  return (a: Vec2, b: Vec2) => {
+    const [e0] = facingWall(fp, a, b);
+    const w = ws.find((x) => x.a[0] === e0[0] && x.a[1] === e0[1])!;
+    return { h7: wandhoeheArt7(w, o).h, h4: Math.max(w.ha, w.hb) };
+  };
+}
+
 /* ---------- Hauptfunktion ---------- */
 
 export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> {
@@ -172,11 +186,7 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
   const cons: Contributor[] = (['gartenhaus', 'carport'] as const).map((k) => ({
     id: k,
     fp: fps[k],
-    segs: analyse(site, fps[k], (a, b) => {
-      const [e0] = facingWall(fps[k], a, b);
-      const w = waende(site, objs[k]).find((x) => x.a === e0 || (x.a[0] === e0[0] && x.a[1] === e0[1]))!;
-      return { h7: wandhoeheArt7(w, objs[k]).h, h4: Math.max(w.ha, w.hb) };
-    }),
+    segs: analyse(site, fps[k], wandFuer(site, objs[k], fps[k])),
     provenance: 'berechnet',
   }));
   // Bestand auf dem eigenen Grundstück zählt mit (BayBO Art. 6: Gesamtlänge je Grenze) – aber nur Gebäude,
@@ -200,6 +210,55 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
     gartenhaus: mitZaehlung(building(site, objs, fps, 'gartenhaus', cons[0].segs, sums, total, bestandSums)),
     carport: mitZaehlung(building(site, objs, fps, 'carport', cons[1].segs, sums, total, bestandSums)),
     waermepumpe: heatpump(site, objs, fps),
+  };
+}
+
+/**
+ * Schnelle Prüfung eines Objekts an vielen Stellen („Wo darf es hin?“). Alles, was nicht von der Lage des Objekts
+ * abhängt (Bestand, das andere Objekt), wird einmal vorberechnet; je Lage läuft dieselbe Prüfung wie in evaluate().
+ */
+export function zonenPruefer(site: Site, objs: Objects, k: 'gartenhaus' | 'carport'): (center: Vec2, angle: number) => Status {
+  const andere: 'gartenhaus' | 'carport' = k === 'gartenhaus' ? 'carport' : 'gartenhaus';
+  const zaehlung = zaehleBestand(site);
+  const ids = new Set(zaehlung.gezaehlt.map((x) => x.id));
+  const bestandCons: Contributor[] = site.bestand.filter((b) => ids.has(b.id)).map((b) => ({
+    id: b.id, fp: b.footprint, segs: analyse(site, b.footprint, () => ({ h7: b.height, h4: b.height })), provenance: b.provenance,
+  }));
+  const fpAndere = footprint(objs[andere]);
+  const consAndere: Contributor = {
+    id: andere, fp: fpAndere, provenance: 'berechnet',
+    segs: analyse(site, fpAndere, wandFuer(site, objs[andere], fpAndere)),
+  };
+  const bestandSums = sideSums(site, bestandCons);
+  const fix = sideSums(site, [...bestandCons, consAndere]);
+  const fpWp = footprint(objs.waermepumpe);
+  const plot = site.plot.boundary;
+  const hindernisse = [
+    ...site.buildings.map((b) => b.footprint),
+    fpAndere,
+    fpWp,
+    ...site.bestand.filter((b) => istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich').map((b) => b.footprint),
+  ];
+  return (center, angle) => {
+    // Billige Vorprüfung: Ecken außerhalb des Grundstücks oder Kollision → sicher nicht ok (wie in building())
+    const fp0 = footprint({ ...objs[k], center, angle });
+    if (!fp0.every((p) => pointInPolygon(p, plot)) && !insidePolygon(fp0, plot)) return 'bad';
+    const b0 = box(fp0);
+    for (const h of hindernisse) if (boxesMeet(b0, box(h)) && overlaps(fp0, h)) return 'bad';
+    const o = { ...objs[k], center, angle };
+    const o2 = { ...objs, [k]: o };
+    const fp = footprint(o);
+    const fps = { gartenhaus: k === 'gartenhaus' ? fp : fpAndere, carport: k === 'carport' ? fp : fpAndere, waermepumpe: fpWp };
+    const segs = analyse(site, fp, wandFuer(site, o, fp));
+    const own = sideSums(site, [{ id: k, fp, segs, provenance: 'berechnet' }]);
+    const sums = fix.map((v, i) => v + own[i]);
+    const total = sums.reduce((x, y) => x + y, 0);
+    OHNE_TEXT = true;
+    try {
+      return building(site, o2, fps, k, segs, sums, total, bestandSums, true).status;
+    } finally {
+      OHNE_TEXT = false;
+    }
   };
 }
 
@@ -232,10 +291,25 @@ export function zaehleBestand(site: Site): { gezaehlt: { id: string; grund: stri
 
 /* ---------- Gartenhaus und Carport ---------- */
 
+type Box = [number, number, number, number];
+const BOX = new WeakMap<Vec2[], Box>();
+function box(p: Vec2[]): Box {
+  let b = BOX.get(p);
+  if (!b) {
+    b = [Infinity, Infinity, -Infinity, -Infinity];
+    for (const [x, y] of p) { b[0] = Math.min(b[0], x); b[1] = Math.min(b[1], y); b[2] = Math.max(b[2], x); b[3] = Math.max(b[3], y); }
+    BOX.set(p, b);
+  }
+  return b;
+}
+/** Schnelle Vorprüfung: überlappen die umschließenden Rechtecke überhaupt? */
+const boxesMeet = (a: Box, b: Box) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
+
 function collision(site: Site, fps: Record<ObjectKind, Vec2[]>, k: ObjectKind): string | null {
   const fp = fps[k];
+  const bf = box(fp);
   for (const b of site.buildings) {
-    if (overlaps(fp, b.footprint)) return b.own ? 'mit deinem Haus' : 'mit einem Nachbarhaus';
+    if (boxesMeet(bf, box(b.footprint)) && overlaps(fp, b.footprint)) return b.own ? 'mit deinem Haus' : 'mit einem Nachbarhaus';
   }
   for (const other of ['gartenhaus', 'carport', 'waermepumpe'] as const) {
     if (other !== k && overlaps(fp, fps[other])) return NAMES[other].mit;
@@ -243,7 +317,7 @@ function collision(site: Site, fps: Record<ObjectKind, Vec2[]>, k: ObjectKind): 
   for (const b of site.bestand) {
     // Pflanzen, Terrassen, Trampoline lassen sich versetzen oder überbauen – kollidieren nur Gebäude und Wasser
     if (!(istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich')) continue;
-    if (overlaps(fp, b.footprint)) return b.kind === 'pool' ? 'mit dem Pool' : b.kind === 'teich' ? 'mit dem Teich' : 'mit einem bestehenden Nebengebäude';
+    if (boxesMeet(bf, box(b.footprint)) && overlaps(fp, b.footprint)) return b.kind === 'pool' ? 'mit dem Pool' : b.kind === 'teich' ? 'mit dem Teich' : 'mit einem bestehenden Nebengebäude';
   }
   return null;
 }
@@ -308,16 +382,17 @@ function building(
   sums: number[],
   total: number,
   bestandSums: number[],
+  schnell = false,
 ): Result {
   const o = objs[k];
   const fp = fps[k];
   const sides = site.plot.sides;
-  const inside = insidePolygon(fp, site.plot.boundary);
+  const inside = schnell || insidePolygon(fp, site.plot.boundary); // schnell: Vorprüfung in zonenPruefer hat es geklärt
   const lim = limitFor(k, o);
   const closest = segs.reduce((a, b) => (b.d < a.d ? b : a));
   const near = segs.filter((s) => s.near);
   const nearSides = [...new Set(near.map((s) => s.side))];
-  const collide = collision(site, fps, k);
+  const collide = schnell ? null : collision(site, fps, k);
 
   const rows: Row[] = [
     { text: lim.row, tag: ART57, kind: 'rule' },
@@ -335,8 +410,7 @@ function building(
     rows.push({ text: req > MIN_ABSTAND + EPS ? `Abstandsfläche 0,4 H = ${fmt(req)} m eingehalten` : `Mindestabstand von ${MIN_ABSTAND} m eingehalten`, tag: ART6, kind: 'rule' });
   }
   // Abstandsflächen (Art. 6 Abs. 2–7). Privilegierte Nebengebäude brauchen keine eigenen (Abs. 7 Satz 1).
-  const af = pruefeAbstandsflaechen(site, o);
-  const ws = af.waende;
+  const ws = waende(site, o);
   const h7max = Math.max(...ws.map((w) => wandhoeheArt7(w, o).h));
   const a7offen = ws.some((w) => wandhoeheArt7(w, o).offen);
   const ohneRaum = k === 'carport' || !(site.aufenthaltsraum.value || site.feuerstaette.value);
@@ -349,9 +423,12 @@ function building(
     rows.push({ text: 'Giebelfläche wie das Dach angerechnet – Auslegung, bitte prüfen lassen', tag: 'offen', kind: 'offen' });
   }
   if (a7offen) rows.push({ text: 'Dach steiler als 45°: Anrechnung der Giebelfläche bei der mittleren Wandhöhe ist nicht eindeutig geregelt', tag: 'offen', kind: 'offen' });
-  const afAusserhalb = af.ausserhalb.some((x) => x > 0.05);
-  const afUeber = af.ueberdeckung.length > 0;
-  const afIn = af.inFlaeche.length > 0;
+  // Abstandsflächen-Prüfung nur, wo sie zählt (nicht privilegiert, nicht an der Grenze) oder für die Anzeige
+  const afNoetig = !privilegiert && !near.length;
+  const af = afNoetig || !schnell ? pruefeAbstandsflaechen(site, o) : null;
+  const afAusserhalb = !!af && af.ausserhalb.some((x) => x > 0.05);
+  const afUeber = !!af && af.ueberdeckung.length > 0;
+  const afIn = !!af && af.inFlaeche.length > 0;
   if (privilegiert) {
     rows.push({ text: `Mittlere Wandhöhe ${fmt(h7max)} m: braucht keine eigene Abstandsfläche und darf in Abstandsflächen stehen`, tag: 'BayBO Art. 6 Abs. 7', kind: 'rule' });
   } else if (!near.length) {
@@ -360,7 +437,7 @@ function building(
       tag: 'BayBO Art. 6 Abs. 2', kind: 'rule',
     });
     if (afAusserhalb) rows.push({ text: 'Grenzt die Seite an eine öffentliche Straße, Grün- oder Wasserfläche, darf sie bis zu deren Mitte reichen – nicht geprüft', tag: 'offen', kind: 'offen' });
-    if (af.hausFlaechen.length) {
+    if (af && af.hausFlaechen.length) {
       rows.push({
         text: afUeber || afIn ? 'Überschneidet sich mit den Abstandsflächen deines Hauses' : 'Keine Überdeckung mit den Abstandsflächen deines Hauses',
         tag: 'BayBO Art. 6 Abs. 3', kind: 'rule',
@@ -377,7 +454,7 @@ function building(
   } else {
     rows.push({ text: `Offener Carport im ${site.bereich.value === 'innen' ? 'Innenbereich' : 'Außenbereich'}`, tag: site.bereich.provenance, kind: site.bereich.provenance });
   }
-  rows.push(...contextRows(site));
+  if (!schnell) rows.push(...contextRows(site));
 
   let status: Status = 'ok';
   let head = 'Passt so.';
@@ -433,16 +510,16 @@ function building(
     rows,
     badSegments: bad,
     dim: inside && closest.d > 0.02 ? { p: closest.p, q: closest.q, label: `${fmt(closest.d)} m` } : null,
-    af: {
+    af: af ? {
       // je Wand: bis 3 m mittlere Wandhöhe (ohne Aufenthaltsraum) braucht die Wand keine eigene Fläche → grau
       flaechen: ws.map((w, i) => ({
         poly: w.flaeche,
         status: privilegiert || (ohneRaum && wandhoeheArt7(w, o).h <= GRENZ_H + 1e-9) ? 'info'
-          : af.ausserhalb[i] > 0.05 || af.ueberdeckung.some((u) => u.wand === i) ? 'bad' : 'ok',
+          : af!.ausserhalb[i] > 0.05 || af!.ueberdeckung.some((u) => u.wand === i) ? 'bad' : 'ok',
       })),
       haus: af.hausFlaechen,
       privilegiert,
-    },
+    } : undefined,
   };
 }
 

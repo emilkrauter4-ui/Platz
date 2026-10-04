@@ -111,7 +111,18 @@ export function wandhoeheArt7(w: Wand, o: Placed): { h: number; offen: boolean }
  * Abstandsflächen eines bestehenden Gebäudes aus LoD2 (Trauf- und Firsthöhe über Grund). Die Dachneigung ist nicht
  * bekannt: Annahme ≤ 70°, also Dach und Giebel zu einem Drittel → H = Traufe + (First − Traufe) / 3 an allen Wänden.
  */
+const CACHE = new WeakMap<Building, { key: string; r: { a: Vec2; b: Vec2; flaeche: Vec2[]; h: number }[] }>();
+
 export function gebaeudeFlaechen(b: Building): { a: Vec2; b: Vec2; flaeche: Vec2[]; h: number }[] {
+  const key = `${b.trauf}|${b.first}|${b.footprint.length}`;
+  const c = CACHE.get(b);
+  if (c && c.key === key) return c.r;
+  const r = gebaeudeFlaechenNeu(b);
+  CACHE.set(b, { key, r });
+  return r;
+}
+
+function gebaeudeFlaechenNeu(b: Building): { a: Vec2; b: Vec2; flaeche: Vec2[]; h: number }[] {
   if (b.trauf == null) return [];
   const h = b.trauf + Math.max(0, (b.first ?? b.trauf) - b.trauf) / 3;
   const t = tiefe(h);
