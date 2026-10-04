@@ -45,7 +45,7 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | Quelle | Lizenz / Bedingungen | Nutzung in Passt. | Hinweis |
 |---|---|---|---|
 | hplib 1.9 (FZJ IEK-3, github.com/FZJ-IEK3-VSA/hplib) | **MIT** (LICENSE geprüft am 04.10.2026) | Datei `hplib_database_all.csv` → `app/public/data/waermepumpen.json` (2651 Außengeräte, Schallleistung außen, Datum, Heizleistung) via `pipeline/10_waermepumpen.py` | Daten von 2016–2021, technische Typbezeichnungen |
-| Heat Pump KEYMARK, Datenblätter (keymark.eu) | **keine offene Lizenz angegeben**, Seite nennt „© KEYMARK 2025“ | Ursprung der Werte in hplib; Anzeige „Heat Pump KEYMARK / EN 12102“, Label `zertifiziert` | **Offen:** Einzelne Messwerte sind Fakten; für die Übernahme einer ganzen Liste kann das Datenbankherstellerrecht (§ 87b UrhG) greifen. Vor kommerzieller Nutzung mit KEYMARK/EHPA klären oder Werte nur auf Abruf je Gerät zeigen. |
+| Heat Pump KEYMARK, Datenblätter (keymark.eu) | **keine offene Lizenz angegeben**, Seite nennt „© KEYMARK 2025“ | Ursprung der Werte in hplib; Anzeige „Heat Pump KEYMARK / EN 12102“, Label `zertifiziert` | **Status (04.10.2026): Nutzung angefragt, nur Demo.** Bis zur Antwort nur in der Demo verwenden, nicht kommerziell. Hintergrund: Einzelne Messwerte sind Fakten; für die Übernahme einer ganzen Liste kann das Datenbankherstellerrecht (§ 87b UrhG) greifen. |
 | BWP-Schallrechner (waermepumpe.de/werkzeuge/schallrechner) | Website des Bundesverbands Wärmepumpe | nur Vergleich: 10 Abfragen am 04.10.2026 (`docs/messungen/schall_bwp.md`); Stufen der Richtwirkung/Abschirmung als Quellenangabe in `limits.json` | keine Daten übernommen |
 
 ## Nachbar-Link (Phase 3.2)

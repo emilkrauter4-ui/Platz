@@ -11,7 +11,10 @@ Herkunft und Abgleich (04.10.2026):
   (nur Rechtschreibung 1982: „Abstandes“ statt „Abstands“, „Zustandes“ statt „Zustands“).
   Abweichung: Art. 52 Abs. 1 Satz 3. 1982: „Die Verjährung beginnt mit dem Ablauf des Kalenderjahres, in dem die
   Verletzung erkennbar wird.“ Quelle A zeigt die später geänderte Fassung (unten). Die geänderte Fassung steht nur in
-  einer Quelle → in limits.json als offen markiert, Passt. rechnet die Frist nicht aus, sondern fragt nach dem Alter.
+  einer Quelle. Nachtrag 04.10.2026: Emil hat die aktuelle Fassung am amtlichen Text (gesetze-bayern.de) bestätigt.
+  Passt. rechnet die Frist nicht aus, sondern zeigt nur einen Info-Text (inkl. BGH, Urteil vom 1.6.2017, V ZR 230/16:
+  Rn. 9 Entstehung bei Überschreiten von 2 m, Rn. 10 bei zweifelhafter Verletzung erst ab Eindeutigkeit, Rn. 11 nach
+  Rückschnitt neu; Leitsatz: tiefer liegendes Grundstück → Höhe ab höherem Nachbargelände).
 
 Art. 47 Grenzabstand von Pflanzen
 (1) Der Eigentümer eines Grundstücks kann verlangen, daß auf einem Nachbargrundstück nicht Bäume, Sträucher oder
@@ -60,7 +63,7 @@ Verjährung beginnt mit dem Schluss des Jahres, in dem
 1. der Anspruch entstanden ist, und
 2. der Eigentümer des Grundstücks von den den Anspruch begründenden Umständen Kenntnis erlangt oder ohne grobe
    Fahrlässigkeit erlangen müsste.
-   [nur Quelle A; Fassung 1982 siehe oben]
+   [Quelle A; von Emil am amtlichen Text bestätigt; Fassung 1982 siehe oben]
 (2) Sind Ansprüche nach Absatz 1 Sätze 2 und 3 verjährt und werden die Gewächse durch neue ersetzt, so kann
 hinsichtlich der neuen Gewächse die Einhaltung des in Art. 47 bis 50 und 51 Abs. 1 und 2 vorgeschriebenen Abstands
 verlangt werden.

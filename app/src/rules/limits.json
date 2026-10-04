@@ -256,8 +256,8 @@
     "verjaehrungJahre": {
       "wert": 5,
       "quelle": "AGBGB Art. 52 Abs. 1 Sätze 2 und 3",
-      "text": "Der Anspruch auf Beseitigung eines Zustands, der Art. 47 bis 50 verletzt, verjährt in fünf Jahren; Beginn mit dem Schluss des Jahres der Entstehung und Kenntnis bzw. grob fahrlässiger Unkenntnis. Satz 3 nur in einer Quelle in dieser Fassung (GVBl 1982: „Ablauf des Kalenderjahres, in dem die Verletzung erkennbar wird“) – offen.",
-      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "text": "Der Anspruch auf Beseitigung eines Zustands, der Art. 47 bis 50 und 51 Abs. 1 und 2 verletzt, verjährt in fünf Jahren. Beginn: Schluss des Jahres, in dem (1) der Anspruch entstanden ist und (2) der Eigentümer von den anspruchsbegründenden Umständen Kenntnis erlangt oder ohne grobe Fahrlässigkeit erlangen müsste. Nur Info-Text in der App, keine Berechnung.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt – aktuelle Fassung von Abs. 1 Satz 3 (gesetze.legal) von Emil am amtlichen Text (gesetze-bayern.de) bestätigt (04.10.2026); automatisch nicht abrufbar (CAPTCHA)",
       "geprueft": false
     },
     "ersatzpflanzung": {
@@ -271,6 +271,18 @@
       "wert": 3,
       "quelle": "Passt.-Festlegung (keine Rechtsnorm)",
       "text": "Nachbarpflanzen, deren Stamm oder Triebe bis 3 m von der Grenze stehen, werden aufgelistet.",
+      "geprueft": false
+    },
+    "rechtsprechungVerjaehrung": {
+      "wert": "BGH V ZR 230/16",
+      "quelle": "BGH, Urteil vom 1. Juni 2017, V ZR 230/16, Rn. 9–11",
+      "text": "Anspruch entsteht, wenn Pflanzen die 2 m überschreiten; bei objektiv zweifelhafter Verletzung beginnt die Verjährung erst ab Eindeutigkeit; nach Rückschnitt entsteht der Anspruch bei erneutem Überwachsen neu.",
+      "geprueft": false
+    },
+    "hoeheAmHang": {
+      "wert": "hoeheres_gelaende",
+      "quelle": "BGH, Urteil vom 1. Juni 2017, V ZR 230/16, Leitsatz",
+      "text": "Liegt das Grundstück mit der Pflanze tiefer als das Nachbargrundstück, wird die zulässige Wuchshöhe vom höheren Geländeniveau des Nachbargrundstücks aus gemessen. Passt. zeigt das als Hinweis, rechnet es aber nicht ein (Messpunkt an der Grenze unklar).",
       "geprueft": false
     }
   },

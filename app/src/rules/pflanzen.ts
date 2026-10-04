@@ -186,6 +186,17 @@ export function pruefePflanze(site: Site, p: Pflanze, angaben: SeitenAngabe[] = 
   const offen = seiten.filter((x) => !angaben[x.seite]?.strasse);
   if (offen.length) rows.push({ text: 'Grenze zu einer öffentlichen Straße? Dort gilt Art. 47 nicht (Art. 50 Abs. 1). Bis zur Angabe rechnet Passt. mit Nachbargrundstück.', tag: 'offen', kind: 'offen' });
   if (seiten.some((x) => !angaben[x.seite]?.wald)) rows.push({ text: 'Ist ein Nachbar ein Waldgrundstück, gelten dort nur 0,50 m (Art. 47 Abs. 2). Annahme: kein Wald.', tag: 'Annahme', kind: 'Annahme' });
+  // BGH V ZR 230/16 (Leitsatz): liegt der Nachbar höher, zählt die Wuchshöhe ab dessen Gelände – nur Hinweis
+  if (innen && mass && site.ground) {
+    const dx = mass.q[0] - mass.p[0];
+    const dy = mass.q[1] - mass.p[1];
+    const l = Math.hypot(dx, dy);
+    if (l > 0.05) {
+      const nachbar: Vec2 = [mass.q[0] + (dx / l) * 1.0, mass.q[1] + (dy / l) * 1.0];
+      const diff = site.ground(nachbar) - site.ground(mass.p);
+      if (diff > 0.2) rows.push({ text: `Das Nachbargrundstück liegt hier etwa ${fmt(diff, 1)} m höher (DGM1). Laut BGH (V ZR 230/16) wird die zulässige Höhe dann vom höheren Gelände des Nachbarn aus gemessen – Passt. rechnet das nicht ein.`, tag: 'offen', kind: 'offen' });
+    }
+  }
   if (p.art === 'baum') rows.push({ text: 'Art. 48 (4 m zu landwirtschaftlich genutztem Grundstück) gilt laut Art. 50 Abs. 2 nicht für Bäume im Hausgarten und nicht für Obstbäume. Annahme: Hausgarten.', tag: 'Annahme', kind: 'Annahme' });
   rows.push({ text: 'Nachbarrecht (Zivilrecht): Das Bauamt prüft das nicht. Gemeindliche Baumschutz- oder Gestaltungssatzungen können zusätzlich gelten.', tag: 'offen', kind: 'offen' });
 
@@ -336,9 +347,10 @@ export function pflanzenText(site: Site, x: BestandsPflanze): string {
 
 /** Hinweis zum Alter (Art. 52) – nur Information, keine Empfehlung. */
 export function alterText(alter: Alter): string {
-  const basis = `Laut Art. 52 Abs. 1 AGBGB verjährt der Anspruch auf Beseitigung eines Zustands, der den Abstand nicht einhält, in ${P.verjaehrungJahre.wert} Jahren. Die Frist beginnt mit dem Schluss des Jahres, in dem er entstanden ist und der Eigentümer davon wusste oder ohne grobe Fahrlässigkeit hätte wissen müssen.`;
-  const ersatz = 'Wird eine Pflanze später durch eine neue ersetzt, gilt für die neue der Abstand wieder (Art. 52 Abs. 2).';
-  if (alter === 'ueber5') return `${basis} ${ersatz}`;
-  if (alter === 'unter5') return `${basis} Bei weniger als fünf Jahren ist diese Frist noch nicht abgelaufen. ${ersatz}`;
-  return `Wie lange steht die Pflanze schon so? ${basis}`;
+  const basis = `Laut Art. 52 Abs. 1 Satz 2 und 3 AGBGB verjährt der Anspruch auf Beseitigung eines Zustands, der den Abstand nicht einhält, in ${P.verjaehrungJahre.wert} Jahren. Die Frist beginnt mit dem Schluss des Jahres, in dem der Anspruch entstanden ist und der Eigentümer von den Umständen Kenntnis erlangt hat oder ohne grobe Fahrlässigkeit hätte erlangen müssen.`;
+  const bgh = 'Nach dem Bundesgerichtshof (Urteil vom 1. Juni 2017, V ZR 230/16) entsteht der Anspruch bei Pflanzen über 2 m in dem Jahr, in dem sie die 2 m erstmals überschreiten. Ist die Verletzung zweifelhaft, beginnt die Frist erst, wenn sie eindeutig ist. Nach einem Rückschnitt entsteht der Anspruch bei erneutem Überwachsen neu.';
+  const ersatz = 'Werden verjährte Pflanzen durch neue ersetzt, gilt für die neuen der Abstand wieder (Art. 52 Abs. 2).';
+  const keine = 'Passt. rechnet diese Frist nicht aus – es kommt auf die Umstände im Einzelfall an.';
+  const vorn = alter === 'ueber5' ? 'Steht seit mehr als fünf Jahren so: ' : alter === 'unter5' ? 'Steht seit weniger als fünf Jahren so: ' : 'Wie lange steht die Pflanze schon so? ';
+  return `${vorn}${basis} ${bgh} ${ersatz} ${keine}`;
 }

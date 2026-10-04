@@ -178,6 +178,26 @@ describe('Pflanzen im Bestand: sachlich, mit Spanne', () => {
     expect(x.vergleich).toBe('unklar');
   });
 
+  it('Art. 52: nur Info-Text mit BGH V ZR 230/16, keine Fristberechnung', () => {
+    for (const a of ['unbekannt', 'unter5', 'ueber5'] as const) {
+      const t = alterText(a);
+      expect(t).toContain('Schluss des Jahres');
+      expect(t).toContain('grobe Fahrlässigkeit');
+      expect(t).toContain('V ZR 230/16');
+      expect(t).toContain('erstmals überschreiten');
+      expect(t).toContain('eindeutig');
+      expect(t).toContain('rechnet diese Frist nicht aus');
+      expect(t).not.toMatch(/noch nicht abgelaufen|ist abgelaufen|bis \d{4}/);
+    }
+  });
+
+  it('Hang: Nachbar 1 m höher → Hinweis nach BGH, Ergebnis unverändert', () => {
+    const s = { ...site(), ground: (p: Vec2) => (p[1] < 0 ? 401 : 400) };
+    const r = pruefePflanze(s, hecke(1.2, 1.8));
+    expect(r.rows.some((x) => x.kind === 'offen' && x.text.includes('V ZR 230/16'))).toBe(true);
+    expect(r.status).toBe(pruefePflanze(site(), hecke(1.2, 1.8)).status);
+  });
+
   it('Alter-Hinweis nennt Art. 52 und die Ersatzpflanzung, ohne „Anspruch haben“', () => {
     const t = alterText('ueber5');
     expect(t).toContain('Art. 52 Abs. 1');

@@ -234,6 +234,11 @@ gezielt aus und prüft sie getrennt).
 Stand 4. Oktober 2026.
 
 ### 3.1 Hecken und Bäume (AGBGB Art. 47–52): **gebaut; Stamm aus Laser nicht machbar**
+- **Nachtrag 4. Oktober 2026 (Emils Vorgabe):** Art. 52 Abs. 1 Satz 3 in der aktuellen Fassung (Schluss des Jahres der
+  Entstehung und Kenntnis bzw. grob fahrlässiger Unkenntnis), von Emil am amtlichen Text bestätigt. In der App nur
+  Info-Text, keine Berechnung, mit BGH V ZR 230/16 (Entstehung bei erstmaligem Überschreiten von 2 m, bei Zweifel ab
+  Eindeutigkeit, nach Rückschnitt neu) und Abs. 2 (Ersatzpflanzen). Zusätzlich Hinweis `offen`, wenn das
+  Nachbargrundstück höher liegt (BGH-Leitsatz: Höhe ab dem höheren Gelände) – nicht eingerechnet.
 - Wortlaut in `docs/recht/AGBGB_Art47-52.txt`: gesetze-bayern.de per CAPTCHA gesperrt. Verglichen wurden
   gesetze.legal (aktuelle Fassung) und das amtliche **GVBl 25/1982** (PDF von verkuendung-bayern.de). Art. 47–51 und
   Art. 52 Abs. 1 Sätze 1–2 und Abs. 2 stimmen überein. **Abweichung:** Art. 52 Abs. 1 Satz 3 (Fristbeginn) wurde
@@ -291,7 +296,7 @@ Stand 4. Oktober 2026.
   inklusive „speichert keine weiteren Felder“). Insgesamt 112 grün.
 - Nebenbei behoben: Der Ladehinweis „Lädt amtliche Daten …“ blieb sichtbar (CSS überschrieb `hidden`).
 
-### 3.3 AR: **gebaut; auf echten Geräten nicht getestet**
+### 3.3 AR: **gebaut, auf Emils iPhone NICHT funktionsfähig – zurückgestellt**
 - Eigener Erzeuger ohne Bibliothek (`app/scripts/ar-modell.mjs`): glTF 2.0 binär und USDZ (USDA-Text,
   unkomprimiertes ZIP, Daten 64-Byte-ausgerichtet). Meter, Y oben, Boden bei 0. Formen wie in der 3D-Szene:
   Gartenhaus mit Flach- oder Satteldach, Carport mit Pfosten und Dach, Wärmepumpe, Hecke, Baum, Strauch.
@@ -304,7 +309,8 @@ Stand 4. Oktober 2026.
 - Geprüft: glTF-Validator (Khronos) 0 Fehler, 0 Warnungen für alle 7 Formen. USDZ öffnet mit Pixars USD-Bibliothek
   (`usd-core`), Maße stimmen auf den Millimeter (z. B. Gartenhaus 35°: 3,000 × 3,175 × 2,500 m). Der ARKit-Prüfer
   (`usdchecker --arkit`) ist in `usd-core` nicht enthalten.
-- **Nicht nachgewiesen:** Start auf einem echten iPhone bzw. Android-Gerät. Scene Viewer lädt das Modell über eine
+- **Auf Emils iPhone startet AR nicht** (Web-Weg über die App und Download der USDZ). Ursache unbekannt, zurückgestellt (4. Oktober 2026).
+- **Nicht nachgewiesen:** Android. Scene Viewer lädt das Modell über eine
   öffentliche https-Adresse, im lokalen Netz (Laptop-Demo) geht AR deshalb nur auf dem iPhone. Das Modell zeigt
   Größe und Form, nicht den Ort: Man stellt es in der AR-Ansicht selbst auf.
 - Tests: `ar.test.ts` (6). Insgesamt **118 grün**.
@@ -436,7 +442,7 @@ Stand 4. Oktober 2026.
   besonders Art. 52 Abs. 1 Satz 3 (Fristbeginn).
 - Bei 2–3 Bäumen an der Grenze den Stamm vor Ort einmessen, um die Spanne der Kronenmitte zu prüfen.
 - „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
-- KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
+- KEYMARK-Daten: **Nutzung angefragt, nur Demo** (Stand 4. Oktober 2026) – Antwort abwarten.
 - **AR zurückgestellt (Emil, 4. Oktober 2026):** klappt auf dem iPhone noch nicht, später weiter.
 - AR auf dem eigenen iPhone und einem Android-Gerät ausprobieren. Android braucht die App unter einer https-Adresse.
   iPhone im gleichen WLAN: `npm run serve` zeigt die Adresse an (`http://192.168.…:4173`), in Safari öffnen.
