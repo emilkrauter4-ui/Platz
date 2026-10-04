@@ -115,6 +115,10 @@ const st: State = {
   modus: 'objekt',
   pflanze: null,
   pflanzRes: null,
+  ansicht: 'eigen',
+  sichtbar: null,
+  schatten: [],
+  blick: null,
 };
 /** Reiter „Hecke, Baum“ (AGBGB Art. 47–52): Angaben je Grenzseite, Alter der Bestandspflanzen, Nachbarpflanzen. */
 const pflSt: {
@@ -506,6 +510,7 @@ function buildSite() {
 
 function badSegments(): Set<number> {
   const s = new Set<number>();
+  if (st.ansicht === 'nachbar') return s;
   if (st.res) for (const k of ['gartenhaus', 'carport'] as const) st.res[k].badSegments.forEach((i) => s.add(i));
   return s;
 }

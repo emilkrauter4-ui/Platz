@@ -11,6 +11,22 @@ function walk(dir: string): string[] {
   });
 }
 
+/** Dev-Server: dieselbe Nachbar-API wie scripts/serve.mjs (SQLite, siehe scripts/nachbar-api.mjs). */
+function nachbarApiDev() {
+  return {
+    name: 'passt-nachbar-api',
+    apply: 'serve' as const,
+    configureServer(server: { middlewares: { use: (fn: (req: never, res: never, next: () => void) => void) => void } }) {
+      server.middlewares.use(async (req: { url?: string }, res, next) => {
+        if (!req.url?.includes('/api/nachbar/')) return next();
+        // @ts-expect-error reines JS-Modul ohne Typen
+        const { nachbarApi } = await import('./scripts/nachbar-api.mjs');
+        await nachbarApi(req, res);
+      });
+    },
+  };
+}
+
 /**
  * Nach dem Build: Listen für den Service Worker schreiben.
  * - precache.json: App-Hülle (HTML, Bundle, die beim Durchlauf genutzten Cesium-Dateien, Startdaten)
@@ -59,6 +75,7 @@ export default defineConfig({
   },
   plugins: [
     offlineManifest(),
+    nachbarApiDev(),
     viteStaticCopy({
       targets: [
         { src: `${cesiumSource}/ThirdParty`, dest: cesiumBase, rename: { stripBase: 4 } },

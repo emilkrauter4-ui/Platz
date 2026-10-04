@@ -63,11 +63,18 @@ export interface RenderState {
   modus: 'objekt' | 'pflanzen';
   pflanze: Pflanze | null;
   pflanzRes: PflanzenErgebnis | null;
+  /** 'nachbar' = Ansicht über einen Nachbar-Link: nur lesen, nur die geteilten Objekte */
+  ansicht: 'eigen' | 'nachbar';
+  sichtbar: ObjectKind[] | null;
+  /** Schatten am Boden (Nachbar-Link): Vorhaben kräftig, Häuser blass */
+  schatten: { poly: Vec2[]; vorhaben: boolean }[];
+  /** Blickpunkt des Nachbarn */
+  blick: { p: Vec2; z: number; annahme: boolean } | null;
 }
 
 /** Maßkette des gerade gewählten Reiters. */
 function dimOf(s: RenderState) {
-  if (s.step !== 'pruefen') return null;
+  if (s.step !== 'pruefen' || s.ansicht === 'nachbar') return null;
   return s.modus === 'pflanzen' ? s.pflanzRes?.dim ?? null : s.res?.[s.selected].dim ?? null;
 }
 
@@ -106,6 +113,7 @@ export class Renderer {
   private draftEntities: Entity[] = [];
   private editEntities: Entity[] = [];
   private plotEntities: Entity[] = [];
+  private schattenEntities: Entity[] = [];
   private dimMid: Vec2 | null = null;
   private dimLabel = '';
 
@@ -303,7 +311,7 @@ export class Renderer {
 
   private buildObjects() {
     const st = this.s;
-    const obj = (k: ObjectKind) => (st().step === 'pruefen' && st().objs ? st().objs![k] : null);
+    const obj = (k: ObjectKind) => (st().step === 'pruefen' && st().objs && (!st().sichtbar || st().sichtbar!.includes(k)) ? st().objs![k] : null);
     const sel = (k: ObjectKind, c: string) => () => {
       const col = Color.fromCssColorString(c);
       return st().selected === k ? col : Color.lerp(col, Color.fromCssColorString(this.s().dark ? '#121614' : '#ffffff'), 0.25, new Color());
@@ -343,7 +351,7 @@ export class Renderer {
           const c = r === 'bad' ? this.pal().red : r === 'warn' ? this.pal().warn : this.pal().ok;
           return Color.fromCssColorString(c).withAlpha(0.18);
         }),
-        show: new CallbackProperty(() => st().step === 'pruefen' && st().selected === 'waermepumpe', false),
+        show: new CallbackProperty(() => st().step === 'pruefen' && st().ansicht === 'eigen' && st().modus === 'objekt' && st().selected === 'waermepumpe', false),
       },
     });
   }
@@ -351,7 +359,7 @@ export class Renderer {
   /** Geplante Pflanze: Hecke als grüner Block entlang der Pflanzreihe, Baum als Stamm + Krone, Strauch als Krone. */
   private buildPflanze() {
     const st = this.s;
-    const p = () => (st().step === 'pruefen' && st().modus === 'pflanzen' ? st().pflanze : null);
+    const p = () => (st().step === 'pruefen' && (st().modus === 'pflanzen' || st().ansicht === 'nachbar') ? st().pflanze : null);
     const gruen = () => Color.fromCssColorString(st().pflanzRes?.status === 'bad' ? this.pal().red : '#4C8A3F').withAlpha(0.85);
     const braun = () => Color.fromCssColorString('#7A5A3A');
     const boden = (q: Pflanze) => this.ground(q.center);
@@ -520,6 +528,40 @@ export class Renderer {
             color: Color.fromCssColorString(w.provenance === 'Annahme' ? this.pal().muted : this.pal().user),
             outlineColor: Color.WHITE,
             outlineWidth: 1.5,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+        }),
+      );
+    }
+    v.scene.requestRender();
+  }
+
+  /* ---------- Nachbar-Link: Schatten und Blickpunkt ---------- */
+  syncSchatten() {
+    const v = this.viewer;
+    this.schattenEntities.forEach((e) => v.entities.remove(e));
+    this.schattenEntities = [];
+    const st = this.s();
+    for (const sch of st.schatten) {
+      this.schattenEntities.push(
+        v.entities.add({
+          polygon: {
+            hierarchy: new PolygonHierarchy(this.cart(sch.poly)),
+            classificationType: this.cls(),
+            material: Color.fromCssColorString(sch.vorhaben ? '#1B2A4A' : '#1D2321').withAlpha(sch.vorhaben ? 0.5 : 0.22),
+          },
+        }),
+      );
+    }
+    if (st.blick) {
+      this.schattenEntities.push(
+        v.entities.add({
+          position: localToCartesian(st.blick.p, this.ground(st.blick.p) + st.blick.z),
+          point: {
+            pixelSize: 14,
+            color: Color.fromCssColorString(st.blick.annahme ? this.pal().muted : this.pal().user),
+            outlineColor: Color.WHITE,
+            outlineWidth: 2,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
           },
         }),

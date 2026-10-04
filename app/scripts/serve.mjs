@@ -8,6 +8,7 @@ import { createServer } from 'node:http';
 import { createReadStream, statSync, existsSync } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
 import { createBrotliCompress, createGzip, constants } from 'node:zlib';
+import { nachbarApi } from './nachbar-api.mjs';
 
 const port = +(process.argv[2] || 4173);
 const root = resolve(process.argv[3] || 'dist');
@@ -46,6 +47,7 @@ async function lfuProxy(req, res) {
 createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   if (path.endsWith('/proxy/lfu-wsg')) return void lfuProxy(req, res);
+  if (path.includes('/api/nachbar/')) return void nachbarApi(req, res);
   let file = normalize(join(root, path));
   if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
