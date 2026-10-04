@@ -1,5 +1,7 @@
 # Gartenblick – Anleitung für die gemietete GPU (Phase 5.3)
 
+> **Für den nächsten (einzigen) Lauf gilt [`gpu_lauf_froeschau41.md`](gpu_lauf_froeschau41.md)** – dort Befehle, Zeit und Kosten. Diese Datei bleibt als Hintergrund.
+
 Stand 4. Oktober 2026. Nur **vorberechnen**, nur für die drei Demo-Grundstücke – nichts davon läuft live.
 Das Ergebnis ist eine **KI-Visualisierung, nicht gemessen** und wird **nie** für Prüfungen verwendet.
 
