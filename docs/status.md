@@ -415,6 +415,20 @@ Die Bedingung „ohne Aufenthaltsraum/Feuerstätte“ gilt danach nur im Außenb
   Außenbereich). **138 grün.**
 - **Offen:** amtlichen Text auf gesetze-bayern.de von Hand prüfen; CLAUDE.md beschreibt noch die alte Regel.
 
+## Prüfmappe für Fachpersonen (4. Oktober 2026)
+
+`docs/pruefmappe/pruefmappe.pdf` (34 Seiten A4), erzeugt aus `app/src/rules/limits.json` mit
+`python3 pipeline/16_pruefmappe.py && node pipeline/pruefmappe_pdf.mjs`. Je Regel (57): Quelle, Gesetzestext-Auszug
+aus `docs/recht/` (automatisch, nicht abgetippt), Link zum amtlichen Text, unsere Auslegung, wie Passt. rechnet,
+Beispielfall, Felder korrekt / falsch / unklar / Anmerkung. Danach 17 gezielte Fragen (Giebel Abs. 4 und Abs. 7,
+Dachneigung LoD2, Brutto-Rauminhalt, Art. 57 aktueller Wortlaut, Außenbereich, „an der Grenze“, Bestand,
+Carport-Fläche, Wärmepumpe, Lärm-Immissionsort, „nicht erheblich überragen“, Hecken-Messpunkt, Hang,
+Entwurfsverfasser, örtliche Satzungen, Formulierung). Das Skript bricht ab, wenn eine Regel in limits.json keinen
+Eintrag in der Mappe hat. Neu als Wortlaut: `docs/recht/BayBO_Art57.txt`, `docs/recht/TA_Laerm_6_1.txt`.
+Beim Erstellen korrigiert: die 15-m-Regel steht in Art. 6 Abs. 7 **Satz 2** (vorher als Satz 1 Nr. 1 zitiert).
+Ehrlich: Die Beispiele sind von Hand gerechnet, nicht aus der App erzeugt; vier Regeln sind nur dokumentiert und in
+der App nicht umgesetzt (`pflanzen.landwirtschaftM`, `abstand.faktorHGewerbe`, Ersatz-/Verjährungs-Infos nur Text).
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

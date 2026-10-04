@@ -1,0 +1,16 @@
+# TA Lärm Nr. 6.1 (Wortlaut)
+#
+# Abgerufen am 4. Oktober 2026 von https://www.verwaltungsvorschriften-im-internet.de/bsvwvbund_26081998_IG19980826.htm
+# (amtliche Veröffentlichung des Bundes). Sechste Allgemeine Verwaltungsvorschrift zum Bundes-Immissionsschutzgesetz.
+
+6.1 Immissionsrichtwerte für Immissionsorte außerhalb von Gebäuden
+Die Immissionsrichtwerte für den Beurteilungspegel betragen für Immissionsorte außerhalb von Gebäuden
+a) in Industriegebieten 70 dB(A)
+b) in Gewerbegebieten tags 65 dB(A) nachts 50 dB(A)
+c) in urbanen Gebieten tags 63 dB (A) nachts 45 dB (A)
+d) in Kerngebieten, Dorfgebieten und Mischgebieten tags 60 dB(A) nachts 45 dB(A)
+e) in allgemeinen Wohngebieten und Kleinsiedlungsgebieten tags 55 dB(A) nachts 40 dB(A)
+f) in reinen Wohngebieten tags 50 dB(A) nachts 35 dB(A)
+g) in Kurgebieten, für Krankenhäuser und Pflegeanstalten tags 45 dB(A) nachts 35 dB(A)
+Einzelne kurzzeitige Geräuschspitzen dürfen die Immissionsrichtwerte am Tage um nicht mehr als 30 dB(A) und in der
+Nacht um nicht mehr als 20 dB(A) überschreiten.
