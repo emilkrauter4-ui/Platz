@@ -1,0 +1,181 @@
+{
+ "_hinweis": "Freigaberegel: F1 je Klasse (mit Referenzobjekten) und F1 „Nebengebäude“ auf dem eingefrorenen Test-Set dürfen gegenüber der freigegebenen Version nicht sinken.",
+ "freigegeben": 4,
+ "versionen": [
+  {
+   "version": 4,
+   "datum": "2026-10-04",
+   "status": "freigegeben",
+   "lern_beispiele": 0,
+   "metriken": [
+    {
+     "klasse": "gartenhaus",
+     "ref": 2,
+     "erkannt": 6,
+     "tp": 1,
+     "praezision": 0.17,
+     "trefferquote": 0.5
+    },
+    {
+     "klasse": "carport_garage",
+     "ref": 1,
+     "erkannt": 0,
+     "tp": 0,
+     "praezision": null,
+     "trefferquote": 0.0
+    },
+    {
+     "klasse": "pool",
+     "ref": 0,
+     "erkannt": 0,
+     "tp": 0,
+     "praezision": null,
+     "trefferquote": null
+    },
+    {
+     "klasse": "terrasse",
+     "ref": 6,
+     "erkannt": 1,
+     "tp": 1,
+     "praezision": 1.0,
+     "trefferquote": 0.17
+    },
+    {
+     "klasse": "hecke",
+     "ref": 3,
+     "erkannt": 1,
+     "tp": 0,
+     "praezision": 0.0,
+     "trefferquote": 0.0
+    },
+    {
+     "klasse": "baum",
+     "ref": 20,
+     "erkannt": 13,
+     "tp": 6,
+     "praezision": 0.46,
+     "trefferquote": 0.3
+    },
+    {
+     "klasse": "strauch",
+     "ref": 6,
+     "erkannt": 3,
+     "tp": 0,
+     "praezision": 0.0,
+     "trefferquote": 0.0
+    },
+    {
+     "klasse": "zaun_mauer",
+     "ref": 0,
+     "erkannt": 0,
+     "tp": 0,
+     "praezision": null,
+     "trefferquote": null
+    },
+    {
+     "klasse": "nebengebaeude",
+     "ref": 3,
+     "erkannt": 6,
+     "tp": 2,
+     "praezision": 0.33,
+     "trefferquote": 0.67
+    }
+   ],
+   "gruende": [
+    "Ausgangsversion aus Phase 1"
+   ]
+  },
+  {
+   "version": 5,
+   "datum": "2026-10-04",
+   "status": "freigegeben, zurückgenommen",
+   "lern_beispiele": 7,
+   "metriken": [
+    {
+     "klasse": "gartenhaus",
+     "ref": 2,
+     "erkannt": 6,
+     "tp": 1,
+     "praezision": 0.17,
+     "trefferquote": 0.5
+    },
+    {
+     "klasse": "carport_garage",
+     "ref": 1,
+     "erkannt": 0,
+     "tp": 0,
+     "praezision": null,
+     "trefferquote": 0.0
+    },
+    {
+     "klasse": "pool",
+     "ref": 0,
+     "erkannt": 0,
+     "tp": 0,
+     "praezision": null,
+     "trefferquote": null
+    },
+    {
+     "klasse": "terrasse",
+     "ref": 6,
+     "erkannt": 1,
+     "tp": 1,
+     "praezision": 1.0,
+     "trefferquote": 0.17
+    },
+    {
+     "klasse": "hecke",
+     "ref": 3,
+     "erkannt": 1,
+     "tp": 0,
+     "praezision": 0.0,
+     "trefferquote": 0.0
+    },
+    {
+     "klasse": "baum",
+     "ref": 20,
+     "erkannt": 11,
+     "tp": 6,
+     "praezision": 0.55,
+     "trefferquote": 0.3
+    },
+    {
+     "klasse": "strauch",
+     "ref": 6,
+     "erkannt": 4,
+     "tp": 0,
+     "praezision": 0.0,
+     "trefferquote": 0.0
+    },
+    {
+     "klasse": "zaun_mauer",
+     "ref": 0,
+     "erkannt": 0,
+     "tp": 0,
+     "praezision": null,
+     "trefferquote": null
+    },
+    {
+     "klasse": "nebengebaeude",
+     "ref": 3,
+     "erkannt": 6,
+     "tp": 2,
+     "praezision": 0.33,
+     "trefferquote": 0.67
+    }
+   ],
+   "gruende": [
+    "gartenhaus: F1 0.25 → 0.25",
+    "carport_garage: F1 0.00 → 0.00",
+    "terrasse: F1 0.29 → 0.29",
+    "hecke: F1 0.00 → 0.00",
+    "baum: F1 0.36 → 0.39",
+    "strauch: F1 0.00 → 0.00",
+    "nebengebaeude: F1 0.44 → 0.44"
+   ],
+   "verglichen_mit": 4,
+   "quelle": "Probelauf 04.10.2026 mit 13 simulierten Beiträgen aus der Dev-Referenz (12_lernschleife.py simulieren 20)",
+   "anmerkung": "Hat die Freigaberegel bestanden. Zurückgenommen, weil die App-Daten (bestand.json) von v4 stammen und nicht neu erzeugt wurden; v4 bleibt aktiv, v5 liegt in data/build/modelle/."
+  }
+ ]
+}

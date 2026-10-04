@@ -351,6 +351,32 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 - **Nicht enthalten:** amtlicher Katasterauszug und Flurstücksnummern (ALKIS kostenpflichtig, siehe Grundsätze),
   Höhen über NHN im Plan (nur relativ), Baukosten, Baustoffe.
 
+### 4.2 Lernschleife: **gebaut; Probelauf bestanden, Version zurückgenommen**
+- **Einwilligung in der App** (Abschnitt „Steht hier schon etwas?“), standardmäßig aus und widerrufbar. Nur mit
+  Haken sendet Passt. bei „Stimmt“, „Gibt es nicht“, „Umriss nachziehen“ und „Objekt einzeichnen“:
+  Umriss (EPSG:25832, 0,1 m), Objektart, 1-km-Kachel, Aktion und Modellversion. Nicht gesendet werden Adresse,
+  Grenze und Name; der Server speichert weder IP noch Zeitpunkt. „Was genau?“ erklärt das und sagt offen, dass sich
+  ein Umriss über die Koordinaten einem Grundstück zuordnen lässt. „Meine Beiträge löschen“ löscht über die
+  Kennungen, die nur im eigenen Browser liegen. Im Browser geprüft: ohne Haken 0 Anfragen, mit Haken genau diese
+  Felder, Löschen leert die Datei.
+- **Speicher** hinter derselben Schnittstelle wie der Nachbar-Link (`app/src/speicher/`, `LernSpeicher`): JSONL in
+  `app/.daten/lernen.jsonl` (`app/scripts/lern-api.mjs`). Der Server prüft und bereinigt jeden Eintrag: Klasse und
+  Aktion aus fester Liste, Koordinaten in Bayern, Kachel passend zur Geometrie, unbekannte Felder werden verworfen.
+- **Nachtrainieren** (`pipeline/12_lernschleife.py alles`, für einen regelmäßigen Lauf z. B. per cron):
+  - Import: Beiträge in oder bis 15 m neben Test-Grundstücken werden verworfen (das Test-Set bleibt unberührt).
+    Gelöschte Beiträge verschwinden auch aus den Lernbeispielen.
+  - Versionen: `data/build/modelle/garten_v<N>.pkl`, Protokoll in `data/reference/modelle.json` (im Git).
+  - **Freigaberegel:** Alte und neue Version werden auf dem eingefrorenen Test-Set mit demselben Code gemessen.
+    Freigegeben wird nur, wenn F1 in keiner Klasse mit Referenzobjekten und bei „Nebengebäude“ sinkt. Sonst bleibt
+    die alte Version, und die neue wird als `abgelehnt` vermerkt. Tests: `pipeline/test_lernschleife.py`.
+- **Probelauf** (13 simulierte Beiträge aus der Dev-Referenz): 7 nutzbar, 5 ohne passenden Kandidaten der Erkennung,
+  1 mit unbekannter Klasse (Zaun/Mauer). Version 5 hat die Regel bestanden (Baum F1 0,36 → 0,39, sonst gleich).
+  Sie ist **zurückgenommen**, weil die App-Daten von v4 stammen und die ganze Kachel nicht neu erkannt wurde. Aktiv
+  bleibt v4, die simulierten Lernbeispiele sind gelöscht.
+- Ehrlich: 5 von 13 Beiträgen fanden keinen Kandidaten. Was die Erkennung gar nicht als Kandidat findet, kann
+  Nachtrainieren der Klassifikation nicht verbessern; dafür müsste die Kandidatensuche selbst lernen.
+- Tests: `lernen.test.ts` (3). Insgesamt **134 grün** (App) plus 4 (Pipeline).
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
@@ -368,6 +394,7 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 - AR auf dem eigenen iPhone und einem Android-Gerät ausprobieren. Android braucht die App unter einer https-Adresse.
   iPhone im gleichen WLAN: `npm run serve` zeigt die Adresse an (`http://192.168.…:4173`), in Safari öffnen.
   Nachbar-Link geht auch über http im WLAN (SHA-256-Ersatz, wenn `crypto.subtle` fehlt).
+- Lernschleife: Datenschutz von einer Fachperson prüfen lassen (Umrisse mit Koordinaten können personenbezogen sein).
 - Nachbar-Link: Datenschutzerklärung für den Betrieb (Antworten in SQLite, 400 Tage) von einer Fachperson prüfen lassen;
   auf dem Laptop Node-Version prüfen (`node --version`, mindestens 22.5).
 - ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).
