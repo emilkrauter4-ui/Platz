@@ -261,6 +261,36 @@ Stand 4. Oktober 2026.
 - Tests: 19 neu (`pflanzen.test.ts`): Grenzfälle genau 0,50 m und genau 2,00 m (Höhe und Abstand), schräge Hecke,
   schräge Grundstücksgrenze, Straße, Mauer, Wald, Spanne um 2 m Höhe, neutrale Texte. Insgesamt 92 grün.
 
+### 3.2 Nachbar-Link: **gebaut**
+- **Speicher wie entschieden:** Das Vorhaben steht komprimiert im URL-Fragment (`#n=…`, deflate-raw + base64url,
+  rund 260 Zeichen). Das Fragment geht nie an einen Server. Gespeichert wird nur die Antwort (Zeitpunkt,
+  „passt“/„frage“, Projekt-Hash) in SQLite (`node:sqlite`, keine Abhängigkeit) im bestehenden Node-Server
+  (`app/scripts/nachbar-api.mjs`, eingebunden in `serve.mjs` und den Vite-Dev-Server). Dazu kommen nur die
+  Link-Kennung und eine zufällige Antwort-Kennung, damit der Nachbar löschen kann. Keine IP, kein Name.
+  Antworten werden nach 400 Tagen automatisch gelöscht. Datenbank: `app/.daten/nachbar.sqlite` (nicht im Git,
+  Pfad über `PASST_DB`). **Braucht Node ≥ 22.5**; sonst antwortet die API mit 503, Anschauen geht trotzdem.
+- **Speicher-Schnittstelle** `app/src/speicher/` (`NachbarSpeicher`). Heute gibt es eine HTTP-Implementierung; für
+  einen Server in Deutschland wechselt nur die Implementierung oder die Basis-URL.
+- **Ohne Konto:** Link-Kennung = SHA-256 eines Zufallsschlüssels, den nur der Ersteller hat (localStorage). Mit dem
+  Schlüssel kann er Antworten abrufen, den Link zurückziehen und alles löschen. Der Server speichert keine Links.
+- **Ersteller:** „Nachbarn fragen“ öffnet einen Dialog: Objekte wählen, Gültigkeit 7, 30 oder 90 Tage, Link kopieren
+  oder teilen. Darunter die Liste der eigenen Links mit Antworten („anderer Stand“, wenn sich das Vorhaben seitdem
+  geändert hat), Zurückziehen und Löschen.
+- **Nachbar:** Nur-Lese-Szene mit den geteilten Objekten. Blickpunkt: Fenster antippen (Fassade, Höhe aus dem Tipp)
+  oder Stelle im Garten (1,6 m); ohne Eingabe das nächste angenommene Fenster (`Annahme`). „Von hier ansehen“ zeigt
+  die Szene auf Augenhöhe. Schatten mit Tag und Uhrzeit (deutsche Zeit), mit oder ohne Vorhaben. Dazu Aussage für den
+  Blickpunkt (Sonne / Schatten des Vorhabens / Schatten eines Hauses) und Sonnenstunden des Tages mit und ohne
+  Vorhaben. Knöpfe „Passt für mich“ und „Ich habe eine Frage“, Antwort löschbar. Der Hinweis „ersetzt keine Unterschrift
+  auf amtlichen Formularen“ steht im Dialog und beim Nachbarn, dazu Ablaufdatum und Widerrufbarkeit.
+- **Sonnenstand** (`rules/sonne.ts`): NOAA/Meeus-Näherung, gegen NREL-SPA (pvlib) an 5 Zeitpunkten < 0,2° genau.
+  Meridiankonvergenz (UTM 32, ~2°) berücksichtigt. **Schatten vereinfacht (`Annahme`):** ebenes Gelände, Häuser
+  aus LoD2 als Block bis zur halben Dachhöhe, Bäume ohne Schatten, unter 5° Sonnenhöhe kein Schatten.
+- Geprüft im Browser: Link erstellen → beim Nachbarn öffnen → Schatten → Antwort → Abruf beim Ersteller →
+  Widerruf → Link zeigt „zurückgezogen“. Keine Konsolenfehler.
+- Tests: `sonne.test.ts` (13), `nachbar.test.ts` (7: Kodierung, Hash, Kennung, Ablauf, API mit SQLite im Speicher,
+  inklusive „speichert keine weiteren Felder“). Insgesamt 112 grün.
+- Nebenbei behoben: Der Ladehinweis „Lädt amtliche Daten …“ blieb sichtbar (CSS überschrieb `hidden`).
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
@@ -273,6 +303,8 @@ Stand 4. Oktober 2026.
 - Bei 2–3 Bäumen an der Grenze den Stamm vor Ort einmessen, um die Spanne der Kronenmitte zu prüfen.
 - „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
 - KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
+- Nachbar-Link: Datenschutzerklärung für den Betrieb (Antworten in SQLite, 400 Tage) von einer Fachperson prüfen lassen;
+  auf dem Laptop Node-Version prüfen (`node --version`, mindestens 22.5).
 - ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).
 
 ## Speicher-Entscheidung (Emil, 4. Oktober 2026)

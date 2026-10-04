@@ -48,10 +48,23 @@ import {
   type Pflanze,
   type PflanzenArt,
   type SeitenAngabe,
+  imSchatten,
+  koerperAus,
+  koerperGebaeude,
+  koerperPflanze,
+  MIN_HOEHE_GRAD,
+  pointSegment,
+  schattenAmBoden,
+  signedArea,
+  sonnenstand,
+  sonnenstunden,
+  type Koerper,
 } from './rules';
 import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
-import { cartesianToLocal, localToCartesian, lonLatToLocal, setOrigin } from './scene/coords';
+import { cartesianToLocal, getOrigin, localToCartesian, localToLonLat, lonLatToLocal, setOrigin } from './scene/coords';
+import { abgelaufen, dekodieren, kodieren, linkIdAus, neuerSchluessel, projektHash, VERSION, type Vorhaben } from './nachbar/link';
+import { apiSpeicher, type NachbarAntwort } from './speicher';
 import { Terrain } from './scene/terrain';
 import { createScene, type Scene } from './scene/viewer';
 import { Renderer, type RenderState } from './scene/render';
@@ -526,6 +539,7 @@ function update() {
 }
 
 function renderVerdict() {
+  if (st.ansicht === 'nachbar') return nachbarVerdict();
   const r = st.modus === 'pflanzen' && st.pflanzRes ? st.pflanzRes : st.res![st.selected];
   verdict(r.head, r.sub, r.status);
   document.querySelector('[data-modus="pflanzen"]')?.setAttribute('aria-selected', String(st.modus === 'pflanzen'));
@@ -599,6 +613,7 @@ function renderSheet() {
       return `<div class="ctl"><label for="s${i}"><span>${s.l}</span><output data-k="${s.k}" for="s${i}"></output></label><input id="s${i}" type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${v}" data-k="${s.k}"></div>`;
     })
     .join('');
+  if (st.ansicht === 'nachbar') return nbSt.v ? renderNachbarSheet() : undefined;
   if (st.kante || st.zeichnen) return renderEditSheet();
   if (st.modus === 'pflanzen') return renderPflanzenSheet();
   const bestHtml = bestandHtml();
@@ -634,6 +649,7 @@ function renderSheet() {
     </details>
     <div class="btnrow">
       <button class="primary" id="reportBtn" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
+      <button class="sec" id="teilenBtn" type="button" aria-haspopup="dialog">Nachbarn fragen</button>
       <button class="sec" id="editBtn" type="button">Grenze ändern</button>
       <button class="sec" id="newBtn" type="button">Andere Adresse</button>
     </div>`;
@@ -698,6 +714,7 @@ function renderSheet() {
     render();
   });
   $('reportBtn').addEventListener('click', openReport);
+  $('teilenBtn').addEventListener('click', openTeilen);
   $('editBtn').addEventListener('click', () => {
     st.draft = [...(st.plot ?? [])];
     st.view = 'plan';
@@ -819,9 +836,11 @@ function renderPflanzenSheet() {
     <p class="fine" style="text-align:left">Grenzabstand von Pflanzen ist Nachbarrecht (AGBGB), kein Baurecht. Das Bauamt prüft ihn nicht.</p>
     <div class="btnrow">
       <button class="primary" id="reportBtn" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
+      <button class="sec" id="teilenBtn" type="button" aria-haspopup="dialog">Nachbarn fragen</button>
       <button class="sec" id="editBtn" type="button">Grenze ändern</button>
     </div>`;
   bindTabs();
+  $('teilenBtn').addEventListener('click', openTeilen);
   $('pArt').addEventListener('change', (e) => {
     const a = (e.target as HTMLSelectElement).value as PflanzenArt;
     p.art = a;
@@ -921,6 +940,348 @@ function setStamm(g: Vec2) {
   it.stammSpanne = 0.2;
   hint('Stamm gesetzt. Gemessen wird jetzt ab dieser Stelle.');
   buildSite();
+  renderSheet();
+}
+
+/* ---------- Nachbar-Link (Phase 3.2) ---------- */
+const speicher = apiSpeicher();
+interface MeinLink { l: string; s: string; bis: string; hash: string; titel: string; erstellt: string }
+const LINKS_KEY = 'passt.links';
+function meineLinks(): MeinLink[] {
+  try { return JSON.parse(localStorage.getItem(LINKS_KEY) ?? '[]'); } catch { return []; }
+}
+function speichereLinks(l: MeinLink[]) {
+  try { localStorage.setItem(LINKS_KEY, JSON.stringify(l)); } catch { /* privates Fenster: Link bleibt nur in dieser Sitzung */ }
+}
+const datumText = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+const HINWEIS_LINK = 'Der Link ersetzt keine Unterschrift deines Nachbarn auf amtlichen Formularen, zum Beispiel im Bauantrag.';
+
+function objektText(k: ObjectKind, o: Placed): string {
+  if (k === 'gartenhaus') return `Gartenhaus ${fmt(o.w, 1)} × ${fmt(o.d, 1)} m, Wandhöhe ${fmt(o.h, 1)} m${(o.neigung ?? 0) > 0 ? `, Satteldach ${Math.round(o.neigung!)}°, First ${fmt(o.h + dachHoehe(o), 1)} m` : ', Flachdach'}`;
+  if (k === 'carport') return `Carport ${fmt(o.w, 1)} × ${fmt(o.d, 1)} m, ${fmt(o.h, 1)} m hoch`;
+  return `Wärmepumpe (Außengerät)${o.lw ? `, Schallleistung ${Math.round(o.lw)} dB(A) laut Angabe` : ''}`;
+}
+function pflanzeText(p: Pflanze): string {
+  return p.art === 'hecke' ? `Hecke ${fmt(p.laenge, 1)} m lang, bis ${fmt(p.hoehe, 1)} m hoch` : `${p.art === 'baum' ? 'Baum' : 'Strauch'} bis ${fmt(p.hoehe, 1)} m hoch`;
+}
+
+/** Dialog für den Ersteller: Objekte wählen, Ablauf, Link erstellen; eigene Links verwalten. */
+function openTeilen() {
+  if (!st.objs || !st.plot) return;
+  const vor = st.modus === 'pflanzen' ? 'pflanze' : st.selected;
+  const opts: [string, string][] = [...ORDER.map((k) => [k, objektText(k, st.objs![k])] as [string, string]), ...(st.pflanze ? [['pflanze', pflanzeText(st.pflanze)] as [string, string]] : [])];
+  openModal('Nachbarn fragen', `
+    <p>Dein Nachbar bekommt einen Link ohne Anmeldung. Er sieht dein Vorhaben in 3D, kann von seinem Fenster oder Garten aus schauen und den Schatten über den Tag prüfen. Dann kann er antworten: „Passt für mich“ oder „Ich habe eine Frage“.</p>
+    <p class="m-fine">Das Vorhaben steht nur im Link selbst – Passt. speichert es nicht. Gespeichert wird nur die Antwort: Zeitpunkt, Antwort und eine Prüfsumme des Vorhabens.</p>
+    <h3>Was soll er sehen?</h3>
+    <ul class="plain">${opts.map(([k, t]) => `<li><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-teil="${k}" ${k === vor ? 'checked' : ''}> ${esc(t)}</label></li>`).join('')}</ul>
+    <div class="field"><span>Link gilt</span>${sel('tBis', '30', [['7', '7 Tage'], ['30', '30 Tage'], ['90', '90 Tage']])}</div>
+    <div class="btnrow"><button class="primary" id="tMach" type="button">Link erstellen</button></div>
+    <div id="tLink"></div>
+    <p class="m-fine">${HINWEIS_LINK} Du kannst ihn jederzeit zurückziehen und die Antworten löschen.</p>
+    <h3>Deine Links</h3><div id="tListe"></div>`);
+  linkListe();
+  $('tMach').addEventListener('click', async () => {
+    const teile = [...document.querySelectorAll<HTMLInputElement>('[data-teil]')].filter((x) => x.checked).map((x) => x.dataset.teil!);
+    if (!teile.length) { $('tLink').innerHTML = '<p class="fine">Wähl mindestens ein Objekt.</p>'; return; }
+    const tage = Number(($('tBis') as HTMLSelectElement).value);
+    const b = new Date(Date.now() + tage * 86400000);
+    const bis = `${b.getFullYear()}-${String(b.getMonth() + 1).padStart(2, '0')}-${String(b.getDate()).padStart(2, '0')}`;
+    const s = neuerSchluessel();
+    const l = await linkIdAus(s);
+    const o: Vorhaben['o'] = {};
+    for (const k of ORDER) if (teile.includes(k)) o[k] = { ...st.objs![k], baseElevation: undefined, geraet: undefined };
+    const v: Vorhaben = { v: VERSION, u: getOrigin(), b: st.plot!, o, ...(teile.includes('pflanze') && st.pflanze ? { p: st.pflanze } : {}), bis, l };
+    const url = `${location.origin}${location.pathname}#n=${await kodieren(v)}`;
+    const hash = await projektHash(v);
+    const titel = teile.map((k) => (k === 'pflanze' ? PFL_ART.find((a) => a[0] === st.pflanze!.art)![1] : NAMES[k as ObjectKind].name)).join(', ');
+    speichereLinks([{ l, s, bis, hash, titel, erstellt: new Date().toISOString() }, ...meineLinks()]);
+    $('tLink').innerHTML = `<div class="field"><input id="tUrl" readonly value="${esc(url)}" style="width:100%"></div>
+      <div class="btnrow"><button class="sec" id="tCopy" type="button">Kopieren</button>${'share' in navigator ? '<button class="sec" id="tShare" type="button">Teilen</button>' : ''}</div>
+      <p class="m-fine">Gilt bis ${esc(datumText(bis))}.</p>`;
+    $('tCopy').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(url); $('tCopy').textContent = 'Kopiert'; } catch { ($('tUrl') as HTMLInputElement).select(); }
+    });
+    document.getElementById('tShare')?.addEventListener('click', () => navigator.share({ title: 'Mein Vorhaben – Passt.', text: 'Schau dir an, was ich plane, und sag mir, ob es für dich passt.', url }).catch(() => {}));
+    linkListe();
+  });
+}
+
+function linkListe() {
+  const el = document.getElementById('tListe');
+  if (!el) return;
+  const ls = meineLinks();
+  el.innerHTML = ls.length
+    ? `<ul class="rows best">${ls.map((x) => `<li><span>${esc(x.titel)} · bis ${esc(datumText(x.bis))}<br><small class="fine" id="tA-${x.l}"></small></span><span class="acts">
+        <button type="button" data-tab="${x.l}">Antworten</button><button type="button" data-twi="${x.l}">Zurückziehen</button><button type="button" data-tlo="${x.l}">Löschen</button></span></li>`).join('')}</ul>`
+    : '<p class="fine">Noch keine Links.</p>';
+  const finde = (l: string) => ls.find((x) => x.l === l)!;
+  const melde = (l: string, t: string) => { const e = document.getElementById(`tA-${l}`); if (e) e.textContent = t; };
+  el.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) => b.addEventListener('click', async () => {
+    const x = finde(b.dataset.tab!);
+    try {
+      const a = await speicher.abrufen(x.l, x.s);
+      melde(x.l, a.length ? a.map((r) => `${new Date(r.zeit).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}: ${r.antwort === 'passt' ? 'Passt für mich' : 'Hat eine Frage'}${r.hash === x.hash ? '' : ' (anderer Stand)'}`).join(' · ') : 'Noch keine Antwort.');
+    } catch (e) { melde(x.l, (e as Error).message); }
+  }));
+  el.querySelectorAll<HTMLButtonElement>('[data-twi]').forEach((b) => b.addEventListener('click', async () => {
+    const x = finde(b.dataset.twi!);
+    try { await speicher.zurueckziehen(x.l, x.s); melde(x.l, 'Zurückgezogen – keine neuen Antworten mehr.'); } catch (e) { melde(x.l, (e as Error).message); }
+  }));
+  el.querySelectorAll<HTMLButtonElement>('[data-tlo]').forEach((b) => b.addEventListener('click', async () => {
+    const x = finde(b.dataset.tlo!);
+    try {
+      await speicher.allesLoeschen(x.l, x.s);
+      speichereLinks(meineLinks().filter((y) => y.l !== x.l));
+      linkListe();
+    } catch (e) { melde(x.l, (e as Error).message); }
+  }));
+}
+
+/* ----- Ansicht des Nachbarn ----- */
+const nbSt: {
+  v: Vorhaben | null;
+  hash: string;
+  datum: string;
+  minuten: number;
+  mit: boolean;
+  tippen: 'fenster' | 'garten' | null;
+  antwortId: string | null;
+  gesendet: NachbarAntwort | null;
+  meldung: string;
+  stunden: { ohne: number; mit: number } | null;
+  jetzt: string;
+} = { v: null, hash: '', datum: '', minuten: 15 * 60, mit: true, tippen: null, antwortId: null, gesendet: null, meldung: '', stunden: null, jetzt: '' };
+
+const ANTWORT_KEY = (l: string) => `passt.antwort.${l}`;
+
+function nachbarEnde(head: string, sub: string) {
+  st.ansicht = 'nachbar';
+  verdict(head, sub);
+  $('stepBody').innerHTML = `<p class="fine" style="text-align:left">${esc(HINWEIS_LINK)}</p>`;
+}
+
+async function startNachbar(fragment: string) {
+  st.ansicht = 'nachbar';
+  const heute = new Date();
+  nbSt.datum = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, '0')}-${String(heute.getDate()).padStart(2, '0')}`;
+  verdict('Lädt das Vorhaben …', '');
+  $('stepBody').innerHTML = '';
+  const v = await dekodieren(fragment);
+  if (!v) return nachbarEnde('Dieser Link ist unvollständig.', 'Bitte deinen Nachbarn, ihn noch einmal zu schicken.');
+  if (abgelaufen(v)) return nachbarEnde('Dieser Link ist abgelaufen.', `Er galt bis ${datumText(v.bis)}.`);
+  try {
+    if (await speicher.zurueckgezogen(v.l)) return nachbarEnde('Dein Nachbar hat diesen Link zurückgezogen.', 'Das Vorhaben wird nicht mehr angezeigt.');
+  } catch { nbSt.meldung = 'Der Server ist gerade nicht erreichbar – anschauen geht, antworten vielleicht nicht.'; }
+  nbSt.hash = await projektHash(v);
+  try { nbSt.antwortId = localStorage.getItem(ANTWORT_KEY(v.l)); } catch { /* egal */ }
+  // Ursprung anpassen, falls sich das Gebiet verschoben hat
+  const o = getOrigin();
+  const dx = v.u[0] - o[0];
+  const dy = v.u[1] - o[1];
+  const sh = (p: Vec2): Vec2 => [p[0] + dx, p[1] + dy];
+  v.b = v.b.map(sh);
+  for (const k of Object.keys(v.o) as ObjectKind[]) v.o[k]!.center = sh(v.o[k]!.center);
+  if (v.p) v.p.center = sh(v.p.center);
+  nbSt.v = v;
+  const c = centroid(v.b);
+  await Promise.all([details, terrain.ensure([c[0] - 90, c[1] - 90], [c[0] + 90, c[1] + 90])]);
+  st.draft = v.b;
+  plotProvenance = 'nutzerbestätigt';
+  await confirmPlot();
+  st.ansicht = 'nachbar';
+  st.showAF = false;
+  for (const k of Object.keys(v.o) as ObjectKind[]) st.objs![k] = v.o[k]!;
+  st.sichtbar = Object.keys(v.o) as ObjectKind[];
+  st.pflanze = v.p ?? null;
+  // Blickpunkt: angenommenes Fenster, das dem Vorhaben am nächsten liegt
+  const ziel = vorhabenMitte();
+  const w = st.windows.filter((x) => !st.buildings.find((b) => b.id === x.buildingId)?.own).sort((a, b) => Math.hypot(a.pos[0] - ziel[0], a.pos[1] - ziel[1]) - Math.hypot(b.pos[0] - ziel[0], b.pos[1] - ziel[1]))[0];
+  st.blick = w ? { p: w.pos, z: w.z, annahme: true } : null;
+  hint(null);
+  update();
+  schattenNeu(true);
+  renderSheet();
+}
+
+function vorhabenKoerper(): Koerper[] {
+  const v = nbSt.v;
+  if (!v) return [];
+  return [...(Object.values(v.o) as Placed[]).map((o) => koerperAus(o)), ...(v.p ? [koerperPflanze(v.p)] : [])];
+}
+function vorhabenMitte(): Vec2 {
+  const ps = [...(Object.values(nbSt.v?.o ?? {}) as Placed[]).map((o) => o.center), ...(nbSt.v?.p ? [nbSt.v.p.center] : [])];
+  return ps.length ? [ps.reduce((a, p) => a + p[0], 0) / ps.length, ps.reduce((a, p) => a + p[1], 0) / ps.length] : centroid(st.plot!);
+}
+/** Breite, Länge und Meridiankonvergenz (UTM 32, Mittelmeridian 9°) am Grundstück. */
+function geoLage(): { lat: number; lon: number; konv: number } {
+  const [lon, lat] = localToLonLat(centroid(st.plot!));
+  const konv = (Math.atan(Math.tan((lon - 9) * (Math.PI / 180)) * Math.sin(lat * (Math.PI / 180))) * 180) / Math.PI;
+  return { lat, lon, konv };
+}
+/** Uhrzeit am Grundstück (Europe/Berlin, mit Sommerzeit) → Zeitpunkt; unabhängig von der Zeitzone des Geräts. */
+function zeitpunkt(): Date {
+  const [y, m, d] = nbSt.datum.split('-').map(Number);
+  const utc = Date.UTC(y, m - 1, d, Math.floor(nbSt.minuten / 60), nbSt.minuten % 60);
+  const versatz = (t: number) => {
+    const z = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Berlin', timeZoneName: 'shortOffset' }).formatToParts(new Date(t)).find((x) => x.type === 'timeZoneName')?.value ?? 'GMT+1';
+    const r = z.match(/GMT([+-]\d+)(?::(\d+))?/);
+    return r ? (Number(r[1]) * 60 + Math.sign(Number(r[1])) * Number(r[2] ?? 0)) * 60000 : 3600000;
+  };
+  return new Date(utc - versatz(utc - versatz(utc)));
+}
+
+/** Schatten für Datum/Uhrzeit neu; mit tagNeu auch die Sonnenstunden des Tages am Blickpunkt. */
+function schattenNeu(tagNeu = false) {
+  if (!st.plot || !nbSt.v || !nbSt.datum) return;
+  const { lat, lon, konv } = geoLage();
+  const s = sonnenstand(zeitpunkt(), lat, lon);
+  const vk = vorhabenKoerper();
+  const c = centroid(st.plot);
+  const hk = st.buildings.filter((b) => polygonDistance([c], b.footprint) < 70).map(koerperGebaeude).filter((k): k is Koerper => !!k);
+  const polys: RenderState['schatten'] = [];
+  for (const k of hk) { const f = schattenAmBoden(k, s, konv); if (f) polys.push({ poly: f, vorhaben: false }); }
+  if (nbSt.mit) for (const k of vk) { const f = schattenAmBoden(k, s, konv); if (f) polys.push({ poly: f, vorhaben: true }); }
+  st.schatten = polys.filter((x) => x.poly.every((p) => Number.isFinite(p[0]) && Number.isFinite(p[1])));
+  renderer.syncSchatten();
+  render();
+  if (st.blick) {
+    const ids = new Set(vk.map((k) => k.id));
+    const id = s.hoehe < MIN_HOEHE_GRAD ? '' : imSchatten(st.blick.p, st.blick.z, nbSt.mit ? [...vk, ...hk] : hk, s, konv);
+    nbSt.jetzt = s.hoehe < MIN_HOEHE_GRAD ? 'Die Sonne steht zu tief oder ist untergegangen.' : id == null ? 'Dein Blickpunkt liegt in der Sonne.' : ids.has(id) ? 'Dein Blickpunkt liegt im Schatten des Vorhabens.' : 'Dein Blickpunkt liegt im Schatten eines Hauses.';
+    if (tagNeu) {
+      const tag = new Date(`${nbSt.datum}T00:00:00Z`);
+      nbSt.stunden = { ohne: sonnenstunden(st.blick.p, st.blick.z, hk, tag, lat, lon, konv), mit: sonnenstunden(st.blick.p, st.blick.z, [...vk, ...hk], tag, lat, lon, konv) };
+    }
+  } else nbSt.jetzt = '';
+  const el = document.getElementById('nbSonne');
+  if (el) el.innerHTML = sonneHtml();
+  const out = document.querySelector('output[for="nbZeit"]');
+  if (out) out.textContent = `${String(Math.floor(nbSt.minuten / 60)).padStart(2, '0')}:${String(nbSt.minuten % 60).padStart(2, '0')} Uhr`;
+}
+
+const stdText = (h: number) => `${Math.floor(h + 1e-9)} h ${String(Math.round((h - Math.floor(h + 1e-9)) * 60)).padStart(2, '0')} min`;
+function sonneHtml(): string {
+  if (!st.blick) return '<p class="fine" style="text-align:left">Tipp auf dein Fenster oder in deinen Garten, dann rechnet Passt. den Schatten für diese Stelle.</p>';
+  const s = nbSt.stunden;
+  return `<p style="text-align:left;margin:6px 0">${esc(nbSt.jetzt)} ${tag('berechnet', 'berechnet')}</p>
+    ${s ? `<p class="fine" style="text-align:left">Sonne an deinem Blickpunkt an diesem Tag: ohne Vorhaben ${stdText(s.ohne)}, mit Vorhaben ${stdText(s.mit)}${s.ohne - s.mit > 0.01 ? ` – ${stdText(s.ohne - s.mit)} weniger` : ' – kein Unterschied'}.</p>` : ''}`;
+}
+
+function nachbarVerdict() {
+  const v = nbSt.v;
+  if (!v) return;
+  const teile = [...(Object.entries(v.o) as [ObjectKind, Placed][]).map(([k, o]) => objektText(k, o)), ...(v.p ? [pflanzeText(v.p)] : [])];
+  verdict('Dein Nachbar zeigt dir sein Vorhaben.', teile.join(' · '));
+}
+
+function renderNachbarSheet() {
+  const v = nbSt.v!;
+  nachbarVerdict();
+  const b = st.blick;
+  const fp = [...(Object.values(v.o) as Placed[]).map((o) => footprint(o)), ...(v.p ? [koerperPflanze(v.p).fp] : [])];
+  const abst = b ? Math.min(...fp.map((f) => polygonDistance([b.p], f))) : null;
+  const antwort = nbSt.gesendet ?? (nbSt.antwortId ? 'gesendet' : null);
+  $('stepBody').innerHTML = `
+    <h3 style="font-size:15px;margin:16px 0 6px">Von wo schaust du?</h3>
+    <p class="fine" style="text-align:left">${b ? `${b.annahme ? 'Angenommen: das nächste Fenster deines Hauses, Mitte der Fassade.' : 'Dein Blickpunkt'} ${fmt(b.z, 1)} m über dem Gelände${abst != null ? `, etwa ${fmt(abst, 1)} m vom Vorhaben entfernt` : ''}.` : 'Noch kein Blickpunkt.'} ${b ? tag(b.annahme ? 'Annahme' : 'nutzerbestätigt', b.annahme ? 'Annahme' : 'nutzerbestätigt') : ''}</p>
+    <div class="btnrow">
+      <button class="sec" id="nbFenster" type="button" aria-pressed="${nbSt.tippen === 'fenster'}">${nbSt.tippen === 'fenster' ? 'Tipp jetzt auf dein Fenster …' : 'Mein Fenster antippen'}</button>
+      <button class="sec" id="nbGarten" type="button" aria-pressed="${nbSt.tippen === 'garten'}">${nbSt.tippen === 'garten' ? 'Tipp jetzt in deinen Garten …' : 'Stelle im Garten antippen'}</button>
+      ${b ? '<button class="sec" id="nbSicht" type="button">Von hier ansehen</button>' : ''}
+    </div>
+    <h3 style="font-size:15px;margin:16px 0 6px">Schatten</h3>
+    <div class="field"><label for="nbDatum">Tag</label><input id="nbDatum" type="date" value="${esc(nbSt.datum)}"></div>
+    <div class="ctl"><label for="nbZeit"><span>Uhrzeit (deutsche Zeit)</span><output for="nbZeit"></output></label><input id="nbZeit" type="range" min="300" max="1290" step="15" value="${nbSt.minuten}"></div>
+    <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="nbMit" ${nbSt.mit ? 'checked' : ''}> Schatten mit Vorhaben zeigen</label>
+    <div id="nbSonne">${sonneHtml()}</div>
+    <p class="fine" style="text-align:left">Vereinfacht gerechnet: ebenes Gelände, Häuser als Block bis zur halben Dachhöhe, Bäume ohne Schatten. ${tag('Annahme', 'Annahme')}</p>
+    <h3 style="font-size:15px;margin:16px 0 6px">Deine Antwort</h3>
+    ${antwort ? `<p style="text-align:left">${antwort === 'passt' ? 'Danke – du hast „Passt für mich“ geantwortet.' : antwort === 'frage' ? 'Danke – dein Nachbar sieht, dass du eine Frage hast. Sprich ihn am besten direkt an; Passt. speichert keine Nachrichten.' : 'Du hast auf diesen Link schon geantwortet.'}</p>
+      ${nbSt.antwortId ? '<div class="btnrow"><button class="sec" id="nbLoeschen" type="button">Meine Antwort löschen</button></div>' : ''}`
+      : `<div class="btnrow"><button class="primary" id="nbPasst" type="button">Passt für mich</button><button class="sec" id="nbFrage" type="button">Ich habe eine Frage</button></div>`}
+    ${nbSt.meldung ? `<p class="warnbox">${esc(nbSt.meldung)}</p>` : ''}
+    <p class="fine" style="text-align:left">Gespeichert werden nur Zeitpunkt, deine Antwort und eine Prüfsumme des Vorhabens – kein Name, keine Adresse. ${esc(HINWEIS_LINK)} Der Link gilt bis ${esc(datumText(v.bis))}; dein Nachbar kann ihn zurückziehen, und du kannst deine Antwort jederzeit löschen.</p>`;
+  const tippen = (m: 'fenster' | 'garten') => () => {
+    nbSt.tippen = nbSt.tippen === m ? null : m;
+    hint(nbSt.tippen === 'fenster' ? 'Tipp auf die Wand deines Hauses, dort wo dein Fenster ist.' : nbSt.tippen === 'garten' ? 'Tipp auf die Stelle in deinem Garten.' : null);
+    renderSheet();
+  };
+  $('nbFenster').addEventListener('click', tippen('fenster'));
+  $('nbGarten').addEventListener('click', tippen('garten'));
+  document.getElementById('nbSicht')?.addEventListener('click', vonHierAnsehen);
+  $('nbDatum').addEventListener('change', (e) => {
+    const x = (e.target as HTMLInputElement).value;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(x)) { nbSt.datum = x; schattenNeu(true); }
+  });
+  $('nbZeit').addEventListener('input', (e) => { nbSt.minuten = Number((e.target as HTMLInputElement).value); schattenNeu(); });
+  $('nbMit').addEventListener('change', (e) => { nbSt.mit = (e.target as HTMLInputElement).checked; schattenNeu(); });
+  const sende = (a: NachbarAntwort) => async () => {
+    try {
+      nbSt.antwortId = await speicher.antworten(v.l, a, nbSt.hash, v.bis);
+      nbSt.gesendet = a;
+      nbSt.meldung = '';
+      try { localStorage.setItem(ANTWORT_KEY(v.l), nbSt.antwortId); } catch { /* egal */ }
+    } catch (e) { nbSt.meldung = `Antwort nicht gespeichert: ${(e as Error).message}`; }
+    renderSheet();
+  };
+  document.getElementById('nbPasst')?.addEventListener('click', sende('passt'));
+  document.getElementById('nbFrage')?.addEventListener('click', sende('frage'));
+  document.getElementById('nbLoeschen')?.addEventListener('click', async () => {
+    try {
+      await speicher.antwortLoeschen(nbSt.antwortId!);
+      nbSt.antwortId = null;
+      nbSt.gesendet = null;
+      try { localStorage.removeItem(ANTWORT_KEY(v.l)); } catch { /* egal */ }
+      nbSt.meldung = 'Deine Antwort ist gelöscht.';
+    } catch (e) { nbSt.meldung = (e as Error).message; }
+    renderSheet();
+  });
+  schattenNeu();
+}
+
+/** Kamera auf Augenhöhe am Blickpunkt, Richtung Vorhaben. */
+function vonHierAnsehen() {
+  const b = st.blick;
+  if (!b) return;
+  const z = vorhabenMitte();
+  const heading = Math.atan2(z[0] - b.p[0], z[1] - b.p[1]) + CMath.toRadians(geoLage().konv);
+  // Augenhöhe: die Mindesthöhe der Kamera (8 m, gegen Absturz ins Gelände) hier aufheben
+  scene.viewer.scene.screenSpaceCameraController.minimumZoomDistance = 1;
+  scene.viewer.camera.flyTo({
+    destination: localToCartesian(b.p, terrain.heightOrCoarse(b.p) + Math.max(1.6, b.z)),
+    orientation: { heading, pitch: CMath.toRadians(-6), roll: 0 },
+    duration: 1.2,
+  });
+}
+
+/** Tipp des Nachbarn: Fenster an der Fassade (0,3 m davor) oder Stelle im Garten (Augenhöhe 1,6 m). */
+function setBlick(pos: Cartesian2) {
+  const v = scene.viewer;
+  if (nbSt.tippen === 'garten') {
+    const g = pickGround(pos);
+    if (!g) return;
+    st.blick = { p: g, z: 1.6, annahme: false };
+  } else {
+    const c = v.scene.pickPosition(pos);
+    if (!c) return;
+    const { p, h } = cartesianToLocal(c);
+    const nb = st.buildings.filter((b) => !b.own).map((b) => ({ b, d: polygonDistance([p], b.footprint) })).sort((a, b) => a.d - b.d)[0];
+    if (!nb || nb.d > 1.5) { hint('Das war keine Hauswand. Tipp direkt auf die Wand deines Hauses.'); return; }
+    let best: { q: Vec2; n: Vec2; d: number } | null = null;
+    const ccwFp = signedArea(nb.b.footprint) > 0;
+    for (const [a, e] of edges(nb.b.footprint)) {
+      const r = pointSegment(p, a, e);
+      const L = Math.hypot(e[0] - a[0], e[1] - a[1]) || 1;
+      const n: Vec2 = ccwFp ? [(e[1] - a[1]) / L, -(e[0] - a[0]) / L] : [-(e[1] - a[1]) / L, (e[0] - a[0]) / L];
+      if (!best || r.d < best.d) best = { q: r.q, n, d: r.d };
+    }
+    const q: Vec2 = [best!.q[0] + best!.n[0] * 0.3, best!.q[1] + best!.n[1] * 0.3];
+    st.blick = { p: q, z: Math.max(0.5, h - terrain.height(p)), annahme: false };
+  }
+  nbSt.tippen = null;
+  hint(null);
+  schattenNeu(true);
   renderSheet();
 }
 
@@ -1116,7 +1477,7 @@ function setupInput() {
 
   h.setInputAction((e: { position: Cartesian2 }) => {
     downAt = Cartesian2.clone(e.position);
-    if (st.step !== 'pruefen' || !st.objs) return;
+    if (st.step !== 'pruefen' || !st.objs || st.ansicht === 'nachbar') return;
     if (st.kante || st.zeichnen) {
       const kk = Renderer.keyOf(v.scene.pick(e.position));
       if (kk?.startsWith('ecke:') && st.kante) {
@@ -1195,6 +1556,8 @@ function setupInput() {
         renderer.syncEdit();
         renderSheet();
       }
+    } else if (st.step === 'pruefen' && st.ansicht === 'nachbar') {
+      if (nbSt.tippen) setBlick(e.position);
     } else if (st.step === 'pruefen' && st.modus === 'pflanzen' && pflSt.stammTippen) {
       const g = pickGround(e.position);
       if (g) setStamm(g);
@@ -1209,7 +1572,7 @@ function setupInput() {
 
   // Tastatur: Pfeile verschieben relativ zur Blickrichtung, R dreht um 90°
   $('stage').addEventListener('keydown', (e) => {
-    if (e.target !== $('stage') || st.step !== 'pruefen' || !st.objs) return;
+    if (e.target !== $('stage') || st.step !== 'pruefen' || !st.objs || st.ansicht === 'nachbar') return;
     const o: { center: Vec2; angle: number } = st.modus === 'pflanzen' && st.pflanze ? st.pflanze : st.objs[st.selected];
     if (e.key === 'r' || e.key === 'R') {
       o.angle = ((o.angle + Math.PI / 2 + Math.PI / 2) % Math.PI) - Math.PI / 2;
@@ -1459,7 +1822,8 @@ async function main() {
     $('loading').hidden = true;
     hideLoading();
   });
-  showStart();
+  if (location.hash.startsWith('#n=')) void startNachbar(location.hash.slice(3));
+  else showStart();
 
   // Test-Schnittstelle für automatisierte Durchläufe (nur mit ?debug)
   if (new URLSearchParams(location.search).has('debug')) {
@@ -1468,6 +1832,7 @@ async function main() {
         st,
         zonen: zonenSt,
         pflSt,
+        nbSt,
         goToPlot,
         startDemo: (id: string) => startDemo((data.site.demos ?? []).find((d) => d.id === id)!),
         setBoundary: async (pts: Vec2[]) => {

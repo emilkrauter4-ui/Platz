@@ -48,6 +48,14 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | Heat Pump KEYMARK, Datenblätter (keymark.eu) | **keine offene Lizenz angegeben**, Seite nennt „© KEYMARK 2025“ | Ursprung der Werte in hplib; Anzeige „Heat Pump KEYMARK / EN 12102“, Label `zertifiziert` | **Offen:** Einzelne Messwerte sind Fakten; für die Übernahme einer ganzen Liste kann das Datenbankherstellerrecht (§ 87b UrhG) greifen. Vor kommerzieller Nutzung mit KEYMARK/EHPA klären oder Werte nur auf Abruf je Gerät zeigen. |
 | BWP-Schallrechner (waermepumpe.de/werkzeuge/schallrechner) | Website des Bundesverbands Wärmepumpe | nur Vergleich: 10 Abfragen am 04.10.2026 (`docs/messungen/schall_bwp.md`); Stufen der Richtwirkung/Abschirmung als Quellenangabe in `limits.json` | keine Daten übernommen |
 
+## Nachbar-Link (Phase 3.2)
+
+| Werkzeug | Lizenz | Wofür | Hinweis |
+|---|---|---|---|
+| `node:sqlite` (in Node.js eingebaut) | MIT (Node.js), SQLite gemeinfrei | Antworten auf Nachbar-Links | keine zusätzliche Abhängigkeit |
+| CompressionStream / Web Crypto (Browser) | – | Vorhaben im URL-Fragment, Projekt-Hash | eingebaut |
+| pvlib 0.16 (NREL-SPA) | BSD-3-Clause | nur Referenzwerte für den Test des Sonnenstands (`test/sonne.test.ts`) | nicht in der App |
+
 ## Gesetzestexte
 
 | Text | Quelle | Hinweis |
