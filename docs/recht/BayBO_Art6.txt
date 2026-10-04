@@ -1,0 +1,112 @@
+# BayBO Art. 6 – Abstandsflächen, Abstände (Wortlaut)
+#
+# Abgerufen am 4. Oktober 2026. Das amtliche Portal gesetze-bayern.de verlangt bei automatischem Abruf ein CAPTCHA
+# (Myra Security) und war deshalb nicht abrufbar. Text aus zwei unabhängigen Wiedergaben, Wort für Wort verglichen:
+#   - https://lxgesetze.de/baybo/6  (BayBO vom 14.8.2007, zuletzt geändert am 23.4.2026)
+#   - https://lexmea.de/de/gesetz/baybo/art-6  (Import 24.11.2025)
+# Ergebnis des Vergleichs: identisch bis auf „4 m²“ (lxgesetze) / „4 m“ (lexmea, Darstellungsfehler) in Abs. 5a.
+# Satznummern stehen als einzelne Zahl in einer eigenen Zeile.
+# OFFEN: Vor einer öffentlichen Demo gegen https://www.gesetze-bayern.de/Content/Document/BayBO-6 prüfen (von Hand).
+
+Art. 6
+ Abstandsflächen, Abstände
+(1)
+1
+Vor den Außenwänden von Gebäuden sind Abstandsflächen von oberirdischen Gebäuden freizuhalten.
+2
+Satz 1 gilt entsprechend für andere Anlagen, von denen Wirkungen wie von Gebäuden ausgehen, gegenüber Gebäuden und Grundstücksgrenzen.
+ Satz 2 gilt insbesondere nicht für
+1.
+ Antennen und Antennen tragende Masten für den Mobilfunk und den Digitalfunk der Behörden und Organisationen mit Sicherheitsaufgaben (BOS) im Außenbereich,
+2.
+ Windenergieanlagen im Außenbereich,
+3.
+ ebenerdige Terrassen und
+4.
+ Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m über der Geländeoberfläche.
+4
+Eine Abstandsfläche ist nicht erforderlich vor Außenwänden, die an Grundstücksgrenzen errichtet werden, wenn nach planungsrechtlichen Vorschriften an die Grenze gebaut werden muss oder gebaut werden darf.
+5
+Art. 63 bleibt unberührt.
+(2)
+1
+Abstandsflächen sowie Abstände nach Art. 28 Abs. 2 Nr. 1 und Art. 30 Abs. 2 müssen auf dem Grundstück selbst liegen.
+2
+Sie dürfen auch auf öffentlichen Verkehrs-, Grün- und Wasserflächen liegen, jedoch nur bis zu deren Mitte.
+3
+Abstandsflächen sowie Abstände im Sinn des Satzes 1 dürfen sich ganz oder teilweise auf andere Grundstücke erstrecken, wenn rechtlich oder tatsächlich gesichert ist, dass sie nicht überbaut werden, oder wenn der Nachbar gegenüber der Bauaufsichtsbehörde schriftlich zustimmt; die Zustimmung des Nachbarn gilt auch für und gegen seinen Rechtsnachfolger.
+4
+Abstandsflächen dürfen auf die auf diesen Grundstücken erforderlichen Abstandsflächen nicht angerechnet werden.
+(3)
+ Die Abstandsflächen dürfen sich nicht überdecken; das gilt nicht für
+1.
+ Außenwände, die in einem Winkel von mehr als 75 Grad zueinander stehen,
+2.
+ Außenwände zu einem fremder Sicht entzogenen Gartenhof bei Wohngebäuden der Gebäudeklassen 1 und 2,
+3.
+ Gebäude und andere bauliche Anlagen, die in den Abstandsflächen zulässig sind.
+(4)
+1
+Die Tiefe der Abstandsfläche bemisst sich nach der Wandhöhe; sie wird senkrecht zur Wand gemessen.
+2
+Wandhöhe ist das Maß von der Geländeoberfläche bis zum Schnittpunkt der Wand mit der Dachhaut oder bis zum oberen Abschluss der Wand.
+3
+Die Höhe von Dächern mit einer Neigung von bis einschließlich 70 Grad wird zu einem Drittel der Wandhöhe, von Dächern mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet.
+4
+Die Sätze 1 bis 3 gelten für Dachaufbauten entsprechend.
+5
+Das sich ergebende Maß ist H.
+(5)
+1
+Die Tiefe der Abstandsflächen beträgt 0,4 H, in Gewerbe- und Industriegebieten 0,2 H, jeweils aber mindestens 3 m.
+2
+Durch städtebauliche Satzung oder eine Satzung nach Art. 81 kann ein abweichendes Maß der Tiefe der Abstandsfläche zugelassen oder vorgeschrieben werden.
+3
+Für solche Regelungen in Bebauungsplänen gilt § 33 BauGB entsprechend.
+(5a)
+1
+2
+Abweichend von Abs. 5 Satz 1 beträgt die Abstandsfläche in Gemeinden mit mehr als 250 000 Einwohnern außerhalb von Gewerbe-, Kern- und Industriegebieten sowie festgesetzten urbanen Gebieten 1 H, mindestens jedoch 3 m, wenn die nähere Umgebung überwiegend durch Gebäude der Gebäudeklassen 1, 2 oder 3 geprägt ist.
+3
+Vor bis zu zwei Außenwänden von nicht mehr als 16 m Länge genügen in diesen Fällen 0,5 H, mindestens jedoch 3 m, wenn das Gebäude an mindestens zwei Außenwänden Satz 1 beachtet.
+4
+Abweichend von Abs. 4 Satz 3 wird die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet.
+5
+Die Höhe der Giebelflächen im Bereich des Dachs wird abweichend von Satz 3 und von Abs. 4 Satz 3 bei Dachneigung von mehr als 70 Grad voll, im Übrigen zu einem Drittel angerechnet.
+ Dabei bleiben auch untergeordnete Dachgauben bei der Bemessung der Abstandsfläche außer Betracht, wenn
+1.
+ sie insgesamt nicht mehr als ein Drittel der Breite der Außenwand des jeweiligen Gebäudes, höchstens jeweils 5 m in Anspruch nehmen und
+2.
+ ihre Ansichtsfläche jeweils nicht mehr als 4 m² beträgt und eine Höhe von nicht mehr als 2,5 m aufweist.
+(6)
+ Bei der Bemessung der Abstandsflächen bleiben außer Betracht
+1.
+ vor die Außenwand vortretende Bauteile wie Gesimse und Dachüberstände,
+2.
+ untergeordnete Vorbauten wie Balkone und eingeschossige Erker, wenn sie
+a)
+ insgesamt nicht mehr als ein Drittel der Breite der Außenwand des jeweiligen Gebäudes, höchstens jeweils 5 m, in Anspruch nehmen,
+b)
+ nicht mehr als 1,50 m vor diese Außenwand vortreten und
+c)
+ mindestens 2 m von der gegenüberliegenden Nachbargrenze entfernt bleiben,
+3.
+ bei Gebäuden an der Grundstücksgrenze die Seitenwände von Vorbauten und Dachaufbauten, auch wenn sie nicht an der Grundstücksgrenze errichtet werden,
+4.
+ Maßnahmen zum Zwecke der Energieeinsparung an bestehenden Gebäuden, wenn sie
+a)
+ eine Stärke von nicht mehr als 0,30 m aufweisen und
+b)
+ mindestens 2,50 m von der Grundstücksgrenze zurückbleiben.
+2
+Abs. 5a Satz 5 bleibt unberührt.
+(7)
+ In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig
+1.
+ Garagen einschließlich ihrer Nebenräume, überdachte Tiefgaragenzufahrten, Aufzüge zu Tiefgaragen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt,
+2.
+ gebäudeunabhängige Solaranlagen mit einer Höhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m,
+3.
+ Stützmauern und geschlossene Einfriedungen in Gewerbe- und Industriegebieten, außerhalb dieser Baugebiete mit einer Höhe bis zu 2 m.
+2
+Die Länge der die Abstandsflächentiefe gegenüber den Grundstücksgrenzen nicht einhaltenden Bebauung nach den Nrn. 1 und 2 darf auf einem Grundstück insgesamt 15 m nicht überschreiten.

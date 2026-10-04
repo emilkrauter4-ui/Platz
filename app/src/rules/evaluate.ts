@@ -19,6 +19,7 @@ import {
   polygonSegment,
   projectedLength,
 } from './geometry';
+import { pruefeAbstandsflaechen, rauminhalt, waende, wandhoeheArt7 } from './abstand';
 import type { Bestand, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
 
 export const LIMITS = L;
@@ -126,11 +127,12 @@ function segmentsOf(site: Site) {
   }));
 }
 
-function analyse(site: Site, fp: Vec2[], wallFor: (a: Vec2, b: Vec2) => number): SegInfo[] {
+/** wallFor liefert je Grenzstrecke die mittlere Wandhöhe nach Abs. 7 (h7, Privileg) und H nach Abs. 4 (h4, Tiefe). */
+function analyse(site: Site, fp: Vec2[], wallFor: (a: Vec2, b: Vec2) => { h7: number; h4: number }): SegInfo[] {
   return segmentsOf(site).map((s) => {
     const m = polygonSegment(fp, s.a, s.b);
-    const wallH = wallFor(s.a, s.b);
-    const required = requiredDistance(wallH);
+    const { h7: wallH, h4 } = wallFor(s.a, s.b);
+    const required = requiredDistance(h4);
     return {
       seg: s.i,
       side: s.side,
@@ -171,8 +173,9 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
     id: k,
     fp: fps[k],
     segs: analyse(site, fps[k], (a, b) => {
-      const [e0, e1] = facingWall(fps[k], a, b);
-      return meanWallHeight(site, objs[k], e0, e1);
+      const [e0] = facingWall(fps[k], a, b);
+      const w = waende(site, objs[k]).find((x) => x.a === e0 || (x.a[0] === e0[0] && x.a[1] === e0[1]))!;
+      return { h7: wandhoeheArt7(w, objs[k]).h, h4: Math.max(w.ha, w.hb) };
     }),
     provenance: 'berechnet',
   }));
@@ -184,7 +187,7 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
   const bestandCons: Contributor[] = bestandOnPlot.map((b) => ({
     id: b.id,
     fp: b.footprint,
-    segs: analyse(site, b.footprint, () => b.height),
+    segs: analyse(site, b.footprint, () => ({ h7: b.height, h4: b.height })),
     provenance: b.provenance,
   }));
   const all = [...cons, ...bestandCons];
@@ -273,7 +276,7 @@ interface Limit {
 
 function limitFor(k: ObjectKind, o: Placed): Limit {
   if (k === 'gartenhaus') {
-    const v = o.w * o.d * o.h;
+    const v = rauminhalt(o);
     const max = L.gartenhaus.maxBruttoRauminhaltM3.wert;
     return {
       ok: v <= max + 1e-9,
@@ -328,8 +331,42 @@ function building(
     }
     rows.push({ text: `So nah an der Grenze nur bis ${GRENZ_H} m Wandhöhe. Deine: ${fmt(maxWall)} m`, tag: ART6, kind: 'rule' });
   } else {
-    const req = requiredDistance(maxWall);
+    const req = closest.required;
     rows.push({ text: req > MIN_ABSTAND + EPS ? `Abstandsfläche 0,4 H = ${fmt(req)} m eingehalten` : `Mindestabstand von ${MIN_ABSTAND} m eingehalten`, tag: ART6, kind: 'rule' });
+  }
+  // Abstandsflächen (Art. 6 Abs. 2–7). Privilegierte Nebengebäude brauchen keine eigenen (Abs. 7 Satz 1).
+  const af = pruefeAbstandsflaechen(site, o);
+  const ws = af.waende;
+  const h7max = Math.max(...ws.map((w) => wandhoeheArt7(w, o).h));
+  const a7offen = ws.some((w) => wandhoeheArt7(w, o).offen);
+  const ohneRaum = k === 'carport' || !(site.aufenthaltsraum.value || site.feuerstaette.value);
+  const privilegiert = ohneRaum && h7max <= GRENZ_H + 1e-9;
+  if ((o.neigung ?? 0) > 0) {
+    rows.push({
+      text: `Satteldach ${fmt(o.neigung!, 0)}°: Dach ${(o.neigung ?? 0) > 70 ? 'voll' : 'zu einem Drittel'} zur Wandhöhe (H bis ${fmt(Math.max(...ws.map((w) => Math.max(w.ha, w.hb))))} m)`,
+      tag: 'BayBO Art. 6 Abs. 4', kind: 'rule',
+    });
+    rows.push({ text: 'Giebelfläche wie das Dach angerechnet – Auslegung, bitte prüfen lassen', tag: 'offen', kind: 'offen' });
+  }
+  if (a7offen) rows.push({ text: 'Dach steiler als 45°: Anrechnung der Giebelfläche bei der mittleren Wandhöhe ist nicht eindeutig geregelt', tag: 'offen', kind: 'offen' });
+  const afAusserhalb = af.ausserhalb.some((x) => x > 0.05);
+  const afUeber = af.ueberdeckung.length > 0;
+  const afIn = af.inFlaeche.length > 0;
+  if (privilegiert) {
+    rows.push({ text: `Mittlere Wandhöhe ${fmt(h7max)} m: braucht keine eigene Abstandsfläche und darf in Abstandsflächen stehen`, tag: 'BayBO Art. 6 Abs. 7', kind: 'rule' });
+  } else if (!near.length) {
+    rows.push({
+      text: afAusserhalb ? 'Abstandsfläche reicht über die Grundstücksgrenze' : `Abstandsflächen 0,4 H (mind. ${MIN_ABSTAND} m) liegen auf deinem Grundstück`,
+      tag: 'BayBO Art. 6 Abs. 2', kind: 'rule',
+    });
+    if (afAusserhalb) rows.push({ text: 'Grenzt die Seite an eine öffentliche Straße, Grün- oder Wasserfläche, darf sie bis zu deren Mitte reichen – nicht geprüft', tag: 'offen', kind: 'offen' });
+    if (af.hausFlaechen.length) {
+      rows.push({
+        text: afUeber || afIn ? 'Überschneidet sich mit den Abstandsflächen deines Hauses' : 'Keine Überdeckung mit den Abstandsflächen deines Hauses',
+        tag: 'BayBO Art. 6 Abs. 3', kind: 'rule',
+      });
+      rows.push({ text: 'Abstandsflächen des Hauses aus LoD2: Dachneigung angenommen bis 70°', tag: 'Annahme', kind: 'Annahme' });
+    }
   }
   if (k === 'gartenhaus') {
     rows.push({
@@ -358,6 +395,15 @@ function building(
     status = 'bad'; head = 'Mit Aufenthaltsraum oder Ofen braucht es eine Genehmigung.'; sub = 'Ohne Bauantrag gehen nur Gartenhäuser ohne Aufenthaltsraum und ohne Feuerstätte.';
   } else if (!lim.ok) {
     status = 'bad'; head = lim.head; sub = lim.sub;
+  } else if (!privilegiert && !near.length && (afAusserhalb || afUeber || afIn)) {
+    status = 'bad';
+    if (afAusserhalb) {
+      head = 'Die Abstandsfläche reicht aufs Nachbargrundstück.';
+      sub = `Mit ${fmt(h7max)} m mittlerer Wandhöhe braucht ${NAMES[k].art} eigene Abstandsflächen auf deinem Grundstück. Rück weiter von der Grenze weg, bau niedriger oder frag den Nachbarn nach einer schriftlichen Zustimmung.`;
+    } else {
+      head = 'Zu nah an deinem Haus.';
+      sub = 'Die Abstandsflächen dürfen sich nicht überdecken. Rück weiter vom Haus weg oder bau niedriger (bis 3 m mittlere Wandhöhe ist es erlaubt).';
+    }
   } else if (near.length) {
     const tooHigh = near.filter((s) => s.wallH > GRENZ_H + 1e-9);
     if (tooHigh.length) {
@@ -387,6 +433,16 @@ function building(
     rows,
     badSegments: bad,
     dim: inside && closest.d > 0.02 ? { p: closest.p, q: closest.q, label: `${fmt(closest.d)} m` } : null,
+    af: {
+      // je Wand: bis 3 m mittlere Wandhöhe (ohne Aufenthaltsraum) braucht die Wand keine eigene Fläche → grau
+      flaechen: ws.map((w, i) => ({
+        poly: w.flaeche,
+        status: privilegiert || (ohneRaum && wandhoeheArt7(w, o).h <= GRENZ_H + 1e-9) ? 'info'
+          : af.ausserhalb[i] > 0.05 || af.ueberdeckung.some((u) => u.wand === i) ? 'bad' : 'ok',
+      })),
+      haus: af.hausFlaechen,
+      privilegiert,
+    },
   };
 }
 

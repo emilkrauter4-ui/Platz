@@ -6,6 +6,12 @@
       "wert": 75,
       "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
       "text": "Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sind verfahrensfrei."
+    },
+    "dachraumImRauminhalt": {
+      "wert": true,
+      "quelle": "Annahme Passt. zu BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
+      "text": "Brutto-Rauminhalt einschließlich Dachraum (Satteldach als halbes Prisma).",
+      "geprueft": false
     }
   },
   "carport": {
@@ -24,6 +30,47 @@
     "minM": {
       "wert": 3,
       "quelle": "BayBO Art. 6 Abs. 5 Satz 1"
+    },
+    "dachVollAbGrad": {
+      "wert": 70,
+      "quelle": "BayBO Art. 6 Abs. 4 Satz 3",
+      "text": "Die Höhe von Dächern mit einer Neigung von bis einschließlich 70 Grad wird zu einem Drittel der Wandhöhe, von Dächern mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "giebelAlsDach": {
+      "wert": true,
+      "quelle": "Auslegung zu BayBO Art. 6 Abs. 4 Sätze 2 und 3 (offen)",
+      "text": "Passt. rechnet die Giebelfläche wie das Dach an (bis 70° zu einem Drittel). Der Wortlaut regelt Giebelflächen nur in Abs. 5a (Großstädte) ausdrücklich; für Sulzbach-Rosenberg ist das eine Auslegung und im Ergebnis als offen gekennzeichnet.",
+      "geprueft": false
+    },
+    "ueberdeckungWinkelGrad": {
+      "wert": 75,
+      "quelle": "BayBO Art. 6 Abs. 3 Nr. 1",
+      "text": "Die Abstandsflächen dürfen sich nicht überdecken; das gilt nicht für Außenwände, die in einem Winkel von mehr als 75 Grad zueinander stehen.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "eigenesGrundstueck": {
+      "wert": true,
+      "quelle": "BayBO Art. 6 Abs. 2 Sätze 1 bis 3",
+      "text": "Abstandsflächen müssen auf dem Grundstück selbst liegen; auf öffentlichen Verkehrs-, Grün- und Wasserflächen nur bis zu deren Mitte; auf andere Grundstücke nur, wenn rechtlich oder tatsächlich gesichert ist, dass sie nicht überbaut werden, oder der Nachbar schriftlich zustimmt.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "faktorHGewerbe": {
+      "wert": 0.2,
+      "quelle": "BayBO Art. 6 Abs. 5 Satz 1",
+      "text": "In Gewerbe- und Industriegebieten 0,2 H, mindestens 3 m. In Passt. nicht wählbar (nur Wohn- und Mischgebiete).",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "waermepumpeOhneAbstandsflaecheBisM": {
+      "wert": 2,
+      "quelle": "BayBO Art. 6 Abs. 1 Satz 3 Nr. 4",
+      "text": "Satz 2 (Abstandsflächen für andere Anlagen) gilt insbesondere nicht für Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m über der Geländeoberfläche.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
     }
   },
   "grenzbebauung": {
@@ -41,11 +88,29 @@
       "wert": 15,
       "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
       "text": "Gesamtlänge der Bebauung an allen Grundstücksgrenzen bis 15 m."
+    },
+    "dachDrittelAbGrad": {
+      "wert": 45,
+      "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
+      "text": "… wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "ohneEigeneAbstandsflaeche": {
+      "wert": true,
+      "quelle": "BayBO Art. 6 Abs. 7 Satz 1",
+      "text": "In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig: Garagen … und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Wortlaut, Abruf 04.10.2026 über lxgesetze.de und lexmea.de; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
     }
   },
   "bestand": {
     "gebaeudeKlassen": {
-      "wert": ["gartenhaus", "gewaechshaus", "carport_garage"],
+      "wert": [
+        "gartenhaus",
+        "gewaechshaus",
+        "carport_garage"
+      ],
       "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
       "text": "Mitgezählt werden Garagen und Gebäude ohne Aufenthaltsräume und Feuerstätten (Gartenhaus, Gewächshaus, Garage/Carport). Pool, Terrasse, Spielturm, Trampolin und Pflanzen sind keine solchen Gebäude und zählen nicht zur Länge an der Grenze."
     },
@@ -65,12 +130,20 @@
       "text": "Wärmepumpen sind verfahrensfrei (Annahme: am Ein- oder Zweifamilienhaus)."
     },
     "richtwerteNachtDbA": {
-      "wert": { "rein": 35, "allgemein": 40, "misch": 45 },
+      "wert": {
+        "rein": 35,
+        "allgemein": 40,
+        "misch": 45
+      },
       "quelle": "TA Lärm Nr. 6.1",
       "text": "Immissionsrichtwerte nachts: reines Wohngebiet 35, allgemeines Wohngebiet 40, Mischgebiet 45 dB(A)."
     },
     "richtwirkungQ": {
-      "wert": { "frei": 2, "wand": 4, "ecke": 8 },
+      "wert": {
+        "frei": 2,
+        "wand": 4,
+        "ecke": 8
+      },
       "quelle": "LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)"
     },
     "formel": {

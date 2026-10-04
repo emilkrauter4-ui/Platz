@@ -193,7 +193,16 @@ nicht die Wandhöhe nach Art. 6 BayBO (folgt in Phase 2.2).
 - Fachliche Prüfung von `limits.json` durch Bauamt oder Architekt; die Regeln zu Hecken und Bäumen (AGBGB, Phase 3)
   am besten zusätzlich durch einen Anwalt.
 - Einverständnis der Eigentümer für die Demo-Adressen.
-- Vor Phase 3: Entscheidung, wo Nachbar-Link und Lernschleife gespeichert werden (Backend, Datenschutz).
+- ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).
+
+## Speicher-Entscheidung (Emil, 4. Oktober 2026)
+
+Lokal zuerst, aber hinter einer **Speicher-Schnittstelle**, damit später nur die Implementierung wechselt
+(Ziel: Server in Deutschland).
+- **Nachbar-Link:** Projektstand komprimiert im URL-Fragment (`#…`), das Vorhaben wird **nicht** auf dem Server
+  gespeichert. Nur die Antwort des Nachbarn (Zeitpunkt, Antwort, Projekt-Hash) per API in SQLite im bestehenden
+  Node-Server (`app/scripts/serve.mjs`, wo der LfU-Proxy läuft). Widerruf und Löschen per API.
+- **Lernschleife:** gleiche Schnittstelle, lokal als JSONL-Datei, nur mit Einwilligung, nur Geometrie, Klasse, Kachel.
 
 ## Bekannte Lücken
 

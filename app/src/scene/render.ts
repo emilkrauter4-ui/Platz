@@ -19,6 +19,7 @@ import {
   type Cartesian3,
 } from '@cesium/core';
 import {
+  dachHoehe,
   edges,
   footprint,
   type Bestand,
@@ -53,6 +54,8 @@ export interface RenderState {
   kante: { id: string; fp: Vec2[]; ref: Vec2[] } | null;
   /** neues Objekt wird gezeichnet (getippte Ecken) */
   zeichnen: Vec2[] | null;
+  /** Abstandsflächen am Boden zeigen */
+  showAF: boolean;
 }
 
 /** Farben der Garten-Klassen (Bauten nach Herkunft, siehe syncContext). */
@@ -286,11 +289,16 @@ export class Renderer {
       const col = Color.fromCssColorString(c);
       return st().selected === k ? col : Color.lerp(col, Color.fromCssColorString(this.s().dark ? '#121614' : '#ffffff'), 0.25, new Color());
     };
-    // Gartenhaus: Körper + Dachplatte
+    // Gartenhaus: Körper + Dachplatte (Flachdach) bzw. Satteldach mit Giebeln
+    const gh = () => obj('gartenhaus');
+    const flachdach = () => (gh() && !((gh()!.neigung ?? 0) > 0) ? grown(gh()!, 0.15) : null);
     this.objectEntities.push(
-      this.extruded('gartenhaus', () => (obj('gartenhaus') ? footprint(obj('gartenhaus')!) : null), () => this.base(obj('gartenhaus')!), () => this.base(obj('gartenhaus')!) + obj('gartenhaus')!.h, sel('gartenhaus', this.pal().balsa)),
-      this.extruded('gartenhaus', () => (obj('gartenhaus') ? grown(obj('gartenhaus')!, 0.15) : null), () => this.base(obj('gartenhaus')!) + obj('gartenhaus')!.h, () => this.base(obj('gartenhaus')!) + obj('gartenhaus')!.h + 0.12, sel('gartenhaus', this.pal().balsaDark)),
+      this.extruded('gartenhaus', () => (gh() ? footprint(gh()!) : null), () => this.base(gh()!), () => this.base(gh()!) + gh()!.h, sel('gartenhaus', this.pal().balsa)),
+      this.extruded('gartenhaus', flachdach, () => this.base(gh()!) + gh()!.h, () => this.base(gh()!) + gh()!.h + 0.12, sel('gartenhaus', this.pal().balsaDark)),
     );
+    for (const seite of [0, 1]) this.objectEntities.push(this.dachflaeche(gh, seite, sel('gartenhaus', this.pal().balsaDark)));
+    for (const seite of [1, 3]) this.objectEntities.push(this.giebel(gh, seite, sel('gartenhaus', this.pal().balsa)));
+    this.buildAF();
     // Carport: vier Pfosten + Dach
     for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
       this.objectEntities.push(
@@ -319,6 +327,110 @@ export class Renderer {
         show: new CallbackProperty(() => st().step === 'pruefen' && st().selected === 'waermepumpe', false),
       },
     });
+  }
+
+  /** Satteldach: First entlang der Breite w, Traufen an Kante 0 und 2 (wie rules/abstand.ts). */
+  private dachflaeche(o: () => Placed | null, seite: number, col: () => Color) {
+    const e = this.viewer.entities.add({
+      polygon: {
+        hierarchy: new CallbackProperty(() => {
+          const x = o();
+          if (!x || !((x.neigung ?? 0) > 0)) return new PolygonHierarchy([]);
+          const g = grown(x, 0.15);
+          const top = this.base(x) + x.h;
+          const dh = dachHoehe(x) + (0.15 * Math.tan(((x.neigung ?? 0) * Math.PI) / 180));
+          const mid = (p: Vec2, q: Vec2): Vec2 => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+          const [p0, p1, p2, p3] = g;
+          const r0 = mid(p0, p3);
+          const r1 = mid(p1, p2);
+          const pts = seite === 0 ? [[p0, 0], [p1, 0], [r1, dh], [r0, dh]] : [[p2, 0], [p3, 0], [r0, dh], [r1, dh]];
+          return new PolygonHierarchy(pts.map(([p, z]) => localToCartesian(p as Vec2, top + (z as number))));
+        }, false),
+        perPositionHeight: true,
+        material: this.color(col),
+      },
+    });
+    (e as unknown as Record<string, unknown>)[KEY] = new ConstantProperty('gartenhaus');
+    return e;
+  }
+
+  private giebel(o: () => Placed | null, kante: number, col: () => Color) {
+    const e = this.viewer.entities.add({
+      wall: {
+        positions: new CallbackProperty(() => {
+          const x = o();
+          if (!x || !((x.neigung ?? 0) > 0)) return [];
+          const f = footprint(x);
+          const a = f[kante];
+          const b = f[(kante + 1) % 4];
+          return [a, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] as Vec2, b].map((p) => localToCartesian(p, 0));
+        }, false),
+        minimumHeights: new CallbackProperty(() => {
+          const x = o();
+          return x && (x.neigung ?? 0) > 0 ? [0, 0, 0].map(() => this.base(x) + x.h) : [];
+        }, false),
+        show: new CallbackProperty(() => { const x = o(); return !!x && (x.neigung ?? 0) > 0; }, false),
+        maximumHeights: new CallbackProperty(() => {
+          const x = o();
+          if (!x || !((x.neigung ?? 0) > 0)) return [];
+          const top = this.base(x) + x.h;
+          return [top, top + dachHoehe(x), top];
+        }, false),
+        material: this.color(col),
+      },
+    });
+    (e as unknown as Record<string, unknown>)[KEY] = new ConstantProperty('gartenhaus');
+    return e;
+  }
+
+  /** Abstandsflächen am Boden: vier je Objekt (rot = Verstoß, grün = auf dem Grundstück, grau = nicht nötig nach Abs. 7)
+   * und die des eigenen Hauses (blass). Feste Plätze mit CallbackProperty, damit beim Ziehen nichts neu aufgebaut wird. */
+  private buildAF() {
+    const st = this.s;
+    const res = () => {
+      const s = st();
+      if (s.step !== 'pruefen' || !s.res || s.selected === 'waermepumpe' || s.kante || s.zeichnen) return null;
+      return s.res[s.selected].af ?? null;
+    };
+    for (let i = 0; i < 4; i++) {
+      this.viewer.entities.add({
+        polygon: {
+          hierarchy: new CallbackProperty(() => new PolygonHierarchy(res()?.flaechen[i] ? this.cart(res()!.flaechen[i].poly) : []), false),
+          classificationType: this.cls(),
+          material: this.color(() => {
+            const f = res()?.flaechen[i];
+            const c = !f ? this.pal().muted : f.status === 'bad' ? this.pal().red : f.status === 'ok' ? this.pal().ok : this.pal().muted;
+            return Color.fromCssColorString(c).withAlpha(f?.status === 'bad' ? 0.4 : f?.status === 'ok' ? 0.3 : 0.22);
+          }),
+          show: new CallbackProperty(() => !!res()?.flaechen[i] && this.s().showAF, false),
+        },
+      });
+      this.viewer.entities.add({
+        polyline: {
+          positions: new CallbackProperty(() => {
+            const f = res()?.flaechen[i];
+            return f && this.s().showAF ? this.cart([...f.poly, f.poly[0]]) : [];
+          }, false),
+          width: 2,
+          clampToGround: true,
+          classificationType: this.cls(),
+          material: this.color(() => {
+            const f = res()?.flaechen[i];
+            return Color.fromCssColorString(!f ? this.pal().muted : f.status === 'bad' ? this.pal().red : f.status === 'ok' ? this.pal().ok : this.pal().muted);
+          }),
+        },
+      });
+    }
+    for (let i = 0; i < 64; i++) {
+      this.viewer.entities.add({
+        polygon: {
+          hierarchy: new CallbackProperty(() => new PolygonHierarchy(res()?.haus[i] ? this.cart(res()!.haus[i]) : []), false),
+          classificationType: this.cls(),
+          material: this.color(() => Color.fromCssColorString(this.pal().user).withAlpha(0.15)),
+          show: new CallbackProperty(() => !!res()?.haus[i] && !res()!.privilegiert && this.s().showAF, false),
+        },
+      });
+    }
   }
 
   /** Bestand und Fenster (ändern sich selten). */

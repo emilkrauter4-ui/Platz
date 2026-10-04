@@ -48,6 +48,7 @@ describe('Parität mit design/prototyp.html', () => {
     const rand = rng(42);
     let mismatches: string[] = [];
     let skipped = 0;
+    let neueRegel = 0;
     for (let n = 0; n < 2000; n++) {
       const objs = demoObjects();
       for (const k of Object.keys(MAP) as ObjectKind[]) {
@@ -79,6 +80,9 @@ describe('Parität mit design/prototyp.html', () => {
         if (k === 'waermepumpe' && placement(site, fp) === 'ecke') { skipped++; continue; }
         // 2. Objekt liegt exakt auf der Grenze (< 0,01 m² außerhalb): zählt als auf dem Grundstück.
         if (a.head.startsWith('Steht nicht ganz') && area(fp) - clipArea(site.plot.boundary, fp) < 0.01) { skipped++; continue; }
+        // 3. BayBO Art. 6 Abs. 1/3 (Phase 2.2): nicht privilegiert (Wandhöhe > 3 m) und in bzw. über den
+        //    Abstandsflächen des Hauses – der Prototyp kannte keine Abstandsflächen des Hauses.
+        if (b.head === 'Zu nah an deinem Haus.' && a.status === 'ok' && objs[k].h > 3 && !b.af?.privilegiert) { neueRegel++; continue; }
         {
           mismatches.push(`${n} ${k} ${JSON.stringify(objs[k])}: proto=[${a.status}] ${a.head} ${a.sub} | neu=[${b.status}] ${b.head} ${b.sub}`);
         }
@@ -86,6 +90,8 @@ describe('Parität mit design/prototyp.html', () => {
     }
     mismatches = mismatches.slice(0, 10);
     expect(skipped).toBeLessThan(400);
+    expect(neueRegel).toBeGreaterThan(0); // die neue Regel greift tatsächlich
+    expect(neueRegel).toBeLessThan(200);
     expect(mismatches).toEqual([]);
   });
 });

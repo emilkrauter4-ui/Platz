@@ -55,6 +55,9 @@ export interface Building {
   provenance: Provenance;
   /** true = Gebäude auf dem eigenen Grundstück (Wohnhaus). */
   own?: boolean;
+  /** Trauf- und Firsthöhe über Grund (LoD2), für die Abstandsflächen des Gebäudes */
+  trauf?: number;
+  first?: number;
 }
 
 /** Klassen der Garten-Erkennung (pipeline/08_garten.py). */
@@ -114,8 +117,10 @@ export interface Placed {
   w: number;
   /** Tiefe entlang der lokalen y-Achse vor Drehung */
   d: number;
-  /** Wandhöhe über Fußboden */
+  /** Wandhöhe über Fußboden (bis zur Traufe) */
   h: number;
+  /** Dachneigung in Grad; 0 oder fehlt = Flachdach, sonst Satteldach mit First entlang der Breite w */
+  neigung?: number;
   /** Drehung in Bogenmaß, gegen den Uhrzeigersinn */
   angle: number;
   /** nur Wärmepumpe: Schallleistungspegel nachts laut Datenblatt */
@@ -169,6 +174,8 @@ export interface Result {
   rLimit?: number;
   /** Wärmepumpe: Pegel am maßgeblichen Fenster */
   lp?: number;
+  /** Abstandsflächen des Objekts (Art. 6) und des eigenen Hauses, zur Anzeige am Boden */
+  af?: { flaechen: { poly: Vec2[]; status: 'ok' | 'bad' | 'info' }[]; haus: Vec2[][]; privilegiert: boolean };
   /** Grenzbebauung: welche bestehenden Objekte mitgezählt wurden und welche nicht (mit Grund) */
   bestandGezaehlt?: { id: string; grund: string }[];
   bestandNichtGezaehlt?: { id: string; grund: string }[];

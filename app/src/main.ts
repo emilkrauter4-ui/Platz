@@ -36,6 +36,7 @@ import {
   type Vec2,
   type GartenKlasse,
   zaehleBestand,
+  dachHoehe,
 } from './rules';
 import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
@@ -99,6 +100,7 @@ const st: State = {
   hasDragged: false,
   kante: null,
   zeichnen: null,
+  showAF: true,
 };
 /** Grenzseite, für die gerade ein Objekt eingezeichnet wird (nur für den Hinweistext). */
 let zeichnenSeite: number | null = null;
@@ -141,8 +143,19 @@ function tag(text: string, kind: string) {
   return `<span class="tg ${TAG_CLASS[kind] ?? ''}">${esc(text)}</span>`;
 }
 
+let nachzeichnen = 0;
 function render() {
   scene.viewer.scene.requestRender();
+  // Bodenflächen (Abstandsflächen, Zonen) entstehen in Cesium asynchron: ein paar Bilder nachziehen,
+  // sonst bleiben sie im requestRenderMode unsichtbar, bis sich die Kamera bewegt.
+  if (!nachzeichnen) {
+    nachzeichnen = 6;
+    const tick = () => {
+      scene.viewer.scene.requestRender();
+      if (--nachzeichnen > 0) setTimeout(tick, 120);
+    };
+    setTimeout(tick, 120);
+  } else nachzeichnen = 6;
 }
 
 /** Bildschirmpixel → Meter am Grundstück (für Einrast-Toleranz). */
@@ -434,7 +447,8 @@ const CTL: Record<ObjectKind, { k: keyof Placed | 'deg'; l: string; min: number;
   gartenhaus: [
     { k: 'w', l: 'Breite', min: 2, max: 6, step: 0.1 },
     { k: 'd', l: 'Tiefe', min: 2, max: 6, step: 0.1 },
-    { k: 'h', l: 'Wandhöhe', min: 2, max: 3.6, step: 0.05 },
+    { k: 'h', l: 'Wandhöhe bis Traufe', min: 2, max: 3.6, step: 0.05 },
+    { k: 'neigung', l: 'Dachneigung (0 = Flachdach)', min: 0, max: 60, step: 1 },
     { k: 'deg', l: 'Drehung', min: -90, max: 90, step: 1 },
   ],
   carport: [
@@ -453,6 +467,7 @@ function valText(k: string) {
   const o = st.objs![st.selected];
   if (k === 'lw') return `${Math.round(o.lw ?? 58)} dB(A)`;
   if (k === 'deg') return `${Math.round(CMath.toDegrees(o.angle))}°`;
+  if (k === 'neigung') return (o.neigung ?? 0) > 0 ? `${Math.round(o.neigung!)}° · First ${fmt(o.h + dachHoehe(o), 2)} m` : 'Flachdach';
   return `${fmt(o[k as 'w'] as number, k === 'h' ? 2 : 1)} m`;
 }
 
@@ -473,7 +488,7 @@ function renderSheet() {
   const o = st.objs[st.selected];
   const ctl = CTL[st.selected]
     .map((s, i) => {
-      const v = s.k === 'deg' ? Math.round(CMath.toDegrees(o.angle)) : (o[s.k] as number);
+      const v = s.k === 'deg' ? Math.round(CMath.toDegrees(o.angle)) : ((o[s.k] as number | undefined) ?? 0);
       return `<div class="ctl"><label for="s${i}"><span>${s.l}</span><output data-k="${s.k}" for="s${i}"></output></label><input id="s${i}" type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${v}" data-k="${s.k}"></div>`;
     })
     .join('');
@@ -491,6 +506,7 @@ function renderSheet() {
       <summary>Steht hier schon etwas?</summary>
       ${bestHtml}
     </details>
+    ${st.selected !== 'waermepumpe' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="afBox" ${st.showAF ? 'checked' : ''}> Abstandsflächen am Boden zeigen (BayBO Art. 6)</label>` : ''}
     <details open>
       <summary>So haben wir geprüft</summary>
       <ul class="rows" id="rows"></ul>
@@ -555,6 +571,10 @@ function renderSheet() {
       startEdit();
     }),
   );
+  document.getElementById('afBox')?.addEventListener('change', (e) => {
+    st.showAF = (e.target as HTMLInputElement).checked;
+    render();
+  });
   $('reportBtn').addEventListener('click', openReport);
   $('editBtn').addEventListener('click', () => {
     st.draft = [...(st.plot ?? [])];

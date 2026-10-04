@@ -80,12 +80,13 @@ export function sidesFromBoundary(boundary: Vec2[]): { segmentSide: number[]; si
 }
 
 /** Gebäude, deren Schwerpunkt im Grundstück liegt, sind das eigene Haus. */
-export function classifyBuildings(boundary: Vec2[], buildings: { id: string; fp: Vec2[] }[]): Building[] {
+export function classifyBuildings(boundary: Vec2[], buildings: { id: string; fp: Vec2[]; trauf?: number | null; first?: number | null }[]): Building[] {
   return buildings.map((b) => ({
     id: b.id,
     footprint: b.fp,
     provenance: 'amtlich' as const,
     own: pointInPolygon(centroid(b.fp), boundary),
+    ...(b.trauf != null ? { trauf: b.trauf, first: b.first ?? b.trauf } : {}),
   }));
 }
 
