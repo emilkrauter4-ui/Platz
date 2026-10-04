@@ -397,6 +397,24 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 - Tests: `lernen.test.ts` (3). Pipeline: `test_lernschleife.py` 7 (Freigaberegel 4, gezeichnete Objekte 3:
   Merkmale aus dem Umriss, Familie für jede Klasse, Import Ende-zu-Ende ohne Rohdaten).
 
+## Korrektur 4. Oktober 2026: BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a nach aktuellem Wortlaut
+
+Beim Zusammenstellen der Prüfmappe fiel auf: Der aktuelle Wortlaut (lxgesetze.de, Stand 23.4.2026, und lexmea.de
+identisch; `docs/recht/BayBO_Art57.txt`) lautet „Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im
+Außenbereich, sowie Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten […] im Außenbereich bis 20 m³“.
+Die Bedingung „ohne Aufenthaltsraum/Feuerstätte“ gilt danach nur im Außenbereich. CLAUDE.md und Passt. gingen vom
+älteren Wortlaut aus.
+
+- **Geändert:** Gartenhaus mit Aufenthaltsraum oder Feuerstätte im Innenbereich ist nicht mehr „braucht Genehmigung“,
+  sondern gelb („verfahrensfrei – Feuerstätte, Abgasanlage, Brandschutz nicht geprüft“). Es verliert aber das
+  Privileg nach Art. 6 Abs. 7: eigene Abstandsflächen, nicht an die Grenze (neuer Befund `grenze_aufenthaltsraum`,
+  rot). Außenbereich bleibt rot („Passt. kann das nicht freigeben“), der Text nennt jetzt die 20-m³-Regel.
+- limits.json: `gartenhaus.maxBruttoRauminhaltM3` (Text), neu `aussenbereichMaxM3` (20) und
+  `aufenthaltsraumNurArt6`; Wärmepumpe genauer als Art. 57 Abs. 1 Nr. 2 Buchst. b. Alles `geprueft: false`.
+- Tests angepasst (Gartenhaus mit Ofen jetzt gelb und „frei“) und ergänzt (Aufenthaltsraum an der Grenze,
+  Außenbereich). **138 grün.**
+- **Offen:** amtlichen Text auf gesetze-bayern.de von Hand prüfen; CLAUDE.md beschreibt noch die alte Regel.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

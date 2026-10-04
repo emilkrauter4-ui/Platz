@@ -178,13 +178,13 @@ export type Befund =
   | 'ausserhalb'
   | 'kollision'
   | 'aussenbereich'
-  | 'aufenthaltsraum'
   | 'groesse'
   | 'af_nachbar'
   | 'af_haus'
   | 'grenze_wandhoehe'
   | 'grenze_seite'
-  | 'grenze_gesamt';
+  | 'grenze_gesamt'
+  | 'grenze_aufenthaltsraum';
 
 export interface Result {
   status: Status;

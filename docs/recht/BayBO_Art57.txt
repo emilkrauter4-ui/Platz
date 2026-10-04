@@ -1,0 +1,25 @@
+# BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a und b, Nr. 2 (Auszug, Wortlaut)
+#
+# Abgerufen am 4. Oktober 2026. gesetze-bayern.de per CAPTCHA gesperrt. Text aus lxgesetze.de/baybo/57
+# (BayBO vom 14.8.2007, zuletzt geändert am 23.4.2026), verglichen mit lexmea.de/de/gesetz/baybo/art-57: identisch.
+# WICHTIG: Nach diesem Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur im Außenbereich (bis 20 m³).
+# CLAUDE.md und Passt. bis 04.10.2026 gingen vom älteren Wortlaut aus (auch im Innenbereich ohne Aufenthaltsraum).
+# OFFEN: Von Hand gegen https://www.gesetze-bayern.de/Content/Document/BayBO-57 prüfen.
+
+Art. 57 Verfahrensfreie Bauvorhaben, Beseitigung von Anlagen
+(1)
+Verfahrensfrei sind
+1.
+folgende Gebäude:
+a)
+Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sowie Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten, wenn die Gebäude weder Verkaufs- noch Ausstellungszwecken dienen, im Außenbereich bis 20 m³ Brutto-Rauminhalt,
+b)
+Garagen einschließlich überdachter Stellplätze im Sinn des Art. 6 Abs. 7 Satz 1 Nr. 1 mit einer Fläche bis zu 50 m², außer im Außenbereich,
+…
+2.
+folgende Anlagen der technischen Gebäudeausrüstung:
+a)
+Abgasanlagen in, auf und an Gebäuden sowie freistehende Abgasanlagen mit einer freien Höhe bis zu 10 m,
+b)
+sonstige Anlagen der technischen Gebäudeausrüstung,
+…

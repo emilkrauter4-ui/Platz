@@ -298,10 +298,10 @@ describe('Größengrenzen BayBO Art. 57', () => {
     expect(r.carport.status).toBe('bad');
   });
 
-  it('Gartenhaus mit Feuerstätte: nicht verfahrensfrei', () => {
+  it('Gartenhaus mit Feuerstätte im Innenbereich: verfahrensfrei bis 75 m³ (aktueller Wortlaut), aber gelb', () => {
     const s = square();
     s.feuerstaette = { value: true, provenance: 'nutzerbestätigt' };
-    expect(evaluate(s, objs()).gartenhaus.status).toBe('bad');
+    expect(evaluate(s, objs()).gartenhaus.status).toBe('warn');
     expect(evaluate(s, objs()).carport.status).toBe('ok');
   });
 });

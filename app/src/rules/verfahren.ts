@@ -48,19 +48,19 @@ export interface VerfahrensErgebnis {
 const GRUND: Record<Befund, { text: string; quelle: string }> = {
   ausserhalb: { text: 'Das Objekt steht nicht ganz auf dem Grundstück.', quelle: 'Passt.-Prüfung' },
   kollision: { text: 'Das Objekt überschneidet sich mit einem Gebäude oder Objekt.', quelle: 'Passt.-Prüfung' },
-  aussenbereich: { text: 'Im Außenbereich sind auch kleine Nebengebäude nicht verfahrensfrei.', quelle: 'BayBO Art. 57 Abs. 1 Nr. 1' },
-  aufenthaltsraum: { text: 'Mit Aufenthaltsraum, Toilette oder Feuerstätte ist ein Gartenhaus nicht verfahrensfrei.', quelle: 'BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a' },
+  aussenbereich: { text: 'Im Außenbereich sind laut Art. 57 nur Gebäude bis 20 m³ ohne Aufenthaltsraum, Toilette und Feuerstätte verfahrensfrei, Garagen gar nicht; die Zulässigkeit dort klärt das Bauamt.', quelle: 'BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a und b' },
   groesse: { text: 'Größer als die Grenze für verfahrensfreie Vorhaben.', quelle: 'BayBO Art. 57 Abs. 1 Nr. 1' },
   af_nachbar: { text: 'Die Abstandsfläche reicht auf das Nachbargrundstück.', quelle: 'BayBO Art. 6 Abs. 2' },
   af_haus: { text: 'Die Abstandsflächen überdecken sich mit denen deines Hauses.', quelle: 'BayBO Art. 6 Abs. 3' },
   grenze_wandhoehe: { text: 'An der Grenze ist die mittlere Wandhöhe über 3 m.', quelle: 'BayBO Art. 6 Abs. 7' },
   grenze_seite: { text: 'An einer Grundstücksseite stehen mehr als 9 m an der Grenze.', quelle: 'BayBO Art. 6 Abs. 7' },
   grenze_gesamt: { text: 'An allen Grenzen zusammen stehen mehr als 15 m.', quelle: 'BayBO Art. 6 Abs. 7' },
+  grenze_aufenthaltsraum: { text: 'Ohne eigenen Abstand sind nur Gebäude ohne Aufenthaltsräume und Feuerstätten zulässig.', quelle: 'BayBO Art. 6 Abs. 7 Satz 1 Nr. 1' },
 };
 
 const LAGE: Befund[] = ['ausserhalb', 'kollision'];
-const PFLICHT: Befund[] = ['aussenbereich', 'aufenthaltsraum', 'groesse'];
-const ABSTAND: Befund[] = ['af_nachbar', 'af_haus', 'grenze_wandhoehe', 'grenze_seite', 'grenze_gesamt'];
+const PFLICHT: Befund[] = ['aussenbereich', 'groesse'];
+const ABSTAND: Befund[] = ['af_nachbar', 'af_haus', 'grenze_aufenthaltsraum', 'grenze_wandhoehe', 'grenze_seite', 'grenze_gesamt'];
 
 export function verfahrenFuer(site: Site, k: 'gartenhaus' | 'carport', o: Placed, res: Result): VerfahrensErgebnis {
   const b = res.befunde ?? [];

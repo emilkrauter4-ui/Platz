@@ -460,13 +460,13 @@ function building(
   if (!inside) befunde.push('ausserhalb');
   if (collide) befunde.push('kollision');
   if (site.bereich.value === 'aussen') befunde.push('aussenbereich');
-  if (k === 'gartenhaus' && (site.aufenthaltsraum.value || site.feuerstaette.value)) befunde.push('aufenthaltsraum');
   if (!lim.ok) befunde.push('groesse');
   if (!privilegiert && !near.length) {
     if (afAusserhalb) befunde.push('af_nachbar');
     if (afUeber || afIn) befunde.push('af_haus');
   }
   if (near.length) {
+    if (!ohneRaum) befunde.push('grenze_aufenthaltsraum');
     if (near.some((s) => s.wallH > GRENZ_H + 1e-9)) befunde.push('grenze_wandhoehe');
     if (nearSides.some((side) => sums[side] > MAX_SEITE + EPS)) befunde.push('grenze_seite');
     if (total > MAX_GESAMT + EPS) befunde.push('grenze_gesamt');
@@ -483,9 +483,10 @@ function building(
   } else if (collide) {
     status = 'bad'; head = `Kollidiert ${collide}.`; sub = 'Such dir eine freie Stelle auf dem Grundstück.';
   } else if (site.bereich.value === 'aussen') {
-    status = 'bad'; head = 'Im Außenbereich braucht das eine Genehmigung.'; sub = 'Außerhalb des bebauten Ortsteils ist auch ein kleines Nebengebäude nicht verfahrensfrei.';
-  } else if (k === 'gartenhaus' && (site.aufenthaltsraum.value || site.feuerstaette.value)) {
-    status = 'bad'; head = 'Mit Aufenthaltsraum oder Ofen braucht es eine Genehmigung.'; sub = 'Ohne Bauantrag gehen nur Gartenhäuser ohne Aufenthaltsraum und ohne Feuerstätte.';
+    status = 'bad'; head = 'Im Außenbereich kann Passt. das nicht freigeben.';
+    sub = k === 'gartenhaus'
+      ? `Laut Art. 57 sind dort nur Gebäude bis ${L.gartenhaus.aussenbereichMaxM3.wert} m³ ohne Aufenthaltsraum, Toilette und Feuerstätte verfahrensfrei – und ob sie im Außenbereich überhaupt zulässig sind, klärt das Bauamt.`
+      : 'Laut Art. 57 sind Garagen und Carports nur außerhalb des Außenbereichs verfahrensfrei.';
   } else if (!lim.ok) {
     status = 'bad'; head = lim.head; sub = lim.sub;
   } else if (!privilegiert && !near.length && (afAusserhalb || afUeber || afIn)) {
@@ -499,7 +500,13 @@ function building(
     }
   } else if (near.length) {
     const tooHigh = near.filter((s) => s.wallH > GRENZ_H + 1e-9);
-    if (tooHigh.length) {
+    if (!ohneRaum) {
+      const worstSeg = near.reduce((a, b) => (b.required - b.d > a.required - a.d ? b : a));
+      status = 'bad';
+      bad = near.map((s) => s.seg);
+      head = 'Mit Aufenthaltsraum oder Feuerstätte nicht so nah an die Grenze.';
+      sub = `Ohne eigenen Abstand sind laut Art. 6 Abs. 7 nur Gebäude ohne Aufenthaltsräume und Feuerstätten zulässig. Halte ${fmt(worstSeg.required, worstSeg.required === MIN_ABSTAND ? 0 : 2)} m Abstand ein.`;
+    } else if (tooHigh.length) {
       const worstSeg = tooHigh.reduce((a, b) => (b.required - b.d > a.required - a.d ? b : a));
       status = 'bad';
       bad = tooHigh.map((s) => s.seg);
@@ -518,6 +525,12 @@ function building(
       } else sub = 'Keine Baugenehmigung nötig. So nah an der Grenze ist das als kleines Nebengebäude erlaubt.';
     }
   } else sub = 'Keine Baugenehmigung nötig, und der Abstand zur Grenze stimmt.';
+  if (status === 'ok' && !ohneRaum) {
+    status = 'warn';
+    head = 'Verfahrensfrei – mit Aufenthaltsraum oder Feuerstätte aber nicht alles geprüft.';
+    sub = `Laut Art. 57 Abs. 1 Nr. 1 Buchst. a ist ein Gebäude bis ${L.gartenhaus.maxBruttoRauminhaltM3.wert} m³ im Innenbereich verfahrensfrei. Die Anforderungen an Feuerstätte, Abgasanlage und Brandschutz prüft Passt. nicht.`;
+  }
+  if (!ohneRaum) rows.push({ text: 'Aufenthaltsraum oder Feuerstätte: Anforderungen an Brandschutz, Feuerstätte und Abgasanlage nicht geprüft', tag: 'offen', kind: 'offen' });
 
   return {
     status,

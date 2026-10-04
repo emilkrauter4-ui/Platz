@@ -59,11 +59,37 @@ describe('Verfahren aus den Befunden', () => {
     expect(v.schritte.some((x) => x.quelle === 'BayBO Art. 66 Abs. 1' && x.text.includes('ersetzt diese Unterschrift nicht'))).toBe(true);
   });
 
-  it('Gartenhaus mit Ofen: Bauantrag auch wenn klein', () => {
+  it('Gartenhaus mit Ofen im Innenbereich, frei stehend: verfahrensfrei (Art. 57 Abs. 1 Nr. 1 a), aber gelb', () => {
     const s = { ...square(), feuerstaette: { value: true, provenance: 'nutzerbestätigt' as const } };
     const o = objs();
-    const v = verfahrenFuer(s, 'gartenhaus', o.gartenhaus, evaluate(s, o).gartenhaus);
-    expect(v.verfahren).toBe('genehmigung');
+    const r = evaluate(s, o).gartenhaus;
+    expect(r.status).toBe('warn');
+    expect(r.befunde).toEqual([]);
+    expect(r.rows.some((x) => x.kind === 'offen' && x.text.includes('Feuerstätte'))).toBe(true);
+    expect(verfahrenFuer(s, 'gartenhaus', o.gartenhaus, r).verfahren).toBe('frei');
+  });
+
+  it('Gartenhaus mit Aufenthaltsraum direkt an der Grenze: kein Privileg nach Art. 6 Abs. 7', () => {
+    const s = { ...square(), aufenthaltsraum: { value: true, provenance: 'nutzerbestätigt' as const } };
+    const o = objs();
+    o.gartenhaus = { ...o.gartenhaus, center: [o.gartenhaus.w / 2 + 0.3, -15], angle: 0 };
+    const r = evaluate(s, o).gartenhaus;
+    expect(r.status).toBe('bad');
+    expect(r.befunde).toContain('grenze_aufenthaltsraum');
+    expect(r.head).toContain('Aufenthaltsraum');
+    // ohne Aufenthaltsraum wäre dieselbe Stelle erlaubt
+    const ohne = evaluate(square(), o).gartenhaus;
+    expect(ohne.befunde).not.toContain('grenze_aufenthaltsraum');
+    expect(ohne.status).toBe('ok');
+    const v = verfahrenFuer(s, 'gartenhaus', o.gartenhaus, r);
+    expect(v.verfahren).toBe('frei_abweichung');
+  });
+
+  it('Außenbereich: Passt. gibt nicht frei, nennt aber die 20-m³-Regel', () => {
+    const s = { ...square(), bereich: { value: 'aussen' as const, provenance: 'nutzerbestätigt' as const } };
+    const r = evaluate(s, objs()).gartenhaus;
+    expect(r.status).toBe('bad');
+    expect(r.sub).toContain('20 m³');
   });
 
   it('Carport 6 × 9 m (54 m²): Bauantrag; als Kleingarage auch Techniker/Meister', () => {

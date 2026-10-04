@@ -5,7 +5,22 @@
     "maxBruttoRauminhaltM3": {
       "wert": 75,
       "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
-      "text": "Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sind verfahrensfrei."
+      "text": "Verfahrensfrei sind Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich. Die Bedingung „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ gilt laut aktuellem Wortlaut nur für Gebäude im Außenbereich (bis 20 m³).",
+      "wortlaut": "docs/recht/BayBO_Art57.txt (Abruf 04.10.2026: lxgesetze.de und lexmea.de identisch; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "aussenbereichMaxM3": {
+      "wert": 20,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
+      "text": "Im Außenbereich nur Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten, die weder Verkaufs- noch Ausstellungszwecken dienen, bis 20 m³. Passt. gibt den Außenbereich trotzdem nicht frei (Zulässigkeit nach § 35 BauGB prüft Passt. nicht).",
+      "wortlaut": "docs/recht/BayBO_Art57.txt",
+      "geprueft": false
+    },
+    "aufenthaltsraumNurArt6": {
+      "wert": true,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a, Art. 6 Abs. 7 Satz 1 Nr. 1",
+      "text": "Im Innenbereich macht ein Aufenthaltsraum oder eine Feuerstätte ein Gebäude bis 75 m³ nicht genehmigungspflichtig, nimmt ihm aber das Privileg nach Art. 6 Abs. 7: Es braucht eigene Abstandsflächen und darf nicht an die Grenze. Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut (Aufenthaltsraum → Genehmigung).",
+      "geprueft": false
     },
     "dachraumImRauminhalt": {
       "wert": true,
@@ -18,7 +33,8 @@
     "maxFlaecheM2": {
       "wert": 50,
       "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. b",
-      "text": "Garagen einschließlich überdachter Stellplätze mit einer Fläche bis zu 50 m², außer im Außenbereich, sind verfahrensfrei."
+      "text": "Garagen einschließlich überdachter Stellplätze im Sinn des Art. 6 Abs. 7 Satz 1 Nr. 1 mit einer Fläche bis zu 50 m², außer im Außenbereich, sind verfahrensfrei.",
+      "wortlaut": "docs/recht/BayBO_Art57.txt"
     }
   },
   "abstand": {
@@ -126,8 +142,10 @@
   "waermepumpe": {
     "verfahrensfrei": {
       "wert": true,
-      "quelle": "BayBO Art. 57 Abs. 1 Nr. 2",
-      "text": "Wärmepumpen sind verfahrensfrei (Annahme: am Ein- oder Zweifamilienhaus)."
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 2 Buchst. b",
+      "text": "Sonstige Anlagen der technischen Gebäudeausrüstung sind verfahrensfrei; Passt. ordnet die Wärmepumpe dort ein (Auslegung, Annahme: am Ein- oder Zweifamilienhaus).",
+      "wortlaut": "docs/recht/BayBO_Art57.txt",
+      "geprueft": false
     },
     "richtwerteNachtDbA": {
       "wert": {
