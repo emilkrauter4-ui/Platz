@@ -327,6 +327,8 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 - „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
 - KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
 - AR auf dem eigenen iPhone und einem Android-Gerät ausprobieren. Android braucht die App unter einer https-Adresse.
+  iPhone im gleichen WLAN: `npm run serve` zeigt die Adresse an (`http://192.168.…:4173`), in Safari öffnen.
+  Nachbar-Link geht auch über http im WLAN (SHA-256-Ersatz, wenn `crypto.subtle` fehlt).
 - Nachbar-Link: Datenschutzerklärung für den Betrieb (Antworten in SQLite, 400 Tage) von einer Fachperson prüfen lassen;
   auf dem Laptop Node-Version prüfen (`node --version`, mindestens 22.5).
 - ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).

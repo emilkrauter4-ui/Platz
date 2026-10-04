@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { createServer, type Server } from 'node:http';
-import { abgelaufen, dekodieren, kodieren, linkIdAus, neuerSchluessel, projektHash, type Vorhaben } from '../src/nachbar/link';
+import { sha256Js, abgelaufen, dekodieren, kodieren, linkIdAus, neuerSchluessel, projektHash, type Vorhaben } from '../src/nachbar/link';
 
 const vorhaben = (): Vorhaben => ({
   v: 1,
@@ -44,6 +44,14 @@ describe('Nachbar-Link: Vorhaben im URL-Fragment', () => {
     expect(id).toMatch(/^[A-Za-z0-9_-]{22}$/);
     const { createHash } = await import('node:crypto');
     expect(id).toBe(createHash('sha256').update(k).digest('base64url').slice(0, 22));
+  });
+
+  it('SHA-256-Ersatz (für http im WLAN) rechnet wie node:crypto', async () => {
+    const { createHash } = await import('node:crypto');
+    for (const t of ['', 'abc', 'x'.repeat(55), 'x'.repeat(56), 'Grenzabstand ä ö ü '.repeat(40)]) {
+      const hex = [...sha256Js(new TextEncoder().encode(t))].map((x) => x.toString(16).padStart(2, '0')).join('');
+      expect(hex).toBe(createHash('sha256').update(t).digest('hex'));
+    }
   });
 
   it('Ablauf am Ende des Tages', () => {

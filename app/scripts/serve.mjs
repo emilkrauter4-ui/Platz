@@ -5,6 +5,7 @@
  * Aufruf: node scripts/serve.mjs [port] [verzeichnis]
  */
 import { createServer } from 'node:http';
+import { networkInterfaces } from 'node:os';
 import { createReadStream, statSync, existsSync } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
 import { createBrotliCompress, createGzip, constants } from 'node:zlib';
@@ -67,4 +68,10 @@ createServer((req, res) => {
   } else headers['Content-Length'] = statSync(file).size;
   res.writeHead(200, headers);
   stream.pipe(res);
-}).listen(port, () => console.log(`Passt. auf http://localhost:${port} (${root})`));
+}).listen(port, () => {
+  console.log(`Passt. auf http://localhost:${port} (${root})`);
+  // Adressen im WLAN, damit man die App auf dem Handy öffnen kann (gleiches WLAN, Firewall erlauben)
+  for (const l of Object.values(networkInterfaces()).flat()) {
+    if (l && l.family === 'IPv4' && !l.internal) console.log(`  im WLAN, z. B. auf dem Handy: http://${l.address}:${port}`);
+  }
+});
