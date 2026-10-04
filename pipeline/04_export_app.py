@@ -52,14 +52,20 @@ def main() -> int:
         for f in json.loads(gp.read_text(encoding="utf-8"))["features"]:
             p = f["properties"]
             g = shape(f["geometry"])
-            if p["klasse"] in ("baum", "hecke", "strauch", "terrasse", "teich"):
-                g = g.simplify(0.3)
+            unscharf = p["klasse"] in ("baum", "hecke", "strauch", "terrasse", "teich")
+            if p["klasse"] in ("baum", "strauch"):
+                g = g.convex_hull  # Krone: Hülle statt Treppenkante aus der Wasserscheide
+            if unscharf:  # Pflanzen und Flächen: Umriss grob genug, spart den Großteil der Dateigröße
+                g = g.simplify(0.5)
             r = ring(mapping(g), ox, oy)
             if not r:
                 continue
+            if unscharf:
+                r = [[round(x, 1), round(y, 1)] for x, y in r]
+            rd = lambda v: None if v is None else round(v, 2)
             rec = {"id": p["id"], "k": p["klasse"], "fp": r, "a": round(g.area, 1), "c": p["konfidenz"],
-                   "l": p.get("laenge"), "b": p.get("breite"), "sl": p.get("spanne_laenge"),
-                   "h": p.get("hoehe"), "sh": p.get("spanne_hoehe")}
+                   "l": rd(p.get("laenge")), "b": rd(p.get("breite")), "sl": rd(p.get("spanne_laenge")),
+                   "h": rd(p.get("hoehe")), "sh": rd(p.get("spanne_hoehe"))}
             if p.get("wandhoehe_mittel") is not None:
                 rec.update({"wh": p["wandhoehe_mittel"], "sw": p.get("spanne_wand"), "tr": p.get("traufhoehe"), "fi": p.get("firsthoehe")})
             if p.get("form") == "kreis":

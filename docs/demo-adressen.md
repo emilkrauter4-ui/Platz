@@ -1,7 +1,7 @@
 # Demo-Adressen
 
 Drei echte Adressen in Sulzbach-Rosenberg, je mit einer typischen Frage. In der App erscheinen sie auf der Startseite
-unter „Demo-Adressen“ (auch offline). Ergebnisse aus `docs/demo/ergebnisse.json`, Stand 3. Oktober 2026.
+unter „Demo-Adressen“ (auch offline). Ergebnisse aus `docs/demo/ergebnisse.json`, Stand 3. Oktober 2026; Demo 1 nach der Garten-Erkennung neu durchgespielt am 4. Oktober 2026.
 
 **Wichtig:**
 - Die Grenzen sind **nicht amtlich**. Sie sind mit `pipeline/demo_grenze.py` aus der Parzellarkarte abgeleitet und in
@@ -14,12 +14,16 @@ unter „Demo-Adressen“ (auch offline). Ergebnisse aus `docs/demo/ergebnisse.j
 
 ![3D](demo/grenze.jpg)
 
-- Grundstück 906 m². An der Südwestgrenze steht bereits ein Gartenpavillon. Er fehlt in LoD2 und den Hausumringen,
-  die Bestandserkennung findet ihn (`erkannt`, Laser-Anteil 100 %).
-- Start: Gartenhaus 3 × 3 × 2,5 m, 0,25 m von derselben Grenze.
-- Ergebnis: **„Passt so.“**, an der Südwestgrenze belegt **7,7 von 9 m**, davon **4,7 m bestehende Kleinbauten** (`erkannt`).
-- In der Demo zeigen: Breite auf 4,5 m ziehen → „Zu viel an der Südwestgrenze“. Den Pavillon unter
-  „Deine Angaben“ mit „Gibt es nicht“ verwerfen → wieder grün. So wird klar, warum der Bestand zählt.
+- Grundstück 906 m². In der Südecke steht bereits ein Gartenpavillon mit Satteldach. Er fehlt in LoD2 und den
+  Hausumringen; die Garten-Erkennung (AUFTRAG_V2 Phase 1) findet ihn: **5,41 × 4,67 m (±0,23 m), Wandhöhe 2,09 m
+  (±0,19 m)**, Konfidenz 93 %, Umriss aus den Dach-Laserpunkten 2025 (`erkannt`). In Meilenstein 5 war er nur grob
+  aus dem DOM geschätzt (4,7 m an der Grenze).
+- Start: Gartenhaus 3 × 3 × 2,5 m, 0,25 m von der Südwestgrenze.
+- Ergebnis (Stand 4. Oktober 2026): **„Zu viel an der Südwestgrenze.“** – belegt **9,9 von 9 m**, davon **6,9 m
+  bestehende Kleinbauten**. Der Pavillon steht in der Ecke und zählt deshalb an zwei Grenzen.
+- In der Demo zeigen: unter „Steht hier schon etwas?“ den Pavillon mit „Gibt es nicht“ verwerfen → **„Passt so.“**
+  (3,0 von 9 m). Oder „Umriss nachziehen“ → das Objekt wird `nutzerbestätigt` und zählt dann sicher mit.
+  So wird klar, warum der Bestand zählt und warum Bestätigen wichtig ist.
 
 ![Plan](demo/grenze-plan.jpg)
 

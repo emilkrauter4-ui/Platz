@@ -144,6 +144,12 @@ Stand 4. Oktober 2026. Ausführliche Zahlen: `docs/garten_auswertung.md`.
   Traufe, First, geometrisch gemittelte Wandhöhe. Jede Angabe mit Spanne (Punktabstand bzw. Kantenschärfe).
   Beim Gebietslauf gefunden und behoben: RANSAC nahm Bodenpunkte im Umriss als Dachebene (Traufe 0,17 m, Wandhöhe
   eines 2,9-m-Schuppens 1,5 m – gefährlich niedrig). Jetzt nur Punkte ab 1 m, Flachdach = Wand bis Dachkante.
+  Außerdem zählen für die Höhe von Bauten nur noch Einzelechos (überhängende Äste machten den Pavillon in
+  Fröschau 41 3,31 statt 2,48 m hoch). Beide Korrekturen kamen **nach** der Test-Messung; die Höhenspalte im
+  Test-Ergebnis bezieht sich auf den alten Stand. Das Test-Set wurde dafür nicht erneut benutzt.
+- Gebiet (2 × 2 km): 5412 Objekte (3923 Bäume, 814 Gartenhäuser, 117 Carports/Garagen, 372 Sträucher, 100
+  Terrassen, 43 Pools, 43 Hecken), ≈ 45 min auf 4 CPU-Kernen. `bestand.json` 1,2 MB (327 kB gzip), lädt erst nach
+  der Startansicht – die Startzeit ändert sich nicht.
 
 **1.5 Messung**
 
@@ -170,6 +176,9 @@ Test-Set mit 3 Nebengebäuden sagt statistisch fast nichts. Was hilft: mehr Grun
 - Grenzbebauung (9 m / 15 m) zählt nur Nebengebäude (Gartenhaus, Gewächshaus, Garage/Carport): bestätigte immer,
   erkannte ab Konfidenz 0,8 (`limits.json`, Produktentscheidung: ab 0,7 waren auf Dev ein Drittel falsch).
   Pool, Hecke, Terrasse zählen nicht. Der Prüfbericht nennt die mitgezählten und die unsicheren Objekte.
+- Im Browser durchgespielt (Playwright): Fröschau 41 zeigt jetzt „Zu viel an der Südwestgrenze“ (Pavillon laut
+  Laser 5,4 × 4,7 m statt grob 4,7 m an der Grenze, steht in der Ecke und zählt an zwei Grenzen); „Gibt es nicht“ →
+  „Passt so“. Hang- und Wärmepumpen-Demo unverändert. `docs/demo-adressen.md` angepasst.
 - Neue Tests: Zählregel (Konfidenz knapp unter/genau an der Schwelle, bestätigt, Pool/Hecke), Zuordnung zur Grenze
   (genau 1,00 m), Rechteck-Maße, Nachziehen. 53 Tests grün.
 

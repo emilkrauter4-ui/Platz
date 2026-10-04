@@ -474,6 +474,12 @@ def masse(s: dict, klasse: str, g: Polygon, kante: float = 20.0, laser_umriss: b
     sel = (L["x"] >= x0) & (L["x"] <= x1) & (L["y"] >= y0) & (L["y"] <= y1)
     import shapely
     xs_, ys_, zs, kl = L["x"][sel], L["y"][sel], L["z"][sel], L["klasse"][sel]
+    if klasse in BAUKLASSEN:
+        # Bauten: nur Einzelechos (Dach). Mehrfachechos sind Äste über dem Dach und machen den Bau zu hoch.
+        dach = L["echos"][sel] == 1
+        boden_ok = kl == 2
+        keep = dach | boden_ok
+        xs_, ys_, zs, kl = xs_[keep], ys_[keep], zs[keep], kl[keep]
     pts = shapely.points(xs_, ys_)
     in_g = shapely.contains(innen, pts)
     ring = shapely.contains(g.buffer(3), pts) & ~shapely.contains(g.buffer(0.5), pts)
@@ -741,6 +747,33 @@ def trainieren():
     return clf
 
 
+def nachmessen() -> int:
+    """Maße der Bauten in garten.geojson neu bestimmen (nach Änderungen an masse()), ohne die Erkennung zu wiederholen."""
+    p = build_dir() / "garten.geojson"
+    fc = json.loads(p.read_text())
+    n = 0
+    for f in fc["features"]:
+        pr = f["properties"]
+        if pr["klasse"] not in BAUKLASSEN:
+            continue
+        g = shape(f["geometry"])
+        x0, y0, x1, y1 = g.buffer(8).bounds
+        bb = (np.floor(x0), np.floor(y0), np.ceil(x1), np.ceil(y1))
+        L = laser(bb)
+        s = {"_laser": {k: L[k] for k in ("x", "y", "z", "klasse", "echos")}, "_bb": np.array(bb),
+             "dgm": raster("dgm1", bb, RES)[0]}
+        s["dom_h"] = raster("dom20", bb, RES)[0] - s["dgm"]
+        ms = masse(s, pr["klasse"], g, 200 * (0.35 - 0.1), laser_umriss=False)
+        for k in ("traufhoehe", "firsthoehe", "wandhoehe_mittel", "spanne_wand", "dach"):
+            pr.pop(k, None)
+        pr.update({k: (round(float(v), 2) if isinstance(v, (float, np.floating)) else v) for k, v in ms.items()
+                   if k not in ("laenge", "breite", "spanne_laenge", "spanne_breite", "ausrichtung_grad", "form")})
+        n += 1
+    p.write_text(json.dumps(fc), encoding="utf-8")
+    print(f"  {n} Bauten neu vermessen")
+    return 0
+
+
 BLOCK = 250.0
 RAND = 15.0
 KLASSEN_BAU = {"gartenhaus", "gewaechshaus", "carport_garage", "spielturm"}
@@ -804,5 +837,7 @@ if __name__ == "__main__":
         merkmale_cache(a[0] if a and a[0] in ("dev", "test") else None, [x for x in a if x not in ("dev", "test")] or None)
     elif cmd == "trainieren":
         trainieren()
+    elif cmd == "nachmessen":
+        nachmessen()
     elif cmd == "gebiet":
         gebiet([float(v) for v in sys.argv[2:6]] if len(sys.argv) > 5 else None)
