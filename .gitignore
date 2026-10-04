@@ -9,3 +9,4 @@ __pycache__/
 
 # DOM-Mesh (184 MB) wird mit pipeline/06_mesh.py erzeugt und nicht eingecheckt
 app/public/data/mesh/
+data/reference/boegen/

@@ -1,6 +1,6 @@
 # Stand der Meilensteine
 
-Stand: 3. Oktober 2026. Gebiet: 2×2-km-Kachel 698_5486 (ETRS89/UTM 32N 698000–700000 / 5486000–5488000),
+Stand: 4. Oktober 2026 (AUFTRAG_V2 Phase 1). Gebiet: 2×2-km-Kachel 698_5486 (ETRS89/UTM 32N 698000–700000 / 5486000–5488000),
 Sulzbach-Rosenberg Altstadt und Wohngebiete östlich davon.
 
 ## Meilenstein 1 – Daten stehen: **erreicht**
@@ -114,6 +114,75 @@ Erkenntnisse:
   (überzähliges Komma) – wird tolerant gelesen (Test). Im Gebiet liegt kein Schutzgebiet; Positivtest außerhalb:
   „Sulzbach-Rosenberg, festgesetzt am 13.05.2002“.
 - Offen: echte Eigentümer bzw. Bauamt einbinden, Einverständnis für die Demo-Adressen, fachliche Prüfung der Grenzwerte.
+
+## AUFTRAG_V2 Phase 1 – Referenzdaten und Garten-Erkennung: **gebaut, Ziele auf dem Test-Set nicht erreicht**
+
+Stand 4. Oktober 2026. Ausführliche Zahlen: `docs/garten_auswertung.md`.
+
+**1.1 Referenzdatensatz** (`data/reference/`, `pipeline/07_referenz.py`)
+- 60 Grundstücke, je 20 Altstadt / Siedlung / Hang, Zufallsauswahl mit festem Seed, Grenzen aus der Parzellarkarte.
+  Altstadt: im Kern (≥ 35 % bebaut) gab es nur 14 brauchbare Grundstücke; 6 kommen vom Altstadtrand (30–35 %).
+- 207 annotierte Objekte (Umriss, Klasse, Höhe, `sicher` ja/nein, Notiz). 40 Entwicklung / 20 Test,
+  Test-Set am 04.10.2026 eingefroren (SHA-256 in `split.json`, die Auswertung bricht bei Änderung ab).
+- `vor_ort.csv` angelegt (Kopfzeile), wartet auf Maßband-Messungen.
+- **Einschränkung:** annotiert hat Claude auf DOP20 2023 und Laser 2025 – dieselben Daten wie die Erkennung.
+  Referenzhöhen sind aus dem Laser abgeleitet (nur Konsistenz). Unabhängig sind erst Emils Messungen.
+- Zufall trifft die seltenen Klassen hart: im Test-Set liegen **2 sichere Gartenhäuser, 1 Garage, 0 Pools**.
+
+**1.3/1.4 Erkennung** (`pipeline/08_garten.py`, Laserzellen `rohdaten.py`)
+- Signale: DOP20 RGB/CIR (NDVI, Türkis, NIR), DOM20 − DGM1, Laserpunkte (Höhe, Echos, Intensität, Dichte), Masken
+  aus Hausumringen und ALKIS-Verkehrsflächen.
+- Kandidaten je Familie: Bauten nur aus dem Laser (das DOM verschmierte Kanten und Schatten), Vegetation mit
+  Kronentrennung (Wasserscheide), schmale Streifen (Hecken), Wasser (Türkis oder NIR-dunkel mit wenig Laserechos),
+  flache befestigte Flächen, Kreise (Trampoline).
+- Umrisse mit **SAM 2.1 small** (Apache 2.0) aus Box + Punkt, nur übernommen bei IoU ≥ 0,3 zum Kandidaten. CPU: ~1 s
+  je 80-m-Ausschnitt.
+- Klassifikation: Gradient Boosting (scikit-learn) auf 60 Merkmalen, plus 17 Positivbeispiele aus der
+  M5-Referenz (außerhalb der Test-Grundstücke), plus feste Regeln für Pool (helles Türkis und NIR-dunkel) und
+  eindeutige Kleinbauten, plus Plausibilität (Nebengebäude ≥ 1,5 m hoch im Laser, ≥ 1,5 m breit).
+- Maße: Bauten über das Rechteck um die Dach-Laserpunkte; Höhe 95. Perzentil über Bodenpunkten; Dachebenen per RANSAC →
+  Traufe, First, geometrisch gemittelte Wandhöhe. Jede Angabe mit Spanne (Punktabstand bzw. Kantenschärfe).
+
+**1.5 Messung**
+
+| | Dev (Kreuzvalidierung, 40 Grundstücke) | Test (eingefroren, 20 Grundstücke) |
+|---|---|---|
+| Gartenhaus Präzision / Trefferquote | 64 % / 54 % (n = 13) | **17 % / 50 %** (n = 2) |
+| Gartenhaus Median Länge / Breite | 0,39 / 0,33 m | 6,56 / 1,15 m (1 Treffer: Pergola mit Hecke verschmolzen) |
+| Pool | 1 von 2 gefunden, 0 Fehltreffer | **nicht messbar** (0 Pools im Test-Set) |
+| Nebengebäude gesamt | P 69 % / R 47 % | P 33 % / R 67 % (n = 3) |
+| Baum | P 44 % / R 38 % | P 46 % / R 30 % |
+| Hecke, Strauch, Terrasse | praktisch nicht erkannt | praktisch nicht erkannt |
+
+Ziele (≥ 80 % je, Median ≤ 0,30 m) **nicht erreicht**. Gründe, ehrlich: zu wenige Beispiele für die seltenen Klassen
+(10–13 Gartenhäuser zum Lernen, 2 Pools), Hecken verschmelzen mit Bäumen, zwei Zeitpunkte (2023/2025), und ein
+Test-Set mit 3 Nebengebäuden sagt statistisch fast nichts. Was hilft: mehr Grundstücke gezielt mit Objekten
+(geschichtete statt rein zufällige Auswahl), Maßband-Messungen, Nutzerbestätigungen (Phase 4.2).
+
+**1.6 App**
+- `bestand.json` v2: alle erkannten Klassen mit Länge, Breite, Höhe, mittlerer Wandhöhe, je mit Spanne, Label `erkannt`
+  und Konfidenz.
+- Abschnitt **„Steht hier schon etwas?“** je Grenze vorbefüllt (Objekte ≤ 1 m von der Grenze), übrige im Garten
+  aufklappbar. Je Objekt: „Stimmt“, „Umriss nachziehen“, „Gibt es nicht“; je Grenze „Doch, hier steht etwas“ zum
+  Einzeichnen. Nachziehen mit Fingergriffen, Einrasten an erkannter Kante, Gebäuden und Grenze → `nutzerbestätigt`.
+- Grenzbebauung (9 m / 15 m) zählt nur Nebengebäude (Gartenhaus, Gewächshaus, Garage/Carport): bestätigte immer,
+  erkannte ab Konfidenz 0,8 (`limits.json`, Produktentscheidung: ab 0,7 waren auf Dev ein Drittel falsch).
+  Pool, Hecke, Terrasse zählen nicht. Der Prüfbericht nennt die mitgezählten und die unsicheren Objekte.
+- Neue Tests: Zählregel (Konfidenz knapp unter/genau an der Schwelle, bestätigt, Pool/Hecke), Zuordnung zur Grenze
+  (genau 1,00 m), Rechteck-Maße, Nachziehen. 53 Tests grün.
+
+**Annahmen:** Grenzen der Referenz-Grundstücke aus der Parzellarkarte (nicht amtlich); Konfidenzschwelle 0,8 und
+„≤ 1 m = an der Grenze“ sind Produktentscheidungen, keine Rechtsregeln; geometrisch gemittelte Wandhöhe ist noch
+nicht die Wandhöhe nach Art. 6 BayBO (folgt in Phase 2.2).
+
+## Offene Punkte für Emil
+
+- 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
+- Cloud-GPU mieten (für Phase 5 „Gartenblick“; die Erkennung selbst läuft auf der CPU).
+- Fachliche Prüfung von `limits.json` durch Bauamt oder Architekt; die Regeln zu Hecken und Bäumen (AGBGB, Phase 3)
+  am besten zusätzlich durch einen Anwalt.
+- Einverständnis der Eigentümer für die Demo-Adressen.
+- Vor Phase 3: Entscheidung, wo Nachbar-Link und Lernschleife gespeichert werden (Backend, Datenschutz).
 
 ## Bekannte Lücken
 

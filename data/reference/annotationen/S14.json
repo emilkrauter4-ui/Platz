@@ -1,0 +1,6 @@
+{"grundstueck": "S14", "objekte": [
+ {"klasse": "baum", "poly": [[22.5,21.5],[26,21.5],[27,24.5],[26,27],[23,27],[22,24.5]], "sicher": false, "notiz": "Nadelbaum im DOP 2023 (gelblich), im Laser 2025 nicht mehr vorhanden"},
+ {"klasse": "strauch", "poly": [[43.5,24.4],[46.2,24.4],[46.2,27.6],[43.5,27.6]], "notiz": "Strauch/Bäumchen ~3 m"},
+ {"klasse": "baum", "kreis": [19.8, 13.2, 4.5], "notiz": "Nadelbaum ~5 m an der Südgrenze"},
+ {"klasse": "strauch", "poly": [[40.5,14],[44,14],[44,18],[40.5,18]], "sicher": false, "notiz": "Sträucher an der Ostgrenze"}
+]}

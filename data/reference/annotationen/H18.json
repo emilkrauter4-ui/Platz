@@ -1,0 +1,5 @@
+{"grundstueck": "H18", "objekte": [
+ {"klasse": "hecke", "poly": [[6,13],[6.5,25],[10,33],[17,40],[26,45.5],[27,44],[18,38.5],[11.5,32],[8,24.5],[7.6,13]], "notiz": "Hecke entlang der gebogenen Straßengrenze ~2–3 m"},
+ {"klasse": "strauch", "poly": [[14,19],[21,19],[21,25],[14,25]], "sicher": false, "notiz": "Strauchgruppe vor dem Haus"},
+ {"klasse": "strauch", "poly": [[10,19],[14,19],[14,24],[10,24]], "sicher": false, "notiz": "Strauch"}
+]}

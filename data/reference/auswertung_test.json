@@ -1,0 +1,466 @@
+{
+ "datum": "2026-10-04",
+ "modell_version": 4,
+ "grundstuecke": 20,
+ "sekunden_je_grundstueck_cpu": 1.7,
+ "iou_min": 0.3,
+ "klassen": [
+  {
+   "klasse": "gartenhaus",
+   "ref": 2,
+   "erkannt": 6,
+   "tp": 1,
+   "praezision": 0.17,
+   "trefferquote": 0.5,
+   "iou_mittel": 0.34,
+   "median_laenge_m": 6.56,
+   "median_breite_m": 1.15,
+   "median_hoehe_m": 0.13,
+   "in_spanne": 0.0
+  },
+  {
+   "klasse": "carport_garage",
+   "ref": 1,
+   "erkannt": 0,
+   "tp": 0,
+   "praezision": null,
+   "trefferquote": 0.0,
+   "iou_mittel": null,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  },
+  {
+   "klasse": "pool",
+   "ref": 0,
+   "erkannt": 0,
+   "tp": 0,
+   "praezision": null,
+   "trefferquote": null,
+   "iou_mittel": null,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  },
+  {
+   "klasse": "terrasse",
+   "ref": 6,
+   "erkannt": 1,
+   "tp": 1,
+   "praezision": 1.0,
+   "trefferquote": 0.17,
+   "iou_mittel": 0.62,
+   "median_laenge_m": 13.84,
+   "median_breite_m": 4.28,
+   "median_hoehe_m": null,
+   "in_spanne": 0.0
+  },
+  {
+   "klasse": "hecke",
+   "ref": 3,
+   "erkannt": 1,
+   "tp": 0,
+   "praezision": 0.0,
+   "trefferquote": 0.0,
+   "iou_mittel": null,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  },
+  {
+   "klasse": "baum",
+   "ref": 20,
+   "erkannt": 13,
+   "tp": 6,
+   "praezision": 0.46,
+   "trefferquote": 0.3,
+   "iou_mittel": 0.56,
+   "median_laenge_m": 1.35,
+   "median_breite_m": 0.72,
+   "median_hoehe_m": 1.05,
+   "in_spanne": 0.22
+  },
+  {
+   "klasse": "strauch",
+   "ref": 6,
+   "erkannt": 3,
+   "tp": 0,
+   "praezision": 0.0,
+   "trefferquote": 0.0,
+   "iou_mittel": null,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  },
+  {
+   "klasse": "zaun_mauer",
+   "ref": 0,
+   "erkannt": 0,
+   "tp": 0,
+   "praezision": null,
+   "trefferquote": null,
+   "iou_mittel": null,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  },
+  {
+   "klasse": "nebengebaeude",
+   "ref": 3,
+   "erkannt": 6,
+   "tp": 2,
+   "praezision": 0.33,
+   "trefferquote": 0.67,
+   "iou_mittel": 0.43,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  }
+ ],
+ "nebengebaeude_nach_konfidenz": [
+  {
+   "konfidenz_min": 0.8,
+   "klasse": "nebengebaeude",
+   "ref": 3,
+   "erkannt": 2,
+   "tp": 1,
+   "praezision": 0.5,
+   "trefferquote": 0.33,
+   "iou_mittel": 0.34,
+   "median_laenge_m": null,
+   "median_breite_m": null,
+   "median_hoehe_m": null,
+   "in_spanne": null
+  }
+ ],
+ "fehler": [
+  [
+   "A03",
+   "strauch",
+   "verpasst",
+   2.5,
+   1
+  ],
+  [
+   "A07",
+   "baum",
+   "Fehltreffer",
+   67.7,
+   0.75
+  ],
+  [
+   "A07",
+   "baum",
+   "verpasst",
+   70.5,
+   1
+  ],
+  [
+   "A07",
+   "baum",
+   "verpasst",
+   84.0,
+   2
+  ],
+  [
+   "A10",
+   "gartenhaus",
+   "Fehltreffer",
+   15.6,
+   0.79
+  ],
+  [
+   "H04",
+   "baum",
+   "Fehltreffer",
+   17.9,
+   0.62
+  ],
+  [
+   "H04",
+   "baum",
+   "verpasst",
+   54.1,
+   0
+  ],
+  [
+   "H04",
+   "gartenhaus",
+   "Fehltreffer",
+   5.9,
+   0.88
+  ],
+  [
+   "H05",
+   "strauch",
+   "Fehltreffer",
+   17.0,
+   0.9
+  ],
+  [
+   "H05",
+   "strauch",
+   "verpasst",
+   9.6,
+   0
+  ],
+  [
+   "H05",
+   "baum",
+   "verpasst",
+   3.1,
+   1
+  ],
+  [
+   "H05",
+   "baum",
+   "verpasst",
+   3.1,
+   2
+  ],
+  [
+   "H05",
+   "baum",
+   "verpasst",
+   24.8,
+   3
+  ],
+  [
+   "H06",
+   "hecke",
+   "verpasst",
+   14.2,
+   3
+  ],
+  [
+   "H06",
+   "hecke",
+   "verpasst",
+   14.2,
+   4
+  ],
+  [
+   "H06",
+   "gartenhaus",
+   "Fehltreffer",
+   26.7,
+   0.72
+  ],
+  [
+   "H06",
+   "carport_garage",
+   "verpasst",
+   26.0,
+   0
+  ],
+  [
+   "H06",
+   "terrasse",
+   "verpasst",
+   33.8,
+   2
+  ],
+  [
+   "H06",
+   "baum",
+   "verpasst",
+   35.8,
+   6
+  ],
+  [
+   "H07",
+   "strauch",
+   "Fehltreffer",
+   17.4,
+   0.65
+  ],
+  [
+   "H07",
+   "strauch",
+   "Fehltreffer",
+   41.7,
+   0.56
+  ],
+  [
+   "H07",
+   "baum",
+   "verpasst",
+   41.0,
+   1
+  ],
+  [
+   "H14",
+   "hecke",
+   "Fehltreffer",
+   5.0,
+   0.83
+  ],
+  [
+   "H14",
+   "strauch",
+   "verpasst",
+   16.0,
+   4
+  ],
+  [
+   "H14",
+   "baum",
+   "Fehltreffer",
+   42.2,
+   0.57
+  ],
+  [
+   "H14",
+   "baum",
+   "Fehltreffer",
+   46.3,
+   0.54
+  ],
+  [
+   "H14",
+   "baum",
+   "Fehltreffer",
+   57.6,
+   0.51
+  ],
+  [
+   "H17",
+   "terrasse",
+   "verpasst",
+   155.4,
+   0
+  ],
+  [
+   "H20",
+   "baum",
+   "Fehltreffer",
+   77.2,
+   0.91
+  ],
+  [
+   "H20",
+   "baum",
+   "verpasst",
+   5.3,
+   0
+  ],
+  [
+   "H20",
+   "baum",
+   "verpasst",
+   47.0,
+   1
+  ],
+  [
+   "H20",
+   "gartenhaus",
+   "Fehltreffer",
+   8.4,
+   0.72
+  ],
+  [
+   "S01",
+   "terrasse",
+   "verpasst",
+   640.0,
+   1
+  ],
+  [
+   "S04",
+   "baum",
+   "Fehltreffer",
+   68.0,
+   0.54
+  ],
+  [
+   "S04",
+   "baum",
+   "verpasst",
+   61.5,
+   0
+  ],
+  [
+   "S07",
+   "gartenhaus",
+   "Fehltreffer",
+   4.4,
+   0.72
+  ],
+  [
+   "S07",
+   "strauch",
+   "verpasst",
+   5.1,
+   4
+  ],
+  [
+   "S07",
+   "strauch",
+   "verpasst",
+   5.5,
+   5
+  ],
+  [
+   "S07",
+   "terrasse",
+   "verpasst",
+   82.6,
+   6
+  ],
+  [
+   "S11",
+   "hecke",
+   "verpasst",
+   9.3,
+   2
+  ],
+  [
+   "S12",
+   "strauch",
+   "verpasst",
+   5.3,
+   1
+  ],
+  [
+   "S12",
+   "gartenhaus",
+   "verpasst",
+   8.4,
+   0
+  ],
+  [
+   "S16",
+   "baum",
+   "verpasst",
+   42.5,
+   0
+  ],
+  [
+   "S16",
+   "baum",
+   "verpasst",
+   2.8,
+   1
+  ],
+  [
+   "S16",
+   "baum",
+   "verpasst",
+   5.3,
+   2
+  ],
+  [
+   "S20",
+   "terrasse",
+   "verpasst",
+   42.6,
+   0
+  ]
+ ]
+}

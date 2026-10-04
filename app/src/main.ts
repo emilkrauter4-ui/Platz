@@ -19,6 +19,7 @@ import {
   fmt,
   footprint,
   GEBIET_TEXT,
+  istGebaeude,
   LIMITS,
   NAMES,
   pointInPolygon,
@@ -33,7 +34,10 @@ import {
   type Result,
   type Site,
   type Vec2,
+  type GartenKlasse,
+  zaehleBestand,
 } from './rules';
+import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, localToCartesian, lonLatToLocal, setOrigin } from './scene/coords';
 import { Terrain } from './scene/terrain';
@@ -93,7 +97,11 @@ const st: State = {
   view: '3d',
   heading: 0,
   hasDragged: false,
+  kante: null,
+  zeichnen: null,
 };
+/** Grenzseite, für die gerade ein Objekt eingezeichnet wird (nur für den Hinweistext). */
+let zeichnenSeite: number | null = null;
 
 let data: Data;
 /** Grenze vom Nutzer gesetzt oder für eine Demo-Adresse vorgezeichnet */
@@ -345,7 +353,9 @@ async function confirmPlot() {
   }
   st.bestand = near(data.bestand, c, 90)
     .filter((x) => pointInPolygon(centroid(x.fp), b))
-    .map((x) => ({ id: x.id, footprint: x.fp, height: x.h, provenance: 'erkannt' as const, confidence: x.conf, status: 'aktiv' as const }));
+    .map((x) => ({ ...fromRec(x), status: 'aktiv' as const }));
+  st.kante = null;
+  st.zeichnen = null;
   st.windows = assumedWindows(b, st.buildings);
   st.objs = initialObjects(b, st.buildings, st.bestand);
   st.step = 'pruefen';
@@ -467,17 +477,8 @@ function renderSheet() {
       return `<div class="ctl"><label for="s${i}"><span>${s.l}</span><output data-k="${s.k}" for="s${i}"></output></label><input id="s${i}" type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${v}" data-k="${s.k}"></div>`;
     })
     .join('');
-  const activeBest = st.bestand;
-  const bestHtml = activeBest.length
-    ? `<ul class="rows best">${activeBest
-        .map(
-          (b) => `<li><span>${b.status === 'entfernt' ? '<s>' : ''}Kleinbau, ${fmt(b.height, 1)} m hoch, ${fmt(area(b.footprint), 0)} m²${b.status === 'entfernt' ? '</s>' : ''}</span>
-            ${tag(b.status === 'entfernt' ? 'verworfen' : b.provenance, b.status === 'entfernt' ? 'offen' : b.provenance)}
-            <span class="acts">${b.status === 'aktiv' && b.provenance === 'erkannt' ? `<button type="button" data-bok="${b.id}">Stimmt</button>` : ''}
-            ${b.status === 'aktiv' ? `<button type="button" data-bno="${b.id}">Gibt es nicht</button>` : `<button type="button" data-bok="${b.id}">Doch</button>`}</span></li>`,
-        )
-        .join('')}</ul>`
-    : '<p class="fine" style="text-align:left">Keine bestehenden Kleinbauten erkannt.</p>';
+  if (st.kante || st.zeichnen) return renderEditSheet();
+  const bestHtml = bestandHtml();
   const wins = st.windows;
   $('stepBody').innerHTML = `
     <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">
@@ -486,6 +487,10 @@ function renderSheet() {
     <div class="controls" id="controls">${ctl}</div>
     ${st.denkmal?.length ? `<p class="warnbox">Denkmalschutz: ${st.denkmal.map((d) => `${esc(d.art)}${d.bezeichnung ? ` „${esc(d.bezeichnung)}“` : ''} (${esc(d.aktennummer)})`).join('; ')}. Hier kann auch ein kleines Nebengebäude oder eine Wärmepumpe eine denkmalrechtliche Erlaubnis brauchen (Art. 6 BayDSchG). ${tag('amtlich', 'amtlich')} <span class="attr">© BLfD</span></p>` : ''}
     ${st.wsg?.length ? `<p class="warnbox">Das Grundstück liegt in einem Trinkwasserschutzgebiet (${esc(st.wsg.join(', '))}). Dort gelten eigene Auflagen. ${tag('amtlich', 'amtlich')}</p>` : ''}
+    <details ${st.bestand.length ? 'open' : ''} id="bestandBox">
+      <summary>Steht hier schon etwas?</summary>
+      ${bestHtml}
+    </details>
     <details open>
       <summary>So haben wir geprüft</summary>
       <ul class="rows" id="rows"></ul>
@@ -497,8 +502,6 @@ function renderSheet() {
       <div class="field"><span>Gartenhaus mit Aufenthaltsraum ${tag(st.aufenthaltsraum.provenance, st.aufenthaltsraum.provenance)}</span>${sel('fAuf', st.aufenthaltsraum.value ? 'ja' : 'nein', [['nein', 'nein'], ['ja', 'ja']])}</div>
       <div class="field"><span>Gartenhaus mit Ofen ${tag(st.feuerstaette.provenance, st.feuerstaette.provenance)}</span>${sel('fOfen', st.feuerstaette.value ? 'ja' : 'nein', [['nein', 'nein'], ['ja', 'ja']])}</div>
       <div class="field"><span>Nachbarfenster</span><span>${wins.filter((w) => w.provenance !== 'Annahme').length} gesetzt, ${wins.filter((w) => w.provenance === 'Annahme').length} angenommen</span></div>
-      <h3 style="font-size:14px;margin:14px 0 4px">Bestehende Kleinbauten auf deinem Grundstück</h3>
-      ${bestHtml}
       <div class="field"><span>Bebauungsplan ${tag('offen', 'offen')}</span>${data.site.gemeinde.bauleitplanung_url ? `<a href="${esc(data.site.gemeinde.bauleitplanung_url)}" target="_blank" rel="noopener">Pläne der Stadt</a>` : 'unbekannt'}</div>
       <div class="field"><span>Trinkwasserschutzgebiet ${st.wsg == null ? tag('offen', 'offen') : tag('amtlich', 'amtlich')}</span><span>${st.wsg === undefined ? 'wird abgefragt …' : st.wsg === null ? 'nicht abfragbar' : st.wsg.length ? 'ja' : 'nein'}</span></div>
       <div class="field"><span>Denkmal ${st.denkmal == null ? tag('offen', 'offen') : tag('amtlich', 'amtlich')}</span><span>${st.denkmal === undefined ? 'wird abgefragt …' : st.denkmal === null ? 'nicht abfragbar' : st.denkmal.length ? 'ja, siehe Hinweis' : 'nein'} · <a href="https://geoportal.bayern.de/denkmalatlas/" target="_blank" rel="noopener">Denkmal-Atlas</a></span></div>
@@ -538,6 +541,20 @@ function renderSheet() {
       afterContextChange();
     }),
   );
+  document.querySelectorAll<HTMLButtonElement>('[data-kante]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const it = st.bestand.find((x) => x.id === b.dataset.kante)!;
+      st.kante = { id: it.id, fp: griffe(it), ref: it.footprint };
+      startEdit();
+    }),
+  );
+  document.querySelectorAll<HTMLButtonElement>('[data-neu]').forEach((b) =>
+    b.addEventListener('click', () => {
+      st.zeichnen = [];
+      zeichnenSeite = b.dataset.neu === '' ? null : Number(b.dataset.neu);
+      startEdit();
+    }),
+  );
   $('reportBtn').addEventListener('click', openReport);
   $('editBtn').addEventListener('click', () => {
     st.draft = [...(st.plot ?? [])];
@@ -549,6 +566,108 @@ function renderSheet() {
   });
   $('newBtn').addEventListener('click', () => showStart());
   update();
+}
+
+/** „Steht hier schon etwas?“ – je Grenze vorbefüllt aus der Garten-Erkennung, dazu die übrigen Objekte im Garten. */
+function bestandHtml(): string {
+  if (!st.plot || !site) return '';
+  const sides = site.plot.sides;
+  const { seiten, innen } = jeGrenze(st.bestand, st.plot, site.plot.segmentSide ?? sidesFromBoundary(st.plot).segmentSide, sides.length);
+  const z = zaehleBestand({ ...site, bestand: st.bestand.filter((x) => x.status === 'aktiv') });
+  const grund = new Map<string, string>([
+    ...z.gezaehlt.map((x) => [x.id, `zählt bei der Grenzbebauung mit (${x.grund})`] as [string, string]),
+    ...z.nicht.filter((x) => x.grund !== 'kein Gebäude').map((x) => [x.id, `zählt noch nicht mit: ${x.grund}`] as [string, string]),
+  ]);
+  const item = (b: BestandItem) => {
+    const weg = b.status === 'entfernt';
+    const herkunft = weg ? tag('verworfen', 'offen') : b.provenance === 'erkannt' ? tag(`erkannt ${Math.round((b.confidence ?? 0) * 100)} %`, 'erkannt') : tag(b.provenance, b.provenance);
+    return `<li><span>${weg ? '<s>' : ''}${esc(beschreibung(b))}${weg ? '</s>' : ''}${!weg && grund.has(b.id) ? `<br><small class="fine">${esc(grund.get(b.id)!)}</small>` : ''}</span>
+      ${herkunft}
+      <span class="acts">${!weg && b.provenance === 'erkannt' ? `<button type="button" data-bok="${b.id}">Stimmt</button>` : ''}
+      ${!weg ? `<button type="button" data-kante="${b.id}">Umriss nachziehen</button>` : ''}
+      ${!weg ? `<button type="button" data-bno="${b.id}">Gibt es nicht</button>` : `<button type="button" data-bok="${b.id}">Doch</button>`}</span></li>`;
+  };
+  let h = '<p class="fine" style="text-align:left">Aus Luftbild 2023 und Laserdaten 2025 erkannt. Bestehende Gebäude an der Grenze zählen bei den 9 m und 15 m mit. Bitte prüfen.</p>';
+  sides.forEach((sd, i) => {
+    h += `<h3 style="font-size:14px;margin:12px 0 4px">${esc(cap(sd.grenze))}</h3>`;
+    h += seiten[i].length
+      ? `<ul class="rows best">${seiten[i].map((b) => item(b as BestandItem)).join('')}</ul>`
+      : `<p class="fine" style="text-align:left">Nichts erkannt. <button class="link" type="button" data-neu="${i}">Doch, hier steht etwas</button></p>`;
+  });
+  if (innen.length) h += `<details><summary>Weitere Objekte im Garten (${innen.length})</summary><ul class="rows best">${innen.map((b) => item(b as BestandItem)).join('')}</ul></details>`;
+  h += `<p class="fine" style="text-align:left"><button class="link" type="button" data-neu="">Objekt einzeichnen</button></p>`;
+  return h;
+}
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function startEdit() {
+  st.view = 'plan';
+  syncViewButtons();
+  plotFrame();
+  renderer.syncContext();
+  renderer.syncEdit();
+  renderSheet();
+}
+
+function endEdit() {
+  st.kante = null;
+  st.zeichnen = null;
+  zeichnenSeite = null;
+  renderer.syncEdit();
+  afterContextChange();
+}
+
+/** Bedienfeld beim Nachziehen oder Einzeichnen (ersetzt die Prüfansicht, bis fertig). */
+function renderEditSheet() {
+  const zeichnen = st.zeichnen;
+  if (st.kante) {
+    const it = st.bestand.find((x) => x.id === st.kante!.id)!;
+    verdict('Umriss nachziehen.', `${it.kind ? KLASSE_TEXT[it.kind] : 'Kleinbau'}: Zieh die blauen Ecken auf die Kanten im Luftbild. Sie rasten an der erkannten Kante (gestrichelt), an Gebäuden und an der Grenze ein.`);
+    $('stepBody').innerHTML = `<div class="btnrow">
+      <button class="primary" id="eOk" type="button">Übernehmen</button>
+      <button class="sec" id="eNo" type="button">Abbrechen</button></div>`;
+  } else if (zeichnen) {
+    const n = zeichnen.length;
+    verdict('Objekt einzeichnen.', n < 4 ? `Tipp die ${['erste', 'zweite', 'dritte', 'vierte'][n]} Ecke an${zeichnenSeite != null && site ? ` (${site.plot.sides[zeichnenSeite].grenze})` : ''}. An Gebäuden und der Grenze rastet sie ein.` : 'Was steht da, und wie hoch ist die Wand?');
+    const kl: GartenKlasse[] = ['gartenhaus', 'carport_garage', 'gewaechshaus', 'pool', 'terrasse', 'spielturm', 'trampolin', 'hecke', 'strauch', 'baum', 'zaun_mauer'];
+    $('stepBody').innerHTML = `${n >= 4 ? `
+      <div class="field"><span>Was ist es?</span>${sel('eKl', 'gartenhaus', kl.map((k) => [k, KLASSE_TEXT[k]]))}</div>
+      <div class="field"><label for="eH">Mittlere Wandhöhe in m</label><input id="eH" type="number" min="0" max="8" step="0.05" value="2.50" inputmode="decimal"></div>` : ''}
+      <div class="btnrow">
+      ${n >= 4 ? '<button class="primary" id="eOk" type="button">Übernehmen</button>' : ''}
+      <button class="sec" id="eUndo" type="button" ${n ? '' : 'disabled'}>Letzte Ecke löschen</button>
+      <button class="sec" id="eNo" type="button">Abbrechen</button></div>`;
+    document.getElementById('eUndo')?.addEventListener('click', () => {
+      st.zeichnen!.pop();
+      renderer.syncEdit();
+      renderSheet();
+    });
+  }
+  document.getElementById('eNo')?.addEventListener('click', endEdit);
+  document.getElementById('eOk')?.addEventListener('click', () => {
+    if (st.kante) {
+      const i = st.bestand.findIndex((x) => x.id === st.kante!.id);
+      st.bestand[i] = { ...nachgezogen(st.bestand[i], ccw(st.kante.fp)), status: 'aktiv' };
+    } else if (st.zeichnen && st.zeichnen.length >= 4) {
+      const k = ($('eKl') as HTMLSelectElement).value as GartenKlasse;
+      const h = Math.max(0, parseFloat(($('eH') as HTMLInputElement).value.replace(',', '.')) || 0);
+      st.bestand.push({ ...neuesObjekt(`neu-${Date.now()}`, ccw(st.zeichnen), k, h), status: 'aktiv' });
+    }
+    endEdit();
+  });
+}
+
+/** Einrasten beim Nachziehen: erkannter Umriss, Gebäude, Grenze, übrige Objekte. */
+function snapEdit(p: Vec2): Vec2 {
+  const tol = Math.max(0.25, 14 * metersPerPixel(p));
+  const fps = [
+    ...(st.kante ? [st.kante.ref] : []),
+    ...st.buildings.map((b) => b.footprint),
+    ...(st.plot ? [st.plot] : []),
+    ...st.bestand.filter((b) => b.id !== st.kante?.id && b.status === 'aktiv' && istGebaeude(b)).map((b) => b.footprint),
+  ];
+  return snap(p, fps, tol).p;
 }
 
 function afterContextChange() {
@@ -597,11 +716,20 @@ function setupInput() {
   const v = scene.viewer;
   const h = new ScreenSpaceEventHandler(v.scene.canvas);
   let drag: { k: ObjectKind; off: Vec2 } | null = null;
+  let ecke: number | null = null;
   let downAt: Cartesian2 | null = null;
 
   h.setInputAction((e: { position: Cartesian2 }) => {
     downAt = Cartesian2.clone(e.position);
     if (st.step !== 'pruefen' || !st.objs) return;
+    if (st.kante || st.zeichnen) {
+      const kk = Renderer.keyOf(v.scene.pick(e.position));
+      if (kk?.startsWith('ecke:') && st.kante) {
+        ecke = Number(kk.slice(5));
+        v.scene.screenSpaceCameraController.enableInputs = false;
+      }
+      return;
+    }
     const key = Renderer.keyOf(v.scene.pick(e.position));
     if (!key || key.startsWith('bestand:')) return;
     const k = key as ObjectKind;
@@ -618,6 +746,14 @@ function setupInput() {
   }, ScreenSpaceEventType.LEFT_DOWN);
 
   h.setInputAction((e: { endPosition: Cartesian2 }) => {
+    if (ecke != null && st.kante) {
+      const g = pickGround(e.endPosition);
+      if (g) {
+        st.kante.fp[ecke] = snapEdit(g);
+        renderer.syncEdit();
+      }
+      return;
+    }
     if (!drag || !st.objs) return;
     const g = pickGround(e.endPosition);
     if (!g) return;
@@ -627,8 +763,9 @@ function setupInput() {
   }, ScreenSpaceEventType.MOUSE_MOVE);
 
   h.setInputAction((e: { position: Cartesian2 }) => {
-    const wasDrag = !!drag;
+    const wasDrag = !!drag || ecke != null;
     drag = null;
+    ecke = null;
     v.scene.screenSpaceCameraController.enableInputs = true;
     // Tippen = kaum Bewegung zwischen Drücken und Loslassen
     const moved = downAt ? Cartesian2.distance(downAt, e.position) : 99;
@@ -639,6 +776,13 @@ function setupInput() {
     } else if (st.step === 'grenze') {
       const g = pickGround(e.position);
       if (g) addBoundaryPoint(g);
+    } else if (st.step === 'pruefen' && st.zeichnen) {
+      const g = pickGround(e.position);
+      if (g && st.zeichnen.length < 4) {
+        st.zeichnen.push(snapEdit(g));
+        renderer.syncEdit();
+        renderSheet();
+      }
     } else if (st.step === 'pruefen' && st.selected === 'waermepumpe') {
       const picked = v.scene.pick(e.position);
       if (picked && (picked.primitive instanceof Cesium3DTileset || picked.tileset)) {
@@ -740,7 +884,7 @@ function openReport() {
     <li>Gartenhaus ${st.aufenthaltsraum.value ? 'mit' : 'ohne'} Aufenthaltsraum und ${st.feuerstaette.value ? 'mit' : 'ohne'} Feuerstätte (${esc(st.aufenthaltsraum.provenance)})</li>
     <li>Abstandsfläche 0,4 H, mindestens 3 m; Gemeindesatzungen können abweichen</li>
     <li>Wandhöhe über dem Gelände aus DGM1 gemessen, Fußboden am höchsten Geländepunkt</li>
-    <li>${best.length} bestehende Kleinbauten mitgezählt (${best.filter((b) => b.provenance === 'erkannt').length} automatisch erkannt)</li>
+    ${bestandReport(best)}
     <li>Nachbarfenster: ${st.windows.filter((w) => w.provenance !== 'Annahme').length} von dir gesetzt, ${st.windows.filter((w) => w.provenance === 'Annahme').length} angenommen (Fassadenmitte, 1,6 m)</li>
     <li>Schall vereinfacht nach LAI-Leitfaden, ohne Zuschläge</li>
     <li>Denkmal: ${st.denkmal == null ? 'nicht abgefragt (offen)' : st.denkmal.length ? st.denkmal.map((d) => `${esc(d.art)} ${esc(d.aktennummer)}`).join(', ') + ' (amtlich, © BLfD)' : 'kein Denkmal am Grundstück (amtlich, © BLfD)'}</li>
@@ -753,6 +897,17 @@ function openReport() {
   openModal('Prüfbericht', h);
 }
 
+/** Prüfbericht: welche bestehenden Objekte bei der Grenzbebauung mitgezählt wurden und welche nicht. */
+function bestandReport(best: BestandItem[]): string {
+  if (!site) return '';
+  const z = zaehleBestand({ ...site, bestand: best });
+  const name = (id: string) => esc(beschreibung(best.find((b) => b.id === id)!));
+  const ja = z.gezaehlt.map((x) => `${name(x.id)} – ${esc(x.grund)}`);
+  const nein = z.nicht.filter((x) => x.grund !== 'kein Gebäude').map((x) => `${name(x.id)} – ${esc(x.grund)}`);
+  const verworfen = st.bestand.filter((b) => b.status === 'entfernt').length;
+  return `<li>Grenzbebauung (9 m / 15 m): ${ja.length ? `mitgezählt ${ja.length} bestehende${ja.length === 1 ? 's Gebäude' : ' Gebäude'}: ${ja.join('; ')}` : 'keine bestehenden Gebäude mitgezählt'}${nein.length ? `. Nicht mitgezählt (unsicher erkannt, bitte bestätigen): ${nein.join('; ')}` : ''}${verworfen ? `. ${verworfen} erkannte${verworfen === 1 ? 's Objekt' : ' Objekte'} von dir verworfen` : ''}. Erkannt aus Luftbild 2023 und Laser 2025; Maße mit Spanne.</li>`;
+}
+
 function openInfo() {
   openModal(
     'Woher die Daten kommen',
@@ -761,7 +916,7 @@ function openInfo() {
       <li>3D-Gebäudemodelle LoD2 und Hausumringe</li>
       <li>Digitales Geländemodell DGM1, umgerechnet mit dem Quasigeoid GCG2016 (BKG)</li>
       <li>Luftbild DOP20 und Parzellarkarte (Kartendienste)</li>
-      <li>Bestehende Kleinbauten: aus DOM20, DGM1 und DOP20 CIR selbst erkannt</li>
+      <li>Bestehende Objekte im Garten (Gartenhäuser, Pools, Hecken …): aus DOP20, DOM20, DGM1 und Laserpunkten selbst erkannt, Umrisse mit SAM 2 (Meta, Apache 2.0)</li>
       <li>Wasserschutzgebiete: Datenquelle Bayerisches Landesamt für Umwelt, www.lfu.bayern.de (CC BY 4.0, Abfrage)</li>
       <li>Denkmäler: © BLfD (CC BY-ND 4.0, nur Abfrage, unverändert angezeigt)</li>
       <li>Adresssuche: © OpenStreetMap-Mitwirkende, Nominatim</li>

@@ -10,3 +10,9 @@ mapbox_earcut
 pillow
 laspy[lazrs]
 DracoPy
+# Phase 1 (Garten-Erkennung). torch CPU: pip install torch --index-url https://download.pytorch.org/whl/cpu
+scikit-learn
+scikit-image
+opencv-python-headless
+matplotlib
+sam2 @ git+https://github.com/facebookresearch/sam2.git

@@ -1,0 +1,4 @@
+{"grundstueck": "A16", "objekte": [
+ {"klasse": "baum", "kreis": [18.2, 35.0, 3.0], "notiz": "Nadelbaum ~5 m (Ringmuster im Laser)"},
+ {"klasse": "baum", "poly": [[13,28],[19,27],[22,31],[20,38],[14,38],[12,33]], "sicher": false, "notiz": "Gehölzgruppe im Hof"}
+], "notiz": "Autos in der Zufahrt sind keine Objekte"}

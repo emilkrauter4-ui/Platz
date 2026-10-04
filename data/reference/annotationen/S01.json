@@ -1,0 +1,4 @@
+{"grundstueck": "S01", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [23.9, 29.9, 3.0, 3.0, -8], "hoehe": 2.5, "sicher": false, "notiz": "weißer Faltpavillon, nur im DOP 2023, im Laser 2025 nicht vorhanden"},
+ {"klasse": "terrasse", "poly": [[40,61],[54,58],[58,56],[46,34],[42,31],[36,24],[30,20],[22,17],[10,16],[9,18],[22,21],[29,25],[33,30],[31,40]], "hoehe": 0, "notiz": "gepflasterter Hof und Zufahrt, grob"}
+]}

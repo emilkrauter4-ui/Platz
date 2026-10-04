@@ -43,6 +43,21 @@
       "text": "Gesamtlänge der Bebauung an allen Grundstücksgrenzen bis 15 m."
     }
   },
+  "bestand": {
+    "gebaeudeKlassen": {
+      "wert": ["gartenhaus", "gewaechshaus", "carport_garage"],
+      "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
+      "text": "Mitgezählt werden Garagen und Gebäude ohne Aufenthaltsräume und Feuerstätten (Gartenhaus, Gewächshaus, Garage/Carport). Pool, Terrasse, Spielturm, Trampolin und Pflanzen sind keine solchen Gebäude und zählen nicht zur Länge an der Grenze."
+    },
+    "konfidenzMin": {
+      "wert": 0.8,
+      "quelle": "Produktentscheidung Passt. (keine Rechtsregel): Ein erkanntes, nicht bestätigtes Nebengebäude zählt bei der Grenzbebauung nur ab dieser Konfidenz mit. Auf dem Entwicklungs-Set lag die Präzision ab 0,7 bei 67 % (zu viele falsche „zu viel an der Grenze“), ab 0,8 bei 2/2 – deshalb 0,8; alles darunter muss der Nutzer bestätigen (docs/garten_auswertung.md)"
+    },
+    "grenzNaheM": {
+      "wert": 1.0,
+      "quelle": "Produktentscheidung Passt.: Objekte mit höchstens diesem Abstand zur Grenze werden bei „Steht hier schon etwas?“ der Grenze zugeordnet"
+    }
+  },
   "waermepumpe": {
     "verfahrensfrei": {
       "wert": true,

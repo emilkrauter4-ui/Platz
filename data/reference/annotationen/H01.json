@@ -1,0 +1,5 @@
+{"grundstueck": "H01", "objekte": [
+ {"klasse": "baum", "poly": [[11,22],[17,19],[21,21],[21,30],[17,35],[12,33]], "sicher": false, "notiz": "Laubbaum(e) West, Kronen verschmolzen"},
+ {"klasse": "baum", "poly": [[20.5,10],[26,8],[30.5,12],[29,19],[23,20],[20.5,15]], "notiz": "großer Laubbaum Süd"},
+ {"klasse": "hecke", "poly": [[38.5,19.5],[47.5,25.5],[48,24.5],[39.5,18.5]], "sicher": false, "notiz": "Gehölzstreifen an der SO-Grenze"}
+]}

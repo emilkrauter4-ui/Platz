@@ -1,0 +1,9 @@
+{"grundstueck": "S07", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [26.3, 41.5, 4.0, 3.6, 20], "notiz": "Gartenhaus/Pergola mit hellem Dach, im Laser mit Vegetation verschmolzen"},
+ {"klasse": "baum", "poly": [[20.3,42.5],[25,42.5],[25,48],[20.3,48]], "sicher": false, "notiz": "Nadelgehölz ~4 m (Einzelechos), Art unsicher"},
+ {"klasse": "hecke", "poly": [[8,29.5],[12.5,23],[13.3,23.6],[8.8,30.2]], "sicher": false, "notiz": "Hecke an der Westgrenze"},
+ {"klasse": "hecke", "poly": [[9,21.6],[16.5,17.8],[16.9,18.8],[9.4,22.6]], "sicher": false, "notiz": "Hecke im Vorgarten"},
+ {"klasse": "strauch", "poly": [[38.8,10.5],[41,10.5],[41,12.8],[38.8,12.8]], "notiz": "kleiner Nadelbaum/Strauch"},
+ {"klasse": "strauch", "poly": [[40.5,13],[42.6,13],[42.6,15.6],[40.5,15.6]], "notiz": "kleiner Nadelbaum/Strauch"},
+ {"klasse": "terrasse", "poly": [[30,31],[36.5,29],[37.5,16],[33,15.5],[31,22]], "notiz": "Zufahrt, grob"}
+]}

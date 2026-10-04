@@ -1,0 +1,5 @@
+{"grundstueck": "S12", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [28.0, 13.6, 3.0, 2.8, 10], "notiz": "dunkles Gerätehaus südöstlich des Hauses"},
+ {"klasse": "strauch", "poly": [[15.4,12],[17.6,12],[17.6,14.4],[15.4,14.4]], "notiz": "runder Strauch/Bäumchen"},
+ {"klasse": "strauch", "poly": [[9,11],[15,11],[15,14],[9,14]], "sicher": false, "notiz": "Strauchreihe"}
+]}

@@ -1,0 +1,4 @@
+{"grundstueck": "H04", "objekte": [
+ {"klasse": "baum", "poly": [[18.5,41],[22,39.5],[26,41.5],[27,46],[24.5,49],[20,47]], "notiz": "großer Baum nordwestlich des Hauses"},
+ {"klasse": "baum", "kreis": [15.5, 17.2, 4.0], "sicher": false, "notiz": "Baum an der Garage, Grenzlage"}
+]}

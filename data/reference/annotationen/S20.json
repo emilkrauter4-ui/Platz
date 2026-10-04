@@ -1,0 +1,4 @@
+{"grundstueck": "S20", "objekte": [
+ {"klasse": "terrasse", "poly": [[15.5,47.3],[27.5,46.3],[27.5,43],[15.5,43.5]], "notiz": "gepflasterte Fläche nördlich des Hauses"},
+ {"klasse": "terrasse", "poly": [[12.5,22],[14.5,22],[15,40],[12.8,40]], "sicher": false, "notiz": "Weg westlich des Hauses"}
+]}

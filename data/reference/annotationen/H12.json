@@ -1,0 +1,5 @@
+{"grundstueck": "H12", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [10.3, 18.5, 3.0, 2.9, -18], "sicher": false, "notiz": "weißer Pavillon/Zelt im DOP 2023, im Laser 2025 nicht vorhanden"},
+ {"klasse": "hecke", "poly": [[7,16],[16,12.5],[16.4,13.5],[7.4,17]], "notiz": "Hecke an der Südgrenze ~2 m"},
+ {"klasse": "hecke", "poly": [[7,16],[9.5,27],[10.4,26.8],[7.9,15.8]], "sicher": false, "notiz": "Hecke an der Westgrenze"}
+]}

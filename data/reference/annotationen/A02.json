@@ -1,0 +1,4 @@
+{"grundstueck": "A02", "objekte": [
+ {"klasse": "zaun_mauer", "poly": [[11.5,10.5],[20,8.3],[20,9.2],[11.5,11.3]], "sicher": false, "notiz": "Mauer/Einfassung vor dem Haus, Laser ~2,5 m"},
+ {"klasse": "terrasse", "poly": [[8,16],[12.5,13],[18,11.5],[20,9],[12,8.5],[9,12]], "sicher": false, "notiz": "befestigte Fläche vor dem Haus (Straßenraum?)"}
+]}

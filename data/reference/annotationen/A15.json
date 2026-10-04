@@ -1,0 +1,7 @@
+{"grundstueck": "A15", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [28.8, 31.4, 5.3, 2.6, 0], "notiz": "Schuppen mit hellem Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [37.6, 31.2, 3.5, 2.4, 0], "sicher": false, "notiz": "kleiner Anbau/Unterstand"},
+ {"klasse": "carport_garage", "rechteck": [45.5, 28.6, 6.6, 4.4, 0], "notiz": "Nebengebäude mit rotem Dach, nicht im Hausumring, Laser ~3 m"},
+ {"klasse": "hecke", "poly": [[9,15],[11.5,15],[11,35],[9,35]], "notiz": "Hecke an der Westgrenze ~2,5 m"},
+ {"klasse": "hecke", "poly": [[11,33.5],[48,32],[48,33.6],[11,35]], "notiz": "Hecke/Gehölz an der Nordgrenze"}
+]}

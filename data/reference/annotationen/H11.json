@@ -1,0 +1,7 @@
+{"grundstueck": "H11", "objekte": [
+ {"klasse": "pool", "poly": [[14.3,36.6],[15.5,37.3],[19,37.3],[20.6,36.6],[21.2,35.4],[20.4,34.3],[18.5,34.1],[16.5,33.6],[14.6,34.3],[14.0,35.5]], "notiz": "Freiform-Pool (Wasser türkis), im Laser 2025 Bodenpunkte (abgedeckt/leer)"},
+ {"klasse": "terrasse", "poly": [[13,37.3],[16,38.7],[21,38.3],[22.5,36.5],[21.5,33],[16,32.5],[13,33.5]], "sicher": false, "notiz": "Pool-Umrandung (Platten), schließt Pool ein"},
+ {"klasse": "baum", "poly": [[46,24],[53,23],[55,27],[54,32],[48,33],[46,29]], "notiz": "großer Baum an der Ostgrenze"},
+ {"klasse": "baum", "poly": [[29.5,49.5],[37,49.5],[37.5,54.5],[30,55]], "notiz": "Baum an der Nordgrenze"},
+ {"klasse": "baum", "poly": [[8,33],[11,33],[11,43],[8,43]], "sicher": false, "notiz": "Gehölz an der Westgrenze"}
+]}

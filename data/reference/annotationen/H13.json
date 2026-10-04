@@ -1,0 +1,6 @@
+{"grundstueck": "H13", "objekte": [
+ {"klasse": "gewaechshaus", "rechteck": [28.5, 17.6, 3.6, 2.3, -15], "notiz": "Gewächshaus mit Sprossen (DOP), Laser ~1,5 m Einzelecho"},
+ {"klasse": "terrasse", "poly": [[11,23],[24,26],[27.5,24],[28,20],[16,17],[12,19]], "sicher": false, "notiz": "befestigter Hof mit Beeten, grob"},
+ {"klasse": "strauch", "poly": [[6,12.5],[11,12.5],[11,20],[7,20]], "sicher": false, "notiz": "Strauch/Gehölz Westgarten"},
+ {"klasse": "baum", "poly": [[20.5,3.5],[26.5,3.5],[27,8.5],[21,8.5]], "notiz": "Baum/Großstrauch an der Südgrenze"}
+]}

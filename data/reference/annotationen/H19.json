@@ -1,0 +1,7 @@
+{"grundstueck": "H19", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [37.6, 37.3, 3.2, 3.0, 30], "notiz": "Gartenhaus mit hellem Zeltdach, Laser ~2,5 m"},
+ {"klasse": "gartenhaus", "rechteck": [39.3, 40.5, 2.2, 2.0, 30], "sicher": false, "notiz": "kleiner dunkler Anbau/Schuppen hinter dem Gartenhaus"},
+ {"klasse": "hecke", "poly": [[24,52],[41,43],[41.5,44],[24.5,53]], "sicher": false, "notiz": "niedrige Hecke/Zaun an der NO-Grenze"},
+ {"klasse": "strauch", "poly": [[40,19],[44.5,19],[44.5,24],[40,24]], "notiz": "Strauch/kleiner Baum ~4 m"},
+ {"klasse": "strauch", "poly": [[43,28],[50,28],[50,35],[43,35]], "sicher": false, "notiz": "Gehölzgruppe an der Ostgrenze"}
+]}

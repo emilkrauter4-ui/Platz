@@ -1,0 +1,9 @@
+{"grundstueck": "S18", "objekte": [
+ {"klasse": "baum", "poly": [[23,44],[29,43.5],[31,47],[29.5,52],[25,52.5],[22.5,48]], "notiz": "großer Baum nördlich des Hauses"},
+ {"klasse": "baum", "poly": [[18,24],[24.5,24],[25,29.5],[19,30]], "notiz": "Baum südlich des Hauses"},
+ {"klasse": "baum", "poly": [[28.5,17],[34,17.5],[35,23],[31,25.5],[28.5,23]], "notiz": "Baum in der Ostecke"},
+ {"klasse": "baum", "poly": [[12.5,28],[19,28],[19.5,35.5],[13,36]], "notiz": "Baum westlich des Hauses ~5 m"},
+ {"klasse": "strauch", "poly": [[5,17],[15,17],[15,23],[6,23]], "sicher": false, "notiz": "Gehölzgruppe in der SW-Ecke"},
+ {"klasse": "hecke", "poly": [[36.5,25],[43,36],[44,35.4],[37.5,24.4]], "notiz": "Hecke an der Ostgrenze"},
+ {"klasse": "strauch", "kreis": [34.3, 46.3, 2.4], "notiz": "Strauch"}
+]}

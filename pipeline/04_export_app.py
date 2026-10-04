@@ -45,14 +45,33 @@ def main() -> int:
     (out / "buildings.json").write_text(json.dumps({"origin": [ox, oy], "label": "amtlich", "buildings": rows}, separators=(",", ":")), encoding="utf-8")
 
     best = []
-    bp = build_dir() / "bestand.geojson"
-    if bp.exists():
+    gp, bp = build_dir() / "garten.geojson", build_dir() / "bestand.geojson"
+    if gp.exists():
+        # Garten-Erkennung (08_garten.py): alle Klassen mit Maßen und Spanne. Kurze Schlüssel, die App packt aus.
+        from shapely.geometry import mapping
+        for f in json.loads(gp.read_text(encoding="utf-8"))["features"]:
+            p = f["properties"]
+            g = shape(f["geometry"])
+            if p["klasse"] in ("baum", "hecke", "strauch", "terrasse", "teich"):
+                g = g.simplify(0.3)
+            r = ring(mapping(g), ox, oy)
+            if not r:
+                continue
+            rec = {"id": p["id"], "k": p["klasse"], "fp": r, "a": round(g.area, 1), "c": p["konfidenz"],
+                   "l": p.get("laenge"), "b": p.get("breite"), "sl": p.get("spanne_laenge"),
+                   "h": p.get("hoehe"), "sh": p.get("spanne_hoehe")}
+            if p.get("wandhoehe_mittel") is not None:
+                rec.update({"wh": p["wandhoehe_mittel"], "sw": p.get("spanne_wand"), "tr": p.get("traufhoehe"), "fi": p.get("firsthoehe")})
+            if p.get("form") == "kreis":
+                rec["rund"] = 1
+            best.append({k: v for k, v in rec.items() if v is not None})
+    elif bp.exists():
         for f in json.loads(bp.read_text(encoding="utf-8"))["features"]:
             r = ring(f["geometry"], ox, oy)
             if r:
                 p = f["properties"]
                 best.append({"id": p["id"], "fp": r, "h": p["hoehe"], "a": p["flaeche"], "c": p["konfidenz"]})
-    (out / "bestand.json").write_text(json.dumps({"origin": [ox, oy], "label": "erkannt", "bestand": best}, separators=(",", ":")), encoding="utf-8")
+    (out / "bestand.json").write_text(json.dumps({"origin": [ox, oy], "label": "erkannt", "version": 2 if gp.exists() else 1, "bestand": best}, separators=(",", ":")), encoding="utf-8")
 
     x0, y0, x1, y1 = cfg()["gebiet"]["bbox"]
     site = {

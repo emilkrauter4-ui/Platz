@@ -1,0 +1,4 @@
+{"grundstueck": "A10", "objekte": [
+ {"klasse": "baum", "poly": [[11,35],[17,33],[22,36],[22,43],[17,46],[12,43]], "notiz": "großer Baum im Hof"},
+ {"klasse": "pool", "kreis": [17.3, 25.6, 4.0], "sicher": false, "notiz": "runder bläulicher Aufstellpool(?) im DOP 2023, im Laser März 2025 nur Boden (saisonal abgebaut)"}
+]}

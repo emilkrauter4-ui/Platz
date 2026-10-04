@@ -1,0 +1,6 @@
+{"grundstueck": "S11", "objekte": [
+ {"klasse": "terrasse", "poly": [[6.5,20.3],[29,10.3],[35.6,24.5],[31,27.5],[27,30],[20,30.5],[18,34],[12.5,33]], "notiz": "gepflasterter Hof mit Stellplätzen"},
+ {"klasse": "gartenhaus", "rechteck": [19.4, 31.4, 3.0, 2.2, 75], "sicher": false, "notiz": "kleiner Unterstand mit hellem Dach am Haus"},
+ {"klasse": "hecke", "poly": [[28.7,10.5],[34.5,18.5],[35.3,18],[29.5,10]], "notiz": "dichte Hecke an der SO-Grenze (Einzelechos, ~2,5 m)"},
+ {"klasse": "hecke", "poly": [[9.4,21],[11.2,26.5],[12,26.2],[10.2,20.8]], "sicher": false, "notiz": "Hecke an der Westgrenze"}
+]}

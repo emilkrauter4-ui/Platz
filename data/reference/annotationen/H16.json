@@ -1,0 +1,7 @@
+{"grundstueck": "H16", "objekte": [
+ {"klasse": "baum", "kreis": [17.6, 14.7, 3.6], "notiz": "Nadelbaum ~4 m (Ringmuster im Laser)"},
+ {"klasse": "hecke", "poly": [[8,18],[9.5,48],[10.7,48],[9.3,18]], "notiz": "Hecke an der Westgrenze ~1,5–2 m"},
+ {"klasse": "hecke", "poly": [[8,17.5],[11,12],[17,10.3],[17,11.5],[12,13],[9.3,18]], "notiz": "Hecke an der SW-Ecke"},
+ {"klasse": "hecke", "poly": [[32,38],[37,20],[38.3,20.3],[33.3,38.3]], "notiz": "Hecke an der Ostgrenze"},
+ {"klasse": "baum", "poly": [[10,40],[18,38],[28,40],[33,46],[30,55],[18,55],[10,48]], "sicher": false, "notiz": "Baumbestand im Nordteil (mehrere Kronen verschmolzen)"}
+]}

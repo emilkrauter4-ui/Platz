@@ -1,0 +1,7 @@
+{"grundstueck": "A01", "objekte": [
+ {"klasse": "baum", "poly": [[17,33],[22,33],[30,35],[32,40],[28,44],[20,45],[15,42]], "notiz": "große Baumkrone im Nordgarten"},
+ {"klasse": "hecke", "poly": [[9,12],[11,12],[11.5,22],[9.5,22]], "notiz": "Hecke an der Westgrenze ~4 m"},
+ {"klasse": "hecke", "poly": [[11,12],[24,13.5],[24,15],[11,13.5]], "sicher": false, "notiz": "Gehölz an der Südgrenze"},
+ {"klasse": "strauch", "poly": [[10.5,20],[13.5,20],[13.5,23.5],[10.5,23.5]], "notiz": "Großstrauch ~4 m"},
+ {"klasse": "terrasse", "poly": [[12,24],[15.5,24],[16,35],[12,35]], "sicher": false, "notiz": "befestigter Hof westlich des Hauses"}
+]}

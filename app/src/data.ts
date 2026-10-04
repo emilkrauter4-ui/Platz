@@ -34,14 +34,8 @@ export interface BuildingRec {
   c: Vec2;
 }
 
-export interface BestandRec {
-  id: string;
-  fp: Vec2[];
-  h: number;
-  a: number;
-  /** Konfidenz der Erkennung 0…1 */
-  conf: number;
-}
+export type { BestandRec } from './site/bestand';
+import type { BestandRec } from './site/bestand';
 
 export interface Data {
   site: SiteMeta;

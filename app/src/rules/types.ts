@@ -57,14 +57,44 @@ export interface Building {
   own?: boolean;
 }
 
-/** Bestehender Kleinbau, z. B. aus bestand.geojson. Zählt bei der Grenzbebauung mit. */
+/** Klassen der Garten-Erkennung (pipeline/08_garten.py). */
+export type GartenKlasse =
+  | 'gartenhaus'
+  | 'gewaechshaus'
+  | 'carport_garage'
+  | 'pool'
+  | 'teich'
+  | 'terrasse'
+  | 'trampolin'
+  | 'spielturm'
+  | 'hecke'
+  | 'baum'
+  | 'strauch'
+  | 'waermepumpe'
+  | 'zaun_mauer';
+
+/** Maß mit Spanne (± in Metern). */
+export interface Mass {
+  wert: number;
+  spanne: number;
+}
+
+/** Bestehendes Objekt im Garten, erkannt oder vom Nutzer bestätigt. Gebäude zählen bei der Grenzbebauung mit. */
 export interface Bestand {
   id: string;
   footprint: Vec2[];
-  /** mittlere Wandhöhe über Gelände */
+  /** mittlere Wandhöhe über Gelände (für die Grenzbebauung) */
   height: number;
   provenance: Provenance; // 'erkannt' oder 'nutzerbestätigt'
   confidence?: number;
+  /** fehlt bei Altdaten (bestand.json v1): dann Kleinbau */
+  kind?: GartenKlasse;
+  laenge?: Mass;
+  breite?: Mass;
+  hoehe?: Mass;
+  /** geometrisch gemittelte Wandhöhe aus Dachebenen (Laser) */
+  wand?: Mass;
+  rund?: boolean;
 }
 
 export interface NeighborWindow {
@@ -139,4 +169,7 @@ export interface Result {
   rLimit?: number;
   /** Wärmepumpe: Pegel am maßgeblichen Fenster */
   lp?: number;
+  /** Grenzbebauung: welche bestehenden Objekte mitgezählt wurden und welche nicht (mit Grund) */
+  bestandGezaehlt?: { id: string; grund: string }[];
+  bestandNichtGezaehlt?: { id: string; grund: string }[];
 }

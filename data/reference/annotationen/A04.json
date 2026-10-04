@@ -1,0 +1,7 @@
+{"grundstueck": "A04", "objekte": [
+ {"klasse": "baum", "poly": [[11,45],[16,44],[19,47],[18,51],[13,52],[10.5,49]], "notiz": "Baum NW, Krone im Laser hoch"},
+ {"klasse": "baum", "poly": [[20,46],[26,45],[28,48],[27,52],[21,52]], "notiz": "Baum N"},
+ {"klasse": "baum", "poly": [[23,18],[29,17],[31,21],[29,26],[24,26],[22,22]], "notiz": "Baum südlich des Hauses"},
+ {"klasse": "hecke", "poly": [[8,55],[28,53],[28,52],[8,54]], "sicher": false, "notiz": "Gehölz an der Nordgrenze"},
+ {"klasse": "baum", "poly": [[14,10],[22,13],[24,20],[17,24],[12,18]], "sicher": false, "notiz": "Baumbestand im Südzipfel"}
+]}

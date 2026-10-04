@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   evaluate,
+  LIMITS,
   footprint,
   limitRadius,
   meanWallHeight,
@@ -136,6 +137,56 @@ describe('Bestand zählt mit', () => {
     const o = objs();
     o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
     expect(evaluate(site, o).carport.status).toBe('ok');
+  });
+
+  it('erkannt mit niedriger Konfidenz zählt nicht, wird aber als unsicher genannt', () => {
+    const site = square();
+    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erkannt', confidence: 0.55, kind: 'gartenhaus' }];
+    const o = objs();
+    o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
+    const r = evaluate(site, o).carport;
+    expect(r.status).not.toBe('bad');
+    expect(r.bestandGezaehlt).toEqual([]);
+    expect(r.bestandNichtGezaehlt?.[0].grund).toContain('unsicher');
+  });
+
+  it('dasselbe Objekt vom Nutzer bestätigt zählt immer', () => {
+    const site = square();
+    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'nutzerbestätigt', confidence: 0.55, kind: 'gartenhaus' }];
+    const o = objs();
+    o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
+    const r = evaluate(site, o).carport;
+    expect(r.head).toBe('Zu viel an der Westgrenze.');
+    expect(r.bestandGezaehlt).toEqual([{ id: 'b1', grund: 'von dir bestätigt' }]);
+  });
+
+  it('Konfidenz genau am Grenzwert zählt', () => {
+    const site = square();
+    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erkannt', confidence: LIMITS.bestand.konfidenzMin.wert, kind: 'gewaechshaus' }];
+    const o = objs();
+    o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
+    expect(evaluate(site, o).carport.head).toBe('Zu viel an der Westgrenze.');
+  });
+
+  it('Pool und Hecke an der Grenze zählen nicht zur Grenzbebauung', () => {
+    const site = square();
+    site.bestand = [
+      { id: 'p', footprint: [[0.5, -20], [3, -20], [3, -24], [0.5, -24]], height: 0, provenance: 'nutzerbestätigt', kind: 'pool' },
+      { id: 'h', footprint: [[0, -10], [0.8, -10], [0.8, -19], [0, -19]], height: 2, provenance: 'nutzerbestätigt', kind: 'hecke' },
+    ];
+    const o = objs();
+    o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
+    const r = evaluate(site, o).carport;
+    expect(r.head).not.toBe('Zu viel an der Westgrenze.');
+    expect(r.bestandNichtGezaehlt?.map((x) => x.grund)).toEqual(['kein Gebäude', 'kein Gebäude']);
+  });
+
+  it('Kollision mit Pool, aber nicht mit Strauch', () => {
+    const site = square();
+    site.bestand = [{ id: 's', footprint: [[14, -14], [16, -14], [16, -16], [14, -16]], height: 1.5, provenance: 'erkannt', confidence: 0.9, kind: 'strauch' }];
+    expect(evaluate(site, objs()).gartenhaus.head).not.toContain('Kollidiert');
+    site.bestand[0].kind = 'pool';
+    expect(evaluate(site, objs()).gartenhaus.head).toBe('Kollidiert mit dem Pool.');
   });
 
   it('Kollision mit Bestand', () => {

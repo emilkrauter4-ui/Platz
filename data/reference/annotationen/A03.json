@@ -1,0 +1,6 @@
+{"grundstueck": "A03", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [18.3, 25.6, 2.4, 2.0, -15], "sicher": false, "notiz": "kleiner Unterstand/Schuppen am Weg (Laser ~3 m), Art unklar"},
+ {"klasse": "strauch", "kreis": [25.4, 24.1, 1.8], "notiz": "runder Strauch ~2,5 m"},
+ {"klasse": "strauch", "poly": [[12,22],[15.5,22],[15.5,27],[12,27]], "sicher": false, "notiz": "Gehölz westlich"},
+ {"klasse": "zaun_mauer", "poly": [[21,22],[29,26.5],[29.3,25.9],[21.3,21.4]], "sicher": false, "notiz": "Mauer am Hang (~1,5 m), Laser rot = Höhensprung"}
+]}

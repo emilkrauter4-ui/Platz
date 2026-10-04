@@ -1,0 +1,7 @@
+{"grundstueck": "H15", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [30.9, 22.6, 3.8, 2.8, -15], "notiz": "Schuppen mit dunklem Dach, schließt an Nebengebäude im Hausumring an"},
+ {"klasse": "hecke", "poly": [[13,13.8],[27,10.5],[27.2,9.6],[13,12.8]], "notiz": "geschnittene Hecke an der Südgrenze ~1,8 m"},
+ {"klasse": "hecke", "poly": [[26.5,10],[27.5,10],[27.5,14.5],[26.5,14.5]], "sicher": false, "notiz": "Heckenstück"},
+ {"klasse": "hecke", "poly": [[30,43.3],[39,42.6],[39,44.6],[30,45.3]], "notiz": "Hecke an der Nordgrenze ~2 m"},
+ {"klasse": "baum", "poly": [[33,10],[40,10],[42,48],[35,48]], "sicher": false, "notiz": "Baumreihe an der Ostgrenze, größtenteils Nachbar"}
+]}

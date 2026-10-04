@@ -1,0 +1,5 @@
+{"grundstueck": "H03", "objekte": [
+ {"klasse": "baum", "poly": [[33,34],[37,32.5],[41,35],[42,40],[38,44],[34,41]], "notiz": "Laubbaum im Nordgarten"},
+ {"klasse": "baum", "poly": [[40,20],[45,20],[47,24],[45,29],[41,28]], "sicher": false, "notiz": "Baum an der Ostgrenze, Stamm evtl. Nachbar"},
+ {"klasse": "terrasse", "poly": [[4,27.5],[9,30.5],[13,27.5],[12.5,22],[10,17.5],[6,20]], "sicher": false, "notiz": "Hof/Zufahrt zur Straße"}
+]}

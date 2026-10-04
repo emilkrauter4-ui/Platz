@@ -49,7 +49,18 @@ export interface RenderState {
   dark: boolean;
   /** fotorealistisches DOM-Mesh statt LoD2 anzeigen */
   mesh: boolean;
+  /** Umriss eines bestehenden Objekts wird nachgezogen (ref = erkannter Umriss als Hilfslinie) */
+  kante: { id: string; fp: Vec2[]; ref: Vec2[] } | null;
+  /** neues Objekt wird gezeichnet (getippte Ecken) */
+  zeichnen: Vec2[] | null;
 }
+
+/** Farben der Garten-Klassen (Bauten nach Herkunft, siehe syncContext). */
+const KLASSE_FARBE: Partial<Record<string, string>> = {
+  pool: '#2E8BC0', teich: '#2E6FA0', terrasse: '#9A9A92', trampolin: '#6B5B95', spielturm: '#B07D3C',
+  hecke: '#4C8A3F', baum: '#3F7A35', strauch: '#6FA35A', zaun_mauer: '#8A7B6B', waermepumpe: '#7A7F86',
+};
+const FLACH = new Set(['pool', 'teich', 'terrasse', 'trampolin']);
 
 const KEY = 'passtKey';
 
@@ -72,6 +83,7 @@ export class Renderer {
   private bestandEntities: Entity[] = [];
   private windowEntities: Entity[] = [];
   private draftEntities: Entity[] = [];
+  private editEntities: Entity[] = [];
   private plotEntities: Entity[] = [];
   private dimMid: Vec2 | null = null;
   private dimLabel = '';
@@ -127,6 +139,55 @@ export class Renderer {
       },
     });
     this.draftEntities.push(line);
+  }
+
+  /** Nachziehen und Zeichnen: Linie, Griffe an den Ecken, erkannter Umriss gestrichelt als Hilfslinie. */
+  syncEdit() {
+    const v = this.viewer;
+    this.editEntities.forEach((e) => v.entities.remove(e));
+    this.editEntities = [];
+    const st = this.s();
+    const pts = st.kante?.fp ?? st.zeichnen;
+    if (pts && pts.length) {
+      if (st.kante) {
+        this.editEntities.push(v.entities.add({
+          polyline: {
+            positions: this.cart([...st.kante.ref, st.kante.ref[0]]),
+            width: 2,
+            clampToGround: true,
+            classificationType: this.cls(),
+            material: new PolylineDashMaterialProperty({ color: Color.fromCssColorString(this.pal().warn), dashLength: 10 }),
+          },
+        }));
+      }
+      if (pts.length >= 2) {
+        this.editEntities.push(v.entities.add({
+          polyline: {
+            positions: this.cart(st.kante || pts.length >= 3 ? [...pts, pts[0]] : pts),
+            width: 3,
+            clampToGround: true,
+            classificationType: this.cls(),
+            material: Color.fromCssColorString(this.pal().user),
+          },
+        }));
+      }
+      pts.forEach((p, i) => {
+        const e = v.entities.add({
+          position: localToCartesian(p, this.ground(p) + 0.2),
+          point: {
+            pixelSize: 16,
+            color: Color.fromCssColorString(this.pal().user),
+            outlineColor: Color.WHITE,
+            outlineWidth: 2,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+        });
+        e.addProperty(KEY);
+        (e as unknown as Record<string, unknown>)[KEY] = new ConstantProperty(`ecke:${i}`);
+        this.editEntities.push(e);
+      });
+    }
+    v.scene.requestRender();
   }
 
   /** Punkte der Grenze neu zeichnen (wenige, deshalb einfacher Neuaufbau). */
@@ -269,17 +330,28 @@ export class Renderer {
     const st = this.s();
     if (st.step !== 'pruefen') return v.scene.requestRender();
     for (const b of st.bestand) {
-      if (b.status === 'entfernt') continue;
+      if (b.status === 'entfernt' || st.kante?.id === b.id) continue;
       const base = Math.min(...b.footprint.map((p) => this.ground(p)));
       const conf = b.provenance === 'nutzerbestätigt';
-      const e = v.entities.add({
-        polygon: {
-          hierarchy: new PolygonHierarchy(this.cart(b.footprint)),
-          height: base,
-          extrudedHeight: base + b.height,
-          material: Color.fromCssColorString(conf ? this.pal().user : this.pal().warn).withAlpha(conf ? 0.75 : 0.55),
-        },
-      });
+      const farbe = b.kind && KLASSE_FARBE[b.kind];
+      const e = farbe && FLACH.has(b.kind!)
+        ? v.entities.add({
+          polygon: {
+            hierarchy: new PolygonHierarchy(this.cart(b.footprint)),
+            classificationType: this.cls(),
+            material: Color.fromCssColorString(farbe).withAlpha(conf ? 0.7 : 0.5),
+          },
+        })
+        : v.entities.add({
+          polygon: {
+            hierarchy: new PolygonHierarchy(this.cart(b.footprint)),
+            height: base,
+            extrudedHeight: base + Math.max(b.hoehe?.wert ?? b.height, 0.3),
+            material: farbe
+              ? Color.fromCssColorString(farbe).withAlpha(0.35)
+              : Color.fromCssColorString(conf ? this.pal().user : this.pal().warn).withAlpha(conf ? 0.75 : 0.55),
+          },
+        });
       e.addProperty(KEY);
       (e as unknown as Record<string, unknown>)[KEY] = new ConstantProperty(`bestand:${b.id}`);
       this.bestandEntities.push(e);

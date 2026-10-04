@@ -1,0 +1,7 @@
+{"grundstueck": "S06", "objekte": [
+ {"klasse": "carport_garage", "rechteck": [34.3, 23.3, 4.6, 6.3, -20], "sicher": false, "notiz": "nur im Laser 2025 (~3 m, Einzelecho); im DOP 2023 dort Pflaster – Neubau nach 2023"},
+ {"klasse": "strauch", "poly": [[16,40],[17,39.3],[19,39.5],[19.6,41.2],[18.8,42.6],[16.8,42.6],[16,41.5]], "notiz": "dichter Strauch, Einzelechos"},
+ {"klasse": "strauch", "poly": [[31,47],[33.5,47],[33.6,50.5],[31,50.5]], "notiz": "Strauch nördlich des Hauses"},
+ {"klasse": "strauch", "poly": [[23,49],[27,49],[27,52.5],[23,52.5]], "sicher": false, "notiz": "Strauchgruppe"},
+ {"klasse": "terrasse", "poly": [[18.5,35.5],[21,31],[29.5,28.5],[30.5,31.5],[27,35],[22,38]], "notiz": "Terrasse/Hof südwestlich des Hauses, grob"}
+]}

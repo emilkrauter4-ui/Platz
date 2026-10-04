@@ -1,0 +1,6 @@
+{"grundstueck": "S19", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [36.0, 27.7, 3.0, 3.2, 0], "sicher": false, "notiz": "weißes Zelt/Spitzdach-Pavillon im DOP 2023, im Laser 2025 nicht vorhanden"},
+ {"klasse": "baum", "poly": [[12,14],[19,13],[22.5,15],[22.5,21],[18,24.5],[13,22.5]], "notiz": "großer Laubbaum SW"},
+ {"klasse": "baum", "poly": [[37,28.5],[43,28],[46,32],[44,37.5],[38.5,37],[36.5,33]], "notiz": "großer Baum in der NO-Ecke"},
+ {"klasse": "hecke", "poly": [[19,10.2],[25.5,10.2],[25.5,11],[19,11]], "sicher": false, "notiz": "niedrige Hecke/Zaun an der Südgrenze"}
+]}

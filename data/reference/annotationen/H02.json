@@ -1,0 +1,5 @@
+{"grundstueck": "H02", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [15.0, 41.35, 3.2, 3.5, -10], "notiz": "Gerätehaus mit hellem Dach, Umriss nach Laser"},
+ {"klasse": "gewaechshaus", "rechteck": [23.5, 39.7, 2.0, 2.6, -10], "sicher": false, "notiz": "bläuliches Objekt (Folientunnel?) im DOP, Laser nur Vegetation"},
+ {"klasse": "hecke", "poly": [[24.5,30],[27.5,44],[26.5,44.2],[23.5,30.2]], "sicher": false, "notiz": "Gehölz an der Ostgrenze"}
+]}

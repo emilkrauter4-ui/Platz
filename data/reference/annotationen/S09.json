@@ -1,0 +1,5 @@
+{"grundstueck": "S09", "objekte": [
+ {"klasse": "gewaechshaus", "rechteck": [13.7, 15.7, 4.8, 2.9, 85], "notiz": "Glas mit Sprossen im DOP; Laser Mehrfachechos (Glas)"},
+ {"klasse": "gartenhaus", "rechteck": [28.7, 13.0, 5.0, 3.8, 88], "notiz": "Schuppen an der Ostgrenze, ragt evtl. über die Grenze"},
+ {"klasse": "strauch", "poly": [[18,15],[24,15],[24,21],[18,21]], "sicher": false, "notiz": "Strauchgruppe"}
+]}

@@ -1,0 +1,5 @@
+{"grundstueck": "S08", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [13.1, 22.2, 2.6, 2.2, -30], "sicher": false, "notiz": "kleiner weißer Schuppen/Gewächshaus im DOP 2023, im Laser 2025 nicht klar"},
+ {"klasse": "strauch", "poly": [[13,24],[14.5,23],[16.5,23.5],[17.2,25.5],[16,27.2],[13.8,27]], "notiz": "runder Strauch"},
+ {"klasse": "hecke", "poly": [[13,33],[19.5,36.5],[20,35.8],[13.5,32.3]], "sicher": false, "notiz": "Gehölz an der NW-Grenze"}
+]}

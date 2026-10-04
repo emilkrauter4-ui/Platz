@@ -1,0 +1,7 @@
+{"grundstueck": "H07", "objekte": [
+ {"klasse": "baum", "poly": [[13,23],[19,22],[22,25],[21,30.5],[16,31],[13,28]], "notiz": "Laubbaum Mitte-West"},
+ {"klasse": "baum", "poly": [[26.5,21.5],[32,21.5],[33,25.5],[31.5,29],[27,28.5]], "notiz": "Laubbaum westlich des Hauses"},
+ {"klasse": "baum", "poly": [[8.5,16],[14.5,16],[15,22],[9,23]], "sicher": false, "notiz": "Baum SW"},
+ {"klasse": "baum", "poly": [[8.5,29],[14,29],[14.5,35],[9,35]], "sicher": false, "notiz": "Baum NW"},
+ {"klasse": "terrasse", "poly": [[43.5,25],[48.2,25.5],[48.5,33.5],[44,33]], "sicher": false, "notiz": "Zufahrt"}
+]}

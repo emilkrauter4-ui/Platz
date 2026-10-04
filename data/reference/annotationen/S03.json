@@ -1,0 +1,7 @@
+{"grundstueck": "S03", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [22.1, 51.2, 3.6, 3.8, -8], "notiz": "Gerätehaus, Umriss nach Laserpunkten"},
+ {"klasse": "gartenhaus", "rechteck": [18.75, 41.1, 5.0, 4.5, 0], "notiz": "Pavillon mit rotem Dach; Laser 2025 größer als im DOP 2023"},
+ {"klasse": "gartenhaus", "rechteck": [27.7, 42.85, 2.2, 2.1, 0], "sicher": false, "notiz": "kleine Box/Spielhaus ~2 m, Art unklar"},
+ {"klasse": "hecke", "poly": [[11.2,53],[12.8,53],[9.5,26],[8,26]], "hoehe": 2.0, "notiz": "Hecke an der Westgrenze, Laser Mehrfachecho"},
+ {"klasse": "terrasse", "poly": [[21.5,30],[25.3,31.5],[24.5,8.6],[19.5,9.2],[21,15]], "hoehe": 0, "notiz": "Zufahrt östlich des Hauses"}
+]}

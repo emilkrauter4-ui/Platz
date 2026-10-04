@@ -1,0 +1,7 @@
+{"grundstueck": "S13", "objekte": [
+ {"klasse": "pool", "kreis": [29.7, 49.7, 3.6], "notiz": "runder Aufstellpool (dunkel, abgedeckt?), im Laser ohne Echos"},
+ {"klasse": "gartenhaus", "rechteck": [32.3, 42.1, 4.4, 4.2, 35], "notiz": "Gartenhaus mit hellem Dach, Laser ~3 m"},
+ {"klasse": "gartenhaus", "rechteck": [24.3, 43.0, 4.5, 4.0, 30], "notiz": "Pavillon/Gartenhaus mit Walmdach an der Westgrenze"},
+ {"klasse": "baum", "poly": [[33,36],[37,33],[41,35],[42,40],[38,43],[34,41]], "notiz": "Laubbaum (Krone im DOP 2023)"},
+ {"klasse": "terrasse", "poly": [[7.5,23],[12.5,20],[17,26],[20,30],[16,34],[13,38],[11,31]], "sicher": false, "notiz": "Zufahrt, grob"}
+]}

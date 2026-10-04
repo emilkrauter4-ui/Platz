@@ -1,0 +1,4 @@
+{"grundstueck": "A18", "objekte": [
+ {"klasse": "terrasse", "poly": [[13,20.5],[17,24],[24,19],[22,16],[17,13.5]], "sicher": false, "notiz": "helle Terrasse am Haus, Steinbogen"},
+ {"klasse": "baum", "poly": [[14,6],[21,6],[22,10],[18,12],[14,10]], "sicher": false, "notiz": "Gehölz an der Südspitze"}
+]}

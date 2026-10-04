@@ -1,0 +1,6 @@
+{"grundstueck": "A19", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [18.5, 13.9, 3.6, 3.7, 15], "notiz": "Gartenhaus mit rotem Dach an der SW-Ecke, Laser ~2,5 m"},
+ {"klasse": "gartenhaus", "rechteck": [18.0, 19.5, 2.6, 2.6, 15], "sicher": false, "notiz": "kleiner grauer Schuppen nördlich davon"},
+ {"klasse": "carport_garage", "rechteck": [18.8, 28.5, 7.0, 4.5, 15], "notiz": "Anbau mit Wellblech-/Lichtdach (Laser ~2,5–3 m), nur teils im Hausumring"},
+ {"klasse": "terrasse", "poly": [[14,25],[30,30],[33,27],[29,24],[16,21]], "sicher": false, "notiz": "Terrasse/Weg mit Stufen"}
+]}

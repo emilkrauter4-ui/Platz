@@ -1,0 +1,8 @@
+{"grundstueck": "H09", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [47.3, 43.8, 4.3, 3.0, -35], "notiz": "Gerätehaus mit rotem Dach, Laser ~3 m"},
+ {"klasse": "gartenhaus", "kreis": [25.5, 16.3, 3.2], "sicher": false, "notiz": "runder Pavillon? (2,5 m, Einzelechos) – oder Formschnittgehölz"},
+ {"klasse": "gartenhaus", "rechteck": [23.3, 25.0, 3.0, 3.0, 0], "sicher": false, "notiz": "weißer Pavillon/Zelt"},
+ {"klasse": "strauch", "kreis": [19.5, 32.0, 4.0], "notiz": "großer Strauch"},
+ {"klasse": "baum", "poly": [[22,33],[27,33],[29.5,37],[28,41],[24,41],[22,37]], "notiz": "Baum im Westgarten"},
+ {"klasse": "strauch", "poly": [[44,29],[48,29],[48,33],[44,33]], "sicher": false, "notiz": "Strauch am Haus"}
+]}

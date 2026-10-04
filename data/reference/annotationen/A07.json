@@ -1,0 +1,7 @@
+{"grundstueck": "A07", "objekte": [
+ {"klasse": "baum", "poly": [[8,46],[14,44],[17,48],[16,53],[11,55],[7,51]], "notiz": "Baum NW"},
+ {"klasse": "baum", "poly": [[20,38],[27,37],[29,41],[27,46],[21,46],[19,42]], "notiz": "Baum Mitte"},
+ {"klasse": "baum", "poly": [[38,44],[47,44],[50,49],[46,53],[39,52]], "notiz": "Baum NO"},
+ {"klasse": "baum", "poly": [[22,48],[30,47],[34,51],[30,55],[23,55]], "sicher": false, "notiz": "Kronen N, verschmolzen"},
+ {"klasse": "hecke", "poly": [[42,17],[44,24],[44.8,23.8],[42.8,16.8]], "sicher": false, "notiz": "schmale Hecke an der Ostgrenze ~1,5 m"}
+]}

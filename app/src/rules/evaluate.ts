@@ -19,7 +19,7 @@ import {
   polygonSegment,
   projectedLength,
 } from './geometry';
-import type { Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
+import type { Bestand, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
 
 export const LIMITS = L;
 
@@ -45,6 +45,9 @@ const FAKTOR_H = L.abstand.faktorH.wert;
 const GRENZ_H = L.grenzbebauung.maxMittlereWandhoeheM.wert;
 const MAX_SEITE = L.grenzbebauung.maxLaengeJeSeiteM.wert;
 const MAX_GESAMT = L.grenzbebauung.maxLaengeGesamtM.wert;
+
+const BESTAND_KLASSEN = new Set<string>(L.bestand.gebaeudeKlassen.wert);
+const KONF_MIN = L.bestand.konfidenzMin.wert;
 
 const ART6 = 'BayBO Art. 6';
 const ART57 = 'BayBO Art. 57';
@@ -173,8 +176,11 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
     }),
     provenance: 'berechnet',
   }));
-  // Bestand auf dem eigenen Grundstück zählt mit (BayBO Art. 6: Gesamtlänge je Grenze).
-  const bestandOnPlot = site.bestand.filter((b) => pointInPolygon(centroid(b.footprint), site.plot.boundary));
+  // Bestand auf dem eigenen Grundstück zählt mit (BayBO Art. 6: Gesamtlänge je Grenze) – aber nur Gebäude,
+  // und erkannte nur mit hoher Konfidenz. Bestätigte zählen immer.
+  const zaehlung = zaehleBestand(site);
+  const ids = new Set(zaehlung.gezaehlt.map((x) => x.id));
+  const bestandOnPlot = site.bestand.filter((b) => ids.has(b.id));
   const bestandCons: Contributor[] = bestandOnPlot.map((b) => ({
     id: b.id,
     fp: b.footprint,
@@ -186,11 +192,39 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
   const total = sums.reduce((a, b) => a + b, 0);
   const bestandSums = sideSums(site, bestandCons);
 
+  const mitZaehlung = (r: Result): Result => ({ ...r, bestandGezaehlt: zaehlung.gezaehlt, bestandNichtGezaehlt: zaehlung.nicht });
   return {
-    gartenhaus: building(site, objs, fps, 'gartenhaus', cons[0].segs, sums, total, bestandSums),
-    carport: building(site, objs, fps, 'carport', cons[1].segs, sums, total, bestandSums),
+    gartenhaus: mitZaehlung(building(site, objs, fps, 'gartenhaus', cons[0].segs, sums, total, bestandSums)),
+    carport: mitZaehlung(building(site, objs, fps, 'carport', cons[1].segs, sums, total, bestandSums)),
     waermepumpe: heatpump(site, objs, fps),
   };
+}
+
+/** Ist das Objekt ein Gebäude im Sinn der Grenzbebauung (Gartenhaus, Gewächshaus, Garage/Carport)? */
+export function istGebaeude(b: Bestand): boolean {
+  return b.kind === undefined || BESTAND_KLASSEN.has(b.kind);
+}
+
+/**
+ * Welche bestehenden Objekte zählen bei der Grenzbebauung (9 m / 15 m) mit?
+ * Gebäude auf dem eigenen Grundstück, wenn vom Nutzer bestätigt oder mit Konfidenz ≥ konfidenzMin erkannt.
+ */
+export function zaehleBestand(site: Site): { gezaehlt: { id: string; grund: string }[]; nicht: { id: string; grund: string }[] } {
+  const gezaehlt: { id: string; grund: string }[] = [];
+  const nicht: { id: string; grund: string }[] = [];
+  for (const b of site.bestand) {
+    if (!pointInPolygon(centroid(b.footprint), site.plot.boundary)) continue;
+    if (!istGebaeude(b)) {
+      nicht.push({ id: b.id, grund: 'kein Gebäude' });
+    } else if (b.provenance === 'nutzerbestätigt') {
+      gezaehlt.push({ id: b.id, grund: 'von dir bestätigt' });
+    } else if ((b.confidence ?? 0) >= KONF_MIN - EPS) {
+      gezaehlt.push({ id: b.id, grund: `erkannt, Konfidenz ${Math.round((b.confidence ?? 0) * 100)} %` });
+    } else {
+      nicht.push({ id: b.id, grund: `erkannt, aber unsicher (Konfidenz ${Math.round((b.confidence ?? 0) * 100)} %) – bitte bestätigen` });
+    }
+  }
+  return { gezaehlt, nicht };
 }
 
 /* ---------- Gartenhaus und Carport ---------- */
@@ -204,7 +238,9 @@ function collision(site: Site, fps: Record<ObjectKind, Vec2[]>, k: ObjectKind): 
     if (other !== k && overlaps(fp, fps[other])) return NAMES[other].mit;
   }
   for (const b of site.bestand) {
-    if (overlaps(fp, b.footprint)) return 'mit einem bestehenden Nebengebäude';
+    // Pflanzen, Terrassen, Trampoline lassen sich versetzen oder überbauen – kollidieren nur Gebäude und Wasser
+    if (!(istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich')) continue;
+    if (overlaps(fp, b.footprint)) return b.kind === 'pool' ? 'mit dem Pool' : b.kind === 'teich' ? 'mit dem Teich' : 'mit einem bestehenden Nebengebäude';
   }
   return null;
 }

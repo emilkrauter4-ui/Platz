@@ -1,0 +1,4 @@
+{"grundstueck": "A08", "objekte": [
+ {"klasse": "baum", "poly": [[11,7],[19,7],[20,12],[16,14],[11,12.5]], "notiz": "Baum/Großgehölz im Hinterhof"},
+ {"klasse": "strauch", "poly": [[10.5,40],[12,40],[12,46],[10.5,46]], "sicher": false, "notiz": "Gehölz an der Brandwand"}
+]}

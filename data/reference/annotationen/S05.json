@@ -1,0 +1,7 @@
+{"grundstueck": "S05", "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [15.8, 19.2, 3.4, 2.7, 10], "notiz": "Gerätehaus unter Baum, Laser teils durch Äste verdeckt"},
+ {"klasse": "baum", "poly": [[8,22],[12,21.5],[14.5,24],[14.5,30],[12,32.5],[8.5,32]], "notiz": "großer Baum an der Westgrenze"},
+ {"klasse": "baum", "poly": [[9.5,15.5],[12.5,15.5],[13.5,18],[12.5,21],[9.5,21]], "notiz": "Baum hinter der Garage"},
+ {"klasse": "hecke", "poly": [[20.3,32],[21.5,32],[21.6,40.5],[20.4,40.5]], "notiz": "Hecke an der Ostgrenze, ~1,5–2 m"},
+ {"klasse": "hecke", "poly": [[9,47.6],[14,48.2],[19,50.2],[19.3,49.4],[14,47.4],[9,46.8]], "sicher": false, "notiz": "niedrige Hecke an der Straße, Laser ~1,5 m"}
+]}

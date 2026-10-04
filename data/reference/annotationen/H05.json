@@ -1,0 +1,7 @@
+{"grundstueck": "H05", "objekte": [
+ {"klasse": "strauch", "kreis": [13.8, 13.5, 3.5], "notiz": "Strauch ~3 m im Vorgarten"},
+ {"klasse": "baum", "kreis": [17.8, 13.2, 2.0], "notiz": "kleiner Nadelbaum ~4,5 m"},
+ {"klasse": "baum", "kreis": [20.0, 24.0, 2.0], "notiz": "kleiner Nadelbaum am Haus"},
+ {"klasse": "baum", "poly": [[21,33.5],[25.5,33.5],[25.5,39],[21,39]], "notiz": "Baum im Nordgarten"},
+ {"klasse": "strauch", "poly": [[13,17],[18,17],[18,23],[13,23]], "sicher": false, "notiz": "Strauchgruppe"}
+]}

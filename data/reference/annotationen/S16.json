@@ -1,0 +1,7 @@
+{"grundstueck": "S16", "objekte": [
+ {"klasse": "baum", "poly": [[34,8],[40,8],[40.5,13],[38,16.5],[34.5,14]], "notiz": "Baumgruppe in der SO-Ecke"},
+ {"klasse": "baum", "kreis": [17.8, 12.8, 1.9], "notiz": "kleiner Nadelbaum ~4 m"},
+ {"klasse": "baum", "kreis": [21.2, 10.8, 2.6], "notiz": "kleiner Nadelbaum ~4,5 m"},
+ {"klasse": "hecke", "poly": [[12,32.6],[40,30.8],[40,29.6],[12,31.4]], "sicher": false, "notiz": "Gehölz an der Nordgrenze"},
+ {"klasse": "strauch", "poly": [[25,9.5],[29,9.5],[29,12],[25,12]], "sicher": false, "notiz": "Sträucher"}
+]}

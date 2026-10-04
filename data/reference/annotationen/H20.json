@@ -1,0 +1,7 @@
+{"grundstueck": "H20", "objekte": [
+ {"klasse": "baum", "kreis": [29.6, 31.8, 2.6], "notiz": "Nadelbaum ~4 m südlich des Hauses"},
+ {"klasse": "baum", "poly": [[12,14],[18,13],[19,18],[15,21.5],[11,19]], "notiz": "Baum in der SW-Ecke (~7 m)"},
+ {"klasse": "baum", "poly": [[22,11],[29,11],[30,16],[26,18],[22,16]], "sicher": false, "notiz": "Baum an der Südgrenze"},
+ {"klasse": "baum", "poly": [[30,45],[36,45],[37,52],[31,53]], "sicher": false, "notiz": "Baum an der Ostgrenze nördlich des Hauses"},
+ {"klasse": "strauch", "poly": [[24,22],[31,22],[31,29],[24,29]], "sicher": false, "notiz": "Gehölzgruppe"}
+]}

@@ -1,0 +1,4 @@
+{"grundstueck": "A14", "objekte": [
+ {"klasse": "strauch", "kreis": [15.2, 19.0, 2.0], "notiz": "Strauch/Bäumchen ~3 m im Hof"},
+ {"klasse": "terrasse", "poly": [[9,15],[20,10],[24,13],[24,22],[17,22],[10,20]], "sicher": false, "notiz": "Hof westlich, grob"}
+], "notiz": "Mauer an der Nordgrenze (Laser ~2,5 m) gehört zur Grundstückseinfriedung"}

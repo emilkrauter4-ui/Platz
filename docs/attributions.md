@@ -27,6 +27,19 @@ Lizenzen geprüft am 3. Oktober 2026 im Katalog `geodaten.bayern.de/opengeodata/
 | Schrift Instrument Sans | The Instrument Sans Project Authors | SIL OFL 1.1 (`app/src/fonts/OFL.txt`) | Oberfläche, selbst gehostet | nein |
 | CesiumJS | Cesium GS | Apache 2.0 | 3D-Szene, **ohne** ion-Token und ion-Dienste | nein |
 
+## Modelle und Bibliotheken der Pipeline (AUFTRAG_V2)
+
+Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyPI. Keine davon ist nicht-kommerziell.
+
+| Werkzeug | Lizenz | Wofür | Hinweis |
+|---|---|---|---|
+| SAM 2.1 (Meta, `facebookresearch/sam2`), Checkpoint `sam2.1_hiera_small.pt` | **Apache 2.0** (Code und Checkpoints laut README/LICENSE) | Umrisse aus Box-/Punkt-Prompts auf DOP20 (Phase 1.4), Annotationshilfe | läuft nur in der Pipeline (CPU), nicht in der App; Checkpoint liegt in `data/raw/models`, nicht im Git |
+| PyTorch (CPU) | BSD-3-Clause | Laufzeit für SAM 2 | |
+| scikit-learn | BSD-3-Clause | Gradient Boosting (Klassifikation) | |
+| scikit-image | BSD-3-Clause | Wasserscheide für Baumkronen | |
+| OpenCV (`opencv-python-headless`) | Apache 2.0 | Kreiserkennung (Trampoline) | |
+| laspy (+ lazrs) | BSD-2-Clause / MIT | Laserpunkte lesen | |
+
 ## Nicht verwendet
 
 - Google Photorealistic 3D Tiles und andere nicht-amtliche 3D-Daten (Grundsatz 1).
