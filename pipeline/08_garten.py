@@ -505,23 +505,34 @@ def masse(s: dict, klasse: str, g: Polygon, kante: float = 20.0, laser_umriss: b
         P = np.c_[xs_[in_g & ~np.isin(kl, [2, 7, 18])], ys_[in_g & ~np.isin(kl, [2, 7, 18])], ober - z0]
         P[:, 0] -= P[:, 0].mean()
         P[:, 1] -= P[:, 1].mean()
-        eb = _ransac_ebenen(P)
+        # Nur Punkte ab 1 m über Boden (Dach). Sonst findet RANSAC Bodenpunkte im Umriss als „Ebene“ und die Traufe
+        # landet bei 0,2 m – die Wandhöhe wäre gefährlich zu niedrig.
+        P = P[P[:, 2] >= 1.0]
+        eb = _ransac_ebenen(P) if len(P) >= 20 else []
+        # Ebenen mit wenig Punkten (Äste, Antennen) verwerfen
+        eb = [e for e in eb if len(e[2]) >= max(12, 0.1 * len(P))]
         if eb:
             hs_min = [float(np.percentile(P[i, 2], 5)) for _, _, i in eb]
             hs_max = [float(np.percentile(P[i, 2], 95)) for _, _, i in eb]
             neig = [float(np.degrees(np.arccos(abs(n[2])))) for n, _, _ in eb]
             anteil = sum(len(i) for _, _, i in eb) / len(P)
             traufe, first = min(hs_min), max(hs_max)
+            # Sicher nach oben: liegt die Gesamthöhe knapp über der höchsten Ebene (First-Ziegel, Kante), sie nehmen
+            if "hoehe" in out and first < out["hoehe"] <= first + 0.5:
+                first = out["hoehe"]
             out["dach"] = {"ebenen": len(eb), "neigung_grad": [round(v, 1) for v in neig], "anteil_punkte": round(anteil, 2)}
             out["traufhoehe"] = traufe
             out["firsthoehe"] = first
             # Geometrisch gemittelte Wandhöhe: Traufwände = Traufhöhe, Giebelwände = Traufe + halbe Giebelhöhe.
             # Mittel über den Umfang (Länge der Seiten als Gewicht). Die rechtliche Bewertung (Art. 6 BayBO) folgt in Phase 2.
-            if len(eb) >= 2 and max(neig) > 8:
+            if max(neig) <= 8:
+                out["wandhoehe_mittel"] = first  # Flachdach: Wand reicht bis zur Dachkante (sicher nach oben)
+                out["traufhoehe"] = first
+            elif len(eb) >= 2:
                 Lg, Bg = out["laenge"], out["breite"]
                 out["wandhoehe_mittel"] = (2 * Lg * traufe + 2 * Bg * (traufe + (first - traufe) / 2)) / (2 * Lg + 2 * Bg)
             else:
-                out["wandhoehe_mittel"] = (traufe + first) / 2  # Pult- oder Flachdach: Mittel aus hoch und tief
+                out["wandhoehe_mittel"] = (traufe + first) / 2  # Pultdach: Mittel aus hoher und tiefer Wand
             out["spanne_wand"] = round(float(np.hypot(out.get("spanne_hoehe", 0.2), 0.1)), 2)
     return out
 
@@ -743,9 +754,15 @@ def gebiet(bbox=None) -> int:
     m = pickle.loads(MODELL.read_bytes())
     x0, y0, x1, y1 = bbox or cfg()["gebiet"]["bbox"]
     feats = []
+    zw = build_dir() / "garten_bloecke"
+    zw.mkdir(exist_ok=True)
     t0 = __import__("time").time()
     for bx in np.arange(x0, x1, BLOCK):
         for by in np.arange(y0, y1, BLOCK):
+            fertig = zw / f"{bx:.0f}_{by:.0f}.json"
+            if fertig.exists():
+                feats += json.loads(fertig.read_text())
+                continue
             bb = (bx - RAND, by - RAND, bx + BLOCK + RAND, by + BLOCK + RAND)
             s, kand = ausschnitt(bb)
             if not kand:
@@ -760,11 +777,14 @@ def gebiet(bbox=None) -> int:
                     continue
                 g = d["geom"].simplify(0.1)
                 ms = masse(s, d["klasse"], g, d["kante"])
+                if "umriss" in ms:  # Bauten: Rechteck um die Dach-Laserpunkte ist der genauere Umriss
+                    g = ms.pop("umriss")
                 feats.append({"type": "Feature", "geometry": mapping(g), "properties": {
                     "klasse": d["klasse"], "konfidenz": round(d["konfidenz"], 2), "label": "erkannt",
                     **{k: (round(float(v), 2) if isinstance(v, (float, np.floating)) else v) for k, v in ms.items()},
                     "modell_version": m.get("version")}})
                 n += 1
+            (zw / f"{bx:.0f}_{by:.0f}.json").write_text(json.dumps(feats[-n:] if n else []), encoding="utf-8")
             print(f"  Block {bx:.0f}/{by:.0f}: {len(kand)} Kandidaten, {n} Objekte "
                   f"({__import__('time').time() - t0:.0f} s)", flush=True)
     for i, f in enumerate(feats):

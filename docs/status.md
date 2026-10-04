@@ -142,6 +142,8 @@ Stand 4. Oktober 2026. Ausführliche Zahlen: `docs/garten_auswertung.md`.
   eindeutige Kleinbauten, plus Plausibilität (Nebengebäude ≥ 1,5 m hoch im Laser, ≥ 1,5 m breit).
 - Maße: Bauten über das Rechteck um die Dach-Laserpunkte; Höhe 95. Perzentil über Bodenpunkten; Dachebenen per RANSAC →
   Traufe, First, geometrisch gemittelte Wandhöhe. Jede Angabe mit Spanne (Punktabstand bzw. Kantenschärfe).
+  Beim Gebietslauf gefunden und behoben: RANSAC nahm Bodenpunkte im Umriss als Dachebene (Traufe 0,17 m, Wandhöhe
+  eines 2,9-m-Schuppens 1,5 m – gefährlich niedrig). Jetzt nur Punkte ab 1 m, Flachdach = Wand bis Dachkante.
 
 **1.5 Messung**
 
