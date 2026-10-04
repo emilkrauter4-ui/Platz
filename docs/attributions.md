@@ -65,6 +65,18 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | usd-core (Pixar OpenUSD) | Modified Apache 2.0 („Tomorrow Open Source Technology License“) | einmalige Prüfung der USDZ-Dateien | nicht im Repo, nicht in der App |
 | AR Quick Look (Apple), Scene Viewer (Google) | Systemdienste der Geräte | Anzeige | nur Verweis per Link/Intent |
 
+## Gartenblick (Phase 5, experimentell) – geprüft, nichts davon in der App
+
+| Baustein | Lizenz | Kommerziell | Hinweis |
+|---|---|---|---|
+| Skyfall-GS (Code) | Apache 2.0, enthält Inria-abgeleitete Teile | teilweise | `docs/gartenblick/lizenzen.md` |
+| Inria gaussian-splatting / diff-gaussian-rasterization / simple-knn | Inria/MPII Gaussian-Splatting License | **nein (nur Forschung/Evaluation)** | nur intern |
+| FLUX.1 [dev] | FLUX.1 [dev] **Non-Commercial** License v1.1.1 | **nein** | keine Nutzung mit Wirkung auf Endnutzer |
+| Stable Diffusion 3 Medium | Stability AI Non-Commercial Research Community | **nein** | |
+| FLUX.1 [schnell] | Apache 2.0 | ja | freie Alternative |
+| gsplat (nerfstudio) | Apache 2.0 | ja | freie Alternative zum Inria-Rasterizer |
+| MoGe, FlowEdit, fused-ssim | MIT | ja | |
+
 ## Gesetzestexte
 
 | Text | Quelle | Hinweis |
