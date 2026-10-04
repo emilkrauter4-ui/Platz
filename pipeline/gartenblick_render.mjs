@@ -110,7 +110,7 @@ for (let i = 0; i < ansichten.length; i++) {
   await page.evaluate(([p, z, f]) => window.passt.kamera(p, z, f), [v.pos, v.ziel, FOV]);
   if (!(await bereit())) console.log(`  ${i}: nicht vollständig geladen (25 s), Bild trotzdem gespeichert`);
   const name = `${String(i).padStart(3, '0')}_${v.art}`;
-  await page.locator('#map canvas').first().screenshot({ path: path.join(aus, 'images', `${name}.png`) });
+  await page.locator('#map canvas').first().screenshot({ path: path.join(aus, 'images', `${name}.jpg`), type: 'jpeg', quality: 93 });
   const k = await page.evaluate(() => window.passt.kameraInfo());
   // OpenCV: x rechts, y unten, z vorwärts; Spalten der c2w-Matrix = Achsen in Weltkoordinaten
   const p = sub(k.pos, ursprung);
@@ -123,7 +123,7 @@ for (let i = 0; i < ansichten.length; i++) {
   const hh = k.h;
   const fovX = w >= hh ? k.fov : 2 * Math.atan(Math.tan(k.fov / 2) * (w / hh));
   const fl = w / 2 / Math.tan(fovX / 2);
-  frames.push({ file_path: `images/${name}.png`, transform_matrix: c2w, fl_x: fl, fl_y: fl, cx: w / 2, cy: hh / 2, w, h: hh, art: v.art });
+  frames.push({ file_path: `images/${name}.jpg`, transform_matrix: c2w, fl_x: fl, fl_y: fl, cx: w / 2, cy: hh / 2, w, h: hh, art: v.art });
   if (i % 10 === 0) console.log(`  ${i + 1}/${ansichten.length} ${name} (${Math.round((Date.now() - t0) / 1000)} s)`);
 }
 const train = frames.filter((_, i) => i % 8 !== 0);

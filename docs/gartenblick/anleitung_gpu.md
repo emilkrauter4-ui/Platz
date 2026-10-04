@@ -9,7 +9,7 @@ Je Demo-Grundstück ein Ordner `data/build/gartenblick/<demo>/` (≈ 60 MB, nich
 
 | Datei | Inhalt |
 |---|---|
-| `images/*.png` | 89 gerenderte Ansichten des amtlichen DOM-Meshes (1024 × 768, 60° Öffnung): 3 Ringe (12/25/45 m Abstand, 4/12/30 m Höhe), 9 Draufsichten aus 60 m, 32 Ansichten aus Augenhöhe (1,6 m) an 4 Gartenstellen |
+| `images/*.jpg` | 89 gerenderte Ansichten des amtlichen DOM-Meshes (1024 × 768, 60° Öffnung): 3 Ringe (12/25/45 m Abstand, 4/12/30 m Höhe), 9 Draufsichten aus 60 m, 32 Ansichten aus Augenhöhe (1,6 m) an 4 Gartenstellen |
 | `transforms_train.json`, `transforms_test.json` | exakte Kameraposen (c2w, OpenCV-Konvention), fl_x/fl_y/cx/cy – Format „Satellite“ von Skyfall-GS; jede 8. Ansicht ist Test |
 | `points3D.txt` | Startpunktwolke: ≈ 240 000 Laserpunkte (2025) im Umkreis von 60 m, eingefärbt mit DOP20 |
 | `sparse/0/` | dasselbe im COLMAP-Textformat (für gsplat) |
@@ -97,7 +97,7 @@ steht oben dauerhaft „KI-Visualisierung, nicht gemessen“. Prüfungen rechnen
 ## Was man erwarten kann (ehrlich)
 
 - Das DOM-Mesh ist eine 2,5D-Oberfläche mit ≈ 20 cm Textur: Fassaden sind verschmiert, unter Bäumen fehlt der Boden.
-  Aus Gartenhöhe sehen die gerenderten Eingabebilder deshalb unscharf aus (siehe `images/*_garten.png`).
+  Aus Gartenhöhe sehen die gerenderten Eingabebilder deshalb unscharf aus (siehe `images/*_garten.jpg`).
 - Weg A macht daraus eine flüssige, drehbare Ansicht, erfindet aber keine Details – aus Gartenhöhe bleibt es unscharf.
 - Weg B ergänzt Details mit dem Bildmodell (FLUX) – das sind erfundene Details. Genau deshalb die Kennzeichnung.
 - Geometrie gegen Laser: `geometrie.json` (Median-Abstand Splat ↔ Laser). Bäume haben sich zwischen 2023 (Mesh) und
