@@ -100,17 +100,18 @@ export function assumedWindows(boundary: Vec2[], buildings: Building[], radius =
   const toPlot = (m: Vec2) => (pointInPolygon(m, boundary) ? 0 : Math.min(...edges(boundary).map(([a, e]) => pointSegment(m, a, e).d)));
   for (const b of buildings) {
     if (b.own) continue;
-    let best: { d: number; m: Vec2 } | null = null;
+    let best: { d: number; m: Vec2; f: [Vec2, Vec2] } | null = null;
     for (const [a, e] of edges(b.footprint)) {
       if (Math.hypot(e[0] - a[0], e[1] - a[1]) < 2) continue; // kein Fenster in Mini-Kanten
       const m: Vec2 = [(a[0] + e[0]) / 2, (a[1] + e[1]) / 2];
       const brandwand = buildings.some((o) => o !== b && edges(o.footprint).some(([p, q]) => pointSegment(m, p, q).d < 0.5));
       if (brandwand) continue;
       const d = toPlot(m);
-      if (!best || d < best.d) best = { d, m };
+      if (!best || d < best.d) best = { d, m, f: [a, e] };
     }
     if (!best || best.d > radius) continue;
-    out.push({ pos: best.m, z: LIM.waermepumpe.fensterhoeheAnnahmeM.wert, provenance: 'Annahme', buildingId: b.id });
+    const og = b.trauf != null && b.trauf > 4.5 ? LIM.waermepumpe.fensterhoeheOGAnnahmeM.wert : undefined;
+    out.push({ pos: best.m, z: LIM.waermepumpe.fensterhoeheAnnahmeM.wert, provenance: 'Annahme', buildingId: b.id, fassade: best.f, ...(og != null ? { zOG: og } : {}) });
   }
   return out;
 }

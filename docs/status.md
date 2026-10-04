@@ -186,6 +186,49 @@ Test-Set mit 3 Nebengebäuden sagt statistisch fast nichts. Was hilft: mehr Grun
 „≤ 1 m = an der Grenze“ sind Produktentscheidungen, keine Rechtsregeln; geometrisch gemittelte Wandhöhe ist noch
 nicht die Wandhöhe nach Art. 6 BayBO (folgt in Phase 2.2).
 
+## AUFTRAG_V2 Phase 2 – Prüfen auf neuem Niveau: **gebaut; iPhone-Zeit nicht nachgewiesen**
+
+Stand 4. Oktober 2026.
+
+**2.2 Abstandsflächen nach BayBO Art. 6** (`app/src/rules/abstand.ts`)
+- Wortlaut von Art. 6 in `docs/recht/BayBO_Art6.txt`: gesetze-bayern.de sperrt automatischen Abruf per CAPTCHA, deshalb
+  aus lxgesetze.de und lexmea.de geholt und Wort für Wort verglichen (identisch bis auf einen Darstellungsfehler).
+  **Abgleich mit gesetze-bayern.de von Hand offen.**
+- Je Wand: Wandhöhe über DGM1 an beiden Enden (am Hang Trapez), H mit Dachanteil (bis 70° ein Drittel, darüber voll,
+  Abs. 4), Tiefe 0,4 H, mindestens 3 m (Abs. 5), Fläche als Polygon am Boden.
+- Prüfungen: auf dem eigenen Grundstück (Abs. 2), keine Überdeckung mit den Abstandsflächen des eigenen Hauses aus LoD2
+  (Abs. 3, Ausnahme Wände > 75°), Objekt nicht in der Abstandsfläche des Hauses und umgekehrt (Abs. 1).
+- Privileg Abs. 7: Gartenhaus ohne Aufenthaltsraum/Feuerstätte und Garage mit mittlerer Wandhöhe bis 3 m brauchen
+  keine eigene Abstandsfläche (grau); Dach > 45° zu einem Drittel, > 70° voll; Giebel bis 45° unberücksichtigt.
+- Neu in der App: Dachneigung (Satteldach, First entlang der Breite), Rauminhalt mit Dachraum (Art. 57),
+  Satteldach und Giebel in 3D, Abstandsflächen am Boden (rot = Verstoß, grün = auf dem Grundstück, grau = nicht nötig)
+  und die des Hauses blass.
+- `offen` markiert: Giebelfläche wie das Dach angerechnet (Auslegung), Giebel bei Dach > 45° nach Abs. 7,
+  öffentliche Verkehrsflächen bis zur Mitte (Abs. 2 Satz 2) nicht geprüft. Haus-H aus LoD2 mit Annahme Dach ≤ 70°.
+  Alle neuen Regeln in `limits.json` mit `geprueft: false`.
+
+**2.1 „Wo darf es hin?“** (`app/src/rules/zonen.ts`, Web Worker, lazy geladen, 24 kB)
+- 25-cm-Raster, zweistufig (1 m, fein nur an Farbwechseln), Ausrichtungen: aktuelle, parallel zu jeder Grenze,
+  45°-Schritte. Grün = passt so, gelb = passt gedreht, rot = geht nicht. Beste Stelle mit „Hierhin setzen“.
+- Dieselbe Prüfung wie `evaluate()`: Test prüft alle 9184 Zellen einzeln nach – **0 Abweichungen**.
+- Zeit (`docs/messungen/zonen.md`): im Container 180–340 ms je Neuberechnung (Fröschau 41: 181–231 ms,
+  Hang: 235–338 ms). **< 300 ms auf dem iPhone nicht nachgewiesen** – kein Gerät hier; Chromium-Drosselung wirkt
+  nicht auf Worker. Die App zeigt die Zeit klein an, damit sie auf dem iPhone ablesbar ist.
+
+**2.3 Wärmepumpe** (`app/src/rules/evaluate.ts`, `pipeline/10_waermepumpen.py`)
+- Geräte: 2651 Außengeräte aus Heat Pump KEYMARK über hplib (MIT), Suche nach Hersteller/Typ, Label `zertifiziert`,
+  Quelle sichtbar. **Einschränkungen:** Daten 2016–2021, technische Typbezeichnungen, Schallleistung im
+  Nennbetrieb (nicht Nachtbetrieb); Rechte an der KEYMARK-Liste nicht geklärt (siehe attributions.md).
+- Schallmodell: Richtwirkung automatisch aus allen LoD2-Wänden bis 3 m (LAI; vorher 0,6 m), Abschirmung aus der
+  Sichtlinie gegen LoD2 (0 / 5 / 15 dB wie LAI/BWP, keine Beugungsrechnung), ganze Nachbarfassade im 1-m-Raster auf
+  1,6 m und 4,4 m abgetastet, lautester Punkt zählt. Art. 6 Abs. 1 Satz 3 Nr. 4: bis 2 m Höhe keine Abstandsfläche.
+- Vergleich mit dem BWP-Schallrechner (`docs/messungen/schall_bwp.md`): 10 Fälle, Abweichung ≤ 0,1 dB(A), gleiches
+  Urteil – bei gleichen Eingaben. Nicht umgesetzt: Tageswerte mit Ruhezeitenzuschlag, Tonhaltigkeit (`offen`).
+- Demo Carl-Orff-Straße 1 jetzt 48 dB(A) statt 41 (Ecke bis 3 m, ganze Fassade).
+
+**Tests:** 73 grün (neu: `abstand.test.ts`, `zonen.test.ts`, `schall.test.ts`; Paritätstest nimmt die neuen Regeln
+gezielt aus und prüft sie getrennt).
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
@@ -193,6 +236,9 @@ nicht die Wandhöhe nach Art. 6 BayBO (folgt in Phase 2.2).
 - Fachliche Prüfung von `limits.json` durch Bauamt oder Architekt; die Regeln zu Hecken und Bäumen (AGBGB, Phase 3)
   am besten zusätzlich durch einen Anwalt.
 - Einverständnis der Eigentümer für die Demo-Adressen.
+- Art. 6 BayBO einmal von Hand auf gesetze-bayern.de gegen `docs/recht/BayBO_Art6.txt` prüfen (CAPTCHA).
+- „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
+- KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
 - ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).
 
 ## Speicher-Entscheidung (Emil, 4. Oktober 2026)
@@ -211,5 +257,6 @@ Lokal zuerst, aber hinter einer **Speicher-Schnittstelle**, damit später nur di
 - Denkmal-/Wasserschutzabfrage: fällt ein Abfragepunkt aus, zählen die übrigen; erst wenn alle ausfallen: „nicht abfragbar“.
 - DOM-Mesh nicht im Repo (184 MB), siehe oben.
 - Bebauungsplan: für Sulzbach-Rosenberg keine Umringe im Landesportal, nur Link zur Stadt.
-- Mittlere Wandhöhe bei Satteldach-Giebeln wird noch nicht berücksichtigt (Gartenhaus als Flachdach-Kubus).
+- Pultdach und andere Dachformen fehlen (nur Flach- und Satteldach).
+- Abstandsflächen von Nachbargebäuden werden nicht geprüft (nur die des eigenen Hauses).
 - Kein Undo für verschobene Objekte, kein Speichern.

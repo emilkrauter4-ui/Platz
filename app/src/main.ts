@@ -53,7 +53,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ORDER: ObjectKind[] = ['gartenhaus', 'carport', 'waermepumpe'];
 const WORD = { ok: 'passt', warn: 'knapp', bad: 'passt nicht' };
 const TAG_CLASS: Record<string, string> = {
-  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user',
+  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', zertifiziert: 'off',
 };
 
 /* ---------- Zustand ---------- */
@@ -553,6 +553,7 @@ function renderSheet() {
     <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">
       ${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${NAMES[k].name}</button>`).join('')}
     </div>
+    ${st.selected === 'waermepumpe' ? geraetHtml(o) : ''}
     <div class="controls" id="controls">${ctl}</div>
     ${st.denkmal?.length ? `<p class="warnbox">Denkmalschutz: ${st.denkmal.map((d) => `${esc(d.art)}${d.bezeichnung ? ` „${esc(d.bezeichnung)}“` : ''} (${esc(d.aktennummer)})`).join('; ')}. Hier kann auch ein kleines Nebengebäude oder eine Wärmepumpe eine denkmalrechtliche Erlaubnis brauchen (Art. 6 BayDSchG). ${tag('amtlich', 'amtlich')} <span class="attr">© BLfD</span></p>` : ''}
     ${st.wsg?.length ? `<p class="warnbox">Das Grundstück liegt in einem Trinkwasserschutzgebiet (${esc(st.wsg.join(', '))}). Dort gelten eigene Auflagen. ${tag('amtlich', 'amtlich')}</p>` : ''}
@@ -590,6 +591,11 @@ function renderSheet() {
       const v = parseFloat(inp.value);
       if (inp.dataset.k === 'deg') ob.angle = CMath.toRadians(v);
       else (ob as unknown as Record<string, number>)[inp.dataset.k!] = v;
+      if (inp.dataset.k === 'lw' && ob.geraet) {
+        ob.geraet = undefined; // eigener Wert statt KEYMARK-Gerät
+        renderSheet();
+        return;
+      }
       update();
     }),
   );
@@ -632,6 +638,7 @@ function renderSheet() {
     renderSheet();
   });
   zonenInfo();
+  geraetSuche();
   document.getElementById('afBox')?.addEventListener('change', (e) => {
     st.showAF = (e.target as HTMLInputElement).checked;
     render();
@@ -647,6 +654,44 @@ function renderSheet() {
   });
   $('newBtn').addEventListener('click', () => showStart());
   update();
+}
+
+/* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */
+type GeraetRow = [string, string, number, string, number | null];
+let geraete: Promise<{ quelle: string; geraete: GeraetRow[] }> | null = null;
+const ladeGeraete = () => (geraete ??= fetch(`${DATA_URL}/waermepumpen.json`).then((r) => r.json() as Promise<{ quelle: string; geraete: GeraetRow[] }>));
+
+function geraetHtml(o: Placed): string {
+  return `<div class="field" style="display:block">
+    <label for="gSuche" style="display:block;margin-bottom:4px">Gerät suchen (Hersteller, Modell) ${o.geraet ? tag('zertifiziert', 'zertifiziert') : tag('nutzerbestätigt', 'nutzerbestätigt')}</label>
+    <input id="gSuche" type="search" autocomplete="off" placeholder="z. B. Vaillant VWL 105 oder Daikin EDLA" value="${o.geraet ? esc(`${o.geraet.hersteller} ${o.geraet.modell}`) : ''}" style="width:100%">
+    <ul class="rows" id="gTreffer" style="margin-top:6px"></ul>
+    <p class="fine" style="text-align:left">Schallleistung im Nennbetrieb nach EN 12102 aus Heat Pump KEYMARK (über hplib, Datenblätter 2016–2021, technische Typbezeichnungen). Neuere Geräte fehlen. Nachts im Silent-Modus oft leiser – dann den Wert aus dem Datenblatt mit dem Regler einstellen.</p>
+  </div>`;
+}
+
+function geraetSuche() {
+  const inp = document.getElementById('gSuche') as HTMLInputElement | null;
+  if (!inp) return;
+  const liste = $('gTreffer');
+  inp.addEventListener('input', async () => {
+    const q = inp.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (!q.length) { liste.innerHTML = ''; return; }
+    const d = await ladeGeraete();
+    const treffer = d.geraete.filter(([h, m]) => q.every((w) => `${h} ${m}`.toLowerCase().includes(w))).slice(0, 8);
+    liste.innerHTML = treffer.length
+      ? treffer.map(([h, m, lw, datum, kw], i) => `<li><span>${esc(h)} ${esc(m)}${kw ? ` · ${fmt(kw, 1)} kW` : ''}<br><small class="fine">${fmt(lw, 0)} dB(A) · Datenblatt ${esc(datum)}</small></span><span class="acts"><button type="button" data-g="${i}">Übernehmen</button></span></li>`).join('')
+      : '<li><span class="fine">Kein Gerät gefunden. Wert aus dem Datenblatt mit dem Regler einstellen.</span></li>';
+    liste.querySelectorAll<HTMLButtonElement>('[data-g]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const [h, m, lw, datum] = treffer[Number(b.dataset.g)];
+        const ob = st.objs!.waermepumpe;
+        ob.lw = lw;
+        ob.geraet = { hersteller: h, modell: m, datum };
+        renderSheet();
+      }),
+    );
+  });
 }
 
 /** „Steht hier schon etwas?“ – je Grenze vorbefüllt aus der Garten-Erkennung, dazu die übrigen Objekte im Garten. */

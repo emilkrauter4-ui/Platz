@@ -16,7 +16,8 @@ export type Provenance =
   | 'nutzerbestätigt'
   | 'Annahme'
   | 'offen'
-  | 'Demo';
+  | 'Demo'
+  | 'zertifiziert';
 
 export type Status = 'ok' | 'warn' | 'bad';
 
@@ -103,6 +104,11 @@ export interface Bestand {
 export interface NeighborWindow {
   /** Lage auf der Fassade */
   pos: Vec2;
+  /** Gebäude, zu dem das Fenster gehört (verdeckt sich nicht selbst) */
+  buildingId?: string;
+  /** nur angenommene Fenster: die ganze Fassade, die abgetastet wird, und ggf. Obergeschoss-Höhe */
+  fassade?: [Vec2, Vec2];
+  zOG?: number;
   /** Höhe über Gelände */
   z: number;
   provenance: Provenance;
@@ -125,6 +131,8 @@ export interface Placed {
   angle: number;
   /** nur Wärmepumpe: Schallleistungspegel nachts laut Datenblatt */
   lw?: number;
+  /** nur Wärmepumpe: Gerät aus der KEYMARK-Liste (dann ist lw zertifiziert, Nennbetrieb) */
+  geraet?: { hersteller: string; modell: string; datum?: string };
   /** Fußbodenhöhe; fehlt: höchster Geländepunkt unter dem Grundriss (Annahme). */
   baseElevation?: number;
 }

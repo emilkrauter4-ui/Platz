@@ -40,6 +40,20 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | OpenCV (`opencv-python-headless`) | Apache 2.0 | Kreiserkennung (Trampoline) | |
 | laspy (+ lazrs) | BSD-2-Clause / MIT | Laserpunkte lesen | |
 
+## Wärmepumpen-Gerätedaten und Schallrechner (Phase 2.3)
+
+| Quelle | Lizenz / Bedingungen | Nutzung in Passt. | Hinweis |
+|---|---|---|---|
+| hplib 1.9 (FZJ IEK-3, github.com/FZJ-IEK3-VSA/hplib) | **MIT** (LICENSE geprüft am 04.10.2026) | Datei `hplib_database_all.csv` → `app/public/data/waermepumpen.json` (2651 Außengeräte, Schallleistung außen, Datum, Heizleistung) via `pipeline/10_waermepumpen.py` | Daten von 2016–2021, technische Typbezeichnungen |
+| Heat Pump KEYMARK, Datenblätter (keymark.eu) | **keine offene Lizenz angegeben**, Seite nennt „© KEYMARK 2025“ | Ursprung der Werte in hplib; Anzeige „Heat Pump KEYMARK / EN 12102“, Label `zertifiziert` | **Offen:** Einzelne Messwerte sind Fakten; für die Übernahme einer ganzen Liste kann das Datenbankherstellerrecht (§ 87b UrhG) greifen. Vor kommerzieller Nutzung mit KEYMARK/EHPA klären oder Werte nur auf Abruf je Gerät zeigen. |
+| BWP-Schallrechner (waermepumpe.de/werkzeuge/schallrechner) | Website des Bundesverbands Wärmepumpe | nur Vergleich: 10 Abfragen am 04.10.2026 (`docs/messungen/schall_bwp.md`); Stufen der Richtwirkung/Abschirmung als Quellenangabe in `limits.json` | keine Daten übernommen |
+
+## Gesetzestexte
+
+| Text | Quelle | Hinweis |
+|---|---|---|
+| BayBO Art. 6 (`docs/recht/BayBO_Art6.txt`) | Amtliche Werke sind gemeinfrei (§ 5 UrhG); Wortlaut über lxgesetze.de und lexmea.de abgerufen und verglichen | gesetze-bayern.de per CAPTCHA gesperrt; Abgleich von Hand offen |
+
 ## Nicht verwendet
 
 - Google Photorealistic 3D Tiles und andere nicht-amtliche 3D-Daten (Grundsatz 1).

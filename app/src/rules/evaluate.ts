@@ -524,7 +524,7 @@ function building(
 }
 
 /** Die „schwächste" Herkunft gewinnt: eine Annahme bleibt eine Annahme. */
-const RANK: Record<string, number> = { amtlich: 0, berechnet: 1, erkannt: 2, nutzerbestätigt: 3, Annahme: 4, offen: 5, Demo: 6 };
+const RANK: Record<string, number> = { amtlich: 0, zertifiziert: 0.5, berechnet: 1, erkannt: 2, nutzerbestätigt: 3, Annahme: 4, offen: 5, Demo: 6 };
 function worst<T extends string>(...ps: T[]): T {
   return ps.reduce((a, b) => (RANK[b] > RANK[a] ? b : a));
 }
@@ -540,10 +540,11 @@ export function limitRadius(lw: number, q: number, limit: number): number {
   return 10 ** ((lw + 10 * Math.log10(q) - 11 - limit) / 20);
 }
 
+/** Richtwirkung aus der Geometrie: reflektierende Wände (alle Gebäude aus LoD2) bis 3 m Abstand (LAI). */
 export function placement(site: Site, fp: Vec2[]): 'frei' | 'wand' | 'ecke' {
   const tol = L.waermepumpe.wandabstandM.wert;
   const dirs: Vec2[] = [];
-  for (const b of site.buildings.filter((x) => x.own)) {
+  for (const b of site.buildings) {
     for (const [a, c] of edges(b.footprint)) {
       if (polygonSegment(fp, a, c).d < tol) {
         const l = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1;
@@ -561,7 +562,58 @@ export function placement(site: Site, fp: Vec2[]): 'frei' | 'wand' | 'ecke' {
   return 'wand';
 }
 
-const PLACEMENT_TEXT = { frei: 'Gerät steht frei', wand: 'Gerät steht an der Hauswand', ecke: 'Gerät steht in einer Hausecke' };
+const PLACEMENT_TEXT = {
+  frei: 'Gerät steht frei (keine Wand näher als 3 m)',
+  wand: 'Gerät steht an einer Wand (bis 3 m)',
+  ecke: 'Gerät steht in einer Ecke (zwei Wände bis 3 m)',
+};
+
+/** Schneidet die Strecke p–q das Polygon (Kante gekreuzt oder Endpunkt innen)? */
+function streckeSchneidet(p: Vec2, q: Vec2, poly: Vec2[]): boolean {
+  if (pointInPolygon(p, poly) || pointInPolygon(q, poly)) return true;
+  for (const [a, b] of edges(poly)) {
+    const d1 = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    const d2 = (b[0] - a[0]) * (q[1] - a[1]) - (b[1] - a[1]) * (q[0] - a[0]);
+    const d3 = (q[0] - p[0]) * (a[1] - p[1]) - (q[1] - p[1]) * (a[0] - p[0]);
+    const d4 = (q[0] - p[0]) * (b[1] - p[1]) - (q[1] - p[1]) * (b[0] - p[0]);
+    if (d1 * d2 < 0 && d3 * d4 < 0) return true;
+  }
+  return false;
+}
+
+/**
+ * Abschirmung (LAI, vereinfacht): Sichtlinie Gerät–Immissionsort gegen Grundrisse aus LoD2 (ab 2 m Traufe).
+ * Verdeckt das Gebäude, an dem das Gerät steht (bis 3 m), liegt der Ort auf der abgewandten Seite.
+ */
+export function abschirmung(site: Site, quelle: Vec2, fp: Vec2[], ziel: Vec2, zielGebaeude?: string): { db: number; art: 'sichtfrei' | 'verdeckt' | 'abgewandt' } {
+  const A = L.waermepumpe.abschirmungDb.wert;
+  const tol = L.waermepumpe.wandabstandM.wert;
+  let art: 'sichtfrei' | 'verdeckt' | 'abgewandt' = 'sichtfrei';
+  for (const b of site.buildings) {
+    if (b.id === zielGebaeude || (b.trauf != null && b.trauf < 2)) continue;
+    if (!streckeSchneidet(quelle, ziel, b.footprint)) continue;
+    const anDiesem = edges(b.footprint).some(([a, c]) => polygonSegment(fp, a, c).d < tol);
+    if (anDiesem) return { db: A.abgewandt, art: 'abgewandt' };
+    art = 'verdeckt';
+  }
+  return { db: A[art], art };
+}
+
+/** Immissionsorte eines Fensters: gesetzte Fenster als Punkt, angenommene über die ganze Fassade (1 m Raster, EG und OG). */
+function immissionsorte(w: Site['windows'][number]): { pos: Vec2; z: number }[] {
+  if (!w.fassade || w.provenance !== 'Annahme') return [{ pos: w.pos, z: w.z }];
+  const [a, b] = w.fassade;
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const n = Math.max(1, Math.round(len / L.waermepumpe.fassadenRasterM.wert));
+  const out: { pos: Vec2; z: number }[] = [];
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.5) / n;
+    const pos: Vec2 = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    out.push({ pos, z: w.z });
+    if (w.zOG != null) out.push({ pos, z: w.zOG });
+  }
+  return out;
+}
 
 function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): Result {
   const o = objs.waermepumpe;
@@ -575,15 +627,29 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
   const lw = o.lw ?? 58;
   const srcZ = W.quellhoeheM.wert;
 
-  let best: { d: number; w: (typeof site.windows)[number] } | null = null;
+  // maßgeblich: der lauteste Punkt über alle Fenster bzw. abgetasteten Fassaden (Abstand und Abschirmung)
+  let best: { d: number; w: (typeof site.windows)[number]; pos: Vec2; z: number; lp: number; ab: ReturnType<typeof abschirmung> } | null = null;
   for (const w of site.windows) {
-    const d = dist3([o.center[0], o.center[1], srcZ], [w.pos[0], w.pos[1], w.z]);
-    if (!best || d < best.d) best = { d, w };
+    for (const io of immissionsorte(w)) {
+      const d = dist3([o.center[0], o.center[1], srcZ], [io.pos[0], io.pos[1], io.z]);
+      const ab = abschirmung(site, o.center, fp, io.pos, w.buildingId);
+      const lpHier = soundPressure(lw, Q, d) - ab.db;
+      if (!best || lpHier > best.lp) best = { d, w, pos: io.pos, z: io.z, lp: lpHier, ab };
+    }
   }
   const rLimit = limitRadius(lw, Q, limit);
   const rows: Row[] = [
     { text: 'Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus', tag: ART57, kind: 'rule' },
   ];
+  if (o.h <= L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert) {
+    rows.push({ text: `Bis ${fmt(L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert, 0)} m Höhe braucht sie keine Abstandsfläche`, tag: 'BayBO Art. 6 Abs. 1', kind: 'rule' });
+  } else {
+    rows.push({ text: `Über ${fmt(L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert, 0)} m Höhe (mit Einhausung): Abstandsfläche nötig – nicht geprüft`, tag: 'offen', kind: 'offen' });
+  }
+  if (o.geraet) {
+    rows.push({ text: `${o.geraet.hersteller} ${o.geraet.modell}: Schallleistung ${fmt(lw, 0)} dB(A) im Nennbetrieb (EN 12102, Heat Pump KEYMARK)`, tag: 'zertifiziert', kind: 'zertifiziert' });
+    rows.push({ text: 'Nachtbetrieb (Silent-Modus) ist oft leiser – laut Hersteller-Datenblatt prüfen', tag: 'offen', kind: 'offen' });
+  }
 
   if (!best) {
     rows.push({ text: 'Kein Nachbarfenster bekannt. Tipp auf die Fassade des Nachbarhauses.', tag: 'offen', kind: 'offen' });
@@ -595,18 +661,22 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
     return { ...base, status: 'warn', head: 'Lärm noch nicht geprüft.', sub: `Ohne Nachbarfenster können wir den Pegel nicht berechnen. Ab ${fmt(rLimit, 1)} m Abstand sind es höchstens ${limit} dB(A).` };
   }
 
-  const lp = soundPressure(lw, Q, best.d);
+  const lp = best.lp;
   const Lr = Math.round(lp);
   rows.push(
     { text: `Nachts am nächsten Fenster: ${Lr} dB(A). Richtwert: ${limit} dB(A)`, tag: 'TA Lärm', kind: 'rule' },
     { text: `Abstand zum nächsten Nachbarfenster: ${fmt(best.d, 1)} m`, tag: 'berechnet', kind: 'berechnet' },
   );
+  if (best.ab.db > 0) {
+    rows.push({ text: best.ab.art === 'abgewandt' ? `Auf der abgewandten Hausseite: −${best.ab.db} dB` : `Gebäude verdeckt die Sichtlinie: −${best.ab.db} dB`, tag: 'berechnet', kind: 'berechnet' });
+  }
   if (best.w.provenance === 'Annahme') {
-    rows.push({ text: `Fensterlage angenommen: Fassadenmitte auf ${fmt(W.fensterhoeheAnnahmeM.wert, 1)} m`, tag: 'Annahme', kind: 'Annahme' });
+    rows.push({ text: best.w.fassade ? `Fenster angenommen: ganze Fassade abgetastet (alle ${fmt(W.fassadenRasterM.wert, 0)} m, ${fmt(W.fensterhoeheAnnahmeM.wert, 1)} m${best.w.zOG != null ? ` und ${fmt(best.w.zOG, 1)} m` : ''} hoch), lautester Punkt zählt` : `Fensterlage angenommen: Fassadenmitte auf ${fmt(W.fensterhoeheAnnahmeM.wert, 1)} m`, tag: 'Annahme', kind: 'Annahme' });
   }
   rows.push(
     { text: `${PLACEMENT_TEXT[place]}, ${GEBIET_TEXT[site.gebiet.value]}`, tag: site.gebiet.provenance, kind: site.gebiet.provenance },
     { text: 'Vereinfachtes Schallmodell, ersetzt keine Schallprognose', tag: 'Annahme', kind: 'Annahme' },
+    { text: 'Zuschlag für Ton- oder Informationshaltigkeit (TA Lärm) nicht berücksichtigt', tag: 'offen', kind: 'offen' },
   );
   if (site.demo) rows.push({ text: 'Grundstück und Nachbarhäuser sind erfunden', tag: 'Demo', kind: 'Demo' });
 
@@ -620,7 +690,7 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
   else if (lp > limit - marge) { status = 'warn'; head = 'Knapp, aber im Rahmen.'; sub = `Nachts etwa ${Lr} dB(A) am nächsten Nachbarfenster. Der Richtwert liegt bei ${limit}.`; }
   else { status = 'ok'; head = 'Passt so.'; sub = `Keine Baugenehmigung nötig. Nachts kommen am nächsten Nachbarfenster etwa ${Lr} dB(A) an.`; }
 
-  return { status, head, sub, rows, badSegments: [], rLimit, lp, dim: { p: o.center, q: best.w.pos, label: `${Lr} dB(A)` } };
+  return { status, head, sub, rows, badSegments: [], rLimit, lp, dim: { p: o.center, q: best.pos, label: `${Lr} dB(A)` } };
 }
 
 /** Fläche eines Objekts (für Anzeige). */

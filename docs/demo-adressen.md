@@ -45,8 +45,10 @@ unter „Demo-Adressen“ (auch offline). Ergebnisse aus `docs/demo/ergebnisse.j
 
 - Doppelhaushälfte, Grundstück 346 m², Nachbarhälfte 1a direkt angebaut.
 - Start: Wärmepumpe (58 dB(A) nachts laut Datenblatt) an der eigenen Hauswand im Garten, an der Grenze zu 1a.
-- Ergebnis: **„Nachts zu laut für die Nachbarn.“** Etwa **41 dB(A)** am nächsten Nachbarfenster in 3,9 m
-  (Fenster angenommen: Fassadenmitte, 1,6 m, `Annahme`). Richtwert allgemeines Wohngebiet 40 dB(A).
+- Ergebnis (Stand 4. Oktober 2026, Schallmodell Phase 2.3): **„Nachts zu laut für die Nachbarn.“** Etwa
+  **48 dB(A)** am lautesten Punkt der Rückfassade von 1a, 2,5 m entfernt (Fassade im 1-m-Raster auf 1,6 m und 4,4 m
+  abgetastet, `Annahme`), Gerät in einer Ecke (Wände bis 3 m, Q = 8). Richtwert allgemeines Wohngebiet 40 dB(A).
+  Vorher (Meilenstein 5) 41 dB(A): nur Fassadenmitte, Wand nur bis 0,6 m.
 - In der Demo zeigen: Pumpe 2–3 m nach Osten ziehen → gelb/grün; Gebietsart auf „Mischgebiet“ → 45 dB(A) Richtwert;
   auf die Rückfassade von 1a tippen, um das echte Fenster zu setzen (`nutzerbestätigt`).
 - Gefunden beim Durchspielen und behoben: Beim Doppelhaus lag das angenommene Fenster auf der **Brandwand**.

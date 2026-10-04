@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { area, clipArea, evaluate, footprint, placement, type ObjectKind } from '../src/rules';
+import { area, clipArea, evaluate, footprint, type ObjectKind } from '../src/rules';
 import { demoObjects, demoSite } from '../src/rules/demo';
 
 type ProtoObj = { cx: number; cz: number; w: number; d: number; h: number; rot: number; lw?: number };
@@ -36,7 +36,9 @@ describe('Parität mit design/prototyp.html', () => {
     const P = loadPrototype();
     const pr = P.evaluate();
     const r = evaluate(demoSite(), demoObjects());
-    for (const k of Object.keys(MAP) as ObjectKind[]) {
+    // Wärmepumpe: Schallmodell seit Phase 2.3 bewusst anders (Wand bis 3 m, Abschirmung, Fassade abgetastet),
+    // eigene Tests in test/schall.test.ts
+    for (const k of (Object.keys(MAP) as ObjectKind[]).filter((x) => x !== 'waermepumpe')) {
       expect(r[k].status, k).toBe(pr[MAP[k]].status);
       expect(r[k].head, k).toBe(pr[MAP[k]].head);
       expect(r[k].sub, k).toBe(pr[MAP[k]].sub);
@@ -76,8 +78,8 @@ describe('Parität mit design/prototyp.html', () => {
         if (a.status === b.status && a.head === b.head && a.sub === b.sub) continue;
         const fp = footprint(objs[k]);
         // Gewollte Abweichungen:
-        // 1. Wärmepumpe in einer Hausecke: Q = 8 (CLAUDE.md), der Prototyp kannte nur Q = 4.
-        if (k === 'waermepumpe' && placement(site, fp) === 'ecke') { skipped++; continue; }
+        // 1. Wärmepumpe: neues Schallmodell (Phase 2.3) – eigene Tests in test/schall.test.ts.
+        if (k === 'waermepumpe') { skipped++; continue; }
         // 2. Objekt liegt exakt auf der Grenze (< 0,01 m² außerhalb): zählt als auf dem Grundstück.
         if (a.head.startsWith('Steht nicht ganz') && area(fp) - clipArea(site.plot.boundary, fp) < 0.01) { skipped++; continue; }
         // 3. BayBO Art. 6 Abs. 1/3 (Phase 2.2): nicht privilegiert (Wandhöhe > 3 m) und in bzw. über den
@@ -89,7 +91,7 @@ describe('Parität mit design/prototyp.html', () => {
       }
     }
     mismatches = mismatches.slice(0, 10);
-    expect(skipped).toBeLessThan(400);
+    expect(skipped).toBeLessThan(900); // davon ~2000/3 Wärmepumpen
     expect(neueRegel).toBeGreaterThan(0); // die neue Regel greift tatsächlich
     expect(neueRegel).toBeLessThan(200);
     expect(mismatches).toEqual([]);

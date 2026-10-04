@@ -49,7 +49,7 @@ describe('Kontext', () => {
     const site = { plot: { boundary: plot, ...sidesFromBoundary(plot), provenance: 'nutzerbestätigt' as const }, buildings, bestand: [], windows: assumedWindows(plot, buildings), gebiet: { value: 'allgemein' as const, provenance: 'Annahme' as const }, bereich: { value: 'innen' as const, provenance: 'Annahme' as const }, bplan: { status: 'unbekannt' as const, provenance: 'offen' as const }, aufenthaltsraum: { value: false, provenance: 'Annahme' as const }, feuerstaette: { value: false, provenance: 'Annahme' as const } };
     const r = evaluate(site, o);
     expect(r.gartenhaus.head).not.toMatch(/Kollidiert|nicht ganz/);
-    expect(r.waermepumpe.rows.some((x) => x.text.includes('Hauswand'))).toBe(true);
+    expect(r.waermepumpe.rows.some((x) => /an einer Wand|in einer Ecke/.test(x.text))).toBe(true);
   });
 
   it('richtet Objekte an der längsten Grenze aus', () => {

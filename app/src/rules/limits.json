@@ -155,8 +155,10 @@
       "quelle": "Produktentscheidung Passt. (Ampel gelb, wenn weniger als 3 dB unter dem Richtwert)"
     },
     "wandabstandM": {
-      "wert": 0.6,
-      "quelle": "Produktentscheidung Passt. (ab hier gilt das Gerät als an der Wand)"
+      "wert": 3,
+      "quelle": "LAI-Leitfaden für die Verbesserung des Schutzes gegen Lärm bei stationären Geräten (Luftwärmepumpen …), Richtwirkungsmaß; Wortlaut der Stufen aus dem BWP-Schallrechner (abgerufen 04.10.2026): „keine Wand näher als 3 m“ / „an einer Wand, Abstand zum Gerät bis zu 3 m“",
+      "text": "Bis 3 m Abstand zu einer Wand gilt die Wärmepumpe als an der Wand (Q = 4), zu zwei Wänden als in der Ecke (Q = 8). Vorher 0,6 m (Produktentscheidung), angeglichen am 04.10.2026.",
+      "geprueft": false
     },
     "quellhoeheM": {
       "wert": 0.5,
@@ -165,6 +167,32 @@
     "fensterhoeheAnnahmeM": {
       "wert": 1.6,
       "quelle": "CLAUDE.md: ohne Eingabe Fassadenmitte auf 1,6 m Höhe"
+    },
+    "abschirmungDb": {
+      "wert": {
+        "sichtfrei": 0,
+        "verdeckt": 5,
+        "abgewandt": 15
+      },
+      "quelle": "LAI-Leitfaden Luftwärmepumpen, Abschirmmaß (Stufen wie im BWP-Schallrechner: Sichtkontakt 0 dB, kein Sichtkontakt 5 dB, auf abgewandter Seite 15 dB; abgerufen 04.10.2026)",
+      "text": "Passt. prüft die Sichtlinie Gerät–Fenster gegen die Grundrisse aus LoD2 (Gebäude ab 2 m Traufhöhe). Verdeckt das Gebäude, an dem die Wärmepumpe steht: abgewandte Seite (15 dB); verdeckt ein anderes Gebäude: 5 dB. Vereinfacht, keine Beugungsberechnung.",
+      "geprueft": false
+    },
+    "fassadenRasterM": {
+      "wert": 1.0,
+      "quelle": "Produktentscheidung Passt.: angenommene Fenster alle 1 m entlang der dem Grundstück zugewandten Fassade; maßgeblich ist der lauteste Punkt",
+      "geprueft": false
+    },
+    "fensterhoeheOGAnnahmeM": {
+      "wert": 4.4,
+      "quelle": "Annahme Passt.: Fenstermitte Obergeschoss (Erdgeschoss 1,6 m + Geschosshöhe 2,8 m), nur bei Traufhöhe über 4,5 m (LoD2)",
+      "geprueft": false
+    },
+    "keymarkNennbetrieb": {
+      "wert": true,
+      "quelle": "Heat Pump KEYMARK / EN 12102-1 über hplib (MIT, FZJ IEK-3): Schallleistung außen im Nennbetrieb",
+      "text": "KEYMARK-Werte gelten für den Nennbetrieb, nicht für einen schallreduzierten Nachtbetrieb. Ohne Herstellerangabe zum Nachtbetrieb rechnet Passt. mit dem Nennwert (sicher nach oben).",
+      "geprueft": false
     }
   }
 }

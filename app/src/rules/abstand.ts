@@ -32,6 +32,8 @@ export interface Wand {
   /** Wandhöhe über Gelände an a und b (bis Traufe bzw. oberem Abschluss) */
   wa: number;
   wb: number;
+  /** mittlere Wandhöhe über Gelände entlang der Wand (9 Stützstellen, DGM1) */
+  wm: number;
   /** H nach Abs. 4 an a und b */
   ha: number;
   hb: number;
@@ -84,12 +86,15 @@ export function waende(site: Site, o: Placed): Wand[] {
     const typ: WandTyp = dh <= 0 ? 'flach' : i % 2 === 0 ? 'traufe' : 'giebel';
     const wa = traufe - ground(a);
     const wb = traufe - ground(b);
+    let sum = 0;
+    for (let t = 0; t <= 8; t++) sum += traufe - ground([a[0] + ((b[0] - a[0]) * t) / 8, a[1] + ((b[1] - a[1]) * t) / 8]);
+    const wm = sum / 9;
     const zu = typ === 'flach' ? 0 : dh * dachAnteil4(neig);
     const ha = wa + zu;
     const hb = wb + zu;
     const ta = tiefe(ha);
     const tb = tiefe(hb);
-    return { a, b, typ, wa, wb, ha, hb, ta, tb, flaeche: flaeche(a, b, ta, tb, aussenNormale(a, b, true)) };
+    return { a, b, typ, wa, wb, wm, ha, hb, ta, tb, flaeche: flaeche(a, b, ta, tb, aussenNormale(a, b, true)) };
   });
 }
 
@@ -99,7 +104,7 @@ export function waende(site: Site, o: Placed): Wand[] {
  * mittlere Giebelhöhe (halbe Dachhöhe) – der Wortlaut sagt nicht, wie (offen, sicher nach oben).
  */
 export function wandhoeheArt7(w: Wand, o: Placed): { h: number; offen: boolean } {
-  const mittel = (w.wa + w.wb) / 2;
+  const mittel = w.wm;
   const dh = dachHoehe(o);
   const n = o.neigung ?? 0;
   if (dh <= 0 || n <= A7_DACH) return { h: mittel, offen: false };
