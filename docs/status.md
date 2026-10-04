@@ -359,7 +359,7 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 
 - Von Emil am eigenen Laptop ausprobiert (4. Oktober 2026): funktioniert.
 
-### 4.2 Lernschleife: **gebaut; Probelauf bestanden, Version zurückgenommen**
+### 4.2 Lernschleife: **gebaut; nur simuliert getestet (noch keine echten Beiträge); Probelauf bestanden, Version zurückgenommen**
 - **Einwilligung in der App** (Abschnitt „Steht hier schon etwas?“), standardmäßig aus und widerrufbar. Nur mit
   Haken sendet Passt. bei „Stimmt“, „Gibt es nicht“, „Umriss nachziehen“ und „Objekt einzeichnen“:
   Umriss (EPSG:25832, 0,1 m), Objektart, 1-km-Kachel, Aktion und Modellversion. Nicht gesendet werden Adresse,
@@ -383,7 +383,19 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
   bleibt v4, die simulierten Lernbeispiele sind gelöscht.
 - Ehrlich: 5 von 13 Beiträgen fanden keinen Kandidaten. Was die Erkennung gar nicht als Kandidat findet, kann
   Nachtrainieren der Klassifikation nicht verbessern; dafür müsste die Kandidatensuche selbst lernen.
-- Tests: `lernen.test.ts` (3). Insgesamt **134 grün** (App) plus 4 (Pipeline).
+- **Neu (4. Oktober): gezeichnete Objekte ohne Kandidaten werden Lernbeispiele.** Bei „Objekt einzeichnen“ und
+  „Umriss nachziehen“ ohne Kandidaten mit IoU ≥ 0,3 berechnet der Import die Merkmale direkt aus dem gezeichneten
+  Umriss (`kandidat_aus_umriss`, gleiche Merkmale wie bei der Erkennung, Familie aus der Objektart, Quelle
+  `gezeichnet`). „Stimmt“ ohne Kandidaten bleibt draußen (dort gibt es keinen eigenen Umriss). Ältere Importe, die
+  solche Beiträge als unbrauchbar gemerkt hatten, werden nachgeholt. Das Modellprotokoll zählt `lern_gezeichnet`.
+  - Probe auf echten Daten: ein Gartenhaus der Dev-Referenz, als Umriss gezeichnet → Merkmale berechenbar, das
+    aktive Modell v4 nennt es zu 97 % „nichts“. Gezeichnete Umrisse sehen für das Modell anders aus als
+    Kandidaten der Erkennung – genau dafür sind die Beispiele nützlich. Gleichzeitig ein Risiko: Das Modell lernt
+    auf gezeichneten Umrissen, sieht beim Erkennen aber Kandidaten-Umrisse. Die Freigaberegel auf dem Test-Set
+    fängt eine Verschlechterung ab.
+  - Grenze bleibt: Die Trefferquote für Objekte, die die Kandidatensuche nie vorschlägt, steigt dadurch nicht.
+- Tests: `lernen.test.ts` (3). Pipeline: `test_lernschleife.py` 7 (Freigaberegel 4, gezeichnete Objekte 3:
+  Merkmale aus dem Umriss, Familie für jede Klasse, Import Ende-zu-Ende ohne Rohdaten).
 
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 

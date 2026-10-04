@@ -46,6 +46,20 @@ REGISTER = ref_mod.REF / "modelle.json"
 AKTIONEN = {"bestaetigt", "verworfen", "nachgezogen", "neu"}
 IOU_MIN = 0.3
 TEST_PUFFER = 15.0
+# Familie, die ein von Hand gezeichneter Umriss ohne Kandidaten bekommt (sonst kommt sie aus dem Kandidatengenerator)
+FAMILIE_FUER = {"gartenhaus": "bau", "gewaechshaus": "bau", "carport_garage": "bau", "spielturm": "bau",
+                "waermepumpe": "bau", "pool": "wasser", "teich": "wasser", "terrasse": "flach", "trampolin": "rund",
+                "hecke": "streifen", "zaun_mauer": "streifen", "baum": "vegetation", "strauch": "vegetation"}
+
+
+def kandidat_aus_umriss(s: dict, g: Polygon, klasse: str) -> dict:
+    """Vom Nutzer gezeichneter Umriss → Kandidat mit denselben Merkmalen wie einer aus der Erkennung, damit er als
+    Lernbeispiel taugt. Familie aus der Klasse, kein SAM (sam_score/sam_iou = −1 wie bei Kandidaten ohne SAM)."""
+    H, W = s["dgm"].shape
+    maske, fenster = g8._maske_aus_geom(g, tuple(s["_bb"]), (H, W))
+    c = {"familie": FAMILIE_FUER.get(klasse, "bau"), "geom": g, "maske": maske, "fenster": fenster}
+    c["merkmale"] = g8.merkmale(s, c)
+    return c
 
 
 def _register() -> dict:
@@ -106,7 +120,12 @@ def eintraege_lesen(pfad: Path) -> list[dict]:
 
 def importieren(pfad: Path = JSONL) -> int:
     """Beitrag → Lernbeispiel: Kandidat der Erkennung mit IoU ≥ 0,3 zum Umriss suchen, Ziel = Klasse
-    (verworfen → 'nichts'). Nur Klassen, die das Modell kennt."""
+    (verworfen → 'nichts'). Nur Klassen, die das Modell kennt.
+
+    Gezeichnete Objekte (aktion 'neu' oder 'nachgezogen') ohne passenden Kandidaten werden trotzdem aufgenommen:
+    Merkmale direkt aus dem gezeichneten Umriss (kandidat_aus_umriss), Quelle 'gezeichnet'. Ehrliche Grenze: das
+    bringt dem Klassifikator Beispiele, findet aber Objekte nicht, die der Kandidatengenerator gar nicht erst
+    vorschlägt – dafür müsste der Generator selbst lernen."""
     if not pfad.exists():
         print(f"keine Beiträge ({pfad})")
         return 0
@@ -114,9 +133,11 @@ def importieren(pfad: Path = JSONL) -> int:
     klassen = set(m["klassen"])
     test = _testflaechen()
     alt = pickle.loads(BEISPIELE.read_bytes()) if BEISPIELE.exists() else {}
-    zaehl = {"neu": 0, "schon_da": 0, "test_nah": 0, "klasse_unbekannt": 0, "kein_kandidat": 0}
+    zaehl = {"neu": 0, "gezeichnet": 0, "schon_da": 0, "test_nah": 0, "klasse_unbekannt": 0, "kein_kandidat": 0}
     for e in eintraege_lesen(pfad):
-        if e["id"] in alt:
+        gezeichnet = e["aktion"] in ("neu", "nachgezogen")
+        # alte Importe haben gezeichnete Objekte ohne Kandidaten als None gemerkt – die jetzt nachholen
+        if e["id"] in alt and not (alt[e["id"]] is None and gezeichnet):
             zaehl["schon_da"] += 1
             continue
         g = Polygon(e["geometrie"]).buffer(0)
@@ -129,16 +150,21 @@ def importieren(pfad: Path = JSONL) -> int:
             continue
         x0, y0, x1, y1 = g.buffer(20).bounds
         bb = (np.floor(x0), np.floor(y0), np.ceil(x1), np.ceil(y1))
-        _, kand = g8.ausschnitt(bb)
+        s, kand = g8.ausschnitt(bb)
         paare = g8.zuordnen([c["geom"] for c in kand], [{"geom": g}], IOU_MIN)
-        if not paare:
+        if not paare and not gezeichnet:
             zaehl["kein_kandidat"] += 1
             alt[e["id"]] = None  # merken, damit es nicht jedes Mal neu gerechnet wird
             continue
-        c = kand[paare[0][0]]
-        alt[e["id"]] = {"merkmale": c["merkmale"], "ziel": ziel, "aktion": e["aktion"], "kachel": e.get("kachel")}
-        zaehl["neu"] += 1
-        print(f"  {e['id'][:8]} {e['aktion']:11s} {ziel:15s} IoU {paare[0][2]:.2f}", flush=True)
+        if paare:
+            c, quelle, info = kand[paare[0][0]], "kandidat", f"IoU {paare[0][2]:.2f}"
+            zaehl["neu"] += 1
+        else:
+            c, quelle, info = kandidat_aus_umriss(s, g, ziel), "gezeichnet", "ohne Kandidat, aus Umriss"
+            zaehl["gezeichnet"] += 1
+        alt[e["id"]] = {"merkmale": c["merkmale"], "ziel": ziel, "aktion": e["aktion"], "kachel": e.get("kachel"),
+                        "quelle": quelle}
+        print(f"  {e['id'][:8]} {e['aktion']:11s} {ziel:15s} {info}", flush=True)
     # gelöschte Beiträge auch aus den Lernbeispielen entfernen
     ids = {e["id"] for e in eintraege_lesen(pfad)}
     weg = [k for k in alt if k not in ids]
@@ -169,8 +195,10 @@ def trainieren() -> Path:
     MODELLE.mkdir(parents=True, exist_ok=True)
     ziel = MODELLE / f"garten_v{version}.pkl"
     pickle.dump({"modell": clf, "spalten": cols, "klassen": list(clf.classes_), "schwellen": alt["schwellen"],
-                 "version": version, "dev": split["dev"], "lern_beispiele": len(lern)}, open(ziel, "wb"))
-    print(f"Kandidat v{version}: {len(y)} Beispiele, davon {len(lern)} aus der Lernschleife → {ziel}")
+                 "version": version, "dev": split["dev"], "lern_beispiele": len(lern),
+                 "lern_gezeichnet": sum(1 for v in lern if v.get("quelle") == "gezeichnet")}, open(ziel, "wb"))
+    n_gez = sum(1 for v in lern if v.get("quelle") == "gezeichnet")
+    print(f"Kandidat v{version}: {len(y)} Beispiele, davon {len(lern)} aus der Lernschleife ({n_gez} gezeichnet ohne Kandidat) → {ziel}")
     return ziel
 
 
