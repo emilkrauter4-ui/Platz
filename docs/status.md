@@ -351,6 +351,8 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 - **Nicht enthalten:** amtlicher Katasterauszug und Flurstücksnummern (ALKIS kostenpflichtig, siehe Grundsätze),
   Höhen über NHN im Plan (nur relativ), Baukosten, Baustoffe.
 
+- Von Emil am eigenen Laptop ausprobiert (4. Oktober 2026): funktioniert.
+
 ### 4.2 Lernschleife: **gebaut; Probelauf bestanden, Version zurückgenommen**
 - **Einwilligung in der App** (Abschnitt „Steht hier schon etwas?“), standardmäßig aus und widerrufbar. Nur mit
   Haken sendet Passt. bei „Stimmt“, „Gibt es nicht“, „Umriss nachziehen“ und „Objekt einzeichnen“:
