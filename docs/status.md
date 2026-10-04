@@ -314,6 +314,43 @@ Bundle nach Phase 3: 983 kB übertragen (vorher ~974 kB). Fast 4G: bedienbar nac
 Messrauschen im Container ±0,2 s). Die Pflanzen- und Nachbar-Oberfläche liegt im Hauptbundle (+9 kB gzip), AR und Zonen
 laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Dialog in ein eigenes Modul auslagern.
 
+## AUFTRAG_V2 Phase 4 – Abschluss der Kette
+
+### 4.1 Vom Nein zum Antrag: **gebaut**
+- **Wortlaut** in `docs/recht/BayBO_Verfahren_BauVorlV.txt`: BayBO Art. 2 Abs. 3, 55, 58, 59, 61, 63, 64, 66
+  (gesetze.legal, lxgesetze.de und lexmea.de Wort für Wort identisch), BauVorlV §§ 1–3, 7–9 und GaStellV § 1
+  (gesetze.legal und lexmea.de identisch). Neue Einträge in `limits.json` (Abschnitt `verfahren`, `geprueft: false`).
+  Offizielle Links (Digitaler Bauantrag, Bauantragsformulare des Staatsministeriums) am 04.10.2026 abgerufen.
+- **Befunde statt erstem Fehler:** `evaluate()` meldet jetzt alle Befunde eines Gebäudes (`befunde`). Daraus folgt
+  in `rules/verfahren.ts` eines von vier Ergebnissen:
+  - **Lage klären:** außerhalb des Grundstücks oder Kollision. Hier gibt es keinen Export.
+  - **Kein Antrag:** Der Hinweis „Abstandsflächen gelten trotzdem“ (Art. 55 Abs. 2) bleibt stehen.
+  - **Verfahrensfrei mit Abweichungsantrag:** Art. 63 Abs. 2 Satz 2. Reicht die Abstandsfläche aufs
+    Nachbargrundstück, kommt die Übernahme durch den Nachbarn nach Art. 6 Abs. 2 Satz 3 als Weg 2 dazu.
+  - **Bauantrag:** mit Hinweis auf die Genehmigungsfreistellung im Bebauungsplan (Art. 58, `offen`), das vereinfachte
+    Verfahren (Art. 59), die Nachbarunterschrift (Art. 66; der Nachbar-Link ersetzt sie nicht) und die Zuständigkeit
+    (`offen`).
+- **Entwurfsverfasser** (Art. 61): Architekt/in oder eingetragene/r Ingenieur/in. Carports bis 100 m² sind
+  Kleingaragen (GaStellV § 1 Abs. 1 Satz 3, Abs. 7); dafür kommen auch die Gruppen aus Art. 61 Abs. 3 in Frage.
+  Ob ein Gartenhaus unter Abs. 3 fällt, ist im Wortlaut offen und so gekennzeichnet.
+- **Checkliste nach BauVorlV § 3:** Katasterauszug (selbst besorgen), Lageplan (Skizze von Passt.),
+  Bauzeichnungen 1:100 (Skizze), Baubeschreibung (Angaben, Gebäudeklasse voraussichtlich 1, zu bestätigen),
+  Maß der baulichen Nutzung, Abstandsflächenübernahme, Abweichungsantrag, Standsicherheit (nur Sonderbau),
+  Nachbarunterschriften, Formular und Anzahl.
+- **Zeichnungen** (`app/src/antrag/paket.ts`, lazy, 15 kB):
+  - **Lageplan-Skizze:** Maßstab automatisch 1:200 bis 1:1000, Nordpfeil (Gitter-Nord), Maßstabsleiste, Grenze,
+    Gebäude mit Trauf- und Firsthöhe aus LoD2, Bestand, Abstandsflächen, Abstände je Grenzseite. Der Stempel
+    „SKIZZE – keine amtliche Lageplanunterlage (BauVorlV § 7)“ steht auf jedem Plan.
+  - **Grundriss, Schnitt, vier Ansichten** in 1:100, mit Gelände aus DGM1 und Wandhöhe H nach Art. 6 Abs. 4.
+  - Alle SVGs in Millimetern, also beim Druck in Originalgröße maßstäblich.
+- **Export:** druckbares HTML ohne externe Dateien (im Browser als PDF drucken, Beispiel
+  `docs/demo/antrag-paket-beispiel.pdf`, 6 Seiten) und JSON mit dem Schema `passt.antragspaket/1` für Anbieter.
+  Das JSON enthält Lage und Grenze in EPSG:25832, Maße, Befunde, Prüfzeilen, Verfahren, Checkliste und Zeichnungen.
+- Knopf in der App: „Was jetzt? Antrag vorbereiten“, wenn das Ergebnis rot ist, sonst „Antrag-Paket“.
+- Tests: `antrag.test.ts` (12). Insgesamt **131 grün**.
+- **Nicht enthalten:** amtlicher Katasterauszug und Flurstücksnummern (ALKIS kostenpflichtig, siehe Grundsätze),
+  Höhen über NHN im Plan (nur relativ), Baukosten, Baustoffe.
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
@@ -321,11 +358,13 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
 - Fachliche Prüfung von `limits.json` durch Bauamt oder Architekt; die Regeln zu Hecken und Bäumen (AGBGB, Phase 3)
   am besten zusätzlich durch einen Anwalt.
 - Einverständnis der Eigentümer für die Demo-Adressen.
-- Art. 6 BayBO und AGBGB Art. 47–52 einmal von Hand auf gesetze-bayern.de gegen `docs/recht/` prüfen (CAPTCHA),
+- Antrag-Paket von Bauamt oder Architekt durchsehen lassen (Checkliste, Verfahrenslogik, Hinweise zu Art. 61).
+- Art. 6 BayBO, die Verfahrensvorschriften (Phase 4) und AGBGB Art. 47–52 einmal von Hand auf gesetze-bayern.de gegen `docs/recht/` prüfen (CAPTCHA),
   besonders Art. 52 Abs. 1 Satz 3 (Fristbeginn).
 - Bei 2–3 Bäumen an der Grenze den Stamm vor Ort einmessen, um die Spanne der Kronenmitte zu prüfen.
 - „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
 - KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
+- **AR zurückgestellt (Emil, 4. Oktober 2026):** klappt auf dem iPhone noch nicht, später weiter.
 - AR auf dem eigenen iPhone und einem Android-Gerät ausprobieren. Android braucht die App unter einer https-Adresse.
   iPhone im gleichen WLAN: `npm run serve` zeigt die Adresse an (`http://192.168.…:4173`), in Safari öffnen.
   Nachbar-Link geht auch über http im WLAN (SHA-256-Ersatz, wenn `crypto.subtle` fehlt).

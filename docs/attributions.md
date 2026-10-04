@@ -70,6 +70,7 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | Text | Quelle | Hinweis |
 |---|---|---|
 | BayBO Art. 6 (`docs/recht/BayBO_Art6.txt`) | Amtliche Werke sind gemeinfrei (§ 5 UrhG); Wortlaut über lxgesetze.de und lexmea.de abgerufen und verglichen | gesetze-bayern.de per CAPTCHA gesperrt; Abgleich von Hand offen |
+| BayBO Art. 2, 55, 58, 59, 61, 63, 64, 66; BauVorlV §§ 1–3, 7–9; GaStellV § 1 (`docs/recht/BayBO_Verfahren_BauVorlV.txt`) | gemeinfrei (§ 5 UrhG); gesetze.legal, lxgesetze.de, lexmea.de verglichen | Links zum Digitalen Bauantrag und zu den Formularen: Staatsministerium für Wohnen, Bau und Verkehr (nur verlinkt) |
 | AGBGB Art. 47–52 (`docs/recht/AGBGB_Art47-52.txt`) | gemeinfrei (§ 5 UrhG); gesetze.legal (aktuelle Fassung) und Bayerisches GVBl Nr. 25/1982 (verkuendung-bayern.de, amtlich) verglichen | Art. 52 Abs. 1 Satz 3 nur in einer Quelle in aktueller Fassung (offen) |
 
 ## Nicht verwendet

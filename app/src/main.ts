@@ -59,6 +59,8 @@ import {
   sonnenstand,
   sonnenstunden,
   type Koerper,
+  verfahrenFuer,
+  ANTRAG_LINKS,
 } from './rules';
 import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
@@ -650,6 +652,7 @@ function renderSheet() {
     </details>
     <div class="btnrow">
       <button class="primary" id="reportBtn" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
+      ${st.selected !== 'waermepumpe' ? `<button class="sec" id="antragBtn" type="button" aria-haspopup="dialog">${st.res?.[st.selected].status === 'bad' ? 'Was jetzt? Antrag vorbereiten' : 'Antrag-Paket'}</button>` : ''}
       <button class="sec" id="teilenBtn" type="button" aria-haspopup="dialog">Nachbarn fragen</button>
       <button class="sec" id="editBtn" type="button">Grenze ändern</button>
       <button class="sec" id="newBtn" type="button">Andere Adresse</button>
@@ -717,6 +720,7 @@ function renderSheet() {
   $('reportBtn').addEventListener('click', openReport);
   $('teilenBtn').addEventListener('click', openTeilen);
   $('arBtn').addEventListener('click', startAr);
+  document.getElementById('antragBtn')?.addEventListener('click', openAntrag);
   $('editBtn').addEventListener('click', () => {
     st.draft = [...(st.plot ?? [])];
     st.view = 'plan';
@@ -949,6 +953,7 @@ function setStamm(g: Vec2) {
 
 /* ---------- Nachbar-Link (Phase 3.2) ---------- */
 const speicher = apiSpeicher();
+const APP_VERSION = '0.4.0';
 interface MeinLink { l: string; s: string; bis: string; hash: string; titel: string; erstellt: string }
 const LINKS_KEY = 'passt.links';
 function meineLinks(): MeinLink[] {
@@ -1309,6 +1314,46 @@ async function startAr() {
     <p>Hier am Rechner kannst du das Modell herunterladen:</p>
     <div class="btnrow"><a class="sec" href="${r.glb}" download="passt-modell.glb">glTF (.glb)</a><a class="sec" href="${r.usdz}" download="passt-modell.usdz">USDZ (iPhone)</a></div>
     <p class="m-fine">Das Modell wird aus den Maßen erzeugt, nichts wird gespeichert. Es zeigt die Größe, nicht den Ort: Du stellst es in der AR-Ansicht selbst in deinen Garten. Der Scene Viewer auf Android lädt das Modell über eine öffentliche https-Adresse – im lokalen Netz geht AR deshalb nur auf dem iPhone.</p>`);
+}
+
+/* ---------- Vom Nein zum Antrag (Phase 4.1, Zeichnungen lazy) ---------- */
+async function openAntrag() {
+  if (!site || !st.res || st.selected === 'waermepumpe') return;
+  const k = st.selected;
+  const o = st.objs![k];
+  const res = st.res[k];
+  const v = verfahrenFuer(site, k, o, res);
+  const pk = await import('./antrag/paket');
+  const paket = pk.paketBauen({
+    site, k, o: { ...o, baseElevation: undefined }, res, verfahren: v, bestand: st.bestand.filter((b) => b.status === 'aktiv'),
+    ursprung: getOrigin(), adresse: st.address, erstellt: new Date(), links: ANTRAG_LINKS, version: APP_VERSION,
+  });
+  const NOETIG = { ja: 'nötig', wenn: 'wenn zutreffend', nein: 'in der Regel nicht' };
+  const BEITRAG = { skizze: 'Skizze von Passt.', daten: 'Angaben von Passt.', nein: 'selbst besorgen' };
+  openModal(v.titel, `
+    ${v.gruende.length ? `<ul class="plain">${v.gruende.map((g) => `<li>${esc(g.text)} ${tag(g.quelle, 'rule')}</li>`).join('')}</ul>` : ''}
+    <h3>Was jetzt?</h3>
+    <ul class="plain">${v.schritte.map((x) => `<li>${esc(x.text)} ${tag(x.quelle, x.kind)}</li>`).join('')}</ul>
+    ${v.entwurfsverfasser ? `<h3>Wer die Pläne erstellt</h3><p>${esc(v.entwurfsverfasser.wer)} ${tag(v.entwurfsverfasser.quelle, 'rule')}</p>${v.entwurfsverfasser.offen ? `<p class="m-fine">${esc(v.entwurfsverfasser.offen)} ${tag('offen', 'offen')}</p>` : ''}` : ''}
+    ${v.checkliste.length ? `<h3>Unterlagen</h3><ul class="rows best">${v.checkliste.map((c) => `<li><span><b>${esc(c.titel)}</b> · ${NOETIG[c.noetig]}<br><small class="fine">${esc(c.hinweis)}</small></span>${tag(BEITRAG[c.passt], c.passt === 'nein' ? 'offen' : 'berechnet')}</li>`).join('')}</ul>` : ''}
+    ${v.verfahren !== 'lage' && v.verfahren !== 'frei' ? `<h3>Lageplan-Skizze</h3><p class="warnbox">${esc(pk.HINWEIS_SKIZZE)}</p><div style="overflow:auto;background:#fff;border-radius:8px">${paket.zeichnungen.lageplan.svg.replace(/width="[\d.]+mm" height="[\d.]+mm"/, 'width="100%"')}</div>` : ''}
+    ${v.verfahren === 'lage' ? '' : `<div class="btnrow">
+      <button class="primary" id="aHtml" type="button">Paket speichern (zum Drucken)</button>
+      <button class="sec" id="aJson" type="button">Daten exportieren (JSON)</button>
+    </div>`}
+    <p class="m-fine">Das Paket enthält Zusammenfassung, Lageplan-Skizze, Grundriss, Schnitt, Ansichten und die Checkliste. Die HTML-Datei im Browser öffnen und als PDF drucken – in Originalgröße sind die Zeichnungen maßstäblich. Die JSON-Datei können später Anbieter oder Planer übernehmen. Nichts davon ist eine amtliche Bauvorlage.</p>
+    <p class="m-fine">Offizielle Stellen: <a href="${esc(ANTRAG_LINKS.digitalerBauantrag)}" target="_blank" rel="noopener">Digitaler Bauantrag Bayern</a> · <a href="${esc(ANTRAG_LINKS.formulare)}" target="_blank" rel="noopener">Bauantragsformulare</a> · <a href="${esc(ANTRAG_LINKS.bauvorlv)}" target="_blank" rel="noopener">Bauvorlagenverordnung</a></p>`);
+  const name = `passt-${k}-${new Date().toISOString().slice(0, 10)}`;
+  const speichern = (inhalt: string, typ: string, datei: string) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([inhalt], { type: typ }));
+    a.download = datei;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  };
+  document.getElementById('aHtml')?.addEventListener('click', () => speichern(pk.paketHtml(paket), 'text/html;charset=utf-8', `${name}.html`));
+  document.getElementById('aJson')?.addEventListener('click', () => speichern(JSON.stringify(paket, null, 2), 'application/json', `${name}.json`));
 }
 
 /* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */

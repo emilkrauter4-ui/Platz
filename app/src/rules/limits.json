@@ -273,5 +273,94 @@
       "text": "Nachbarpflanzen, deren Stamm oder Triebe bis 3 m von der Grenze stehen, werden aufgelistet.",
       "geprueft": false
     }
+  },
+  "verfahren": {
+    "_hinweis": "Phase 4.1: Was folgt aus einem Nein? Alle Angaben sind Information, keine Rechtsberatung.",
+    "pflichtenAuchVerfahrensfrei": {
+      "wert": true,
+      "quelle": "BayBO Art. 55 Abs. 2",
+      "text": "Auch verfahrensfreie Vorhaben müssen die öffentlich-rechtlichen Anforderungen einhalten (z. B. Abstandsflächen).",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "genehmigungsfreistellung": {
+      "wert": true,
+      "quelle": "BayBO Art. 58 Abs. 1 und 2",
+      "text": "Im Geltungsbereich eines Bebauungsplans kann das Vorhaben genehmigungsfrei gestellt sein: Unterlagen bei der Gemeinde einreichen, Nachbarn benachrichtigen, Beginn frühestens einen Monat nach Vorlage.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "vereinfachtesVerfahren": {
+      "wert": true,
+      "quelle": "BayBO Art. 59",
+      "text": "Außer bei Sonderbauten prüft die Bauaufsichtsbehörde im vereinfachten Verfahren u. a. Planungsrecht, Abstandsflächen (Art. 6), örtliche Bauvorschriften und beantragte Abweichungen.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "bauvorlageberechtigung": {
+      "wert": true,
+      "quelle": "BayBO Art. 61 Abs. 1 bis 3",
+      "text": "Bauvorlagen für die nicht verfahrensfreie Errichtung von Gebäuden erstellt ein bauvorlageberechtigter Entwurfsverfasser: Architekt/in oder eingetragene/r Ingenieur/in (Abs. 2); für Kleingaragen auch Ingenieure der Fachrichtungen Architektur, Hochbau, Bauingenieurwesen, staatlich geprüfte Techniker Bautechnik und Maurer-/Betonbauer- oder Zimmerermeister (Abs. 3 Nr. 4).",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "kleingarageBisM2": {
+      "wert": 100,
+      "quelle": "GaStellV § 1 Abs. 7 Satz 1 Nr. 1, Abs. 1 Satz 3",
+      "text": "Garagen bis 100 m² Nutzfläche sind Kleingaragen; Carports gelten als offene Garagen.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "abweichung": {
+      "wert": true,
+      "quelle": "BayBO Art. 63 Abs. 1 und 2",
+      "text": "Abweichungen (z. B. von Art. 6) sind gesondert schriftlich zu beantragen und zu begründen – auch für Anlagen, die keiner Genehmigung bedürfen; bei genehmigungspflichtigen Vorhaben zusammen mit dem Bauantrag.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "bauantrag": {
+      "wert": true,
+      "quelle": "BayBO Art. 64",
+      "text": "Bauantrag schriftlich bei der Bauaufsichtsbehörde, mit allen Bauvorlagen; Bauherr und Entwurfsverfasser unterschreiben.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "nachbarbeteiligung": {
+      "wert": true,
+      "quelle": "BayBO Art. 66 Abs. 1",
+      "text": "Den Eigentümern der benachbarten Grundstücke sind Lageplan und Bauzeichnungen zur Zustimmung vorzulegen; die Zustimmung bedarf der Schriftform.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "bauvorlagen": {
+      "wert": [
+        "katasterauszug",
+        "lageplan",
+        "bauzeichnungen",
+        "baubeschreibung"
+      ],
+      "quelle": "BauVorlV § 3 Nr. 1 bis 3, §§ 7 bis 9",
+      "text": "Auszug aus dem Katasterwerk, Lageplan (Maßstab nicht kleiner als 1:1000), Bauzeichnungen (1:100), Baubeschreibung mit Gebäudeklasse und Höhe sowie Baukosten.",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "anzahl": {
+      "wert": 3,
+      "quelle": "BauVorlV § 2 Satz 1",
+      "text": "Bauvorlagen dreifach, zweifach wenn die Gemeinde zugleich Bauaufsichtsbehörde ist (bei Papier).",
+      "wortlaut": "docs/recht/BayBO_Verfahren_BauVorlV.txt (Abruf 04.10.2026, gesetze.legal/lxgesetze.de/lexmea.de verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "links": {
+      "wert": {
+        "digitalerBauantrag": "https://www.stmb.bayern.de/buw/baurechtundtechnik/digitaler_bauantrag/index.php",
+        "portal": "https://www.digitalerbauantrag.bayern.de",
+        "formulare": "https://www.stmb.bayern.de/buw/baurechtundtechnik/bauordnungsrecht/bauantragsformulare/index.php",
+        "bauvorlv": "https://www.gesetze-bayern.de/Content/Document/BayBauVorlV2008",
+        "baybo": "https://www.gesetze-bayern.de/Content/Document/BayBO"
+      },
+      "quelle": "Staatsministerium für Wohnen, Bau und Verkehr, Seiten abgerufen am 04.10.2026",
+      "geprueft": false
+    }
   }
 }

@@ -5,3 +5,4 @@ export * from './abstand';
 export * from './zonen';
 export * from './pflanzen';
 export * from './sonne';
+export * from './verfahren';

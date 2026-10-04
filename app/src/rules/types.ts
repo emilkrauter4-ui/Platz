@@ -173,8 +173,23 @@ export interface Dimension {
   label: string;
 }
 
+/** Befund eines Gebäudes (alle gleichzeitig, nicht nur der erste) – Grundlage für das Antrag-Paket (Phase 4.1). */
+export type Befund =
+  | 'ausserhalb'
+  | 'kollision'
+  | 'aussenbereich'
+  | 'aufenthaltsraum'
+  | 'groesse'
+  | 'af_nachbar'
+  | 'af_haus'
+  | 'grenze_wandhoehe'
+  | 'grenze_seite'
+  | 'grenze_gesamt';
+
 export interface Result {
   status: Status;
+  /** nur Gartenhaus/Carport */
+  befunde?: Befund[];
   head: string;
   sub: string;
   rows: Row[];

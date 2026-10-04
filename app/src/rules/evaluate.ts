@@ -20,7 +20,7 @@ import {
   projectedLength,
 } from './geometry';
 import { pruefeAbstandsflaechen, rauminhalt, waende, wandhoeheArt7 } from './abstand';
-import type { Bestand, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
+import type { Befund, Bestand, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
 
 export const LIMITS = L;
 
@@ -456,6 +456,22 @@ function building(
   }
   if (!schnell) rows.push(...contextRows(site));
 
+  const befunde: Befund[] = [];
+  if (!inside) befunde.push('ausserhalb');
+  if (collide) befunde.push('kollision');
+  if (site.bereich.value === 'aussen') befunde.push('aussenbereich');
+  if (k === 'gartenhaus' && (site.aufenthaltsraum.value || site.feuerstaette.value)) befunde.push('aufenthaltsraum');
+  if (!lim.ok) befunde.push('groesse');
+  if (!privilegiert && !near.length) {
+    if (afAusserhalb) befunde.push('af_nachbar');
+    if (afUeber || afIn) befunde.push('af_haus');
+  }
+  if (near.length) {
+    if (near.some((s) => s.wallH > GRENZ_H + 1e-9)) befunde.push('grenze_wandhoehe');
+    if (nearSides.some((side) => sums[side] > MAX_SEITE + EPS)) befunde.push('grenze_seite');
+    if (total > MAX_GESAMT + EPS) befunde.push('grenze_gesamt');
+  }
+
   let status: Status = 'ok';
   let head = 'Passt so.';
   let sub: string;
@@ -505,6 +521,7 @@ function building(
 
   return {
     status,
+    befunde,
     head,
     sub,
     rows,
