@@ -194,5 +194,84 @@
       "text": "KEYMARK-Werte gelten für den Nennbetrieb, nicht für einen schallreduzierten Nachtbetrieb. Ohne Herstellerangabe zum Nachtbetrieb rechnet Passt. mit dem Nennwert (sicher nach oben).",
       "geprueft": false
     }
+  },
+  "pflanzen": {
+    "_hinweis": "Grenzabstand von Pflanzen nach dem bayerischen AGBGB (Nachbarrecht, Zivilrecht). Kein Baurecht: Das Bauamt prüft das nicht, es geht um Ansprüche zwischen Nachbarn.",
+    "abstandKleinM": {
+      "wert": 0.5,
+      "quelle": "AGBGB Art. 47 Abs. 1",
+      "text": "Bäume, Sträucher, Hecken, Weinstöcke, Hopfenstöcke: mindestens 0,50 m von der Grenze.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "hoeheGrenzeM": {
+      "wert": 2,
+      "quelle": "AGBGB Art. 47 Abs. 1",
+      "text": "„falls sie über 2 m hoch sind“: genau 2,00 m zählt noch als bis 2 m.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "abstandHochM": {
+      "wert": 2,
+      "quelle": "AGBGB Art. 47 Abs. 1",
+      "text": "Pflanzen über 2 m Höhe: mindestens 2 m von der Grenze.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "waldM": {
+      "wert": 0.5,
+      "quelle": "AGBGB Art. 47 Abs. 2 Satz 1",
+      "text": "Zugunsten eines Waldgrundstücks kann nur die Einhaltung von 0,50 m verlangt werden.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "landwirtschaftM": {
+      "wert": 4,
+      "quelle": "AGBGB Art. 48 Abs. 1, Art. 50 Abs. 2",
+      "text": "Bäume über 2 m gegenüber landwirtschaftlich genutztem Grundstück (Sonnenlicht): 4 m. Gilt laut Art. 50 Abs. 2 nicht für Stein- und Kernobstbäume und nicht für Bäume in einem Hausgarten.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "messung": {
+      "wert": "stamm",
+      "quelle": "AGBGB Art. 49",
+      "text": "Gemessen wird von der Mitte des Stammes, wo er aus dem Boden tritt; bei Sträuchern und Hecken von der Mitte der Triebe, die der Grenze am nächsten sind.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "ausnahmeEinfriedung": {
+      "wert": true,
+      "quelle": "AGBGB Art. 50 Abs. 1 Satz 1",
+      "text": "Art. 47 und 48 gelten nicht für Gewächse hinter einer Mauer oder sonstigen dichten Einfriedung, die diese nicht oder nicht erheblich überragen. „Erheblich“ ist im Gesetz nicht beziffert – Passt. markiert das als offen.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "ausnahmeStrasse": {
+      "wert": true,
+      "quelle": "AGBGB Art. 50 Abs. 1 Satz 2",
+      "text": "Art. 47 und 48 gelten nicht für Bepflanzungen längs einer öffentlichen Straße oder auf einem öffentlichen Platz, und nicht zum Ufer-, Hang-, Böschungs- oder Bahnschutz.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "verjaehrungJahre": {
+      "wert": 5,
+      "quelle": "AGBGB Art. 52 Abs. 1 Sätze 2 und 3",
+      "text": "Der Anspruch auf Beseitigung eines Zustands, der Art. 47 bis 50 verletzt, verjährt in fünf Jahren; Beginn mit dem Schluss des Jahres der Entstehung und Kenntnis bzw. grob fahrlässiger Unkenntnis. Satz 3 nur in einer Quelle in dieser Fassung (GVBl 1982: „Ablauf des Kalenderjahres, in dem die Verletzung erkennbar wird“) – offen.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "ersatzpflanzung": {
+      "wert": true,
+      "quelle": "AGBGB Art. 52 Abs. 2",
+      "text": "Werden verjährte Gewächse durch neue ersetzt, kann für die neuen der Abstand wieder verlangt werden.",
+      "wortlaut": "docs/recht/AGBGB_Art47-52.txt (Abruf 04.10.2026: gesetze.legal und GVBl 25/1982 verglichen; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "geprueft": false
+    },
+    "nachbarNaheM": {
+      "wert": 3,
+      "quelle": "Passt.-Festlegung (keine Rechtsnorm)",
+      "text": "Nachbarpflanzen, deren Stamm oder Triebe bis 3 m von der Grenze stehen, werden aufgelistet.",
+      "geprueft": false
+    }
   }
 }

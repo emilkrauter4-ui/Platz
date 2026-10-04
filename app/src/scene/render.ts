@@ -21,6 +21,9 @@ import {
 import {
   dachHoehe,
   edges,
+  pflanzLinie,
+  type Pflanze,
+  type PflanzenErgebnis,
   footprint,
   type Bestand,
   type NeighborWindow,
@@ -56,6 +59,21 @@ export interface RenderState {
   zeichnen: Vec2[] | null;
   /** Abstandsflächen am Boden zeigen */
   showAF: boolean;
+  /** Reiter „Hecke, Baum“: geplante Pflanze und Ergebnis nach AGBGB */
+  modus: 'objekt' | 'pflanzen';
+  pflanze: Pflanze | null;
+  pflanzRes: PflanzenErgebnis | null;
+}
+
+/** Maßkette des gerade gewählten Reiters. */
+function dimOf(s: RenderState) {
+  if (s.step !== 'pruefen') return null;
+  return s.modus === 'pflanzen' ? s.pflanzRes?.dim ?? null : s.res?.[s.selected].dim ?? null;
+}
+
+/** Achteck um p (Krone, Stamm). */
+function achteck(p: Vec2, r: number): Vec2[] {
+  return Array.from({ length: 8 }, (_, i) => [p[0] + r * Math.cos((i * Math.PI) / 4), p[1] + r * Math.sin((i * Math.PI) / 4)] as Vec2);
 }
 
 /** Farben der Garten-Klassen (Bauten nach Herkunft, siehe syncContext). */
@@ -96,6 +114,7 @@ export class Renderer {
     this.buildDraft();
     this.buildObjects();
     this.buildDim();
+    this.buildPflanze();
   }
 
   /** Bodenlinien und -flächen liegen auf dem Gelände, mit Foto-Mesh auch auf dem Mesh. */
@@ -329,6 +348,30 @@ export class Renderer {
     });
   }
 
+  /** Geplante Pflanze: Hecke als grüner Block entlang der Pflanzreihe, Baum als Stamm + Krone, Strauch als Krone. */
+  private buildPflanze() {
+    const st = this.s;
+    const p = () => (st().step === 'pruefen' && st().modus === 'pflanzen' ? st().pflanze : null);
+    const gruen = () => Color.fromCssColorString(st().pflanzRes?.status === 'bad' ? this.pal().red : '#4C8A3F').withAlpha(0.85);
+    const braun = () => Color.fromCssColorString('#7A5A3A');
+    const boden = (q: Pflanze) => this.ground(q.center);
+    this.objectEntities.push(
+      this.extruded('pflanze', () => {
+        const q = p();
+        if (!q) return null;
+        if (q.art === 'hecke') {
+          const [a, b] = pflanzLinie(q);
+          return footprint({ center: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], w: Math.max(q.laenge, 0.6), d: 0.6, angle: q.angle });
+        }
+        return achteck(q.center, q.art === 'baum' ? 0.15 : Math.min(1.2, Math.max(0.4, q.hoehe / 3)));
+      }, () => boden(p()!), () => boden(p()!) + (p()!.art === 'baum' ? p()!.hoehe * 0.45 : p()!.hoehe), () => (p()?.art === 'baum' ? braun() : gruen())),
+      this.extruded('pflanze', () => {
+        const q = p();
+        return q?.art === 'baum' ? achteck(q.center, Math.max(0.8, q.hoehe / 3)) : null;
+      }, () => boden(p()!) + p()!.hoehe * 0.45, () => boden(p()!) + p()!.hoehe, gruen),
+    );
+  }
+
   /** Satteldach: First entlang der Breite w, Traufen an Kante 0 und 2 (wie rules/abstand.ts). */
   private dachflaeche(o: () => Placed | null, seite: number, col: () => Color) {
     const e = this.viewer.entities.add({
@@ -402,14 +445,14 @@ export class Renderer {
             const c = !f ? this.pal().muted : f.status === 'bad' ? this.pal().red : f.status === 'ok' ? this.pal().ok : this.pal().muted;
             return Color.fromCssColorString(c).withAlpha(f?.status === 'bad' ? 0.4 : f?.status === 'ok' ? 0.3 : 0.22);
           }),
-          show: new CallbackProperty(() => !!res()?.flaechen[i] && this.s().showAF, false),
+          show: new CallbackProperty(() => !!res()?.flaechen[i] && this.s().showAF && this.s().modus === 'objekt', false),
         },
       });
       this.viewer.entities.add({
         polyline: {
           positions: new CallbackProperty(() => {
             const f = res()?.flaechen[i];
-            return f && this.s().showAF ? this.cart([...f.poly, f.poly[0]]) : [];
+            return f && this.s().showAF && this.s().modus === 'objekt' ? this.cart([...f.poly, f.poly[0]]) : [];
           }, false),
           width: 2,
           clampToGround: true,
@@ -427,7 +470,7 @@ export class Renderer {
           hierarchy: new CallbackProperty(() => new PolygonHierarchy(res()?.haus[i] ? this.cart(res()!.haus[i]) : []), false),
           classificationType: this.cls(),
           material: this.color(() => Color.fromCssColorString(this.pal().user).withAlpha(0.15)),
-          show: new CallbackProperty(() => !!res()?.haus[i] && !res()!.privilegiert && this.s().showAF, false),
+          show: new CallbackProperty(() => !!res()?.haus[i] && !res()!.privilegiert && this.s().showAF && this.s().modus === 'objekt', false),
         },
       });
     }
@@ -491,8 +534,7 @@ export class Renderer {
     this.viewer.entities.add({
       polyline: {
         positions: new CallbackProperty(() => {
-          const s = st();
-          const d = s.step === 'pruefen' ? s.res?.[s.selected].dim : null;
+          const d = dimOf(st());
           if (!d) return [];
           return this.cart([d.p, d.q]);
         }, false),
@@ -505,8 +547,7 @@ export class Renderer {
   }
 
   updateDim() {
-    const s = this.s();
-    const d = s.step === 'pruefen' ? s.res?.[s.selected].dim : null;
+    const d = dimOf(this.s());
     this.dimMid = d ? [(d.p[0] + d.q[0]) / 2, (d.p[1] + d.q[1]) / 2] : null;
     this.dimLabel = d?.label ?? '';
   }

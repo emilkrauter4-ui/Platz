@@ -37,6 +37,17 @@ import {
   type GartenKlasse,
   zaehleBestand,
   dachHoehe,
+  alterText,
+  bestandsPflanzen,
+  HOCH_M,
+  KLEIN_M,
+  pflanzenText,
+  pflanzZonen,
+  pruefePflanze,
+  type Alter,
+  type Pflanze,
+  type PflanzenArt,
+  type SeitenAngabe,
 } from './rules';
 import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
@@ -101,7 +112,23 @@ const st: State = {
   kante: null,
   zeichnen: null,
   showAF: true,
+  modus: 'objekt',
+  pflanze: null,
+  pflanzRes: null,
 };
+/** Reiter „Hecke, Baum“ (AGBGB Art. 47–52): Angaben je Grenzseite, Alter der Bestandspflanzen, Nachbarpflanzen. */
+const pflSt: {
+  angaben: SeitenAngabe[];
+  alter: Record<string, Alter>;
+  /** Bestandspflanze, deren Stamm gerade angetippt wird */
+  stammTippen: string | null;
+  zonen: boolean;
+  /** erkannte Pflanzen jenseits der Grenze (nur für die Liste, nicht für die Grenzbebauung) */
+  nachbar: BestandItem[];
+  /** Reiter einmal geöffnet → im Prüfbericht */
+  benutzt: boolean;
+} = { angaben: [], alter: {}, stammTippen: null, zonen: true, nachbar: [], benutzt: false };
+let pflanzLayer: import('./scene/zonen').ZonenLayer | null = null;
 /** „Wo darf es hin?“: an/aus, letztes Ergebnis. Rechnet im Web Worker (lazy geladen). */
 const zonenSt: { an: boolean; laeuft: boolean; erg: null | { beste: { p: Vec2; angle: number; farbe: number } | null; ms: number; msGesamt: number; pruefungen: number; k: ObjectKind } } = { an: false, laeuft: false, erg: null };
 let zonenTimer: ReturnType<typeof setTimeout> | null = null;
@@ -423,6 +450,17 @@ async function confirmPlot() {
   st.zeichnen = null;
   st.windows = assumedWindows(b, st.buildings);
   st.objs = initialObjects(b, st.buildings, st.bestand);
+  pflSt.nachbar = near(data.bestand, c, 90)
+    .filter((x) => (x.k === 'baum' || x.k === 'strauch' || x.k === 'hecke') && !pointInPolygon(centroid(x.fp), b) && polygonDistance(x.fp, b) <= 8)
+    .map((x) => ({ ...fromRec(x), status: 'aktiv' as const }));
+  pflSt.angaben = [];
+  pflSt.alter = {};
+  pflSt.stammTippen = null;
+  pflSt.benutzt = false;
+  st.pflanze = startPflanze(b);
+  st.pflanzRes = null;
+  st.modus = 'objekt';
+  pflanzLayer?.weg();
   st.step = 'pruefen';
   st.view = '3d';
   syncViewButtons();
@@ -475,6 +513,7 @@ function badSegments(): Set<number> {
 function update() {
   if (!site || !st.objs) return;
   st.res = evaluate(site, st.objs);
+  st.pflanzRes = st.pflanze ? pruefePflanze(site, st.pflanze, pflSt.angaben) : null;
   zonenNeu();
   renderer.updateDim();
   renderVerdict();
@@ -482,18 +521,22 @@ function update() {
 }
 
 function renderVerdict() {
-  const r = st.res![st.selected];
+  const r = st.modus === 'pflanzen' && st.pflanzRes ? st.pflanzRes : st.res![st.selected];
   verdict(r.head, r.sub, r.status);
+  document.querySelector('[data-modus="pflanzen"]')?.setAttribute('aria-selected', String(st.modus === 'pflanzen'));
+  const pd = document.querySelector('[data-modus="pflanzen"] .d');
+  if (pd && st.pflanzRes) pd.className = `d ${st.pflanzRes.status}`;
   ORDER.forEach((k) => {
     const b = document.querySelector<HTMLButtonElement>(`[data-obj="${k}"]`);
     if (!b) return;
-    b.setAttribute('aria-selected', String(k === st.selected));
+    b.setAttribute('aria-selected', String(st.modus === 'objekt' && k === st.selected));
     b.querySelector('.d')!.className = `d ${st.res![k].status}`;
     b.setAttribute('aria-label', `${NAMES[k].name}, ${WORD[st.res![k].status]}`);
   });
   const rows = document.getElementById('rows');
   if (rows) rows.innerHTML = r.rows.map((x) => `<li><span>${esc(x.text)}</span>${tag(x.tag, x.kind)}</li>`).join('');
   document.querySelectorAll<HTMLOutputElement>('#controls output').forEach((out) => (out.textContent = valText(out.dataset.k!)));
+  if (st.modus === 'pflanzen') pflanzInfo();
 }
 
 const CTL: Record<ObjectKind, { k: keyof Placed | 'deg'; l: string; min: number; max: number; step: number }[]> = {
@@ -526,6 +569,11 @@ function valText(k: string) {
 
 function select(k: ObjectKind) {
   st.selected = k;
+  if (st.modus === 'pflanzen') {
+    st.modus = 'objekt';
+    pflanzLayer?.weg();
+    pflSt.stammTippen = null;
+  }
   if (k === 'waermepumpe') zonenAus();
   renderSheet();
   if (!st.hasDragged) hint(`Zieh ${NAMES[k].art} an eine andere Stelle.`);
@@ -547,11 +595,12 @@ function renderSheet() {
     })
     .join('');
   if (st.kante || st.zeichnen) return renderEditSheet();
+  if (st.modus === 'pflanzen') return renderPflanzenSheet();
   const bestHtml = bestandHtml();
   const wins = st.windows;
   $('stepBody').innerHTML = `
     <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">
-      ${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${NAMES[k].name}</button>`).join('')}
+      ${tabsHtml()}
     </div>
     ${st.selected === 'waermepumpe' ? geraetHtml(o) : ''}
     <div class="controls" id="controls">${ctl}</div>
@@ -584,7 +633,7 @@ function renderSheet() {
       <button class="sec" id="newBtn" type="button">Andere Adresse</button>
     </div>`;
 
-  document.querySelectorAll<HTMLButtonElement>('[data-obj]').forEach((b) => b.addEventListener('click', () => select(b.dataset.obj as ObjectKind)));
+  bindTabs();
   document.querySelectorAll<HTMLInputElement>('#controls input').forEach((inp) =>
     inp.addEventListener('input', () => {
       const ob = st.objs![st.selected];
@@ -654,6 +703,220 @@ function renderSheet() {
   });
   $('newBtn').addEventListener('click', () => showStart());
   update();
+}
+
+/* ---------- Hecke, Baum (AGBGB Art. 47–52) ---------- */
+const PFL_ART: [PflanzenArt, string][] = [['hecke', 'Hecke'], ['baum', 'Baum'], ['strauch', 'Strauch']];
+
+function tabsHtml(): string {
+  return `${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${NAMES[k].name}</button>`).join('')}
+    <button class="obj" role="tab" type="button" data-modus="pflanzen"><span class="d"></span>Hecke, Baum</button>`;
+}
+
+function bindTabs() {
+  document.querySelectorAll<HTMLButtonElement>('[data-obj]').forEach((b) => b.addEventListener('click', () => select(b.dataset.obj as ObjectKind)));
+  document.querySelector<HTMLButtonElement>('[data-modus="pflanzen"]')?.addEventListener('click', () => {
+    if (st.modus === 'pflanzen') return;
+    st.modus = 'pflanzen';
+    pflSt.benutzt = true;
+    zonenAus();
+    renderSheet();
+    hint(st.hasDragged ? null : 'Zieh die Hecke an eine andere Stelle.');
+  });
+}
+
+/** Startlage: Hecke 1 m innen parallel zur längsten Grenzstrecke, 1,8 m hoch. */
+function startPflanze(b: Vec2[]): Pflanze {
+  let best: [Vec2, Vec2] = [b[0], b[1]];
+  for (const [p, q] of edges(b)) if (Math.hypot(q[0] - p[0], q[1] - p[1]) > Math.hypot(best[1][0] - best[0][0], best[1][1] - best[0][1])) best = [p, q];
+  const [p, q] = best;
+  const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+  const n: Vec2 = [-(q[1] - p[1]) / len, (q[0] - p[0]) / len]; // links = innen bei CCW
+  let center: Vec2 = [(p[0] + q[0]) / 2 + n[0], (p[1] + q[1]) / 2 + n[1]];
+  if (!pointInPolygon(center, b)) center = centroid(b);
+  let angle = Math.atan2(q[1] - p[1], q[0] - p[0]);
+  if (angle > Math.PI / 2) angle -= Math.PI; // Regler −90° … 90° (Hecke ist 180° symmetrisch)
+  if (angle <= -Math.PI / 2) angle += Math.PI;
+  return { art: 'hecke', center, laenge: Math.round(Math.min(6, len * 0.6)), angle, hoehe: 1.8 };
+}
+
+const PFL_CTL: { k: 'hoehe' | 'laenge' | 'deg'; l: string; min: number; max: number; step: number; nur?: PflanzenArt }[] = [
+  { k: 'hoehe', l: 'Höhe, die sie erreichen soll', min: 0.5, max: 15, step: 0.1 },
+  { k: 'laenge', l: 'Länge der Hecke', min: 1, max: 30, step: 0.5, nur: 'hecke' },
+  { k: 'deg', l: 'Drehung', min: -90, max: 90, step: 1, nur: 'hecke' },
+];
+
+function pflValText(k: string): string {
+  const p = st.pflanze!;
+  if (k === 'deg') return `${Math.round(CMath.toDegrees(p.angle))}°`;
+  return `${fmt(k === 'hoehe' ? p.hoehe : p.laenge, 1)} m`;
+}
+
+function seitenHtml(): string {
+  if (!site) return '';
+  return site.plot.sides
+    .map((sd, i) => {
+      const a = pflSt.angaben[i] ?? {};
+      const nb = a.strasse?.value ? 'strasse' : a.wald?.value ? 'wald' : 'grundstueck';
+      const prov = a.strasse || a.wald ? 'nutzerbestätigt' : 'Annahme';
+      const ef = a.einfriedung?.value ?? 0;
+      return `<div class="field"><span>${esc(cap(sd.grenze))} ${tag(prov, prov)}</span>${sel(`pNb${i}`, nb, [['grundstueck', 'Nachbargrundstück'], ['strasse', 'öffentliche Straße, Platz'], ['wald', 'Wald']])}</div>
+        <div class="field"><span>Mauer oder dichter Zaun dort ${a.einfriedung ? tag('nutzerbestätigt', 'nutzerbestätigt') : ''}</span>${sel(`pEf${i}`, String(ef), [['0', 'keine'], ['1', '1,0 m'], ['1.5', '1,5 m'], ['1.8', '1,8 m'], ['2', '2,0 m'], ['2.5', '2,5 m']])}</div>`;
+    })
+    .join('');
+}
+
+function bestandPflanzenHtml(): string {
+  if (!site) return '';
+  const liste = bestandsPflanzen({ ...site, bestand: [...site.bestand, ...pflSt.nachbar] }, pflSt.angaben);
+  if (!liste.length) return '<p class="fine" style="text-align:left">Keine Hecken, Bäume oder Sträucher bis 3 m an der Grenze erkannt.</p>';
+  return `<p class="fine" style="text-align:left">Aus Luftbild 2023 und Laser 2025 erkannt. Den Stamm sehen die Laserdaten nicht – bis du ihn antippst, misst Passt. ab der Kronenmitte, mit großer Spanne.</p>
+    <ul class="rows best">${liste
+      .map((x) => {
+        const offen = x.vergleich !== 'darueber';
+        const al = pflSt.alter[x.id] ?? 'unbekannt';
+        return `<li><span>${esc(pflanzenText(site!, x))}
+          ${offen ? `<br><label class="fine" style="display:flex;gap:6px;align-items:center;text-align:left">Steht so seit ${sel(`pAl-${x.id}`, al, [['unbekannt', 'weiß nicht'], ['unter5', 'weniger als 5 Jahren'], ['ueber5', 'mehr als 5 Jahren']])}</label><small class="fine">${esc(alterText(al))}</small>` : ''}</span>
+          ${tag(x.provenance, x.provenance)}
+          <span class="acts">${x.art !== 'hecke' ? `<button type="button" data-stamm="${x.id}">${pflSt.stammTippen === x.id ? 'Tipp jetzt auf den Stamm …' : 'Stamm antippen'}</button>` : ''}</span></li>`;
+      })
+      .join('')}</ul>
+    <p class="fine" style="text-align:left">Das ist eine Messung, keine Bewertung. Ob und wie man darüber spricht, entscheidet ihr.</p>`;
+}
+
+function renderPflanzenSheet() {
+  const p = st.pflanze!;
+  const ctl = PFL_CTL.filter((c) => !c.nur || c.nur === p.art)
+    .map((c, i) => {
+      const v = c.k === 'deg' ? Math.round(CMath.toDegrees(p.angle)) : c.k === 'hoehe' ? p.hoehe : p.laenge;
+      return `<div class="ctl"><label for="p${i}"><span>${c.l}</span><output data-pk="${c.k}" for="p${i}"></output></label><input id="p${i}" type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${v}" data-pk="${c.k}"></div>`;
+    })
+    .join('');
+  $('stepBody').innerHTML = `
+    <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">${tabsHtml()}</div>
+    <div class="field"><span>Was willst du pflanzen?</span>${sel('pArt', p.art, PFL_ART)}</div>
+    <div class="controls" id="controls">${ctl}</div>
+    <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="pZonen" ${pflSt.zonen ? 'checked' : ''}> Wo darf was wachsen? Zonen zeigen</label>
+    <div id="pflInfo"></div>
+    <details open>
+      <summary>So haben wir geprüft</summary>
+      <ul class="rows" id="rows"></ul>
+    </details>
+    <details>
+      <summary>Was liegt hinter deinen Grenzen?</summary>
+      <p class="fine" style="text-align:left">Längs öffentlicher Straßen und hinter einer Mauer oder einem dichten Zaun, den die Pflanze nicht überragt, gilt Art. 47 nicht (Art. 50 Abs. 1). Neben Wald gelten nur 0,50 m (Art. 47 Abs. 2).</p>
+      ${seitenHtml()}
+    </details>
+    <details>
+      <summary>Hecken und Bäume an der Grenze</summary>
+      ${bestandPflanzenHtml()}
+    </details>
+    <p class="fine" style="text-align:left">Grenzabstand von Pflanzen ist Nachbarrecht (AGBGB), kein Baurecht. Das Bauamt prüft ihn nicht.</p>
+    <div class="btnrow">
+      <button class="primary" id="reportBtn" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
+      <button class="sec" id="editBtn" type="button">Grenze ändern</button>
+    </div>`;
+  bindTabs();
+  $('pArt').addEventListener('change', (e) => {
+    const a = (e.target as HTMLSelectElement).value as PflanzenArt;
+    p.art = a;
+    if (a === 'baum' && p.hoehe < 3) p.hoehe = 6;
+    if (a === 'strauch' && p.hoehe > 3) p.hoehe = 1.5;
+    renderSheet();
+  });
+  document.querySelectorAll<HTMLInputElement>('#controls input').forEach((inp) =>
+    inp.addEventListener('input', () => {
+      const v = parseFloat(inp.value);
+      if (inp.dataset.pk === 'deg') p.angle = CMath.toRadians(v);
+      else if (inp.dataset.pk === 'hoehe') p.hoehe = v;
+      else p.laenge = v;
+      update();
+    }),
+  );
+  $('pZonen').addEventListener('change', (e) => {
+    pflSt.zonen = (e.target as HTMLInputElement).checked;
+    pflanzZonenNeu();
+  });
+  site?.plot.sides.forEach((_, i) => {
+    $(`pNb${i}`).addEventListener('change', (e) => {
+      const v = (e.target as HTMLSelectElement).value;
+      const a = (pflSt.angaben[i] = { ...pflSt.angaben[i] });
+      a.strasse = { value: v === 'strasse', provenance: 'nutzerbestätigt' };
+      a.wald = { value: v === 'wald', provenance: 'nutzerbestätigt' };
+      renderSheet();
+      pflanzZonenNeu();
+    });
+    $(`pEf${i}`).addEventListener('change', (e) => {
+      pflSt.angaben[i] = { ...pflSt.angaben[i], einfriedung: { value: parseFloat((e.target as HTMLSelectElement).value), provenance: 'nutzerbestätigt' } };
+      renderSheet();
+    });
+  });
+  document.querySelectorAll<HTMLSelectElement>('[id^="pAl-"]').forEach((s) =>
+    s.addEventListener('change', () => {
+      pflSt.alter[s.id.slice(4)] = s.value as Alter;
+      renderSheet();
+    }),
+  );
+  document.querySelectorAll<HTMLButtonElement>('[data-stamm]').forEach((b) =>
+    b.addEventListener('click', () => {
+      pflSt.stammTippen = b.dataset.stamm!;
+      st.view = 'plan';
+      syncViewButtons();
+      plotFrame();
+      hint('Tipp im Luftbild auf die Stelle, an der der Stamm aus dem Boden kommt.');
+      renderSheet();
+    }),
+  );
+  $('reportBtn').addEventListener('click', openReport);
+  $('editBtn').addEventListener('click', () => {
+    st.draft = [...(st.plot ?? [])];
+    st.view = 'plan';
+    syncViewButtons();
+    showGrenze();
+    renderer.syncDraftPoints();
+    plotFrame();
+  });
+  pflanzZonenNeu();
+  update();
+}
+
+/** Text unter den Reglern: zulässige Höhe an dieser Stelle und Legende der Zonen. */
+function pflanzInfo() {
+  const el = document.getElementById('pflInfo');
+  const r = st.pflanzRes;
+  if (!el || !r) return;
+  document.querySelectorAll<HTMLOutputElement>('#controls output[data-pk]').forEach((o) => (o.textContent = pflValText(o.dataset.pk!)));
+  const h = r.maxHoehe === Infinity ? 'beliebig hoch (Art. 47 begrenzt die Höhe hier nicht)' : r.maxHoehe === 0 ? 'gar nicht – zu nah an der Grenze' : `bis ${fmt(r.maxHoehe, 1)} m hoch`;
+  el.innerHTML = `<p class="fine" style="text-align:left">An dieser Stelle: ${esc(h)}. ${tag('berechnet', 'berechnet')}</p>
+    ${pflSt.zonen ? `<p class="fine" style="text-align:left"><span style="color:var(--red)">■</span> unter ${fmt(KLEIN_M)} m: nichts pflanzen · <span style="color:var(--warn)">■</span> bis ${fmt(HOCH_M, 0)} m Abstand: bis 2 m hoch · <span style="color:var(--ok)">■</span> keine Höhengrenze</p>` : ''}`;
+}
+
+function pflanzZonenNeu() {
+  if (!site || st.modus !== 'pflanzen' || !pflSt.zonen) {
+    pflanzLayer?.weg();
+    return;
+  }
+  const s = site;
+  void import('./scene/zonen').then((z) => {
+    if (st.modus !== 'pflanzen' || !pflSt.zonen) return;
+    pflanzLayer ??= new z.ZonenLayer(scene.viewer);
+    const { geo, rect } = z.geometrieFuer(s.plot.boundary);
+    pflanzLayer.zeige(pflanzZonen(s, pflSt.angaben, geo), geo.nx, geo.ny, rect);
+    render();
+  });
+}
+
+/** Stamm einer Bestandspflanze angetippt (Art. 49: Stammmitte am Boden). */
+function setStamm(g: Vec2) {
+  const id = pflSt.stammTippen!;
+  const it = st.bestand.find((x) => x.id === id) ?? pflSt.nachbar.find((x) => x.id === id);
+  pflSt.stammTippen = null;
+  if (!it) return;
+  it.stamm = g;
+  it.stammSpanne = 0.2;
+  hint('Stamm gesetzt. Gemessen wird jetzt ab dieser Stelle.');
+  buildSite();
+  renderSheet();
 }
 
 /* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */
@@ -842,6 +1105,7 @@ function setupInput() {
   const v = scene.viewer;
   const h = new ScreenSpaceEventHandler(v.scene.canvas);
   let drag: { k: ObjectKind; off: Vec2 } | null = null;
+  let pDrag: Vec2 | null = null;
   let ecke: number | null = null;
   let downAt: Cartesian2 | null = null;
 
@@ -858,6 +1122,15 @@ function setupInput() {
     }
     const key = Renderer.keyOf(v.scene.pick(e.position));
     if (!key || key.startsWith('bestand:')) return;
+    if (key === 'pflanze' && st.pflanze) {
+      const g = pickGround(e.position);
+      if (!g) return;
+      pDrag = [st.pflanze.center[0] - g[0], st.pflanze.center[1] - g[1]];
+      v.scene.screenSpaceCameraController.enableInputs = false;
+      st.hasDragged = true;
+      hint(null);
+      return;
+    }
     const k = key as ObjectKind;
     if (k !== st.selected) select(k);
     const g = pickGround(e.position);
@@ -880,6 +1153,13 @@ function setupInput() {
       }
       return;
     }
+    if (pDrag && st.pflanze) {
+      const g = pickGround(e.endPosition);
+      if (!g) return;
+      st.pflanze.center = [Math.round((g[0] + pDrag[0]) * 20) / 20, Math.round((g[1] + pDrag[1]) * 20) / 20];
+      update();
+      return;
+    }
     if (!drag || !st.objs) return;
     const g = pickGround(e.endPosition);
     if (!g) return;
@@ -889,8 +1169,9 @@ function setupInput() {
   }, ScreenSpaceEventType.MOUSE_MOVE);
 
   h.setInputAction((e: { position: Cartesian2 }) => {
-    const wasDrag = !!drag || ecke != null;
+    const wasDrag = !!drag || ecke != null || !!pDrag;
     drag = null;
+    pDrag = null;
     ecke = null;
     v.scene.screenSpaceCameraController.enableInputs = true;
     // Tippen = kaum Bewegung zwischen Drücken und Loslassen
@@ -909,7 +1190,10 @@ function setupInput() {
         renderer.syncEdit();
         renderSheet();
       }
-    } else if (st.step === 'pruefen' && st.selected === 'waermepumpe') {
+    } else if (st.step === 'pruefen' && st.modus === 'pflanzen' && pflSt.stammTippen) {
+      const g = pickGround(e.position);
+      if (g) setStamm(g);
+    } else if (st.step === 'pruefen' && st.modus === 'objekt' && st.selected === 'waermepumpe') {
       const picked = v.scene.pick(e.position);
       if (picked && (picked.primitive instanceof Cesium3DTileset || picked.tileset)) {
         const c = v.scene.pickPosition(e.position);
@@ -921,7 +1205,7 @@ function setupInput() {
   // Tastatur: Pfeile verschieben relativ zur Blickrichtung, R dreht um 90°
   $('stage').addEventListener('keydown', (e) => {
     if (e.target !== $('stage') || st.step !== 'pruefen' || !st.objs) return;
-    const o = st.objs[st.selected];
+    const o: { center: Vec2; angle: number } = st.modus === 'pflanzen' && st.pflanze ? st.pflanze : st.objs[st.selected];
     if (e.key === 'r' || e.key === 'R') {
       o.angle = ((o.angle + Math.PI / 2 + Math.PI / 2) % Math.PI) - Math.PI / 2;
       renderSheet();
@@ -1002,6 +1286,14 @@ function openReport() {
   for (const k of ORDER) {
     const r: Result = st.res[k];
     h += `<div class="rep"><div class="rep-h"><span class="d ${r.status}"></span><strong>${NAMES[k].name}</strong><span class="rep-s">${WORD[r.status]}</span></div><p class="rep-t">${esc(r.head)} ${esc(r.sub)}</p></div>`;
+  }
+  if (pflSt.benutzt && st.pflanzRes && st.pflanze) {
+    const r = st.pflanzRes;
+    const nb = bestandsPflanzen({ ...site, bestand: [...site.bestand, ...pflSt.nachbar] }, pflSt.angaben);
+    h += `<div class="rep"><div class="rep-h"><span class="d ${r.status}"></span><strong>${esc(PFL_ART.find((a) => a[0] === st.pflanze!.art)![1])} (Nachbarrecht)</strong><span class="rep-s">${WORD[r.status]}</span></div><p class="rep-t">${esc(r.head)} ${esc(r.sub)}</p>
+      <ul class="plain">${r.rows.map((x) => `<li>${esc(x.text)} (${esc(x.tag)})</li>`).join('')}</ul>
+      ${nb.length ? `<p class="rep-t">Pflanzen an der Grenze (Messung, keine Bewertung):</p><ul class="plain">${nb.map((x) => `<li>${esc(pflanzenText(site!, x))} (${esc(x.provenance)})</li>`).join('')}</ul>` : ''}
+      <p class="m-fine">Wortlaut AGBGB Art. 47–52 aus gesetze.legal und GVBl 1982 verglichen, nicht von einer Fachperson geprüft.</p></div>`;
   }
   const best = st.bestand.filter((b) => b.status === 'aktiv');
   h += `<h3>Was wir angenommen haben</h3><ul class="plain">
@@ -1170,6 +1462,7 @@ async function main() {
       passt: {
         st,
         zonen: zonenSt,
+        pflSt,
         goToPlot,
         startDemo: (id: string) => startDemo((data.site.demos ?? []).find((d) => d.id === id)!),
         setBoundary: async (pts: Vec2[]) => {

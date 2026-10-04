@@ -1,0 +1,66 @@
+Gesetz zur Ausführung des Bürgerlichen Gesetzbuchs und anderer Gesetze (AGBGB), Bayern
+Siebter Abschnitt (Nachbarrecht), Art. 47–52 – Grenzabstand von Pflanzen
+
+Herkunft und Abgleich (04.10.2026):
+  Quelle A: gesetze.legal/bayern/agbgb/47 … /52 (aktuelle Fassung, abgerufen 04.10.2026)
+  Quelle B: Bayerisches Gesetz- und Verordnungsblatt Nr. 25/1982, S. 809 f. (Neubekanntmachung 20.09.1982),
+            verkuendung-bayern.de/files/gvbl/1982/25/gvbl-1982-25.pdf (amtlich, Textauszug per pdftotext)
+  gesetze-bayern.de (BayAGBGB-47 ff.) ist per CAPTCHA gesperrt – Abgleich von Hand offen.
+
+  Ergebnis Wort für Wort: Art. 47, 48, 49, 50, 51 und 52 Abs. 1 Sätze 1–2, Abs. 2 stimmen überein
+  (nur Rechtschreibung 1982: „Abstandes“ statt „Abstands“, „Zustandes“ statt „Zustands“).
+  Abweichung: Art. 52 Abs. 1 Satz 3. 1982: „Die Verjährung beginnt mit dem Ablauf des Kalenderjahres, in dem die
+  Verletzung erkennbar wird.“ Quelle A zeigt die später geänderte Fassung (unten). Die geänderte Fassung steht nur in
+  einer Quelle → in limits.json als offen markiert, Passt. rechnet die Frist nicht aus, sondern fragt nach dem Alter.
+
+Art. 47 Grenzabstand von Pflanzen
+(1) Der Eigentümer eines Grundstücks kann verlangen, daß auf einem Nachbargrundstück nicht Bäume, Sträucher oder
+Hecken, Weinstöcke oder Hopfenstöcke in einer geringeren Entfernung als 0,50 m oder, falls sie über 2 m hoch sind, in
+einer geringeren Entfernung als 2 m von der Grenze seines Grundstücks gehalten werden.
+(2) 1Zugunsten eines Waldgrundstücks kann nur die Einhaltung eines Abstands von 0,50 m verlangt werden. 2Das gleiche
+gilt, wenn Wein oder Hopfen auf einem Grundstück angebaut wird, in dessen Lage dieser Anbau nach den örtlichen
+Verhältnissen üblich ist.
+
+Art. 48 Grenzabstand bei landwirtschaftlichen Grundstücken
+(1) Gegenüber einem landwirtschaftlich genutzten Grundstück, dessen wirtschaftliche Bestimmung durch Schmälerung des
+Sonnenlichts erheblich beeinträchtigt werden würde, ist mit Bäumen von mehr als 2 m Höhe ein Abstand von 4 m
+einzuhalten.
+(2) Die Einhaltung des in Absatz 1 bestimmten Abstands kann nur verlangt werden, wenn das Grundstück die bezeichnete
+wirtschaftliche Bestimmung schon zu der Zeit gehabt hat, zu der die Bäume die Höhe von 2 m überschritten haben.
+
+Art. 49 Messung des Grenzabstands
+Der Abstand nach Art. 47 und 48 wird von der Mitte des Stammes an der Stelle, an der dieser aus dem Boden hervortritt,
+bei Sträuchern und Hecken von der Mitte der zunächst an der Grenze befindlichen Triebe, bei Hopfenstöcken von der
+Hopfenstange oder dem Steigdraht ab gemessen.
+
+Art. 50 Ausnahmen vom Grenzabstand
+(1) 1Art. 47 und 48 sind nicht auf Gewächse anzuwenden, die sich hinter einer Mauer oder einer sonstigen dichten
+Einfriedung befinden und diese nicht oder nicht erheblich überragen. 2Sie gelten ferner nicht für Bepflanzungen, die
+längs einer öffentlichen Straße oder auf einem öffentlichen Platz gehalten werden, sowie für Bepflanzungen, die zum
+Uferschutz, zum Schutz von Abhängen oder Böschungen oder zum Schutz einer Eisenbahn dienen.
+(2) Art. 48 Abs. 1 gilt auch nicht für Stein- und Kernobstbäume sowie Bäume, die sich in einem Hofraum oder einem
+Hausgarten befinden.
+(3) 1Im Fall einer Aufforstung kann die Einhaltung des in Art. 48 Abs. 1 bestimmten Abstands nicht verlangt werden,
+wenn die Aufforstung nach der Lage des aufzuforstenden Grundstücks der wirtschaftlichen Zweckmäßigkeit entspricht.
+2Im übrigen bleiben die besonderen Vorschriften über den Grenzabstand bei der Erstaufforstung unberührt.
+
+Art. 51 Ältere Gewächse und Waldungen (Abs. 1, 2 – für Hausgärten praktisch ohne Bedeutung)
+(1) Für die bereits zur Zeit des Inkrafttretens des Bürgerlichen Gesetzbuchs vorhandenen Bäume, Sträucher und Hecken
+sind die vor diesem Zeitpunkt geltenden Vorschriften weiterhin anzuwenden, soweit sie das Halten der Gewächse in einer
+geringeren als der nach Art. 47 bis 50 einzuhaltenden Entfernung von der Grenze des Nachbargrundstücks gestatten.
+(2) 1Bei einem Grundstück, das bereits zur Zeit des Inkrafttretens des Bürgerlichen Gesetzbuchs mit Wald bestanden
+war, gilt bis zur ersten Verjüngung des Waldes nach Inkrafttreten des Bürgerlichen Gesetzbuchs das gleiche auch für
+neue Bäume und Sträucher. 2Auch nach der Verjüngung ist Art. 48 nicht anzuwenden.
+(Abs. 3, 4: Duldung von Wurzeln und Zweigen bei Wald – hier nicht verwendet.)
+
+Art. 52 Verjährung der nachbarrechtlichen Ansprüche
+(1) 1Die sich aus Art. 43 bis 45 und 46 Abs. 1 ergebenden Ansprüche unterliegen nicht der Verjährung. 2Der Anspruch auf
+Beseitigung eines die Art. 47 bis 50 und 51 Abs. 1 und 2 verletzenden Zustands verjährt in fünf Jahren. 3Die
+Verjährung beginnt mit dem Schluss des Jahres, in dem
+1. der Anspruch entstanden ist, und
+2. der Eigentümer des Grundstücks von den den Anspruch begründenden Umständen Kenntnis erlangt oder ohne grobe
+   Fahrlässigkeit erlangen müsste.
+   [nur Quelle A; Fassung 1982 siehe oben]
+(2) Sind Ansprüche nach Absatz 1 Sätze 2 und 3 verjährt und werden die Gewächse durch neue ersetzt, so kann
+hinsichtlich der neuen Gewächse die Einhaltung des in Art. 47 bis 50 und 51 Abs. 1 und 2 vorgeschriebenen Abstands
+verlangt werden.

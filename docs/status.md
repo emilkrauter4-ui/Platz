@@ -229,6 +229,38 @@ Stand 4. Oktober 2026.
 **Tests:** 73 grün (neu: `abstand.test.ts`, `zonen.test.ts`, `schall.test.ts`; Paritätstest nimmt die neuen Regeln
 gezielt aus und prüft sie getrennt).
 
+## AUFTRAG_V2 Phase 3 – Nachbarn und Garten
+
+Stand 4. Oktober 2026.
+
+### 3.1 Hecken und Bäume (AGBGB Art. 47–52): **gebaut; Stamm aus Laser nicht machbar**
+- Wortlaut in `docs/recht/AGBGB_Art47-52.txt`: gesetze-bayern.de per CAPTCHA gesperrt. Verglichen wurden
+  gesetze.legal (aktuelle Fassung) und das amtliche **GVBl 25/1982** (PDF von verkuendung-bayern.de). Art. 47–51 und
+  Art. 52 Abs. 1 Sätze 1–2 und Abs. 2 stimmen überein. **Abweichung:** Art. 52 Abs. 1 Satz 3 (Fristbeginn) wurde
+  nach 1982 geändert, die neue Fassung steht nur in einer Quelle → `offen`. Passt. rechnet die Frist deshalb nicht
+  aus, sondern fragt nach dem Alter und zitiert die Regel.
+- Neu in `limits.json` (Abschnitt `pflanzen`, alle `geprueft: false`): 0,50 m / 2 m, Höhengrenze 2 m („über 2 m“:
+  genau 2,00 m zählt noch als niedrig), Wald 0,50 m, Art. 48/50 Abs. 2, Messpunkt Art. 49, Ausnahmen Art. 50 Abs. 1,
+  Verjährung 5 Jahre, Ersatzpflanzung.
+- **Planung** (Hauptfunktion, Reiter „Hecke, Baum“): Hecke als Pflanzreihe, Baum oder Strauch ziehen, Höhe einstellen.
+  Antwort in einem Satz („Passt, solange die Hecke höchstens 2,0 m hoch bleibt.“), Maßkette zur Grenze und die
+  Zonen am Boden: rot = unter 0,50 m, gelb = bis 2 m hoch, grün = keine Höhengrenze aus Art. 47.
+- Angaben je Grenzseite: Nachbargrundstück, öffentliche Straße oder Wald, dazu Mauer oder dichter Zaun mit Höhe.
+  Ohne Angabe gilt die strengere Lesart (`Annahme`/`offen`). „Nicht erheblich überragen“ ist nicht beziffert, deshalb
+  zählt nur „überragt nicht“, und die Zeile ist `offen`.
+- **Bestand an der Grenze** (eigene und Nachbarpflanzen bis 3 m): sachlich mit Maß, Spanne und dem Wert aus Art. 47.
+  Ergebnis nur „liegt darüber / darunter / nicht eindeutig“, ohne Ampel und ohne Wörter wie „Anspruch“ oder
+  „Verstoß“ (Test prüft das). Die Frage nach dem Alter führt zum Text zu Art. 52 einschließlich Ersatzpflanzung.
+- **Stammposition:** Der Versuch, den Stamm aus den Laserdaten zu schätzen, ist gescheitert
+  (`docs/messungen/staemme.md`): zwei Verfahren, Selbstkontrolle Median 5,3 m. Unter den Kronen liegen kaum Punkte
+  zwischen 0,3 und 2,5 m, und viele „Bäume“ sind Baumgruppen. Passt. misst deshalb ab der Kronenmitte mit großer
+  Spanne (halber Ersatzradius, mindestens 0,75 m). Mit „Stamm antippen“ kann der Nutzer den Stamm setzen
+  (Spanne 0,2 m, `nutzerbestätigt`). Für Hecken gilt die Spanne vom Heckenrand bis zur halben Breite.
+- Prüfbericht: eigener Abschnitt „Hecke (Nachbarrecht)“ mit allen Zeilen und den Bestandspflanzen. Dazu der Hinweis
+  „Zivilrecht, das Bauamt prüft das nicht“.
+- Tests: 19 neu (`pflanzen.test.ts`): Grenzfälle genau 0,50 m und genau 2,00 m (Höhe und Abstand), schräge Hecke,
+  schräge Grundstücksgrenze, Straße, Mauer, Wald, Spanne um 2 m Höhe, neutrale Texte. Insgesamt 92 grün.
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
@@ -236,7 +268,9 @@ gezielt aus und prüft sie getrennt).
 - Fachliche Prüfung von `limits.json` durch Bauamt oder Architekt; die Regeln zu Hecken und Bäumen (AGBGB, Phase 3)
   am besten zusätzlich durch einen Anwalt.
 - Einverständnis der Eigentümer für die Demo-Adressen.
-- Art. 6 BayBO einmal von Hand auf gesetze-bayern.de gegen `docs/recht/BayBO_Art6.txt` prüfen (CAPTCHA).
+- Art. 6 BayBO und AGBGB Art. 47–52 einmal von Hand auf gesetze-bayern.de gegen `docs/recht/` prüfen (CAPTCHA),
+  besonders Art. 52 Abs. 1 Satz 3 (Fristbeginn).
+- Bei 2–3 Bäumen an der Grenze den Stamm vor Ort einmessen, um die Spanne der Kronenmitte zu prüfen.
 - „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
 - KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
 - ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).

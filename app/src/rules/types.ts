@@ -99,6 +99,9 @@ export interface Bestand {
   /** geometrisch gemittelte Wandhöhe aus Dachebenen (Laser) */
   wand?: Mass;
   rund?: boolean;
+  /** Bäume/Sträucher: vom Nutzer angetippte Stammmitte am Boden (Art. 49 AGBGB) und Spanne als Radius */
+  stamm?: Vec2;
+  stammSpanne?: number;
 }
 
 export interface NeighborWindow {

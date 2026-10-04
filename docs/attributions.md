@@ -53,6 +53,7 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | Text | Quelle | Hinweis |
 |---|---|---|
 | BayBO Art. 6 (`docs/recht/BayBO_Art6.txt`) | Amtliche Werke sind gemeinfrei (§ 5 UrhG); Wortlaut über lxgesetze.de und lexmea.de abgerufen und verglichen | gesetze-bayern.de per CAPTCHA gesperrt; Abgleich von Hand offen |
+| AGBGB Art. 47–52 (`docs/recht/AGBGB_Art47-52.txt`) | gemeinfrei (§ 5 UrhG); gesetze.legal (aktuelle Fassung) und Bayerisches GVBl Nr. 25/1982 (verkuendung-bayern.de, amtlich) verglichen | Art. 52 Abs. 1 Satz 3 nur in einer Quelle in aktueller Fassung (offen) |
 
 ## Nicht verwendet
 
