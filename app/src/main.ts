@@ -624,6 +624,7 @@ function renderSheet() {
     </div>
     ${st.selected === 'waermepumpe' ? geraetHtml(o) : ''}
     <div class="controls" id="controls">${ctl}</div>
+    <div class="btnrow"><button class="sec" id="arBtn" type="button">In AR ansehen (1:1)</button></div>
     ${st.denkmal?.length ? `<p class="warnbox">Denkmalschutz: ${st.denkmal.map((d) => `${esc(d.art)}${d.bezeichnung ? ` „${esc(d.bezeichnung)}“` : ''} (${esc(d.aktennummer)})`).join('; ')}. Hier kann auch ein kleines Nebengebäude oder eine Wärmepumpe eine denkmalrechtliche Erlaubnis brauchen (Art. 6 BayDSchG). ${tag('amtlich', 'amtlich')} <span class="attr">© BLfD</span></p>` : ''}
     ${st.wsg?.length ? `<p class="warnbox">Das Grundstück liegt in einem Trinkwasserschutzgebiet (${esc(st.wsg.join(', '))}). Dort gelten eigene Auflagen. ${tag('amtlich', 'amtlich')}</p>` : ''}
     <details ${st.bestand.length ? 'open' : ''} id="bestandBox">
@@ -715,6 +716,7 @@ function renderSheet() {
   });
   $('reportBtn').addEventListener('click', openReport);
   $('teilenBtn').addEventListener('click', openTeilen);
+  $('arBtn').addEventListener('click', startAr);
   $('editBtn').addEventListener('click', () => {
     st.draft = [...(st.plot ?? [])];
     st.view = 'plan';
@@ -818,6 +820,7 @@ function renderPflanzenSheet() {
     <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">${tabsHtml()}</div>
     <div class="field"><span>Was willst du pflanzen?</span>${sel('pArt', p.art, PFL_ART)}</div>
     <div class="controls" id="controls">${ctl}</div>
+    <div class="btnrow"><button class="sec" id="arBtn" type="button">In AR ansehen (1:1)</button></div>
     <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="pZonen" ${pflSt.zonen ? 'checked' : ''}> Wo darf was wachsen? Zonen zeigen</label>
     <div id="pflInfo"></div>
     <details open>
@@ -841,6 +844,7 @@ function renderPflanzenSheet() {
     </div>`;
   bindTabs();
   $('teilenBtn').addEventListener('click', openTeilen);
+  $('arBtn').addEventListener('click', startAr);
   $('pArt').addEventListener('change', (e) => {
     const a = (e.target as HTMLSelectElement).value as PflanzenArt;
     p.art = a;
@@ -1283,6 +1287,28 @@ function setBlick(pos: Cartesian2) {
   hint(null);
   schattenNeu(true);
   renderSheet();
+}
+
+/* ---------- AR (Phase 3.3, lazy geladen) ---------- */
+async function startAr() {
+  const ar = await import('./ar');
+  let p: import('./ar').ArParameter;
+  let titel: string;
+  if (st.modus === 'pflanzen' && st.pflanze) {
+    const q = st.pflanze;
+    p = { art: q.art, h: q.hoehe, ...(q.art === 'hecke' ? { l: q.laenge } : {}) };
+    titel = pflanzeText(q);
+  } else {
+    const o = st.objs![st.selected];
+    p = { art: st.selected, w: o.w, d: o.d, h: o.h, ...(st.selected === 'gartenhaus' ? { n: o.neigung ?? 0 } : {}) };
+    titel = objektText(st.selected, o);
+  }
+  const r = await ar.zeigeAr(p, titel);
+  if (r.weg !== 'download') return;
+  openModal('In AR ansehen', `<p>AR startet auf dem Handy direkt: auf dem iPhone mit AR Quick Look, auf Android mit dem Scene Viewer. Das Modell steht dort in echter Größe (1:1) – ${esc(titel)}.</p>
+    <p>Hier am Rechner kannst du das Modell herunterladen:</p>
+    <div class="btnrow"><a class="sec" href="${r.glb}" download="passt-modell.glb">glTF (.glb)</a><a class="sec" href="${r.usdz}" download="passt-modell.usdz">USDZ (iPhone)</a></div>
+    <p class="m-fine">Das Modell wird aus den Maßen erzeugt, nichts wird gespeichert. Es zeigt die Größe, nicht den Ort: Du stellst es in der AR-Ansicht selbst in deinen Garten. Der Scene Viewer auf Android lädt das Modell über eine öffentliche https-Adresse – im lokalen Netz geht AR deshalb nur auf dem iPhone.</p>`);
 }
 
 /* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */

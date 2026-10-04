@@ -56,6 +56,15 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | CompressionStream / Web Crypto (Browser) | – | Vorhaben im URL-Fragment, Projekt-Hash | eingebaut |
 | pvlib 0.16 (NREL-SPA) | BSD-3-Clause | nur Referenzwerte für den Test des Sonnenstands (`test/sonne.test.ts`) | nicht in der App |
 
+## AR (Phase 3.3)
+
+| Werkzeug | Lizenz | Wofür | Hinweis |
+|---|---|---|---|
+| eigener Erzeuger `app/scripts/ar-modell.mjs` | – | glTF/USDZ | keine Bibliothek |
+| glTF-Validator (Khronos, npm `gltf-validator`) | Apache 2.0 | einmalige Prüfung der GLB-Dateien | nicht im Repo, nicht in der App |
+| usd-core (Pixar OpenUSD) | Modified Apache 2.0 („Tomorrow Open Source Technology License“) | einmalige Prüfung der USDZ-Dateien | nicht im Repo, nicht in der App |
+| AR Quick Look (Apple), Scene Viewer (Google) | Systemdienste der Geräte | Anzeige | nur Verweis per Link/Intent |
+
 ## Gesetzestexte
 
 | Text | Quelle | Hinweis |

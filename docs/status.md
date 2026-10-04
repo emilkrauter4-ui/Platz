@@ -291,6 +291,29 @@ Stand 4. Oktober 2026.
   inklusive „speichert keine weiteren Felder“). Insgesamt 112 grün.
 - Nebenbei behoben: Der Ladehinweis „Lädt amtliche Daten …“ blieb sichtbar (CSS überschrieb `hidden`).
 
+### 3.3 AR: **gebaut; auf echten Geräten nicht getestet**
+- Eigener Erzeuger ohne Bibliothek (`app/scripts/ar-modell.mjs`): glTF 2.0 binär und USDZ (USDA-Text,
+  unkomprimiertes ZIP, Daten 64-Byte-ausgerichtet). Meter, Y oben, Boden bei 0. Formen wie in der 3D-Szene:
+  Gartenhaus mit Flach- oder Satteldach, Carport mit Pfosten und Dach, Wärmepumpe, Hecke, Baum, Strauch.
+- **Maßstab 1:1:** iOS mit `#allowsContentScaling=0`, Android Scene Viewer mit `resizable=false`.
+- Quick Look und Scene Viewer brauchen eine echte Adresse. Der Node-Server erzeugt das Modell deshalb
+  **zustandslos aus den Maßen in der URL** (`/api/ar/modell.glb|usdz?art=…&w=…`), ohne zu speichern. Am Rechner
+  entstehen die Dateien direkt im Browser als Download (geht auch offline).
+- Knopf „In AR ansehen (1:1)“ bei Gartenhaus, Carport, Wärmepumpe und im Reiter „Hecke, Baum“. Das Modul lädt erst
+  beim Tippen (1,6 kB + 7,9 kB).
+- Geprüft: glTF-Validator (Khronos) 0 Fehler, 0 Warnungen für alle 7 Formen. USDZ öffnet mit Pixars USD-Bibliothek
+  (`usd-core`), Maße stimmen auf den Millimeter (z. B. Gartenhaus 35°: 3,000 × 3,175 × 2,500 m). Der ARKit-Prüfer
+  (`usdchecker --arkit`) ist in `usd-core` nicht enthalten.
+- **Nicht nachgewiesen:** Start auf einem echten iPhone bzw. Android-Gerät. Scene Viewer lädt das Modell über eine
+  öffentliche https-Adresse, im lokalen Netz (Laptop-Demo) geht AR deshalb nur auf dem iPhone. Das Modell zeigt
+  Größe und Form, nicht den Ort: Man stellt es in der AR-Ansicht selbst auf.
+- Tests: `ar.test.ts` (6). Insgesamt **118 grün**.
+
+### Ladezeit nach Phase 3
+Bundle nach Phase 3: 983 kB übertragen (vorher ~974 kB). Fast 4G: bedienbar nach 1,7–1,9 s (vorher 1,6 s,
+Messrauschen im Container ±0,2 s). Die Pflanzen- und Nachbar-Oberfläche liegt im Hauptbundle (+9 kB gzip), AR und Zonen
+laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Dialog in ein eigenes Modul auslagern.
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
@@ -303,6 +326,7 @@ Stand 4. Oktober 2026.
 - Bei 2–3 Bäumen an der Grenze den Stamm vor Ort einmessen, um die Spanne der Kronenmitte zu prüfen.
 - „Wo darf es hin?“ auf dem eigenen iPhone ausprobieren und die angezeigte Zeit notieren (Ziel < 300 ms).
 - KEYMARK-Daten: vor kommerzieller Nutzung Rechte mit KEYMARK/EHPA klären.
+- AR auf dem eigenen iPhone und einem Android-Gerät ausprobieren. Android braucht die App unter einer https-Adresse.
 - Nachbar-Link: Datenschutzerklärung für den Betrieb (Antworten in SQLite, 400 Tage) von einer Fachperson prüfen lassen;
   auf dem Laptop Node-Version prüfen (`node --version`, mindestens 22.5).
 - ~~Vor Phase 3: Speicher-Entscheidung~~ – entschieden am 4. Oktober 2026 (siehe unten).
