@@ -379,10 +379,55 @@ laden erst bei Bedarf. Wenn das stört, lassen sich Nachbaransicht und Teilen-Di
   Nachtrainieren der Klassifikation nicht verbessern; dafür müsste die Kandidatensuche selbst lernen.
 - Tests: `lernen.test.ts` (3). Insgesamt **134 grün** (App) plus 4 (Pipeline).
 
+## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
+
+Stand 4. Oktober 2026.
+
+### 5.1 Lizenz: **Skyfall-GS ist so nicht kommerziell nutzbar** (`docs/gartenblick/lizenzen.md`)
+- Eigener Code: Apache 2.0, aber mit Teilen aus Inrias gaussian-splatting. Der Rasterizer (Inria/MPII) ist nur für
+  Forschung und Evaluation erlaubt.
+- Das fest eingestellte Bildmodell **FLUX.1 [dev]** ist nicht kommerziell; ausdrücklich verboten ist auch jede Nutzung
+  „mit Wirkung auf Endnutzer“. Das betrifft auch eine Kunden-Demo.
+- Freie Bausteine: **gsplat** (Apache 2.0) statt Inria, **FLUX.1 [schnell]** (Apache 2.0) statt [dev], MoGe/FlowEdit (MIT).
+- Empfehlung: zuerst Weg A, also gsplat **ohne** Bildmodell nur aus unseren amtlichen Mesh-Ansichten. Er ist kommerziell
+  nutzbar und erfindet keine Details.
+
+### 5.2 Eigene Daten statt Satellitenbilder: **fertig für das erste Grundstück, die anderen rendern**
+- `pipeline/gartenblick_render.mjs`: 89 Ansichten des DOM-Meshes über die eigene Cesium-Szene (Ringe, Draufsichten,
+  Augenhöhe 1,6 m außerhalb von Gebäuden), exakte Kameraposen aus Cesium, Skyfall-Format plus COLMAP
+  (`15_gartenblick_colmap.py`, Rücktest Abweichung < 10⁻⁵).
+- `13_gartenblick_punkte.py`: Startpunktwolke aus dem Laser (Normalhöhe → Ellipsoidhöhe über GCG2016), eingefärbt mit
+  DOP20. Lage gegen das Mesh geprüft: Laserpunkte über 4 m liegen in der Draufsicht auf Dächern und Kronen.
+- Ehrlich: Das DOM-Mesh ist 2,5D mit rund 20 cm Textur. Aus Augenhöhe sind die Eingabebilder unscharf, und unter
+  Baumkronen liegt der Augenpunkt teils unter der Mesh-Oberfläche. Nahaufnahmen sind pixelig.
+- Rendern im Container: rund 18 s je Ansicht (Software-Grafik), also etwa 27 Minuten je Grundstück.
+
+### 5.3 Rechenleistung: **Anleitung fertig** (`docs/gartenblick/anleitung_gpu.md`)
+- Weg A (gsplat): GPU ab 16 GB, rund 20–40 Minuten je Grundstück. Weg B (Skyfall-GS): 48 GB, laut Paper rund 6¾ Stunden
+  auf einer RTX A6000, braucht die FLUX-Lizenz.
+
+### 5.4 In der App: **gebaut und mit Prüf-Splats getestet; echtes Training fehlt (GPU)**
+- CesiumJS (engine 26.4) kann Gaussian Splats darstellen (experimentell): 3D Tiles mit `KHR_gaussian_splatting` und
+  `KHR_gaussian_splatting_compression_spz_2`. Ein eigener Viewer ist nicht nötig.
+- `14_gartenblick_tiles.py`: PLY → SPZ (selbst geschrieben) → glTF → Tileset mit Transform ENU → ECEF, inklusive
+  Meridiankonvergenz (2,1°) und UTM-Maßstab. Geprüft mit Cesiums eigenem Decoder (`app/spz-pruefen.html`):
+  Position < 0,2 mm, Farbe < 0,004, Skala < 0,03 (log), Deckkraft < 0,002, Rotation exakt.
+- Gefundener Fehler: COLOR_0 muss als uint8 angemeldet sein, sonst bricht Cesiums WebAssembly-Modul ab.
+- In der App: Auge-Knopf „Gartenblick“, sichtbar nur, wenn für das Grundstück ein Eintrag in
+  `data/gartenblick/index.json` existiert. Solange er an ist, steht oben dauerhaft **„KI-Visualisierung, nicht
+  gemessen“** mit der Herkunft. Das geplante Objekt bleibt in der Szene, und der Nachbar-Link hat denselben Knopf.
+  Das Regelwerk kennt den Gartenblick nicht und prüft weiter nur mit amtlichen Daten.
+- Getestet mit synthetischen Splats aus 60 000 Laserpunkten: Sie sitzen georeferenziert auf Dächern und Grundstück
+  (`docs/demo/gartenblick-pruefsplats.jpg`). Diese Prüfdaten sind **nicht** ausgeliefert.
+- Geometrie gegen Laser: `14_gartenblick_tiles.py geometrie` (Abstand Splat ↔ Laser in beide Richtungen). Im Test
+  mit 5 cm Rauschen ergab sich ein Median von 7,4 cm. Für echte Trainingsergebnisse steht die Messung noch aus.
+
 ## Offene Punkte für Emil
 
 - 5–10 Objekte mit dem Maßband messen (mit Einverständnis der Eigentümer) und in `data/reference/vor_ort.csv` eintragen.
-- Cloud-GPU mieten (für Phase 5 „Gartenblick“; die Erkennung selbst läuft auf der CPU).
+- Cloud-GPU mieten (Phase 5 „Gartenblick“): Weg A mit gsplat, GPU ab 16 GB, Anleitung `docs/gartenblick/anleitung_gpu.md`.
+  Ergebnis-PLY zurückgeben, dann baue ich die Tiles und messe die Geometrie gegen den Laser.
+- Lizenz-Entscheidung Gartenblick: Weg A (frei) oder kommerzielle FLUX-Lizenz (bfl.ai) für Weg B.
 - Fachliche Prüfung von `limits.json` durch Bauamt oder Architekt; die Regeln zu Hecken und Bäumen (AGBGB, Phase 3)
   am besten zusätzlich durch einen Anwalt.
 - Einverständnis der Eigentümer für die Demo-Adressen.

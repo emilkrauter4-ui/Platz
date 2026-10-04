@@ -296,6 +296,8 @@ function plotFrame(animate = true) {
 
 /* ---------- Schritt 1: Adresse ---------- */
 function showStart(msg?: string) {
+  $('gbBtn').hidden = true;
+  if (gbSt.an) void gartenblick(false);
   zonenAus();
   st.step = 'start';
   st.draft = [];
@@ -482,6 +484,7 @@ async function confirmPlot() {
   pflanzLayer?.weg();
   st.step = 'pruefen';
   st.view = '3d';
+  void gartenblickPruefen();
   syncViewButtons();
   scene.parzellar.show = false;
   st.wsg = undefined;
@@ -1402,6 +1405,44 @@ function openLernInfo() {
   });
 }
 
+/* ---------- Gartenblick (Phase 5.4): KI-Visualisierung, nur Anzeige, nie für Prüfungen ---------- */
+interface GbEintrag { id: string; bbox: [number, number, number, number]; herkunft: string; splats: number; erstellt: string }
+const gbSt: { liste: GbEintrag[] | null; an: boolean; tileset: Cesium3DTileset | null; eintrag: GbEintrag | null } = { liste: null, an: false, tileset: null, eintrag: null };
+
+/** Liste der vorberechneten Gartenblicke (data/gartenblick/index.json). Fehlt sie, bleibt der Knopf verborgen. */
+async function gartenblickPruefen() {
+  if (gbSt.liste === null) {
+    try { gbSt.liste = ((await (await fetch(`${DATA_URL}/gartenblick/index.json`)).json()) as { eintraege: GbEintrag[] }).eintraege; } catch { gbSt.liste = []; }
+  }
+  const c = st.plot ? centroid(st.plot) : null;
+  gbSt.eintrag = c ? gbSt.liste.find((e) => c[0] >= e.bbox[0] && c[0] <= e.bbox[2] && c[1] >= e.bbox[1] && c[1] <= e.bbox[3]) ?? null : null;
+  $('gbBtn').hidden = !gbSt.eintrag;
+  if (!gbSt.eintrag && gbSt.an) void gartenblick(false);
+}
+
+async function gartenblick(an: boolean) {
+  const e = gbSt.eintrag;
+  if (an && !e) return;
+  gbSt.an = an;
+  $('gbBtn').setAttribute('aria-pressed', String(an));
+  $('kiBand').hidden = !an;
+  if (an && e) {
+    $('kiHerkunft').textContent = `· ${e.herkunft}`;
+    if (!gbSt.tileset || gbSt.tileset.resource?.url?.indexOf(`/gartenblick/${e.id}/`) === -1) {
+      if (gbSt.tileset) scene.viewer.scene.primitives.remove(gbSt.tileset);
+      gbSt.tileset = await Cesium3DTileset.fromUrl(`${DATA_URL}/gartenblick/${e.id}/tileset.json`);
+      scene.viewer.scene.primitives.add(gbSt.tileset);
+    }
+    gbSt.tileset.show = true;
+    if (scene.tileset) scene.tileset.show = false;
+    hint('Gartenblick ist eine KI-Visualisierung. Sie zeigt, wie es aussehen könnte – gemessen und geprüft wird nur mit den amtlichen Daten.');
+  } else {
+    if (gbSt.tileset) gbSt.tileset.show = false;
+    if (scene.tileset) scene.tileset.show = !st.mesh;
+  }
+  render();
+}
+
 /* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */
 type GeraetRow = [string, string, number, string, number | null];
 let geraete: Promise<{ quelle: string; geraete: GeraetRow[] }> | null = null;
@@ -1730,6 +1771,7 @@ function setupView() {
       }
     }),
   );
+  $('gbBtn').addEventListener('click', () => void gartenblick(!gbSt.an));
   $('meshBtn').addEventListener('click', async () => {
     const b = $('meshBtn');
     const want = b.getAttribute('aria-pressed') !== 'true';
@@ -1963,14 +2005,64 @@ async function main() {
         select,
         update,
         buildings: () => data.buildings,
-        tilesLoaded: () => scene.viewer.scene.globe.tilesLoaded && !!scene.tileset?.tilesLoaded,
+        tilesLoaded: () => {
+          scene.viewer.scene.requestRender();
+          return scene.viewer.scene.globe.tilesLoaded && (!scene.tileset?.show || !!scene.tileset?.tilesLoaded);
+        },
         frame: (c: Vec2, r: number, v: '3d' | 'plan') => frame(c, r, v, false),
         setMesh: async (on: boolean) => {
           st.mesh = on && (await scene.setMesh(on));
           renderer.syncPlot(badSegments);
           return st.mesh;
         },
+        /** Gartenblick-Daten (Phase 5.2): Kamera auf lokale Position (x, y, Ellipsoidhöhe) mit Blick auf ein Ziel. */
+        kamera: (p: [number, number, number], ziel: [number, number, number], fovGrad: number) => {
+          const v = scene.viewer;
+          v.scene.screenSpaceCameraController.minimumZoomDistance = 0.5;
+          v.scene.screenSpaceCameraController.enableCollisionDetection = false;
+          const pos = localToCartesian([p[0], p[1]], p[2]);
+          const z = localToCartesian([ziel[0], ziel[1]], ziel[2]);
+          const dir = Cartesian3.normalize(Cartesian3.subtract(z, pos, new Cartesian3()), new Cartesian3());
+          const oben = Cartesian3.normalize(pos, new Cartesian3());
+          const rechts = Cartesian3.normalize(Cartesian3.cross(dir, oben, new Cartesian3()), new Cartesian3());
+          const up = Cartesian3.normalize(Cartesian3.cross(rechts, dir, new Cartesian3()), new Cartesian3());
+          (v.camera.frustum as unknown as { fov: number }).fov = CMath.toRadians(fovGrad);
+          v.camera.setView({ destination: pos, orientation: { direction: dir, up } });
+          v.scene.requestRender();
+        },
+        /** Kamera in lokalen Koordinaten: Position, Punkt 1 m voraus, Punkt 1 m oben; Bildgröße und Öffnungswinkel. */
+        kameraInfo: () => {
+          const c = scene.viewer.camera;
+          const loc = (x: Cartesian3) => { const r = cartesianToLocal(x); return [r.p[0], r.p[1], r.h]; };
+          const vor = Cartesian3.add(c.positionWC, c.directionWC, new Cartesian3());
+          const auf = Cartesian3.add(c.positionWC, c.upWC, new Cartesian3());
+          const cv = scene.viewer.canvas;
+          return { pos: loc(c.positionWC), vor: loc(vor), auf: loc(auf), fov: (c.frustum as unknown as { fov: number }).fov, w: cv.width, h: cv.height };
+        },
+        /** Geländehöhe (Ellipsoid) an einem lokalen Punkt */
+        boden: (p: [number, number]) => terrain.heightOrCoarse(p),
+        /** Nur Mesh und Gelände zeigen (keine Linien, Objekte, Beschriftungen). */
+        nurMesh: async () => {
+          await scene.setMesh(true);
+          st.mesh = true;
+          (scene.viewer as unknown as { entities: { show: boolean } }).entities.show = false;
+          // feinste Detailstufe für die Aufnahmen (langsamer, aber scharf)
+          const prims = scene.viewer.scene.primitives;
+          for (let i = 0; i < prims.length; i++) {
+            const t = prims.get(i);
+            if (t !== scene.tileset && t.maximumScreenSpaceError !== undefined) t.maximumScreenSpaceError = 2;
+          }
+          scene.viewer.scene.globe.maximumScreenSpaceError = 2;
+          zonenLayer?.weg();
+          pflanzLayer?.weg();
+          const css = document.createElement('style');
+          css.textContent = '.bar,.sheet,.viewctl,.hint,.dim,.loading{display:none!important}.app,.stage{display:block!important;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important}#map{position:absolute!important;inset:0!important}';
+          document.head.appendChild(css);
+          window.dispatchEvent(new Event('resize'));
+          scene.viewer.scene.requestRender();
+        },
         meshLoaded: () => {
+          scene.viewer.scene.requestRender(); // requestRenderMode: ohne neue Bilder lädt Cesium keine Kacheln nach
           const prims = scene.viewer.scene.primitives;
           for (let i = 0; i < prims.length; i++) {
             const p = prims.get(i);

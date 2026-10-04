@@ -76,6 +76,8 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | FLUX.1 [schnell] | Apache 2.0 | ja | freie Alternative |
 | gsplat (nerfstudio) | Apache 2.0 | ja | freie Alternative zum Inria-Rasterizer |
 | MoGe, FlowEdit, fused-ssim | MIT | ja | |
+| SPZ-Format (Niantic, `nianticlabs/spz`) | MIT | ja | eigener Encoder in `pipeline/14_gartenblick_tiles.py` |
+| @spz-loader/core (in CesiumJS enthalten) | Apache 2.0 | ja | Decoder in der App, mit Cesium ausgeliefert |
 
 ## Gesetzestexte
 

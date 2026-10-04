@@ -113,3 +113,7 @@ button.link{background:none;border:0;padding:4px 0;color:var(--focus);font:inher
 .loading[hidden]{display:none}
 
 .icon[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.kiband{position:absolute;left:50%;top:62px;transform:translateX(-50%);background:#7a1f1b;color:#fff;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;pointer-events:none;z-index:5;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.kiband span{font-weight:400;opacity:.85;margin-left:6px}
+.kiband[hidden]{display:none}
+@media (max-width:520px){.kiband{top:58px;font-size:12px}}

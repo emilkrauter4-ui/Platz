@@ -29,11 +29,15 @@
       <button class="icon" id="meshBtn" type="button" aria-pressed="false" aria-label="Fotorealistische 3D-Ansicht (DOM-Mesh)" title="Foto-3D">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
       </button>
+      <button class="icon" id="gbBtn" type="button" aria-pressed="false" aria-label="Gartenblick: KI-Visualisierung aus Gartenhöhe" title="Gartenblick" hidden>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
+      </button>
       <button class="icon" id="rotBtn" type="button" aria-label="Ansicht drehen">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/></svg>
       </button>
     </div>
     <div class="hint gone" id="hint"></div>
+    <div class="kiband" id="kiBand" hidden role="status">KI-Visualisierung, nicht gemessen<span id="kiHerkunft"></span></div>
   </main>
 
   <section class="sheet" aria-label="Ergebnis">

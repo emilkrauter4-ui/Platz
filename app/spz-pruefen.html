@@ -1,0 +1,30 @@
+<!-- Entwicklungswerkzeug: npx vite, dann /spz-pruefen.html öffnen und window.pruefen(glbUrl, sollUrl) aufrufen. Prüft SPZ aus pipeline/14_gartenblick_tiles.py mit Cesiums Decoder (@spz-loader/core) gegen spz_soll.json. -->
+<!doctype html><meta charset="utf-8"><body>
+<script type="module">
+import { loadSpz } from '@spz-loader/core';
+window.pruefen = async (glbUrl, sollUrl) => {
+  const b = new Uint8Array(await (await fetch(glbUrl)).arrayBuffer());
+  const dv = new DataView(b.buffer);
+  const jl = dv.getUint32(12, true);
+  const gltf = JSON.parse(new TextDecoder().decode(b.subarray(20, 20 + jl)));
+  const prim = gltf.meshes[0].primitives[0];
+  const bv = gltf.bufferViews[prim.extensions.KHR_gaussian_splatting.extensions.KHR_gaussian_splatting_compression_spz_2.bufferView];
+  const s0 = 20 + jl + 8 + (bv.byteOffset ?? 0);
+  const g = await loadSpz(b.slice(s0, s0 + bv.byteLength), { unpackOptions: { coordinateSystem: 'UNSPECIFIED' } });
+  const soll = await (await fetch(sollUrl)).json();
+  let maxPos = 0, maxFarbe = 0, maxSkala = 0, maxDeck = 0, minRot = 1;
+  for (const s of soll.stichprobe) {
+    const i = s.i;
+    for (let a = 0; a < 3; a++) {
+      maxPos = Math.max(maxPos, Math.abs(g.positions[i * 3 + a] - s.pos[a]));
+      maxFarbe = Math.max(maxFarbe, Math.abs(g.colors[i * 3 + a] - (0.5 + 0.28209479177387814 * s.farbe[a])));
+      maxSkala = Math.max(maxSkala, Math.abs(Math.log(g.scales[i * 3 + a]) - s.skala[a]));
+    }
+    maxDeck = Math.max(maxDeck, Math.abs(g.alphas[i] - s.deckkraft));
+    const q = [g.rotations[i * 4 + 3], g.rotations[i * 4], g.rotations[i * 4 + 1], g.rotations[i * 4 + 2]];
+    minRot = Math.min(minRot, Math.abs(q.reduce((acc, v, k) => acc + v * s.rot[k], 0)));
+  }
+  return { splats: g.numPoints, erwartet: gltf.accessors[prim.attributes.POSITION].count, maxPos, maxFarbe, maxSkala, maxDeck, minRot, beispielFarbe: [...g.colors.slice(0,3)], sollFarbe: soll.stichprobe[0].farbe };
+};
+window.bereit = true;
+</script>
