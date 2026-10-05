@@ -1,0 +1,5 @@
+{"block": "B081", "fertig": true, "objekte": [
+ {"klasse": "pool", "rechteck": [30.4, 87.4, 7.0, 3.4, -15], "notiz": "rechteckiger Pool, im Laser keine Echos (Wasser/Abdeckung)"},
+ {"klasse": "pool", "kreis": [1.4, 92.6, 2.2], "notiz": "runder Pool am Blockrand (Mittelpunkt im Block)"},
+ {"klasse": "gartenhaus", "rechteck": [17.2, 34.4, 5.0, 3.0, 0], "notiz": "Hütte am Weg, Laser ~2 m"}
+]}

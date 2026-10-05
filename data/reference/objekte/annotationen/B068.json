@@ -1,0 +1,4 @@
+{"block": "B068", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [32.5, 31.0, 4.4, 4.4, 20], "notiz": "rotes Dach im Garten, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [13.0, 11.8, 3.0, 5.6, 5], "sicher": false, "notiz": "weißes Objekt neben Haus, Laser kaum erhöht: Wohnwagen/Plane?"}
+]}

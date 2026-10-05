@@ -1,0 +1,5 @@
+{"block": "B069", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [59.0, 31.8, 7.0, 3.6, 0], "notiz": "weißes Dach, Laser ~2,5 m"},
+ {"klasse": "gartenhaus", "rechteck": [70.2, 32.0, 3.6, 3.2, 0], "sicher": false, "notiz": "rotes Zeltdach/Pavillon"},
+ {"klasse": "pool", "kreis": [72.6, 4.4, 1.7], "notiz": "runder Pool mit dunklem Wasser"}
+]}

@@ -1,0 +1,10 @@
+{"block": "B083", "fertig": true, "objekte": [
+ {"klasse": "gewaechshaus", "rechteck": [39.4, 32.6, 5.0, 3.0, -35], "notiz": "hellgrünes durchscheinendes Dach (Kleingarten), Laser schwach"},
+ {"klasse": "gewaechshaus", "rechteck": [31.6, 26.2, 4.2, 2.6, -35], "notiz": "hellgrünes durchscheinendes Dach (Kleingarten)"},
+ {"klasse": "gewaechshaus", "rechteck": [50.6, 25.4, 4.0, 2.6, -35], "notiz": "hellgrünes durchscheinendes Dach (Kleingarten)"},
+ {"klasse": "gewaechshaus", "rechteck": [38.6, 22.4, 3.6, 1.6, 55], "sicher": false, "notiz": "schmales helles Dach"},
+ {"klasse": "gewaechshaus", "rechteck": [5.4, 53.2, 3.6, 2.6, -35], "sicher": false, "notiz": "helles Dach, Gewächshaus oder Laube"},
+ {"klasse": "gartenhaus", "rechteck": [36.0, 25.6, 4.0, 3.0, -35], "notiz": "Gartenlaube im Kleingarten, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [31.0, 31.0, 3.6, 3.0, -35], "sicher": false, "notiz": "Laube im Kleingarten"},
+ {"klasse": "gartenhaus", "rechteck": [19.0, 14.6, 3.6, 3.6, 0], "sicher": false, "notiz": "rotes Dach unter Bäumen, Laser ~2,5 m"}
+]}

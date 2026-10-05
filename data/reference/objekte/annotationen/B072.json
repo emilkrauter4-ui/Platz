@@ -1,0 +1,4 @@
+{"block": "B072", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [6.0, 72.2, 2.8, 2.8, 15], "notiz": "türkises Zeltdach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [27.0, 69.4, 3.6, 3.2, -10], "sicher": false, "notiz": "weißes Dach/Pavillon im Hof"}
+]}
