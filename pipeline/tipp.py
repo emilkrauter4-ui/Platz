@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+"""„Ein Tipp erfasst“: Der Nutzer tippt auf ein Objekt im Luftbild (DOP20), SAM 2.1 segmentiert den Umriss aus diesem
+einen Punkt. Höhe aus den Laserpunkten, Maße mit Spanne (08_garten.masse), Klassenvorschlag vom Klassifikator.
+Ergebnis-Label: „erfasst per Tipp“. Der Umriss bleibt in der App nachziehbar.
+
+Unterschied zur Vollautomatik: Es gibt keine Kandidatensuche und keine Farbschwellen. Der Mensch sagt, *wo* etwas steht
+(und meist auch *was*), SAM 2 liefert nur die Kante.
+
+  python3 tipp.py X Y [klasse]      X, Y in EPSG:25832 → JSON auf stdout
+"""
+from __future__ import annotations
+
+import importlib
+import json
+import pickle
+import sys
+import time
+
+import numpy as np
+from rasterio import features
+from rasterio.transform import from_origin
+from scipy import ndimage
+from shapely.geometry import Point, Polygon, shape
+
+g8 = importlib.import_module("08_garten")
+RES = g8.RES
+
+# Einstellungen – nur auf dem Entwicklungs-Set gewählt (19_tipp_messen.py dev), nie auf einem Test-Set
+FENSTER_M = 24.0          # halbe Kantenlänge des Bildausschnitts um den Tipp (48 × 48 m)
+FLAECHE_MIN, FLAECHE_MAX = 1.0, 150.0
+OHNE_HAUSUMRINGE = True   # Hausumringe aus der Maske nehmen (Nebengebäude stehen per Definition nicht darin)
+WAHL = "klein"            # "score": beste SAM-Bewertung; "klein": kleinste Maske mit ≥ 85 % der besten Bewertung
+GLAETTEN_M = 0.1
+VERFEINERN = False        # zweiter SAM-Durchgang mit Box um die erste Maske
+FORM = True               # Form: False | True (Rechteck/Kreis) | "laser" (Bauten: Rechteck um die Dach-Laserpunkte)
+SAM_GROESSE = "small"     # "small" (184 MB) | "large" (898 MB)
+
+_PRED: dict = {}
+
+
+def _sam(groesse: str = None):
+    groesse = groesse or SAM_GROESSE
+    if groesse == "small":
+        return g8._sam()
+    if groesse not in _PRED:
+        import torch
+        from sam2.build_sam import build_sam2
+        from sam2.sam2_image_predictor import SAM2ImagePredictor
+        torch.set_num_threads(4)
+        ck = g8.build_dir().parent / "raw" / "models" / "sam2.1_hiera_large.pt"
+        _PRED[groesse] = SAM2ImagePredictor(build_sam2("configs/sam2.1/sam2.1_hiera_l.yaml", str(ck), device="cpu"))
+    return _PRED[groesse]
+
+KLASSEN_TIPP = ["gartenhaus", "carport_garage", "gewaechshaus", "pool", "trampolin", "spielturm", "terrasse", "teich",
+                "hecke", "baum", "strauch", "waermepumpe"]
+
+
+def ausschnitt_um(x: float, y: float, r: float = FENSTER_M):
+    bb = (np.floor(x - r), np.floor(y - r), np.ceil(x + r), np.ceil(y + r))
+    return bb, g8.signale(bb)
+
+
+def _maske_zu_poly(m: np.ndarray, bb, px: tuple[int, int]) -> Polygon | None:
+    lab, _ = ndimage.label(m)
+    k = lab[px]
+    if k == 0:  # Tipp liegt knapp neben der Maske: nächste Komponente
+        d, (ri, ci) = ndimage.distance_transform_edt(lab == 0, return_indices=True)
+        if d[px] * RES > 1.0:
+            return None
+        k = lab[ri[px], ci[px]]
+    comp = ndimage.binary_fill_holes(lab == k)
+    tr = from_origin(bb[0], bb[3], RES, RES)
+    polys = [shape(g).buffer(0) for g, v in features.shapes(comp.astype(np.uint8), mask=comp, transform=tr) if v]
+    if not polys:
+        return None
+    p = max(polys, key=lambda q: q.area)
+    return p.simplify(GLAETTEN_M) if GLAETTEN_M else p
+
+
+def _form(p: Polygon, klasse: str | None) -> Polygon:
+    """Form regularisieren: Bauten → gedrehtes Rechteck, runde Pools/Trampoline → Kreis gleicher Fläche."""
+    if klasse in ("pool", "trampolin") and g8._kreisfoermigkeit(p) > 0.75:
+        c = p.centroid
+        return c.buffer(float(np.sqrt(p.area / np.pi)), quad_segs=16)
+    if klasse in (None, "gartenhaus", "carport_garage", "gewaechshaus", "spielturm", "pool", "waermepumpe"):
+        rr = p.minimum_rotated_rectangle
+        if p.area / max(rr.area, 1e-6) >= 0.6:
+            return rr
+    return p
+
+
+def segmentieren(s: dict, x: float, y: float, wahl: str = WAHL, ohne_umringe: bool = OHNE_HAUSUMRINGE,
+                 verfeinern: bool = VERFEINERN, form=FORM, klasse: str | None = None, groesse: str = None) -> dict | None:
+    bb = tuple(s["_bb"])
+    groesse = groesse or SAM_GROESSE
+    pred = _sam(groesse)
+    if s.get("_sam_bb") != (bb, groesse):
+        rgb = np.clip(np.nan_to_num(np.stack([s["r"], s["g"], s["b"]], -1)), 0, 255).astype(np.uint8)
+        pred.set_image(rgb)
+        s["_sam_bb"] = (bb, groesse)
+    col, row = (x - bb[0]) / RES, (bb[3] - y) / RES
+    px = (int(row), int(col))
+
+    def kandidaten(masks, scores):
+        out = []
+        for m, sc in zip(masks, scores):
+            m = m > 0
+            if ohne_umringe and not s["gebaeude"][px]:
+                m = m & ~s["gebaeude"]
+            if not (FLAECHE_MIN <= m.sum() * RES * RES <= FLAECHE_MAX):
+                continue
+            p = _maske_zu_poly(m, bb, px)
+            if p is not None and FLAECHE_MIN <= p.area <= FLAECHE_MAX:
+                out.append((float(sc), p, m))
+        return out
+
+    masks, scores, _ = pred.predict(point_coords=np.array([[col, row]]), point_labels=np.array([1]), multimask_output=True)
+    kand = kandidaten(masks, scores)
+    if not kand:
+        return None
+    best = max(t[0] for t in kand)
+    if wahl == "score":
+        sc, p, m = max(kand, key=lambda t: t[0])
+    elif wahl == "gross":
+        sc, p, m = max((t for t in kand if t[0] >= 0.7 * best), key=lambda t: t[1].area)
+    else:
+        sc, p, m = min((t for t in kand if t[0] >= 0.85 * best), key=lambda t: t[1].area)
+    if verfeinern:
+        # zweiter Durchgang: Box um die erste Maske (+0,6 m) und derselbe Punkt
+        x0, y0, x1, y1 = p.buffer(0.6).bounds
+        box = np.array([(x0 - bb[0]) / RES, (bb[3] - y1) / RES, (x1 - bb[0]) / RES, (bb[3] - y0) / RES])
+        m2, s2, _ = pred.predict(point_coords=np.array([[col, row]]), point_labels=np.array([1]), box=box, multimask_output=False)
+        k2 = kandidaten(m2, s2)
+        if k2:
+            sc, p, m = k2[0]
+    if form == "laser" and klasse in g8.BAUKLASSEN:
+        lr = g8.laser_rechteck(s, p)
+        p = lr[0] if lr is not None else _form(p, klasse)
+    elif form:
+        p = _form(p, klasse)
+    return {"geom": p, "sam_score": sc}
+
+
+def klasse_vorschlagen(s: dict, g: Polygon) -> list[tuple[str, float]]:
+    """Klassifikator v4 auf den Merkmalen des getippten Umrisses. Familie aus einfachen Signalen."""
+    H, W = s["dgm"].shape
+    maske, fenster = g8._maske_aus_geom(g, tuple(s["_bb"]), (H, W))
+    voll = np.zeros((H, W), bool)
+    voll[fenster[0]:fenster[0] + maske.shape[0], fenster[1]:fenster[1] + maske.shape[1]] = maske[:H - fenster[0], :W - fenster[1]]
+    lh = float(np.percentile(s["las_h"][voll], 90)) if voll.any() else 0
+    tu = float(np.median(s["tuerkis"][voll])) if voll.any() else 0
+    ndvi = float(np.median(s["ndvi"][voll])) if voll.any() else 0
+    fam = "wasser" if tu > 0.3 and lh < 1.6 else "bau" if lh >= 1.5 and ndvi < 0.25 else \
+        "vegetation" if ndvi >= 0.25 else "rund" if g8._kreisfoermigkeit(g) > 0.8 else "flach"
+    c = {"familie": fam, "geom": g, "maske": maske, "fenster": fenster}
+    c["merkmale"] = g8.merkmale(s, c)
+    m = pickle.loads(g8.MODELL.read_bytes())
+    X = np.array([[c["merkmale"][k] for k in m["spalten"]]], np.float32)
+    p = g8.mit_regeln(m["modell"].predict_proba(X), m["klassen"], [c])[0]
+    out = sorted(((k, float(v)) for k, v in zip(m["klassen"], p) if k != "nichts"), key=lambda t: -t[1])
+    return out[:3]
+
+
+def erfassen(x: float, y: float, klasse: str | None = None, s: dict | None = None) -> dict:
+    t0 = time.time()
+    if s is None:
+        _, s = ausschnitt_um(x, y)
+    seg = segmentieren(s, x, y, klasse=klasse)
+    if seg is None:
+        return {"ok": False, "grund": "Kein Umriss gefunden. Bitte genauer tippen oder Umriss zeichnen.", "sekunden": round(time.time() - t0, 1)}
+    g = seg["geom"]
+    vorschlag = klasse_vorschlagen(s, g)
+    k = klasse or (vorschlag[0][0] if vorschlag else "gartenhaus")
+    ms = g8.masse(s, k, g, laser_umriss=False)
+    return {
+        "ok": True, "label": "erfasst per Tipp", "klasse": k, "klasse_quelle": "Nutzer" if klasse else "Vorschlag",
+        "vorschlag": [{"klasse": a, "p": round(b, 2)} for a, b in vorschlag],
+        "umriss": [[round(px, 2), round(py, 2)] for px, py in list(g.exterior.coords)[:-1]],
+        "flaeche": round(g.area, 1), "sam_score": round(seg["sam_score"], 3),
+        "masse": {kk: (round(v, 2) if isinstance(v, float) else v) for kk, v in ms.items() if kk not in ("umriss",)},
+        "quelle": "Umriss: SAM 2.1 aus DOP20 2023 (Tipp); Höhe: Laser 2025; Bayerische Vermessungsverwaltung (CC BY 4.0)",
+        "sekunden": round(time.time() - t0, 1),
+    }
+
+
+if __name__ == "__main__":
+    a = sys.argv[1:]
+    print(json.dumps(erfassen(float(a[0]), float(a[1]), a[2] if len(a) > 2 else None), ensure_ascii=False, default=float))
