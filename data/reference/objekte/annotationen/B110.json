@@ -1,0 +1,8 @@
+{"block": "B110", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [80.6, 75.8, 1.6], "notiz": "dunkle Matte mit weißem Rand, im Laser 2025 nicht vorhanden"},
+ {"klasse": "gartenhaus", "rechteck": [51.6, 86.8, 4.0, 4.0, 30], "notiz": "weißes Dach im Garten, Laser ~2,5 m, nicht im Hausumring"},
+ {"klasse": "gartenhaus", "rechteck": [32.4, 70.0, 3.6, 5.0, 30], "notiz": "rotes Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [14.4, 73.6, 3.2, 3.2, 30], "notiz": "rotes Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [29.0, 74.6, 3.4, 2.8, 30], "sicher": false, "notiz": "Dach am Garten, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [28.4, 79.2, 3.0, 3.0, 30], "sicher": false, "notiz": "kleines Dach, Laser ~1,5 m"}
+]}

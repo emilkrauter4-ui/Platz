@@ -1,0 +1,4 @@
+{"block": "B089", "fertig": true, "objekte": [
+ {"klasse": "pool", "kreis": [25.8, 88.6, 1.7], "notiz": "runder Pool"},
+ {"klasse": "gartenhaus", "rechteck": [66.4, 72.4, 2.8, 3.0, 30], "sicher": false, "notiz": "weißes Dach am Waldrand, Laser ~1,5 m"}
+]}

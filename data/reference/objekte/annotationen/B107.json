@@ -1,0 +1,4 @@
+{"block": "B107", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [54.6, 40.6, 2.2], "notiz": "dunkle Matte mit Netz, Laser ohne Höhe in der Mitte"},
+ {"klasse": "gartenhaus", "rechteck": [55.4, 53.6, 4.4, 2.0, -10], "sicher": false, "notiz": "helles Dach neben Haus, Laser ~2 m"}
+]}

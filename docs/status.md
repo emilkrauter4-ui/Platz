@@ -429,6 +429,14 @@ Beim Erstellen korrigiert: die 15-m-Regel steht in Art. 6 Abs. 7 **Satz 2** (vor
 Ehrlich: Die Beispiele sind von Hand gerechnet, nicht aus der App erzeugt; vier Regeln sind nur dokumentiert und in
 der App nicht umgesetzt (`pflanzen.landwirtschaftM`, `abstand.faktorHGewerbe`, Ersatz-/Verjährungs-Infos nur Text).
 
+## Test-Set nach Objekten (5. Oktober 2026)
+
+`docs/messungen/testset_objekte.md`. 119 Blöcke (100 × 100 m, alle 4 Kacheln) unabhängig von der Erkennung vollständig
+annotiert und eingefroren (Prüfsumme in `data/reference/objekte/testset.json`). Altes Set unverändert.
+**Quoten nicht erreicht**: Gartenhaus 43/50, Pool 24/30, Trampolin 14/30, Gewächshaus 3/20 – mehr gibt das Gebiet nicht her.
+Modell v4: Gartenhaus Trefferquote 0,56, Präzision 0,12 (Untergrenze: Annotation unvollständig, Garagen als Gartenhaus);
+Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampoline und Gewächshäuser nicht.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

@@ -1,0 +1,4 @@
+{"block": "B112", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [49.0, 11.0, 3.6, 3.0, 20], "sicher": false, "notiz": "Dach im Garten, Laser ~2 m, teils verdeckt"},
+ {"klasse": "pool", "rechteck": [53.0, 7.0, 3.0, 3.4, 15], "sicher": false, "notiz": "hellblaue Fläche neben Anbau: Pool oder Folie"}
+]}

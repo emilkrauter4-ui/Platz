@@ -1,0 +1,4 @@
+{"block": "B095", "fertig": true, "objekte": [
+ {"klasse": "carport_garage", "rechteck": [87.0, 72.6, 6.0, 2.6, -8], "notiz": "Garagenzeile/Carport neben Hausumring, Laser ~2,5 m (keine Zielklasse)"},
+ {"klasse": "pool", "rechteck": [15.2, 31.6, 3.0, 2.4, 0], "sicher": false, "notiz": "hellblaues Rechteck, Pool oder Plane"}
+]}

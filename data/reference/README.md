@@ -38,3 +38,8 @@ Altstadt, Siedlung und Hang. Erzeugt und gepflegt mit `pipeline/07_referenz.py`.
 - **Klassen:** gartenhaus (inkl. Laube, Pavillon mit Dach), gewaechshaus, carport_garage (nur wenn nicht in den
   Hausumringen), pool, teich, terrasse (inkl. befestigter Hof/Zufahrt im Garten), trampolin, spielturm, hecke,
   baum, strauch; optional waermepumpe, zaun_mauer (nur auffällige Mauern ≥ 1,2 m).
+
+## Zweites Test-Set: nach Objekten (`objekte/`, eingefroren 5. Oktober 2026)
+119 Blöcke à 100 × 100 m, vollständig für Gartenhaus, Pool, Trampolin und Gewächshaus annotiert (dieselben Regeln wie oben,
+Angaben in Blockkoordinaten). `objekte/testset.json` enthält Stichprobe und Prüfsumme. Erzeugt mit
+`pipeline/17_testset_objekte.py`, Auswertung in `docs/messungen/testset_objekte.md`. Tabu für Training und Parameter.

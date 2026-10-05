@@ -1,0 +1,69 @@
+{
+ "datei": "garten.geojson",
+ "modell": [
+  4
+ ],
+ "bloecke": 119,
+ "iou_min": 0.3,
+ "zeilen": [
+  {
+   "klasse": "gartenhaus",
+   "stichprobe": 43,
+   "treffer": 24,
+   "trefferquote": 0.5581395348837209,
+   "beruehrt": 30,
+   "erkennungen": 279,
+   "richtig": 33,
+   "praezision": 0.11827956989247312,
+   "verwechselt": 4,
+   "f1": 0.19519408502772642,
+   "ref_in_bloecken": 96
+  },
+  {
+   "klasse": "pool",
+   "stichprobe": 24,
+   "treffer": 1,
+   "trefferquote": 0.041666666666666664,
+   "beruehrt": 2,
+   "erkennungen": 10,
+   "richtig": 1,
+   "praezision": 0.1,
+   "verwechselt": 1,
+   "f1": 0.058823529411764705,
+   "ref_in_bloecken": 36
+  },
+  {
+   "klasse": "trampolin",
+   "stichprobe": 14,
+   "treffer": 0,
+   "trefferquote": 0.0,
+   "beruehrt": 0,
+   "erkennungen": 0,
+   "richtig": 0,
+   "praezision": null,
+   "verwechselt": 0,
+   "f1": null,
+   "ref_in_bloecken": 21
+  },
+  {
+   "klasse": "gewaechshaus",
+   "stichprobe": 3,
+   "treffer": 0,
+   "trefferquote": 0.0,
+   "beruehrt": 0,
+   "erkennungen": 0,
+   "richtig": 0,
+   "praezision": null,
+   "verwechselt": 0,
+   "f1": null,
+   "ref_in_bloecken": 11
+  }
+ ],
+ "kontamination": {
+  "hinweis": "13 der 20 Zusatzpunkte aus docs/bestand_referenz.json (Training v4) liegen in Test-Blöcken",
+  "gartenhaus_kontaminiert": 2,
+  "gartenhaus_kontaminiert_treffer": 1,
+  "gartenhaus_sauber": 41,
+  "gartenhaus_sauber_treffer": 23
+ }
+}

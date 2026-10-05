@@ -1,0 +1,4 @@
+{"block": "B094", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [24.6, 69.6, 2.6, 2.6, 30], "sicher": false, "notiz": "weißes Zelt/Pavillon zwischen Reihenhausgärten, Laser nicht erhöht"},
+ {"klasse": "gartenhaus", "rechteck": [20.6, 61.4, 2.6, 2.6, 30], "sicher": false, "notiz": "weißes Zelt/Pavillon, Laser nicht erhöht"}
+]}

@@ -15,7 +15,7 @@ Befehle:
   python3 12_lernschleife.py alles [jsonl]      alle drei Schritte (für einen regelmäßigen Lauf, z. B. wöchentlich per cron)
   python3 12_lernschleife.py simulieren [n]     Mechanik-Test: n Beiträge aus der Dev-Referenz als JSONL erzeugen
 
-Schutz des Test-Sets: Beiträge in oder bis 15 m neben Test-Grundstücken werden verworfen und nie zum Training
+Schutz der Test-Sets: Beiträge in oder bis 15 m neben Test-Grundstücken und Test-Blöcken (17_testset_objekte.py) werden verworfen und nie zum Training
 benutzt. Protokoll: data/reference/modelle.json (versioniert, im Git).
 """
 from __future__ import annotations
@@ -103,7 +103,16 @@ def freigabe(alt: list[dict], neu: list[dict]) -> tuple[bool, list[str]]:
 
 def _testflaechen():
     gs, _ = g8.referenz()
-    return [g["geom"].buffer(TEST_PUFFER) for g in gs.values() if g["split"] == "test"]
+    flaechen = [g["geom"].buffer(TEST_PUFFER) for g in gs.values() if g["split"] == "test"]
+    # zweites Test-Set (nach Objekten, 17_testset_objekte.py): ganze Blöcke sind tabu
+    ts = ref_mod.REF / "objekte" / "testset.json"
+    if ts.exists():
+        from shapely.geometry import box
+        bl = {b["id"]: b for b in json.loads((ref_mod.REF / "objekte" / "bloecke.json").read_text(encoding="utf-8"))["bloecke"]}
+        for bid in json.loads(ts.read_text(encoding="utf-8"))["bloecke"]:
+            e = bl[bid]
+            flaechen.append(box(e["x0"], e["y0"], e["x0"] + 100.0, e["y0"] + 100.0).buffer(TEST_PUFFER))
+    return flaechen
 
 
 def eintraege_lesen(pfad: Path) -> list[dict]:
@@ -181,6 +190,10 @@ def trainieren() -> Path:
     cache = g8.merkmale_cache(ids=split["dev"])
     X, y, meta, cols = g8.lern_tabelle(cache, split["dev"])
     zk, zz = g8.zusatz_beispiele()
+    # Zusatzpunkte (Meilenstein 5) liegen teils in den Blöcken des zweiten Test-Sets – die nicht mehr verwenden
+    test = _testflaechen()
+    frei = [i for i, c in enumerate(zk) if not any(t.contains(c["geom"].centroid) for t in test)]
+    zk, zz = [zk[i] for i in frei], [zz[i] for i in frei]
     lern = [v for v in (pickle.loads(BEISPIELE.read_bytes()) if BEISPIELE.exists() else {}).values() if v]
     zusatz = [(c["merkmale"], k) for c, k in zip(zk, zz)] + [(v["merkmale"], v["ziel"]) for v in lern]
     if zusatz:

@@ -1,0 +1,4 @@
+{"block": "B117", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [43.6, 47.6, 2.8, 2.6, 15], "sicher": false, "notiz": "kleines Dach am Gartenrand, im DOP sichtbar, Laser schwach"},
+ {"klasse": "gartenhaus", "rechteck": [67.4, 45.0, 2.6, 3.0, 0], "sicher": false, "notiz": "kleines graues Dach, Laser ~2 m (Mischecho)"}
+]}
