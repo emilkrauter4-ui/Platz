@@ -92,7 +92,7 @@ Wichtig für die 9-m- und 15-m-Regel an der Grenze. Viele Gartenhäuser und Carp
 
 Aus dem Prototyp übernehmen und erweitern. Alle Grenzwerte in einer JSON-Datei, jeder mit Quellenangabe. **Vor jeder öffentlichen Demo von einer Fachperson (Bauamt oder Architekt) prüfen lassen.**
 
-- Gartenhaus ohne Genehmigung bis 75 m³ Brutto-Rauminhalt, ohne Aufenthaltsraum, ohne Feuerstätte, nicht im Außenbereich (BayBO Art. 57).
+- Gartenhaus ohne Genehmigung bis 75 m³ Brutto-Rauminhalt, nicht im Außenbereich (BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a). Im Innenbereich gilt das für jedes Gebäude bis 75 m³. „Ohne Aufenthaltsräume, Toiletten oder Feuerstätten, weder Verkaufs- noch Ausstellungszwecke“ ist nur Bedingung im Außenbereich (dort bis 20 m³). Wortlaut am 05.10.2026 auf gesetze-bayern.de bestätigt. Mit Aufenthaltsraum oder Feuerstätte entfällt aber das Grenzprivileg nach Art. 6 Abs. 7.
 - Garage oder Carport ohne Genehmigung bis 50 m² (BayBO Art. 57).
 - Abstandsfläche 0,4 H, mindestens 3 m (BayBO Art. 6). Hinweis anzeigen, dass Gemeindesatzungen abweichen können.
 - An der Grenze erlaubt: mittlere Wandhöhe bis 3 m, je Grundstücksseite höchstens 9 m, insgesamt höchstens 15 m (BayBO Art. 6). **Bestehende Bauten aus `bestand.geojson` mitzählen.**

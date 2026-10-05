@@ -6,20 +6,20 @@
       "wert": 75,
       "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
       "text": "Verfahrensfrei sind Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich. Die Bedingung „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ gilt laut aktuellem Wortlaut nur für Gebäude im Außenbereich (bis 20 m³).",
-      "wortlaut": "docs/recht/BayBO_Art57.txt (Abruf 04.10.2026: lxgesetze.de und lexmea.de identisch; gesetze-bayern.de per CAPTCHA gesperrt)",
+      "wortlaut": "docs/recht/BayBO_Art57.txt – am 05.10.2026 von Emil am amtlichen Text (gesetze-bayern.de) bestätigt",
       "geprueft": false
     },
     "aussenbereichMaxM3": {
       "wert": 20,
       "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a",
       "text": "Im Außenbereich nur Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten, die weder Verkaufs- noch Ausstellungszwecken dienen, bis 20 m³. Passt. gibt den Außenbereich trotzdem nicht frei (Zulässigkeit nach § 35 BauGB prüft Passt. nicht).",
-      "wortlaut": "docs/recht/BayBO_Art57.txt",
+      "wortlaut": "docs/recht/BayBO_Art57.txt – am 05.10.2026 von Emil am amtlichen Text (gesetze-bayern.de) bestätigt",
       "geprueft": false
     },
     "aufenthaltsraumNurArt6": {
       "wert": true,
       "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a, Art. 6 Abs. 7 Satz 1 Nr. 1",
-      "text": "Im Innenbereich macht ein Aufenthaltsraum oder eine Feuerstätte ein Gebäude bis 75 m³ nicht genehmigungspflichtig, nimmt ihm aber das Privileg nach Art. 6 Abs. 7: Es braucht eigene Abstandsflächen und darf nicht an die Grenze. Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut (Aufenthaltsraum → Genehmigung).",
+      "text": "Im Innenbereich macht ein Aufenthaltsraum oder eine Feuerstätte ein Gebäude bis 75 m³ nicht genehmigungspflichtig, nimmt ihm aber das Privileg nach Art. 6 Abs. 7: Es braucht eigene Abstandsflächen und darf nicht an die Grenze. Ergebnis gelb: „Verfahrensfrei. Brandschutz und Feuerstätte prüft die App nicht.“ Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut (Aufenthaltsraum → Genehmigung).",
       "geprueft": false
     },
     "dachraumImRauminhalt": {

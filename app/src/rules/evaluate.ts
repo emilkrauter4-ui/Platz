@@ -527,8 +527,8 @@ function building(
   } else sub = 'Keine Baugenehmigung nötig, und der Abstand zur Grenze stimmt.';
   if (status === 'ok' && !ohneRaum) {
     status = 'warn';
-    head = 'Verfahrensfrei – mit Aufenthaltsraum oder Feuerstätte aber nicht alles geprüft.';
-    sub = `Laut Art. 57 Abs. 1 Nr. 1 Buchst. a ist ein Gebäude bis ${L.gartenhaus.maxBruttoRauminhaltM3.wert} m³ im Innenbereich verfahrensfrei. Die Anforderungen an Feuerstätte, Abgasanlage und Brandschutz prüft Passt. nicht.`;
+    head = 'Verfahrensfrei. Brandschutz und Feuerstätte prüft die App nicht.';
+    sub = `Laut Art. 57 Abs. 1 Nr. 1 Buchst. a ist ein Gebäude bis ${L.gartenhaus.maxBruttoRauminhaltM3.wert} m³ im Innenbereich verfahrensfrei.`;
   }
   if (!ohneRaum) rows.push({ text: 'Aufenthaltsraum oder Feuerstätte: Anforderungen an Brandschutz, Feuerstätte und Abgasanlage nicht geprüft', tag: 'offen', kind: 'offen' });
 

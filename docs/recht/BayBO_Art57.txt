@@ -4,7 +4,7 @@
 # (BayBO vom 14.8.2007, zuletzt geändert am 23.4.2026), verglichen mit lexmea.de/de/gesetz/baybo/art-57: identisch.
 # WICHTIG: Nach diesem Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur im Außenbereich (bis 20 m³).
 # CLAUDE.md und Passt. bis 04.10.2026 gingen vom älteren Wortlaut aus (auch im Innenbereich ohne Aufenthaltsraum).
-# OFFEN: Von Hand gegen https://www.gesetze-bayern.de/Content/Document/BayBO-57 prüfen.
+# BESTÄTIGT: Emil hat den Wortlaut am 05.10.2026 auf https://www.gesetze-bayern.de/Content/Document/BayBO-57 geprüft (gleichlautend).
 
 Art. 57 Verfahrensfreie Bauvorhaben, Beseitigung von Anlagen
 (1)

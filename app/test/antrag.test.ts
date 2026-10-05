@@ -64,6 +64,7 @@ describe('Verfahren aus den Befunden', () => {
     const o = objs();
     const r = evaluate(s, o).gartenhaus;
     expect(r.status).toBe('warn');
+    expect(r.head).toBe('Verfahrensfrei. Brandschutz und Feuerstätte prüft die App nicht.');
     expect(r.befunde).toEqual([]);
     expect(r.rows.some((x) => x.kind === 'offen' && x.text.includes('Feuerstätte'))).toBe(true);
     expect(verfahrenFuer(s, 'gartenhaus', o.gartenhaus, r).verfahren).toBe('frei');
