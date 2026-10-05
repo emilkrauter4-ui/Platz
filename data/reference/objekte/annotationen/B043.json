@@ -1,0 +1,4 @@
+{"block": "B043", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [21.0, 51.0, 5.5, 3.6, 0], "notiz": "rotbraunes Dach, Laser ~2,5 m"},
+ {"klasse": "gartenhaus", "rechteck": [31.8, 96.0, 4.4, 2.4, 0], "sicher": false, "notiz": "heller Bau unter Baum, Laser kaum erhöht: Pergola/Schuppen"}
+]}

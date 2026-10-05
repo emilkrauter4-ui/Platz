@@ -1,0 +1,4 @@
+{"block": "B059", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [45.8, 32.0, 6.0, 4.6, -25], "notiz": "weißes Flachdach, Laser ~2,5 m, nicht im Hausumring"},
+ {"klasse": "gartenhaus", "kreis": [1.2, 31.8, 1.5], "sicher": false, "notiz": "weißer achteckiger Pavillon, im Laser 2025 nicht vorhanden"}
+]}

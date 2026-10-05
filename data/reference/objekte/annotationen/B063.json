@@ -1,0 +1,5 @@
+{"block": "B063", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [73.0, 12.4, 1.9], "notiz": "Ring mit Matte, im Laser 2025 nicht sichtbar"},
+ {"klasse": "trampolin", "kreis": [79.0, 62.6, 1.6], "sicher": false, "notiz": "dunkler Ring: Trampolin oder Pool"},
+ {"klasse": "pool", "rechteck": [80.3, 41.6, 2.6, 1.4, 30], "sicher": false, "notiz": "kleine helle Wanne/Planschbecken"}
+]}

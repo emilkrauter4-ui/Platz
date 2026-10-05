@@ -1,0 +1,4 @@
+{"block": "B049", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [8.4, 64.6, 1.7], "notiz": "dunkle Matte mit hellem Rand"},
+ {"klasse": "pool", "kreis": [32.6, 66.4, 1.6], "sicher": false, "notiz": "rundes türkises Objekt unter Pavillon/Überdachung"}
+]}

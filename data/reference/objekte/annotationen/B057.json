@@ -1,0 +1,4 @@
+{"block": "B057", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [36.0, 60.6, 3.2, 5.0, 0], "notiz": "dunkles Dach, Laser ~2,5 m"},
+ {"klasse": "gartenhaus", "rechteck": [53.2, 48.2, 2.8, 4.6, -25], "notiz": "weißes Dach, Laser ~3 m"}
+]}
