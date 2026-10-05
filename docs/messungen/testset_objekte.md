@@ -22,6 +22,10 @@ Alle Wohnblöcke des 2 × 2-km-Gebiets sind durchgesehen. Mehr gibt es hier nich
 Laser 2025 nicht sicher erkennbar). Für die vollen Quoten braucht es weitere Kacheln (Daten herunterladen) oder eine
 Begehung. Gewächshäuser (3) und Trampoline (14) sind für belastbare Zahlen zu wenige.
 
+> **Nachtrag 05.10.2026:** Die Umrisse v1 liegen systematisch ≈ 0,8 m zu weit nördlich und ≈ 0,3 m zu weit westlich
+> (Ablesefehler; belegt mit Laser-Dachpunkten und Wasser-Echolücken, siehe `tipp_test.md`). v1 bleibt eingefroren.
+> v2 (`objekte_v2.geojson`) ist global verschoben. Vollautomatik gegen v2: Trefferquoten bei IoU ≥ 0,3 unverändert.
+
 ## Ergebnis Modell v4 (IoU ≥ 0,3, gleiche Klasse)
 | Klasse | Stichprobe | Treffer | Trefferquote | Erkennungen im Gebiet | davon richtig | Präzision |
 |---|---|---|---|---|---|---|

@@ -23,6 +23,10 @@ function nachbarApiDev() {
           const { lernApi } = await import('./scripts/lern-api.mjs');
           return void lernApi(req, res);
         }
+        if (req.url?.endsWith('/api/tipp')) {
+          const { tippApi } = await import('./scripts/tipp-proxy.mjs');
+          return void tippApi(req, res);
+        }
         if (req.url?.includes('/api/ar/')) {
           const { arApi } = await import('./scripts/ar-modell.mjs');
           return void arApi(req, res);

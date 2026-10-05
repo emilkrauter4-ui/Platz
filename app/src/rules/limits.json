@@ -130,9 +130,11 @@
       "quelle": "BayBO Art. 6 Abs. 7 Satz 1 Nr. 1",
       "text": "Mitgezählt werden Garagen und Gebäude ohne Aufenthaltsräume und Feuerstätten (Gartenhaus, Gewächshaus, Garage/Carport). Pool, Terrasse, Spielturm, Trampolin und Pflanzen sind keine solchen Gebäude und zählen nicht zur Länge an der Grenze."
     },
-    "konfidenzMin": {
-      "wert": 0.8,
-      "quelle": "Produktentscheidung Passt. (keine Rechtsregel): Ein erkanntes, nicht bestätigtes Nebengebäude zählt bei der Grenzbebauung nur ab dieser Konfidenz mit. Auf dem Entwicklungs-Set lag die Präzision ab 0,7 bei 67 % (zu viele falsche „zu viel an der Grenze“), ab 0,8 bei 2/2 – deshalb 0,8; alles darunter muss der Nutzer bestätigen (docs/garten_auswertung.md)"
+    "automatikNurHinweis": {
+      "wert": true,
+      "quelle": "Produktentscheidung Passt. (Emil, 05.10.2026; keine Rechtsregel)",
+      "text": "Automatisch erkannte Objekte sind nur ein Hinweis („Hier scheint noch etwas zu stehen“), klar gekennzeichnet und nie Grundlage einer Prüfung: Sie zählen nicht zur Grenzbebauung und lösen keine Kollision aus. Mit Gewicht gehen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte ein. Bis 05.10.2026 zählten erkannte ab Konfidenz 0,8 automatisch (Test-Set nach Objekten: Präzision zu gering, docs/messungen/testset_objekte.md).",
+      "geprueft": false
     },
     "grenzNaheM": {
       "wert": 1.0,

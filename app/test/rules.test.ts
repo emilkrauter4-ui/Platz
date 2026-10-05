@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   evaluate,
-  LIMITS,
   footprint,
   limitRadius,
   meanWallHeight,
@@ -120,15 +119,16 @@ describe('Grenzbebauung: genau 9,00 m je Seite, 15 m gesamt', () => {
 });
 
 describe('Bestand zählt mit', () => {
-  it('erkanntes Gartenhaus an der Westgrenze plus neuer Carport > 9 m', () => {
+  it('per Tipp erfasstes Gartenhaus an der Westgrenze plus neuer Carport > 9 m', () => {
     const site = square();
-    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erkannt', confidence: 0.8 }];
+    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erfasst per Tipp', kind: 'gartenhaus' }];
     const o = objs();
     o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
     const r = evaluate(site, o).carport;
     expect(r.status).toBe('bad');
     expect(r.head).toBe('Zu viel an der Westgrenze.');
-    expect(r.rows.find((x) => x.kind === 'erkannt')?.text).toBe('Davon bestehende Kleinbauten: 4,0 m');
+    expect(r.rows.find((x) => x.text.startsWith('Davon bestehende'))?.text).toBe('Davon bestehende Kleinbauten: 4,0 m');
+    expect(r.bestandGezaehlt).toEqual([{ id: 'b1', grund: 'von dir per Tipp erfasst' }]);
   });
 
   it('Bestand auf dem Nachbargrundstück zählt nicht', () => {
@@ -139,15 +139,15 @@ describe('Bestand zählt mit', () => {
     expect(evaluate(site, o).carport.status).toBe('ok');
   });
 
-  it('erkannt mit niedriger Konfidenz zählt nicht, wird aber als unsicher genannt', () => {
+  it('automatisch erkannt zählt nie – auch nicht mit hoher Konfidenz –, wird aber als Hinweis genannt', () => {
     const site = square();
-    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erkannt', confidence: 0.55, kind: 'gartenhaus' }];
+    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erkannt', confidence: 0.99, kind: 'gartenhaus' }];
     const o = objs();
     o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
     const r = evaluate(site, o).carport;
     expect(r.status).not.toBe('bad');
     expect(r.bestandGezaehlt).toEqual([]);
-    expect(r.bestandNichtGezaehlt?.[0].grund).toContain('unsicher');
+    expect(r.bestandNichtGezaehlt?.[0].grund).toContain('Hinweis der Automatik');
   });
 
   it('dasselbe Objekt vom Nutzer bestätigt zählt immer', () => {
@@ -158,14 +158,6 @@ describe('Bestand zählt mit', () => {
     const r = evaluate(site, o).carport;
     expect(r.head).toBe('Zu viel an der Westgrenze.');
     expect(r.bestandGezaehlt).toEqual([{ id: 'b1', grund: 'von dir bestätigt' }]);
-  });
-
-  it('Konfidenz genau am Grenzwert zählt', () => {
-    const site = square();
-    site.bestand = [{ id: 'b1', footprint: [[0, -20], [2.5, -20], [2.5, -24], [0, -24]], height: 2.2, provenance: 'erkannt', confidence: LIMITS.bestand.konfidenzMin.wert, kind: 'gewaechshaus' }];
-    const o = objs();
-    o.carport = { ...o.carport, w: 3, d: 6, center: [1.5, -8] };
-    expect(evaluate(site, o).carport.head).toBe('Zu viel an der Westgrenze.');
   });
 
   it('Pool und Hecke an der Grenze zählen nicht zur Grenzbebauung', () => {
@@ -183,15 +175,23 @@ describe('Bestand zählt mit', () => {
 
   it('Kollision mit Pool, aber nicht mit Strauch', () => {
     const site = square();
-    site.bestand = [{ id: 's', footprint: [[14, -14], [16, -14], [16, -16], [14, -16]], height: 1.5, provenance: 'erkannt', confidence: 0.9, kind: 'strauch' }];
+    site.bestand = [{ id: 's', footprint: [[14, -14], [16, -14], [16, -16], [14, -16]], height: 1.5, provenance: 'nutzerbestätigt', kind: 'strauch' }];
     expect(evaluate(site, objs()).gartenhaus.head).not.toContain('Kollidiert');
     site.bestand[0].kind = 'pool';
     expect(evaluate(site, objs()).gartenhaus.head).toBe('Kollidiert mit dem Pool.');
   });
 
+  it('Automatisch erkanntes Objekt: keine Kollision, nur Hinweis', () => {
+    const site = square();
+    site.bestand = [{ id: 'b1', footprint: [[14, -14], [16, -14], [16, -16], [14, -16]], height: 2.2, provenance: 'erkannt', confidence: 0.95 }];
+    const r = evaluate(site, objs()).gartenhaus;
+    expect(r.head).not.toContain('Kollidiert');
+    expect(r.rows.some((x) => x.text.startsWith('Hier scheint noch etwas zu stehen') && x.kind === 'erkannt')).toBe(true);
+  });
+
   it('Kollision mit Bestand', () => {
     const site = square();
-    site.bestand = [{ id: 'b1', footprint: [[14, -14], [16, -14], [16, -16], [14, -16]], height: 2.2, provenance: 'erkannt' }];
+    site.bestand = [{ id: 'b1', footprint: [[14, -14], [16, -14], [16, -16], [14, -16]], height: 2.2, provenance: 'nutzerbestätigt' }];
     expect(evaluate(site, objs()).gartenhaus.head).toBe('Kollidiert mit einem bestehenden Nebengebäude.');
   });
 });

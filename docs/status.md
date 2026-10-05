@@ -437,6 +437,31 @@ annotiert und eingefroren (Prüfsumme in `data/reference/objekte/testset.json`).
 Modell v4: Gartenhaus Trefferquote 0,56, Präzision 0,12 (Untergrenze: Annotation unvollständig, Garagen als Gartenhaus);
 Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampoline und Gewächshäuser nicht.
 
+## Nachtrag 5. Oktober 2026: „Ein Tipp erfasst“, Vollautomatik nur noch Hinweis
+
+- **Art. 57** am amtlichen Text bestätigt (Emil). CLAUDE.md korrigiert. Gelb-Text: „Verfahrensfrei. Brandschutz und
+  Feuerstätte prüft die App nicht.“
+- **Fehleranalyse Pools** (`docs/messungen/pools_fehleranalyse.md`): 12 von 24 ohne passenden Kandidaten, 11 vom
+  Klassifikator verworfen (2 Pools im Training). Laser März 2025 passt nicht zum Luftbild September 2023: nur 3 von 24
+  zeigen die Wasser-Echolücke. Die Pool-Regel (NIR ≤ 50) erfüllen nur 4 von 24. Vollautomatik wird nicht weiter optimiert.
+- **„Ein Tipp erfasst“** (`pipeline/tipp.py`, Dienst `pipeline/tipp_dienst.py`, App „Steht hier schon etwas?“ →
+  „Ein Tipp erfasst“): Tipp ins Luftbild → SAM 2.1 (Punkt-Prompt) → Umriss, Höhe aus Laser, Maße mit Spanne,
+  Klassenvorschlag. Label „erfasst per Tipp“. Der Nutzer wählt die Art, kann die Wandhöhe ändern und die Kanten nachziehen.
+  Im Browser durchgespielt (Fröschau 41): Gartenhaus 5,90 × 4,74 m (±0,38), Wand 2,08 m (±0,19), zählt danach bei
+  der Grenzbebauung mit. Erste Anfrage ≈ 18 s (Modell lädt), danach ≈ 5–10 s auf CPU.
+- **Messung** (`docs/messungen/tipp_test.md`): **Ziel nicht erreicht.** Gegen die eingefrorene Referenz v1: Erfolg
+  (IoU ≥ 0,5) Gartenhaus 30 %, Pool 25 %. Gegen die korrigierte Referenz v2: Gartenhaus 63 %, Pool 33 %, Trampolin
+  43 %. Maßfehler bei erfolgreichen Tipps im Median: Gartenhaus Länge 0,90 m, Breite 0,56 m; Pool 0,65/0,40 m.
+  Wichtig: Meine Referenz ist ungenauer als das Ziel. v1 ist systematisch ≈ 0,9 m versetzt, nach der Korrektur weicht
+  sie noch im Median 0,6 m vom Laser ab. Für eine belastbare Aussage zu 90 % / 0,30 m braucht es Maßband-Werte
+  (`vor_ort.csv`) oder eine unabhängige Annotation.
+- **Vollautomatik nur noch Hinweis:** Erkannte Objekte heißen „Hier scheint noch etwas zu stehen“, sind blass dargestellt,
+  zählen nie zur Grenzbebauung und lösen keine Kollision aus. Vorher zählten sie ab Konfidenz 0,8 automatisch.
+  Sie zählen erst nach „Stimmt“, nach Nachziehen oder wenn sie per Tipp erfasst sind. limits.json:
+  `bestand.automatikNurHinweis` ersetzt `bestand.konfidenzMin`.
+- Tests: App 144 grün (neu: Tipp-Objekt, Proxy, Hinweis statt Kollision), Pipeline 7.
+- **Gartenblick** bleibt pausiert.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

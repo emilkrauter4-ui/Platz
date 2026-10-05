@@ -52,7 +52,6 @@ const MAX_SEITE = L.grenzbebauung.maxLaengeJeSeiteM.wert;
 const MAX_GESAMT = L.grenzbebauung.maxLaengeGesamtM.wert;
 
 const BESTAND_KLASSEN = new Set<string>(L.bestand.gebaeudeKlassen.wert);
-const KONF_MIN = L.bestand.konfidenzMin.wert;
 
 const ART6 = 'BayBO Art. 6';
 const ART57 = 'BayBO Art. 57';
@@ -189,8 +188,8 @@ export function evaluate(site: Site, objs: Objects): Record<ObjectKind, Result> 
     segs: analyse(site, fps[k], wandFuer(site, objs[k], fps[k])),
     provenance: 'berechnet',
   }));
-  // Bestand auf dem eigenen Grundstück zählt mit (BayBO Art. 6: Gesamtlänge je Grenze) – aber nur Gebäude,
-  // und erkannte nur mit hoher Konfidenz. Bestätigte zählen immer.
+  // Bestand auf dem eigenen Grundstück zählt mit (BayBO Art. 6: Gesamtlänge je Grenze) – nur Gebäude und nur
+  // vom Nutzer geprüfte. Automatisch erkannte sind nie Grundlage einer Prüfung.
   const zaehlung = zaehleBestand(site);
   const ids = new Set(zaehlung.gezaehlt.map((x) => x.id));
   const bestandOnPlot = site.bestand.filter((b) => ids.has(b.id));
@@ -237,7 +236,7 @@ export function zonenPruefer(site: Site, objs: Objects, k: 'gartenhaus' | 'carpo
     ...site.buildings.map((b) => b.footprint),
     fpAndere,
     fpWp,
-    ...site.bestand.filter((b) => istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich').map((b) => b.footprint),
+    ...site.bestand.filter((b) => geprueft(b) && (istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich')).map((b) => b.footprint),
   ];
   return (center, angle) => {
     // Billige Vorprüfung: Ecken außerhalb des Grundstücks oder Kollision → sicher nicht ok (wie in building())
@@ -267,9 +266,16 @@ export function istGebaeude(b: Bestand): boolean {
   return b.kind === undefined || BESTAND_KLASSEN.has(b.kind);
 }
 
+/** Vom Menschen geprüft (bestätigt, eingezeichnet, nachgezogen oder per Tipp erfasst)? Nur das trägt eine Prüfung.
+ *  Die Vollautomatik („erkannt“) ist nur ein Hinweis (limits.json bestand.automatikNurHinweis). */
+export function geprueft(b: Bestand): boolean {
+  return b.provenance !== 'erkannt';
+}
+
 /**
  * Welche bestehenden Objekte zählen bei der Grenzbebauung (9 m / 15 m) mit?
- * Gebäude auf dem eigenen Grundstück, wenn vom Nutzer bestätigt oder mit Konfidenz ≥ konfidenzMin erkannt.
+ * Gebäude auf dem eigenen Grundstück, wenn vom Nutzer bestätigt, eingezeichnet oder per Tipp erfasst.
+ * Automatisch erkannte zählen nie – sie sind nur ein Hinweis, bis der Nutzer „Stimmt“ sagt.
  */
 export function zaehleBestand(site: Site): { gezaehlt: { id: string; grund: string }[]; nicht: { id: string; grund: string }[] } {
   const gezaehlt: { id: string; grund: string }[] = [];
@@ -280,10 +286,10 @@ export function zaehleBestand(site: Site): { gezaehlt: { id: string; grund: stri
       nicht.push({ id: b.id, grund: 'kein Gebäude' });
     } else if (b.provenance === 'nutzerbestätigt') {
       gezaehlt.push({ id: b.id, grund: 'von dir bestätigt' });
-    } else if ((b.confidence ?? 0) >= KONF_MIN - EPS) {
-      gezaehlt.push({ id: b.id, grund: `erkannt, Konfidenz ${Math.round((b.confidence ?? 0) * 100)} %` });
+    } else if (b.provenance === 'erfasst per Tipp') {
+      gezaehlt.push({ id: b.id, grund: 'von dir per Tipp erfasst' });
     } else {
-      nicht.push({ id: b.id, grund: `erkannt, aber unsicher (Konfidenz ${Math.round((b.confidence ?? 0) * 100)} %) – bitte bestätigen` });
+      nicht.push({ id: b.id, grund: 'nur ein Hinweis der Automatik – zählt erst, wenn du „Stimmt“ sagst' });
     }
   }
   return { gezaehlt, nicht };
@@ -315,11 +321,20 @@ function collision(site: Site, fps: Record<ObjectKind, Vec2[]>, k: ObjectKind): 
     if (other !== k && overlaps(fp, fps[other])) return NAMES[other].mit;
   }
   for (const b of site.bestand) {
-    // Pflanzen, Terrassen, Trampoline lassen sich versetzen oder überbauen – kollidieren nur Gebäude und Wasser
-    if (!(istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich')) continue;
+    // Pflanzen, Terrassen, Trampoline lassen sich versetzen oder überbauen – kollidieren nur Gebäude und Wasser.
+    // Automatisch erkannte nur als Hinweis (hinweisAutomatik), nie als Kollision.
+    if (!geprueft(b) || !(istGebaeude(b) || b.kind === 'pool' || b.kind === 'teich')) continue;
     if (boxesMeet(bf, box(b.footprint)) && overlaps(fp, b.footprint)) return b.kind === 'pool' ? 'mit dem Pool' : b.kind === 'teich' ? 'mit dem Teich' : 'mit einem bestehenden Nebengebäude';
   }
   return null;
+}
+
+/** „Hier scheint noch etwas zu stehen“: das Objekt überschneidet sich mit einem nur automatisch erkannten Objekt. */
+function hinweisAutomatik(site: Site, fp: Vec2[]): Row | null {
+  const bf = box(fp);
+  const b = site.bestand.find((x) => !geprueft(x) && (istGebaeude(x) || x.kind === 'pool' || x.kind === 'teich')
+    && boxesMeet(bf, box(x.footprint)) && overlaps(fp, x.footprint));
+  return b ? { text: 'Hier scheint noch etwas zu stehen (automatischer Hinweis, nicht geprüft). Bitte unter „Steht hier schon etwas?“ ansehen.', tag: 'erkannt', kind: 'erkannt' } : null;
 }
 
 function contextRows(site: Site): Row[] {
@@ -454,7 +469,11 @@ function building(
   } else {
     rows.push({ text: `Offener Carport im ${site.bereich.value === 'innen' ? 'Innenbereich' : 'Außenbereich'}`, tag: site.bereich.provenance, kind: site.bereich.provenance });
   }
-  if (!schnell) rows.push(...contextRows(site));
+  if (!schnell) {
+    const hw = hinweisAutomatik(site, fp);
+    if (hw) rows.push(hw);
+    rows.push(...contextRows(site));
+  }
 
   const befunde: Befund[] = [];
   if (!inside) befunde.push('ausserhalb');
@@ -554,7 +573,7 @@ function building(
 }
 
 /** Die „schwächste" Herkunft gewinnt: eine Annahme bleibt eine Annahme. */
-const RANK: Record<string, number> = { amtlich: 0, zertifiziert: 0.5, berechnet: 1, erkannt: 2, nutzerbestätigt: 3, Annahme: 4, offen: 5, Demo: 6 };
+const RANK: Record<string, number> = { amtlich: 0, zertifiziert: 0.5, berechnet: 1, erkannt: 2, 'erfasst per Tipp': 2.5, nutzerbestätigt: 3, Annahme: 4, offen: 5, Demo: 6 };
 function worst<T extends string>(...ps: T[]): T {
   return ps.reduce((a, b) => (RANK[b] > RANK[a] ? b : a));
 }

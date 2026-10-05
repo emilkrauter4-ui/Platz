@@ -41,8 +41,8 @@ sup { font-size: 6.5pt; }
   <li>Am Ende: 17 gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
  </div>
  <table class="meta">
-  <tr><td>Stand</td><td>04.10.2026</td></tr>
-  <tr><td>Regeln</td><td>57 (aus <code>app/src/rules/limits.json</code>, SHA-256 d8d5ee7f7db0…)</td></tr>
+  <tr><td>Stand</td><td>05.10.2026</td></tr>
+  <tr><td>Regeln</td><td>57 (aus <code>app/src/rules/limits.json</code>, SHA-256 6d6f6368ce20…)</td></tr>
   <tr><td>Geprüft von</td><td>______________________________ (Name, Funktion)</td></tr>
   <tr><td>Datum, Unterschrift</td><td>______________________________</td></tr>
   <tr><td>Rückfragen</td><td>Emil (Passt.) – ______________________________</td></tr>
@@ -81,7 +81,7 @@ sup { font-size: 6.5pt; }
     <dt>Quelle</dt><dd>BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a, Art. 6 Abs. 7 Satz 1 Nr. 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 57 Abs. 1 Nr. 1 Buchst. a: Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sowie Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten, wenn die Gebäude weder Verkaufs- noch Ausstellungszwecken dienen, im Außenbereich bis 20 m³ Brutto-Rauminhalt<br>Art. 6 Abs. 7: <sup>1</sup>In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig 1. Garagen einschließlich ihrer Nebenräume, überdachte Tiefgaragenzufahrten, Aufzüge zu Tiefgaragen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt, 2. gebäudeunabhängige Solaranlagen mit einer Höhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, 3. Stützmauern und geschlossene Einfriedungen in Gewerbe- und Industriegebieten, außerhalb dieser Baugebiete mit einer Höhe bis zu 2 m.</dd>
     <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-57</dd>
-    <dt>Unsere Auslegung</dt><dd>Im Innenbereich macht ein Aufenthaltsraum oder eine Feuerstätte ein Gebäude bis 75 m³ nicht genehmigungspflichtig, nimmt ihm aber das Privileg nach Art. 6 Abs. 7: Es braucht eigene Abstandsflächen und darf nicht an die Grenze. Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut (Aufenthaltsraum → Genehmigung).</dd>
+    <dt>Unsere Auslegung</dt><dd>Im Innenbereich macht ein Aufenthaltsraum oder eine Feuerstätte ein Gebäude bis 75 m³ nicht genehmigungspflichtig, nimmt ihm aber das Privileg nach Art. 6 Abs. 7: Es braucht eigene Abstandsflächen und darf nicht an die Grenze. Ergebnis gelb: „Verfahrensfrei. Brandschutz und Feuerstätte prüft die App nicht.“ Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut (Aufenthaltsraum → Genehmigung).</dd>
     <dt>So rechnet Passt.</dt><dd>Innenbereich, Aufenthaltsraum oder Feuerstätte: nicht mehr „Genehmigung nötig“, sondern gelb (Feuerstätte, Abgasanlage, Brandschutz nicht geprüft). Kein Privileg nach Art. 6 Abs. 7: eigene Abstandsflächen, nicht an der Grenze (rot).</dd>
     <dt>Beispiel</dt><dd>Gartenhaus 3 × 3 m mit Holzofen, 6 m von allen Grenzen: gelb, „verfahrensfrei“. Dasselbe 0,3 m an der Grenze: rot „Mit Aufenthaltsraum oder Feuerstätte nicht so nah an die Grenze“.</dd>
   </dl>
@@ -297,14 +297,14 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">20</span><code>bestand.konfidenzMin</code><span class="wert">Wert: <b>0.8</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">20</span><code>bestand.automatikNurHinweis</code><span class="wert">Wert: <b>ja</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
-    <dt>Quelle</dt><dd>Produktentscheidung Passt. (keine Rechtsregel): Ein erkanntes, nicht bestätigtes Nebengebäude zählt bei der Grenzbebauung nur ab dieser Konfidenz mit. Auf dem Entwicklungs-Set lag die Präzision ab 0,7 bei 67 % (zu viele falsche „zu viel an der Grenze“), ab 0,8 bei 2/2 – deshalb 0,8; alles darunter muss der Nutzer bestätigen (docs/garten_auswertung.md)</dd>
+    <dt>Quelle</dt><dd>Produktentscheidung Passt. (Emil, 05.10.2026; keine Rechtsregel)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
     
-    <dt>Unsere Auslegung</dt><dd>–</dd>
-    <dt>So rechnet Passt.</dt><dd>Erkannte, nicht bestätigte Nebengebäude zählen erst ab Konfidenz 0,8 automatisch mit; darunter fragt Passt. nach.</dd>
-    <dt>Beispiel</dt><dd>Erkanntes Gartenhaus mit Konfidenz 0,75 an der Grenze → zählt nicht, Nutzer wird gebeten zu bestätigen.</dd>
+    <dt>Unsere Auslegung</dt><dd>Automatisch erkannte Objekte sind nur ein Hinweis („Hier scheint noch etwas zu stehen“), klar gekennzeichnet und nie Grundlage einer Prüfung: Sie zählen nicht zur Grenzbebauung und lösen keine Kollision aus. Mit Gewicht gehen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte ein. Bis 05.10.2026 zählten erkannte ab Konfidenz 0,8 automatisch (Test-Set nach Objekten: Präzision zu gering, docs/messungen/testset_objekte.md).</dd>
+    <dt>So rechnet Passt.</dt><dd>Automatisch erkannte Objekte erscheinen nur als Hinweis „Hier scheint noch etwas zu stehen“ (blass, Label „Hinweis, nicht geprüft“). Sie zählen nicht zur 9-m-/15-m-Länge und lösen keine Kollision aus. Es zählen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte.</dd>
+    <dt>Beispiel</dt><dd>Automatik meldet ein Gartenhaus 4 m an der Ostgrenze (Konfidenz 95 %) → zählt nicht. Nutzer tippt darauf, prüft Art und Kanten → zählt.</dd>
   </dl>
   <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
     <div class="anm">Anmerkung:</div></div>

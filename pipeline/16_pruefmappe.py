@@ -173,10 +173,10 @@ R: dict[str, dict] = {
         text=lambda: art6("7", (1, 2)), link="BayBO-6",
         umsetzung="Bei der Grenzlänge zählen erkannte oder eingezeichnete Gartenhäuser, Gewächshäuser, Garagen/Carports. Pool, Terrasse, Spielturm, Trampolin, Pflanzen zählen nicht.",
         beispiel="Erkannter Carport 6 m an der Westgrenze + neues Gartenhaus 4 m dort → 10 m → rot. Ein 8 m langer Pool an derselben Grenze zählt nicht."),
-    "bestand.konfidenzMin": dict(
+    "bestand.automatikNurHinweis": dict(
         text=lambda: KEIN, link=None,
-        umsetzung="Erkannte, nicht bestätigte Nebengebäude zählen erst ab Konfidenz 0,8 automatisch mit; darunter fragt Passt. nach.",
-        beispiel="Erkanntes Gartenhaus mit Konfidenz 0,75 an der Grenze → zählt nicht, Nutzer wird gebeten zu bestätigen."),
+        umsetzung="Automatisch erkannte Objekte erscheinen nur als Hinweis „Hier scheint noch etwas zu stehen“ (blass, Label „Hinweis, nicht geprüft“). Sie zählen nicht zur 9-m-/15-m-Länge und lösen keine Kollision aus. Es zählen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte.",
+        beispiel="Automatik meldet ein Gartenhaus 4 m an der Ostgrenze (Konfidenz 95 %) → zählt nicht. Nutzer tippt darauf, prüft Art und Kanten → zählt."),
     "bestand.grenzNaheM": dict(
         text=lambda: KEIN, link=None,
         umsetzung="Bestandsobjekte bis 1,0 m von der Grenze werden in der Liste „Steht hier schon etwas?“ dieser Grenze zugeordnet.",

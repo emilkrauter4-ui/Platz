@@ -62,7 +62,8 @@ import {
   verfahrenFuer,
   ANTRAG_LINKS,
 } from './rules';
-import { beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
+import { ausTipp, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
+import type { TippAntwort } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, getOrigin, localToCartesian, localToLonLat, lonLatToLocal, setOrigin } from './scene/coords';
 import { abgelaufen, dekodieren, kodieren, linkIdAus, neuerSchluessel, projektHash, VERSION, type Vorhaben } from './nachbar/link';
@@ -79,7 +80,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ORDER: ObjectKind[] = ['gartenhaus', 'carport', 'waermepumpe'];
 const WORD = { ok: 'passt', warn: 'knapp', bad: 'passt nicht' };
 const TAG_CLASS: Record<string, string> = {
-  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', zertifiziert: 'off',
+  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', zertifiziert: 'off',
 };
 
 /* ---------- Zustand ---------- */
@@ -200,6 +201,8 @@ function zonenInfo() {
 
 /** Grenzseite, für die gerade ein Objekt eingezeichnet wird (nur für den Hinweistext). */
 let zeichnenSeite: number | null = null;
+/** „Ein Tipp erfasst“: warten auf den Tipp → Dienst rechnet → Ergebnis prüfen (Klasse, Wandhöhe, Kanten). */
+let tippSt: { phase: 'warten' | 'laeuft' | 'fertig'; antwort?: TippAntwort; id?: string; fehler?: string } | null = null;
 
 let data: Data;
 /** Grenze vom Nutzer gesetzt oder für eine Demo-Adresse vorgezeichnet */
@@ -619,7 +622,7 @@ function renderSheet() {
     })
     .join('');
   if (st.ansicht === 'nachbar') return nbSt.v ? renderNachbarSheet() : undefined;
-  if (st.kante || st.zeichnen) return renderEditSheet();
+  if (st.kante || st.zeichnen || tippSt) return renderEditSheet();
   if (st.modus === 'pflanzen') return renderPflanzenSheet();
   const bestHtml = bestandHtml();
   const wins = st.windows;
@@ -707,6 +710,10 @@ function renderSheet() {
       startEdit();
     }),
   );
+  document.getElementById('tippBtn')?.addEventListener('click', () => {
+    tippSt = { phase: 'warten' };
+    startEdit();
+  });
   document.querySelectorAll<HTMLButtonElement>('[data-neu]').forEach((b) =>
     b.addEventListener('click', () => {
       st.zeichnen = [];
@@ -1493,14 +1500,15 @@ function bestandHtml(): string {
   ]);
   const item = (b: BestandItem) => {
     const weg = b.status === 'entfernt';
-    const herkunft = weg ? tag('verworfen', 'offen') : b.provenance === 'erkannt' ? tag(`erkannt ${Math.round((b.confidence ?? 0) * 100)} %`, 'erkannt') : tag(b.provenance, b.provenance);
-    return `<li><span>${weg ? '<s>' : ''}${esc(beschreibung(b))}${weg ? '</s>' : ''}${!weg && grund.has(b.id) ? `<br><small class="fine">${esc(grund.get(b.id)!)}</small>` : ''}</span>
+    const hinweis = !weg && b.provenance === 'erkannt';
+    const herkunft = weg ? tag('verworfen', 'offen') : hinweis ? tag('Hinweis, nicht geprüft', 'erkannt') : tag(b.provenance, b.provenance);
+    return `<li><span>${hinweis ? '<small class="fine">Hier scheint noch etwas zu stehen:</small><br>' : ''}${weg ? '<s>' : ''}${esc(beschreibung(b))}${weg ? '</s>' : ''}${!weg && grund.has(b.id) ? `<br><small class="fine">${esc(grund.get(b.id)!)}</small>` : ''}</span>
       ${herkunft}
       <span class="acts">${!weg && b.provenance === 'erkannt' ? `<button type="button" data-bok="${b.id}">Stimmt</button>` : ''}
       ${!weg ? `<button type="button" data-kante="${b.id}">Umriss nachziehen</button>` : ''}
       ${!weg ? `<button type="button" data-bno="${b.id}">Gibt es nicht</button>` : `<button type="button" data-bok="${b.id}">Doch</button>`}</span></li>`;
   };
-  let h = '<p class="fine" style="text-align:left">Aus Luftbild 2023 und Laserdaten 2025 erkannt. Bestehende Gebäude an der Grenze zählen bei den 9 m und 15 m mit. Bitte prüfen.</p>';
+  let h = '<p class="fine" style="text-align:left">Bestehende Gebäude an der Grenze zählen bei den 9 m und 15 m mit – aber nur, was du bestätigt, per Tipp erfasst oder eingezeichnet hast. „Hier scheint noch etwas zu stehen“ ist ein automatischer Hinweis aus Luftbild 2023 und Laser 2025, nicht geprüft und nie Grundlage der Prüfung.</p>';
   h += `<label class="fine" style="display:flex;gap:8px;align-items:flex-start;text-align:left;margin:6px 0"><input type="checkbox" id="lernBox" ${lernEinwilligung() ? 'checked' : ''}> <span>Meine Korrekturen dürfen die Erkennung verbessern: nur Umriss, Art des Objekts und 1-km-Kachel, ohne Adresse und Grenze. <button class="link" type="button" id="lernInfo">Was genau?</button></span></label>`;
   sides.forEach((sd, i) => {
     h += `<h3 style="font-size:14px;margin:12px 0 4px">${esc(cap(sd.grenze))}</h3>`;
@@ -1509,7 +1517,8 @@ function bestandHtml(): string {
       : `<p class="fine" style="text-align:left">Nichts erkannt. <button class="link" type="button" data-neu="${i}">Doch, hier steht etwas</button></p>`;
   });
   if (innen.length) h += `<details><summary>Weitere Objekte im Garten (${innen.length})</summary><ul class="rows best">${innen.map((b) => item(b as BestandItem)).join('')}</ul></details>`;
-  h += `<p class="fine" style="text-align:left"><button class="link" type="button" data-neu="">Objekt einzeichnen</button></p>`;
+  h += `<div class="btnrow" style="margin-top:8px"><button class="sec" type="button" id="tippBtn">Ein Tipp erfasst</button><button class="link" type="button" data-neu="">Objekt einzeichnen</button></div>
+    <p class="fine" style="text-align:left">Tipp im Luftbild auf ein Gartenhaus, einen Pool oder Carport: Passt. zeichnet den Umriss (SAM 2) und misst die Höhe (Laser). Du prüfst Art und Kanten.</p>`;
   return h;
 }
 
@@ -1527,6 +1536,7 @@ function startEdit() {
 function endEdit() {
   st.kante = null;
   st.zeichnen = null;
+  tippSt = null;
   zeichnenSeite = null;
   renderer.syncEdit();
   afterContextChange();
@@ -1535,6 +1545,7 @@ function endEdit() {
 /** Bedienfeld beim Nachziehen oder Einzeichnen (ersetzt die Prüfansicht, bis fertig). */
 function renderEditSheet() {
   const zeichnen = st.zeichnen;
+  if (tippSt) return renderTippSheet();
   if (st.kante) {
     const it = st.bestand.find((x) => x.id === st.kante!.id)!;
     verdict('Umriss nachziehen.', `${it.kind ? KLASSE_TEXT[it.kind] : 'Kleinbau'}: Zieh die blauen Ecken auf die Kanten im Luftbild. Sie rasten an der erkannten Kante (gestrichelt), an Gebäuden und an der Grenze ein.`);
@@ -1570,6 +1581,79 @@ function renderEditSheet() {
       st.bestand.push({ ...neuesObjekt(`neu-${Date.now()}`, ccw(st.zeichnen), k, h), status: 'aktiv' });
       lernBeitrag('neu', st.bestand[st.bestand.length - 1]);
     }
+    endEdit();
+  });
+}
+
+/** „Ein Tipp erfasst“: Dienst fragen (/api/tipp), Ergebnis als Vorschau in den Bestand. */
+async function tippAusfuehren(g: Vec2) {
+  if (!tippSt) return;
+  tippSt = { phase: 'laeuft' };
+  renderSheet();
+  const o = getOrigin();
+  try {
+    const r = await fetch('api/tipp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ x: g[0] + o[0], y: g[1] + o[1] }) });
+    const a = (await r.json()) as TippAntwort;
+    if (!tippSt) return; // abgebrochen
+    if (!a.ok) {
+      tippSt = { phase: 'warten', fehler: a.grund ?? 'Kein Umriss gefunden.' };
+    } else {
+      const id = `tipp-${Date.now()}`;
+      st.bestand.push({ ...ausTipp(id, a, o), status: 'aktiv' });
+      tippSt = { phase: 'fertig', antwort: a, id };
+      afterContextChange();
+      return;
+    }
+  } catch {
+    if (!tippSt) return;
+    tippSt = { phase: 'warten', fehler: 'Der Tipp-Dienst ist nicht erreichbar. Du kannst das Objekt einzeichnen.' };
+  }
+  renderSheet();
+}
+
+function renderTippSheet() {
+  const t = tippSt!;
+  if (t.phase !== 'fertig') {
+    verdict(t.phase === 'laeuft' ? 'Passt. zeichnet den Umriss …' : 'Ein Tipp erfasst.',
+      t.phase === 'laeuft' ? 'Umriss aus dem Luftbild (SAM 2), Höhe aus dem Laser. Das dauert ein paar Sekunden.'
+        : t.fehler ?? 'Tipp im Luftbild mitten auf das Objekt – Gartenhaus, Pool, Carport, Gewächshaus.');
+    $('stepBody').innerHTML = `<div class="btnrow"><button class="sec" id="eNo" type="button">Abbrechen</button>${t.fehler ? '<button class="link" type="button" id="tZeichnen">Lieber einzeichnen</button>' : ''}</div>`;
+    document.getElementById('eNo')?.addEventListener('click', endEdit);
+    document.getElementById('tZeichnen')?.addEventListener('click', () => { tippSt = null; st.zeichnen = []; renderer.syncEdit(); renderSheet(); });
+    return;
+  }
+  const it = st.bestand.find((x) => x.id === t.id)!;
+  const a = t.antwort!;
+  const vor = a.vorschlag?.[0];
+  verdict('Stimmt der Umriss?', `${beschreibung(it)}. Erfasst per Tipp – Umriss aus dem Luftbild 2023, Höhe aus dem Laser 2025, Maße mit Spanne. Bitte Art prüfen; die Kanten kannst du nachziehen.`);
+  const kl: GartenKlasse[] = ['gartenhaus', 'carport_garage', 'gewaechshaus', 'pool', 'trampolin', 'spielturm', 'terrasse', 'teich', 'hecke', 'baum', 'strauch', 'waermepumpe'];
+  const h = it.height;
+  $('stepBody').innerHTML = `
+    <div class="field"><span>Was ist es? ${vor ? tag(`Vorschlag: ${KLASSE_TEXT[vor.klasse]}`, 'erkannt') : ''}</span>${sel('tKl', it.kind ?? 'gartenhaus', kl.map((k) => [k, KLASSE_TEXT[k]]))}</div>
+    <div class="field"><label for="tH">Mittlere Wandhöhe in m ${tag('Laser 2025', 'berechnet')}</label><input id="tH" type="number" min="0" max="8" step="0.05" value="${h.toFixed(2)}" inputmode="decimal"></div>
+    <div class="btnrow"><button class="primary" id="tOk" type="button">Übernehmen</button>
+      <button class="sec" id="tKante" type="button">Kanten nachziehen</button>
+      <button class="sec" id="tNo" type="button">Verwerfen</button></div>
+    <p class="fine" style="text-align:left">${esc(a.quelle ?? '')}</p>`;
+  const uebernehmen = () => {
+    const k = ($('tKl') as HTMLSelectElement).value as GartenKlasse;
+    const hw = Math.max(0, parseFloat(($('tH') as HTMLInputElement).value.replace(',', '.')) || 0);
+    const i = st.bestand.findIndex((x) => x.id === t.id);
+    const geaendert = Math.abs(hw - h) > 0.01 ? hw : undefined;
+    st.bestand[i] = { ...ausTipp(t.id!, a, getOrigin(), k, geaendert), footprint: st.bestand[i].footprint, status: 'aktiv' };
+    lernBeitrag('neu', st.bestand[i]);
+    return st.bestand[i];
+  };
+  document.getElementById('tOk')?.addEventListener('click', () => { uebernehmen(); endEdit(); });
+  document.getElementById('tKante')?.addEventListener('click', () => {
+    const b = uebernehmen();
+    tippSt = null;
+    st.kante = { id: b.id, fp: griffe(b), ref: b.footprint };
+    renderer.syncEdit();
+    renderSheet();
+  });
+  document.getElementById('tNo')?.addEventListener('click', () => {
+    st.bestand = st.bestand.filter((x) => x.id !== t.id);
     endEdit();
   });
 }
@@ -1710,6 +1794,9 @@ function setupInput() {
     } else if (st.step === 'grenze') {
       const g = pickGround(e.position);
       if (g) addBoundaryPoint(g);
+    } else if (st.step === 'pruefen' && tippSt?.phase === 'warten') {
+      const g = pickGround(e.position);
+      if (g) void tippAusfuehren(g);
     } else if (st.step === 'pruefen' && st.zeichnen) {
       const g = pickGround(e.position);
       if (g && st.zeichnen.length < 4) {
@@ -1853,7 +1940,7 @@ function bestandReport(best: BestandItem[]): string {
   const ja = z.gezaehlt.map((x) => `${name(x.id)} – ${esc(x.grund)}`);
   const nein = z.nicht.filter((x) => x.grund !== 'kein Gebäude').map((x) => `${name(x.id)} – ${esc(x.grund)}`);
   const verworfen = st.bestand.filter((b) => b.status === 'entfernt').length;
-  return `<li>Grenzbebauung (9 m / 15 m): ${ja.length ? `mitgezählt ${ja.length} bestehende${ja.length === 1 ? 's Gebäude' : ' Gebäude'}: ${ja.join('; ')}` : 'keine bestehenden Gebäude mitgezählt'}${nein.length ? `. Nicht mitgezählt (unsicher erkannt, bitte bestätigen): ${nein.join('; ')}` : ''}${verworfen ? `. ${verworfen} erkannte${verworfen === 1 ? 's Objekt' : ' Objekte'} von dir verworfen` : ''}. Erkannt aus Luftbild 2023 und Laser 2025; Maße mit Spanne.</li>`;
+  return `<li>Grenzbebauung (9 m / 15 m): ${ja.length ? `mitgezählt ${ja.length} bestehende${ja.length === 1 ? 's Gebäude' : ' Gebäude'}: ${ja.join('; ')}` : 'keine bestehenden Gebäude mitgezählt'}${nein.length ? `. Nicht mitgezählt (nur automatischer Hinweis, nicht geprüft): ${nein.join('; ')}` : ''}${verworfen ? `. ${verworfen} Hinweis${verworfen === 1 ? '' : 'e'} von dir verworfen` : ''}. Gezählt wird nur, was du bestätigt, per Tipp erfasst oder eingezeichnet hast; Maße mit Spanne.</li>`;
 }
 
 function openInfo() {
@@ -1874,7 +1961,8 @@ function openInfo() {
       <li><span class="tg rule">BayBO</span>Regel aus der Bauordnung</li>
       <li><span class="tg off">amtlich</span>Aus amtlichen Daten</li>
       <li><span class="tg calc">berechnet</span>An deinem Grundstück gemessen</li>
-      <li><span class="tg det">erkannt</span>Automatisch erkannt, bitte prüfen</li>
+      <li><span class="tg det">erkannt</span>Automatischer Hinweis, nicht geprüft – nie Grundlage der Prüfung</li>
+      <li><span class="tg user">erfasst per Tipp</span>Du hast getippt, Passt. hat Umriss (SAM 2) und Höhe (Laser) gemessen</li>
       <li><span class="tg user">nutzerbestätigt</span>Von dir angegeben</li>
       <li><span class="tg assume">Annahme</span>Gilt nur, wenn es bei dir so ist</li>
       <li><span class="tg open">offen</span>Muss noch jemand prüfen</li>
@@ -2010,6 +2098,13 @@ async function main() {
           return scene.viewer.scene.globe.tilesLoaded && (!scene.tileset?.show || !!scene.tileset?.tilesLoaded);
         },
         frame: (c: Vec2, r: number, v: '3d' | 'plan') => frame(c, r, v, false),
+        /** „Ein Tipp erfasst“ ohne Bildschirm-Tipp (Test): Tipp-Modus öffnen und auf lokale Position tippen. */
+        tipp: async (p: Vec2) => {
+          tippSt = { phase: 'warten' };
+          startEdit();
+          await tippAusfuehren(p);
+          return tippSt;
+        },
         setMesh: async (on: boolean) => {
           st.mesh = on && (await scene.setMesh(on));
           renderer.syncPlot(badSegments);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { beschreibung, fromRec, jeGrenze, minRect, nachgezogen, seitenAnGrenze } from '../src/site/bestand';
+import { ausTipp, beschreibung, fromRec, jeGrenze, minRect, nachgezogen, seitenAnGrenze } from '../src/site/bestand';
+import type { TippAntwort } from '../src/site/bestand';
 import { sidesFromBoundary } from '../src/site/plot';
 import type { Vec2 } from '../src/rules';
 
@@ -50,5 +51,37 @@ describe('Garten-Bestand', () => {
     expect(n.provenance).toBe('nutzerbestätigt');
     expect(n.laenge?.wert).toBeCloseTo(3.5, 6);
     expect(beschreibung(n)).toContain('3,50 × 2,50 m (±0,10 m)');
+  });
+});
+
+describe('Ein Tipp erfasst', () => {
+  const antwort: TippAntwort = {
+    ok: true, label: 'erfasst per Tipp', klasse: 'gartenhaus',
+    vorschlag: [{ klasse: 'gartenhaus', p: 0.72 }, { klasse: 'gewaechshaus', p: 0.1 }],
+    umriss: [[699010, 5487020], [699013, 5487020], [699013, 5487022.5], [699010, 5487022.5]],
+    masse: { form: 'rechteck', laenge: 3.02, breite: 2.48, spanne_laenge: 0.38, spanne_breite: 0.38, hoehe: 2.6, spanne_hoehe: 0.12, wandhoehe_mittel: 2.3, spanne_wand: 0.16 },
+  };
+  it('lokale Koordinaten, Herkunft „erfasst per Tipp“, Maße mit Spanne aus dem Dienst', () => {
+    const b = ausTipp('t1', antwort, [699000, 5487000]);
+    expect(b.provenance).toBe('erfasst per Tipp');
+    expect(b.footprint[0]).toEqual([10, 20]);
+    expect(b.kind).toBe('gartenhaus');
+    expect(b.height).toBe(2.3);
+    expect(b.laenge).toEqual({ wert: 3.02, spanne: 0.38 });
+    expect(beschreibung(b)).toContain('3,02 × 2,48 m');
+  });
+  it('Klasse und Wandhöhe vom Nutzer gehen vor', () => {
+    const b = ausTipp('t1', antwort, [699000, 5487000], 'gewaechshaus', 2.1);
+    expect(b.kind).toBe('gewaechshaus');
+    expect(b.height).toBe(2.1);
+    expect(b.hoehe).toEqual({ wert: 2.1, spanne: 0 });
+  });
+  it('nachgezogen: Kanten bleiben änderbar, danach nutzerbestätigt', () => {
+    const b = nachgezogen(ausTipp('t1', antwort, [699000, 5487000]), [[10, 20], [13.2, 20], [13.2, 22.5], [10, 22.5]]);
+    expect(b.provenance).toBe('nutzerbestätigt');
+    expect(b.laenge?.wert).toBeCloseTo(3.2);
+  });
+  it('ohne Umriss: Fehler mit Grund', () => {
+    expect(() => ausTipp('t', { ok: false, grund: 'Kein Umriss gefunden.' }, [0, 0])).toThrow('Kein Umriss gefunden.');
   });
 });

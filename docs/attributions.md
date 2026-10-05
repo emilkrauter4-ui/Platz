@@ -33,7 +33,7 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 
 | Werkzeug | Lizenz | Wofür | Hinweis |
 |---|---|---|---|
-| SAM 2.1 (Meta, `facebookresearch/sam2`), Checkpoint `sam2.1_hiera_small.pt` | **Apache 2.0** (Code und Checkpoints laut README/LICENSE) | Umrisse aus Box-/Punkt-Prompts auf DOP20 (Phase 1.4), Annotationshilfe | läuft nur in der Pipeline (CPU), nicht in der App; Checkpoint liegt in `data/raw/models`, nicht im Git |
+| SAM 2.1 (Meta, `facebookresearch/sam2`), Checkpoint `sam2.1_hiera_small.pt` | **Apache 2.0** (Code und Checkpoints laut README/LICENSE) | Umrisse aus Box-/Punkt-Prompts auf DOP20 (Phase 1.4), Annotationshilfe, **„Ein Tipp erfasst“** (Punkt-Prompt) | läuft serverseitig im Tipp-Dienst (`pipeline/tipp_dienst.py`, CPU), nie im Browser; Checkpoint liegt in `data/raw/models`, nicht im Git. `sam2.1_hiera_large.pt` (ebenfalls Apache 2.0) nur zum Vergleich auf dem Dev-Set getestet, nicht verwendet |
 | PyTorch (CPU) | BSD-3-Clause | Laufzeit für SAM 2 | |
 | scikit-learn | BSD-3-Clause | Gradient Boosting (Klassifikation) | |
 | scikit-image | BSD-3-Clause | Wasserscheide für Baumkronen | |

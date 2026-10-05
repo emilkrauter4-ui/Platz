@@ -17,7 +17,8 @@ export type Provenance =
   | 'Annahme'
   | 'offen'
   | 'Demo'
-  | 'zertifiziert';
+  | 'zertifiziert'
+  | 'erfasst per Tipp';
 
 export type Status = 'ok' | 'warn' | 'bad';
 
@@ -89,7 +90,8 @@ export interface Bestand {
   footprint: Vec2[];
   /** mittlere Wandhöhe über Gelände (für die Grenzbebauung) */
   height: number;
-  provenance: Provenance; // 'erkannt' oder 'nutzerbestätigt'
+  /** 'erkannt' (Vollautomatik: nur Hinweis, nie Prüfgrundlage), 'erfasst per Tipp' oder 'nutzerbestätigt' */
+  provenance: Provenance;
   confidence?: number;
   /** fehlt bei Altdaten (bestand.json v1): dann Kleinbau */
   kind?: GartenKlasse;

@@ -495,9 +495,19 @@ export class Renderer {
     for (const b of st.bestand) {
       if (b.status === 'entfernt' || st.kante?.id === b.id) continue;
       const base = Math.min(...b.footprint.map((p) => this.ground(p)));
-      const conf = b.provenance === 'nutzerbestätigt';
+      const conf = b.provenance === 'nutzerbestätigt' || b.provenance === 'erfasst per Tipp';
+      const hinweis = b.provenance === 'erkannt';
       const farbe = b.kind && KLASSE_FARBE[b.kind];
-      const e = farbe && FLACH.has(b.kind!)
+      // Automatische Hinweise: nur blass am Boden, nie als Körper – sie sind nicht geprüft
+      const e = hinweis
+        ? v.entities.add({
+          polygon: {
+            hierarchy: new PolygonHierarchy(this.cart(b.footprint)),
+            classificationType: this.cls(),
+            material: Color.fromCssColorString(this.pal().warn).withAlpha(0.28),
+          },
+        })
+        : farbe && FLACH.has(b.kind!)
         ? v.entities.add({
           polygon: {
             hierarchy: new PolygonHierarchy(this.cart(b.footprint)),

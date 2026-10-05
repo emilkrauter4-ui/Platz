@@ -192,3 +192,46 @@ export function neuesObjekt(id: string, fp: Vec2[], kind: GartenKlasse, hoehe: n
 }
 
 export { centroid };
+
+/** Antwort des Tipp-Dienstes (pipeline/tipp.py). Koordinaten in EPSG:25832. */
+export interface TippAntwort {
+  ok: boolean;
+  grund?: string;
+  label?: string;
+  klasse?: GartenKlasse;
+  vorschlag?: { klasse: GartenKlasse; p: number }[];
+  umriss?: Vec2[];
+  masse?: {
+    form?: 'kreis' | 'rechteck';
+    laenge?: number; breite?: number; spanne_laenge?: number; spanne_breite?: number;
+    hoehe?: number; spanne_hoehe?: number; wandhoehe_mittel?: number; spanne_wand?: number;
+  };
+  quelle?: string;
+}
+
+/**
+ * „Ein Tipp erfasst“: Antwort des Dienstes → Bestand mit Herkunft „erfasst per Tipp“ (lokale Koordinaten).
+ * Klasse wählt der Nutzer; ohne Wahl gilt der Vorschlag. Höhe für die Grenzbebauung: mittlere Wandhöhe aus den
+ * Dachebenen, sonst die Gesamthöhe (sicher nach oben); eine vom Nutzer eingegebene Wandhöhe geht vor.
+ */
+export function ausTipp(id: string, a: TippAntwort, origin: Vec2, klasse?: GartenKlasse, wandhoehe?: number): Bestand {
+  if (!a.ok || !a.umriss || a.umriss.length < 3) throw new Error(a.grund ?? 'Tipp ohne Umriss');
+  const fp: Vec2[] = a.umriss.map(([x, y]) => [x - origin[0], y - origin[1]]);
+  const m = a.masse ?? {};
+  const r = minRect(fp);
+  const mass = (wert: number | undefined, spanne: number | undefined, ersatz: number) => ({ wert: wert ?? ersatz, spanne: spanne ?? 0.3 });
+  const hoehe = m.hoehe != null ? { wert: m.hoehe, spanne: m.spanne_hoehe ?? 0.3 } : undefined;
+  const wand = m.wandhoehe_mittel != null ? { wert: m.wandhoehe_mittel, spanne: m.spanne_wand ?? 0.3 } : undefined;
+  return {
+    id,
+    footprint: fp,
+    height: wandhoehe ?? wand?.wert ?? hoehe?.wert ?? 0,
+    provenance: 'erfasst per Tipp',
+    kind: klasse ?? a.klasse,
+    laenge: mass(m.laenge, m.spanne_laenge, r.laenge),
+    breite: mass(m.breite, m.spanne_breite, r.breite),
+    hoehe: wandhoehe != null ? { wert: wandhoehe, spanne: 0 } : hoehe,
+    wand: wandhoehe != null ? undefined : wand,
+    rund: m.form === 'kreis',
+  };
+}
