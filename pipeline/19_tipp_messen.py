@@ -2,6 +2,7 @@
 """„Ein Tipp erfasst“ messen: simulierter Tipp in die Objektmitte, SAM 2 segmentiert, Vergleich mit der Referenz.
 
   python3 19_tipp_messen.py dev     Varianten auf dem Entwicklungs-Set (alte Referenz, nur split=dev) – zum Einstellen
+  python3 19_tipp_messen.py test_v2 dasselbe gegen die korrigierte Referenz v2 (globaler Versatz, 17_testset_objekte.py)
   python3 19_tipp_messen.py test    EINMAL mit den in tipp.py festgelegten Einstellungen auf dem eingefrorenen
                                     Test-Set nach Objekten (prüft die Prüfsumme) → docs/messungen/tipp_test.json
 
@@ -57,10 +58,8 @@ def objekte(menge: str) -> list[dict]:
             if p["klasse"] in KLASSEN and gs[p["grundstueck"]] == "dev" and p.get("sicher", True):
                 out.append({"id": f"{p['grundstueck']}_{p['nr']}", "klasse": p["klasse"], "geom": shape(f["geometry"])})
         return out
-    if not t17.gueltig():
-        raise SystemExit("Test-Set verändert (Prüfsumme) – Abbruch")
-    return [dict(f["properties"], geom=shape(f["geometry"])) for f in json.load(open(t17.OBJ / "objekte.geojson"))["features"]
-            if f["properties"]["klasse"] in KLASSEN and f["properties"]["sicher"]]
+    _, ref = t17.referenz("v2" if menge == "test_v2" else "v1")
+    return [r for r in ref if r["klasse"] in KLASSEN and r["sicher"]]
 
 
 def eins(s, r, wahl, ohne, verf=False, form=False, groesse="small") -> dict:

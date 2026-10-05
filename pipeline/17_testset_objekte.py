@@ -19,7 +19,8 @@ Unabhängig von der Erkennung:
   python3 17_testset_objekte.py stand                Zählung je Klasse über die annotierten Blöcke
   python3 17_testset_objekte.py bauen                annotationen/*.json → objekte.geojson
   python3 17_testset_objekte.py einfrieren           Stichprobe ziehen, Prüfsumme → testset.json
-  python3 17_testset_objekte.py messen [geojson]     Erkennung (Standard data/build/garten.geojson) gegen das Set
+  python3 17_testset_objekte.py messen [geojson] [v2]  Erkennung (Standard data/build/garten.geojson) gegen das Set
+  python3 17_testset_objekte.py v2                   korrigierte Fassung (globaler Versatz, siehe V2_VERSATZ)
 
 Blockkoordinaten: Meter ab der linken unteren Ecke des Blocks (x Ost, y Nord); der Bogen zeigt 5 m Rand (−5 … 105).
 Annotation: {"block": "B007", "fertig": true, "objekte": [{"klasse": "pool", "rechteck": [cx, cy, laenge, breite, grad]},
@@ -99,13 +100,13 @@ def _gitter(im: Image.Image, bb, s: float, schritt: float, x00: float, y00: floa
         stark = abs((v - x00) % (schritt * 2)) < 1e-6
         d.line([(X, 0), (X, im.height)], fill=(255, 255, 255, 140 if stark else 60))
         if beschr and stark:
-            d.text((X + 2, 2), f"{v - x00:.0f}", fill=(255, 255, 0), font=f, stroke_width=2, stroke_fill=(0, 0, 0))
+            d.text((X, 2), f"{v - x00:.0f}", fill=(255, 255, 0), font=f, stroke_width=2, stroke_fill=(0, 0, 0), anchor="mt")
     for v in np.arange(np.ceil(bb[1] / schritt) * schritt, bb[3] + 0.01, schritt):
         Y = (bb[3] - v) * s
         stark = abs((v - y00) % (schritt * 2)) < 1e-6
         d.line([(0, Y), (im.width, Y)], fill=(255, 255, 255, 140 if stark else 60))
         if beschr and stark:
-            d.text((2, Y + 2), f"{v - y00:.0f}", fill=(255, 255, 0), font=f, stroke_width=2, stroke_fill=(0, 0, 0))
+            d.text((2, Y), f"{v - y00:.0f}", fill=(255, 255, 0), font=f, stroke_width=2, stroke_fill=(0, 0, 0), anchor="lm")
     if kern:
         d.rectangle([(kern[0] - bb[0]) * s, (bb[3] - kern[3]) * s, (kern[2] - bb[0]) * s, (bb[3] - kern[1]) * s], outline=(0, 255, 255, 255), width=2)
     return d
@@ -251,6 +252,32 @@ def einfrieren() -> int:
     return 0
 
 
+# Korrektur 05.10.2026: Die Annotationen v1 liegen systematisch versetzt (Ablesefehler an den Bögen: Zahlen standen
+# neben statt auf der Linie). Versatz nur aus dem Laser geschätzt (35 Gartenhäuser: Dach-Laserpunkte minus Referenz,
+# Median dx +0,27 m, dy −0,84 m; 3 Pools mit Echolücke bestätigen die Richtung). Kein Bezug auf die zu messenden Verfahren.
+V2_VERSATZ = (0.3, -0.8)
+
+
+def v2_erzeugen() -> int:
+    """objekte_v2.geojson = v1 um V2_VERSATZ verschoben; v1 bleibt unverändert und eingefroren."""
+    if not gueltig():
+        raise SystemExit("v1 verändert – Abbruch")
+    d = json.loads((OBJ / "objekte.geojson").read_text(encoding="utf-8"))
+    for f in d["features"]:
+        f["geometry"] = mapping(affinity.translate(shape(f["geometry"]), *V2_VERSATZ))
+    roh = json.dumps(d, ensure_ascii=False).encode("utf-8")
+    (OBJ / "objekte_v2.geojson").write_bytes(roh)
+    ts = json.loads((OBJ / "testset.json").read_text(encoding="utf-8"))
+    (OBJ / "testset_v2.json").write_text(json.dumps({
+        "erstellt": __import__("time").strftime("%Y-%m-%d"), "basis": "testset.json (v1, unverändert)",
+        "sha256_v1": ts["sha256_objekte"], "versatz_m": V2_VERSATZ, "sha256_objekte": _hash(roh),
+        "stichprobe": ts["stichprobe"], "bloecke": ts["bloecke"],
+        "begruendung": "Systematischer Ablesefehler der Annotation v1; Versatz nur aus Laser 2025 geschätzt "
+                       "(35 Gartenhäuser, Median dx +0,27 dy −0,84 m; 3 Pools mit Echolücke gleichsinnig)."}, indent=1, ensure_ascii=False), encoding="utf-8")
+    print(f"v2: {len(d['features'])} Objekte um {V2_VERSATZ} verschoben → objekte_v2.geojson")
+    return 0
+
+
 def gueltig() -> bool:
     ts = json.loads((OBJ / "testset.json").read_text(encoding="utf-8"))
     return ts["sha256_objekte"] == _hash((OBJ / "objekte.geojson").read_bytes())
@@ -263,11 +290,20 @@ def _iou(a: Polygon, b: Polygon) -> float:
     return i / max(a.union(b).area, 1e-9)
 
 
-def messen(pfad: Path | None = None) -> list[dict]:
-    if not gueltig():
-        raise SystemExit("objekte.geojson passt nicht zur Prüfsumme in testset.json – Test-Set wurde verändert")
-    ts = json.loads((OBJ / "testset.json").read_text(encoding="utf-8"))
-    ref = [dict(f["properties"], geom=shape(f["geometry"])) for f in json.loads((OBJ / "objekte.geojson").read_text(encoding="utf-8"))["features"]]
+def referenz(version: str = "v1") -> tuple[dict, list[dict]]:
+    if version == "v2":
+        ts = json.loads((OBJ / "testset_v2.json").read_text(encoding="utf-8"))
+        roh = (OBJ / "objekte_v2.geojson").read_bytes()
+    else:
+        ts = json.loads((OBJ / "testset.json").read_text(encoding="utf-8"))
+        roh = (OBJ / "objekte.geojson").read_bytes()
+    if _hash(roh) != ts["sha256_objekte"]:
+        raise SystemExit(f"Test-Set {version} passt nicht zur Prüfsumme – verändert")
+    return ts, [dict(f["properties"], geom=shape(f["geometry"])) for f in json.loads(roh)["features"]]
+
+
+def messen(pfad: Path | None = None, version: str = "v1") -> list[dict]:
+    ts, ref = referenz(version)
     pfad = pfad or build_dir() / "garten.geojson"
     det_all = json.loads(pfad.read_text(encoding="utf-8"))
     kerne = []
@@ -297,8 +333,8 @@ def messen(pfad: Path | None = None) -> list[dict]:
                        "beruehrt": nah, "erkennungen": len(dk), "richtig": richtig, "praezision": pr,
                        "verwechselt": verwechselt, "f1": f1, "ref_in_bloecken": len(alle_k)})
     modell = sorted({d.get("modell_version") for d in det if d.get("modell_version") is not None})
-    erg = {"datei": str(pfad.name), "modell": modell, "bloecke": len(kerne), "iou_min": IOU_MIN, "zeilen": zeilen}
-    (r7.REF / "auswertung_test_objekte.json").write_text(json.dumps(erg, indent=1, ensure_ascii=False), encoding="utf-8")
+    erg = {"datei": str(pfad.name), "referenz": version, "modell": modell, "bloecke": len(kerne), "iou_min": IOU_MIN, "zeilen": zeilen}
+    (r7.REF / ("auswertung_test_objekte.json" if version == "v1" else "auswertung_test_objekte_v2.json")).write_text(json.dumps(erg, indent=1, ensure_ascii=False), encoding="utf-8")
     p = lambda v: "–" if v is None else f"{v:.2f}"
     print(f"Modell {modell}, {len(kerne)} Blöcke, IoU ≥ {IOU_MIN}")
     print("| Klasse | Stichprobe | Treffer | Trefferquote | berührt | Erkennungen | richtig | Präzision | F1 |")
@@ -324,6 +360,10 @@ if __name__ == "__main__":
     elif a[0] == "einfrieren":
         einfrieren()
     elif a[0] == "messen":
-        messen(Path(a[1]) if len(a) > 1 else None)
+        v = "v2" if "v2" in a else "v1"
+        rest = [x for x in a[1:] if x != "v2"]
+        messen(Path(rest[0]) if rest else None, v)
+    elif a[0] == "v2":
+        v2_erzeugen()
     else:
         print(__doc__)
