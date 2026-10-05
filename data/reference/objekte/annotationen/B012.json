@@ -1,0 +1,4 @@
+{"block": "B012", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [23.0, 93.8, 4.6, 3.2, -20], "notiz": "weißes Dach, Laser ~1,7 m"},
+ {"klasse": "gewaechshaus", "rechteck": [20.8, 86.5, 4.5, 2.0, -50], "sicher": false, "notiz": "weißes längliches Objekt, evtl. Gewächshaus oder Anhänger"}
+]}

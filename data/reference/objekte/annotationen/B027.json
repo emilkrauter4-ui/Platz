@@ -1,0 +1,6 @@
+{"block": "B027", "fertig": true, "objekte": [
+ {"klasse": "pool", "kreis": [71.8, 25.5, 1.8], "notiz": "runder hellblauer Pool"},
+ {"klasse": "gartenhaus", "rechteck": [46.0, 32.0, 2.6, 7.0, 0], "sicher": false, "notiz": "längliches Objekt mit weißem Ende, Laser ~2 m"},
+ {"klasse": "gewaechshaus", "rechteck": [60.3, 30.5, 1.5, 5.0, 5], "sicher": false, "notiz": "schmales türkises Objekt: Frühbeet/Folientunnel?"},
+ {"klasse": "gartenhaus", "rechteck": [93.5, 87.8, 3.6, 3.4, -15], "sicher": false, "notiz": "weißer Pavillon, im Laser 2025 nicht vorhanden"}
+]}

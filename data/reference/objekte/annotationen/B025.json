@@ -1,0 +1,6 @@
+{"block": "B025", "fertig": true, "objekte": [
+ {"klasse": "pool", "kreis": [36.6, 91.5, 1.6], "notiz": "hellblauer runder Pool"},
+ {"klasse": "gartenhaus", "rechteck": [77.3, 57.5, 5.0, 4.0, 30], "notiz": "rotes Dach, Laser ~2 m"},
+ {"klasse": "trampolin", "kreis": [60.0, 35.5, 1.9], "notiz": "Ring mit dunkler Matte"},
+ {"klasse": "gewaechshaus", "rechteck": [65.5, 55.0, 3.0, 5.0, 30], "sicher": false, "notiz": "durchsichtiger Rahmenbau im Nutzgarten"}
+]}

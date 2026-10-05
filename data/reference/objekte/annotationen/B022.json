@@ -1,0 +1,5 @@
+{"block": "B022", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [77.0, 41.2, 5.0, 3.2, -5], "notiz": "hellblaues Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [24.3, 31.8, 3.4, 4.4, 10], "notiz": "weißes Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [39.0, 41.5, 3.0, 4.0, 10], "sicher": false, "notiz": "hellgraues kleines Objekt, im Laser kaum erhöht"}
+]}

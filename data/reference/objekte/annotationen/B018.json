@@ -1,0 +1,8 @@
+{"block": "B018", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [33.0, 84.3, 1.7], "notiz": "Rahmen und dunkle Matte"},
+ {"klasse": "pool", "kreis": [28.8, 84.6, 0.9], "sicher": false, "notiz": "kleiner runder Ring, Planschbecken oder Feuerschale"},
+ {"klasse": "pool", "kreis": [90.8, 50.3, 1.7], "sicher": false, "notiz": "weißes rundes Objekt: abgedeckter Pool oder Schirm"},
+ {"klasse": "gartenhaus", "rechteck": [25.8, 69.0, 4.2, 4.0, -25], "notiz": "türkises Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [18.4, 65.6, 3.5, 3.4, -30], "notiz": "weißes Dach, Laser ~2 m"},
+ {"klasse": "trampolin", "kreis": [55.6, 62.2, 2.2], "sicher": false, "notiz": "dunkle runde Fläche mit Rand: Trampolin oder Pool"}
+]}

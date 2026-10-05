@@ -1,0 +1,4 @@
+{"block": "B032", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [21.5, 76.8, 3.8, 4.2, 0], "sicher": false, "notiz": "kleiner Rahmenbau, Pergola oder Schuppen"},
+ {"klasse": "pool", "kreis": [37.0, 19.5, 1.9], "sicher": false, "notiz": "weißes rundes Objekt: Schirm oder abgedeckter Pool"}
+]}

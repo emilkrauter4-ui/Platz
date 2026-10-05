@@ -1,0 +1,5 @@
+{"block": "B011", "fertig": true, "objekte": [
+ {"klasse": "pool", "kreis": [7.3, 85.2, 1.85], "notiz": "Aufstellpool, im Laser 2025 nicht vorhanden"},
+ {"klasse": "carport_garage", "rechteck": [88.8, 47.5, 5.0, 3.6, -20], "sicher": false, "notiz": "Anbau/Garage am Haus, nicht im Hausumring"},
+ {"klasse": "gartenhaus", "poly": [[63.5,16],[68.5,15.5],[69,21],[64,22]], "sicher": false, "notiz": "nur im Laser 2025 (2–3 m), im DOP 2023 nicht vorhanden"}
+]}

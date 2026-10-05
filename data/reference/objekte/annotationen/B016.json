@@ -1,0 +1,6 @@
+{"block": "B016", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [17.3, 82.3, 2.9, 2.6, 0], "notiz": "kleiner Schuppen, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [49.3, 76.4, 3.6, 3.5, -10], "notiz": "rotes Dach, Laser ~2 m"},
+ {"klasse": "gartenhaus", "rechteck": [62.0, 15.2, 6.0, 4.5, -15], "sicher": false, "notiz": "blaues Dach neben Gärtnerei-Gewächshäusern"},
+ {"klasse": "gewaechshaus", "rechteck": [67.8, 12.2, 4.5, 4.5, 30], "sicher": false, "notiz": "weißes Dach an der Gärtnerei, Gewächshaus oder Schuppen"}
+]}

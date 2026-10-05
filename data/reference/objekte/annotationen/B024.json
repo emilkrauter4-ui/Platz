@@ -1,0 +1,5 @@
+{"block": "B024", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [7.8, 22.6, 1.8], "notiz": "roter Randschutz, dunkle Matte, Rahmen im Laser"},
+ {"klasse": "gartenhaus", "rechteck": [46.0, 90.0, 4.4, 2.6, -25], "sicher": false, "notiz": "weißes Dach ~2 m: Schuppen oder Fahrzeug"},
+ {"klasse": "gartenhaus", "rechteck": [40.5, 11.3, 4.0, 3.6, -20], "sicher": false, "notiz": "weißer Pavillon, im Laser 2025 nicht vorhanden"}
+]}

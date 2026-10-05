@@ -1,0 +1,4 @@
+{"block": "B035", "fertig": true, "objekte": [
+ {"klasse": "pool", "kreis": [12.5, 32.8, 2.8], "notiz": "runder Pool, grau-blaues Wasser oder Abdeckung"},
+ {"klasse": "trampolin", "kreis": [72.2, 53.0, 1.8], "sicher": false, "notiz": "dunkler Ring, Trampolin oder Pool"}
+]}

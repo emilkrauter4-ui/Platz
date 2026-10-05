@@ -1,0 +1,5 @@
+{"block": "B010", "fertig": true, "objekte": [
+ {"klasse": "gartenhaus", "rechteck": [12.3, 21.2, 4.2, 3.4, -5], "notiz": "Schuppen im Garten, Laser 2–2,5 m"},
+ {"klasse": "gartenhaus", "rechteck": [24.3, 31.8, 3.0, 4.0, -15], "sicher": false, "notiz": "weißer Pavillon/Zelt, im Laser 2025 nicht vorhanden"},
+ {"klasse": "gartenhaus", "rechteck": [39.5, 29.5, 4.5, 2.6, -10], "sicher": false, "notiz": "graues Dach unter Bewuchs"}
+]}

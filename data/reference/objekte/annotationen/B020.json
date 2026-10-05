@@ -1,0 +1,4 @@
+{"block": "B020", "fertig": true, "objekte": [
+ {"klasse": "trampolin", "kreis": [38.9, 64.6, 2.0], "sicher": false, "notiz": "Ring mit hellem Zentrum, im Laser niedriger Ring: Trampolin oder rundes Beet"},
+ {"klasse": "gartenhaus", "rechteck": [89.8, 33.4, 4.8, 2.6, 0], "sicher": false, "notiz": "weiß-rotes Objekt, Gartenhaus oder Wohnwagen"}
+]}

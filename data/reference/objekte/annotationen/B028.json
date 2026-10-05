@@ -1,0 +1,4 @@
+{"block": "B028", "fertig": true, "objekte": [
+ {"klasse": "gewaechshaus", "rechteck": [49.6, 53.5, 2.4, 6.0, 0], "sicher": false, "notiz": "helles schmales Objekt ~2 m hoch: Gewächshaus oder Schuppen"},
+ {"klasse": "gartenhaus", "rechteck": [99.0, 25.8, 5.0, 4.5, 0], "notiz": "rotes Dach am Blockrand, Laser ~2,5 m"}
+]}
