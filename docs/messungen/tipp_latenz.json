@@ -1,0 +1,20 @@
+{
+ "dienst_start_s": 12.4,
+ "erster_tipp_s": 0.674,
+ "erster_embedding": "vorberechnet",
+ "mit_embeddings": {
+  "n": 26,
+  "median_s": 0.679,
+  "p95_s": 0.777,
+  "max_s": 0.842,
+  "unter_1s": 26,
+  "alle_vorberechnet": false
+ },
+ "ohne_embeddings": {
+  "n": 10,
+  "median_s": 2.327,
+  "max_s": 2.727
+ },
+ "maschine": "Container, 4 CPU-Kerne, keine GPU",
+ "datum": "2026-10-09"
+}

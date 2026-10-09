@@ -359,6 +359,19 @@ def aufwaermen() -> float:
     t0 = time.time()
     g8._sam()
     _modell()
+    # Für Kacheln mit vorberechneten Embeddings: Laserzellen (100 m) und Rasterdateien vorab laden, damit kein Tipp
+    # auf die Platte warten muss
+    from rohdaten import _zelle, raw_dir
+    for d in sorted((g8.build_dir() / "tipp_embed").glob("*_*")):
+        if not (d / "index.json").exists():
+            continue
+        kx, ky = (int(v) for v in d.name.split("_"))
+        for cx in range(kx * 10 - 1, kx * 10 + 11):
+            for cy in range(ky * 10 - 1, ky * 10 + 11):
+                _zelle(cx, cy)
+        for art in ("dop20", "dop20cir", "dgm1", "dom20"):
+            for f in (raw_dir() / art).glob(f"*{kx}_{ky}*.tif"):
+                f.read_bytes()
     x, y = RASTER_URSPRUNG[0] + 500, RASTER_URSPRUNG[1] + 500
     erfassen(x, y)
     return time.time() - t0

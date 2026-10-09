@@ -93,7 +93,7 @@ def zellen_bauen() -> None:
         print(f"  {p.name}: {len(teile)} Zellen")
 
 
-@lru_cache(maxsize=64)
+@lru_cache(maxsize=512)  # 512 Zellen à 100 m ≈ 5 km²; der Tipp-Dienst hält so seine Kacheln im Speicher
 def _zelle(cx: int, cy: int):
     p = _zellen_dir() / f"{cx}_{cy}.npz"
     if not p.exists():

@@ -462,6 +462,26 @@ Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampol
 - Tests: App 144 grün (neu: Tipp-Objekt, Proxy, Hinweis statt Kollision), Pipeline 7.
 - **Gartenblick** bleibt pausiert.
 
+## Nachtrag 9. Oktober 2026: Tipp unter 1 s, Dach vs. Wand, Maßband-Protokoll
+
+- **Tipp unter 1 s** (`docs/messungen/tipp_latenz.md`): SAM-2-Embeddings für Kachel 698_5486 vorberechnet
+  (`pipeline/20_tipp_embeddings.py`, 484 Fenster, 4,06 GB, 14 min). Pro Tipp nur noch Prompt-Decoder. Gemessen
+  per HTTP: **erster Tipp nach dem Start 0,67 s**, 26 von 26 Tipps unter 1 s (Median 0,68 s, Maximum 0,84 s). Ohne
+  Embeddings ≈ 2,3 s. Vorberechnet und live liefern dieselben Masken (IoU ≥ 0,998). Fröschau 41 liegt in 699_5486 –
+  diese Kachel wird ebenfalls vorberechnet.
+- **Dach vs. Wand:** Der Tipp-Umriss aus dem Luftbild ist das Dach. Die Wand liegt um den Dachüberstand weiter innen. Je Seite
+  wird der Überstand aus Laser-Wandpunkten unter der Traufe gemessen (ab 4 Punkten), sonst gilt 0,30 m angenommen
+  (`limits.json bestand.dachueberstandAnnahmeM`), vom Nutzer änderbar. Prüfungen nutzen den Wandumriss, Label
+  „geschätzt“. Das Dach wird gestrichelt mit angezeigt. Auf dem Test-Set: Bei 29 von 43 Gartenhäusern ist mindestens eine Seite
+  aus dem Laser messbar, bei 1 alle vier. Gemessene Überstände 0,07–0,99 m – **ungeprüft, bis Maßband-Werte da sind**.
+  Prüfmappe: neue Regel und Frage 18 („Ab welchem Dachüberstand zählt er? Wand- oder Dachlänge bei 9 m/15 m?“).
+- **Neueres DOP20/DOM20:** gibt es nicht (`docs/messungen/dop_aktualitaet.md`). Die Kachel wurde 2025 witterungsbedingt
+  nicht beflogen, Befliegung 2026 ist angekündigt. Keine Neumessung möglich.
+- **Maßband-Protokoll:** `data/reference/vor_ort.csv` (neue Spalten: Lage, Wandlängen und Überstände je
+  Himmelsrichtung, Trauf-/Firsthöhe, Grenzstein, Fotos, Einverständnis), Anleitung `docs/vor_ort_anleitung.md`,
+  Auswertung `pipeline/21_vor_ort_auswerten.py` (Wand und Dach getrennt, Ziel ≤ 0,30 m). Tests `test_vor_ort.py`.
+- **Alles andere pausiert** bis zu den Maßband-Werten (auch Gartenblick).
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.
