@@ -29,3 +29,8 @@ Test-Sets in der Kachel 698_5486 (Embeddings vorberechnet mit `20_tipp_embedding
 - Nur Kacheln mit Embeddings sind schnell. Fröschau 41 liegt in **699_5486**, die wird ebenfalls vorberechnet.
   Für jede weitere Kachel kommen ≈ 4 GB und ≈ 14 min dazu.
 - Rechenzeit Server-seitig gemessen. Dazu kommt in der App die Netzlaufzeit (im WLAN vernachlässigbar, im Mobilfunk ≈ 0,1–0,3 s).
+
+**Nachtrag 09.10.2026 – Kachel 699_5486 (Fröschau 41):** Embeddings ebenfalls vorberechnet (484 Fenster, 739 s, 4,06 GB;
+Prüfung live ↔ vorberechnet: 14 Tipps, IoU Median 1,000, Minimum 0,988). Mit beiden Kacheln dauert der Dienst-Start
+24 s (mehr Laserzellen vorgeladen). Tipp auf das Gartenhaus Fröschau 41 (UTM 699357 / 5486729): erster Tipp 1,0 s
+(knapp an der Grenze), danach 0,72 s und 0,71 s, jeweils „vorberechnet“.

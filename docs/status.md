@@ -468,7 +468,8 @@ Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampol
   (`pipeline/20_tipp_embeddings.py`, 484 Fenster, 4,06 GB, 14 min). Pro Tipp nur noch Prompt-Decoder. Gemessen
   per HTTP: **erster Tipp nach dem Start 0,67 s**, 26 von 26 Tipps unter 1 s (Median 0,68 s, Maximum 0,84 s). Ohne
   Embeddings ≈ 2,3 s. Vorberechnet und live liefern dieselben Masken (IoU ≥ 0,998). Fröschau 41 liegt in 699_5486 –
-  diese Kachel wird ebenfalls vorberechnet.
+  diese Kachel ist jetzt ebenfalls vorberechnet (IoU live ↔ vorberechnet Minimum 0,988); dort erster Tipp 1,0 s
+  (knapp), danach 0,71–0,72 s. Dienst-Start mit beiden Kacheln 24 s.
 - **Dach vs. Wand:** Der Tipp-Umriss aus dem Luftbild ist das Dach. Die Wand liegt um den Dachüberstand weiter innen. Je Seite
   wird der Überstand aus Laser-Wandpunkten unter der Traufe gemessen (ab 4 Punkten), sonst gilt 0,30 m angenommen
   (`limits.json bestand.dachueberstandAnnahmeM`), vom Nutzer änderbar. Prüfungen nutzen den Wandumriss, Label
