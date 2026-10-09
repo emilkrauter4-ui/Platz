@@ -38,11 +38,11 @@ sup { font-size: 6.5pt; }
   <h3>So geht's</h3>
   <ol><li>Je Regel: Gesetzestext, unsere Auslegung, wie Passt. rechnet, ein Beispiel.</li>
   <li>Bitte ankreuzen: <b>korrekt</b>, <b>falsch</b> oder <b>unklar</b>, und bei Bedarf eine Anmerkung.</li>
-  <li>Am Ende: 17 gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
+  <li>Am Ende: 18 gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
  </div>
  <table class="meta">
-  <tr><td>Stand</td><td>05.10.2026</td></tr>
-  <tr><td>Regeln</td><td>57 (aus <code>app/src/rules/limits.json</code>, SHA-256 6d6f6368ce20…)</td></tr>
+  <tr><td>Stand</td><td>09.10.2026</td></tr>
+  <tr><td>Regeln</td><td>58 (aus <code>app/src/rules/limits.json</code>, SHA-256 5835657364f6…)</td></tr>
   <tr><td>Geprüft von</td><td>______________________________ (Name, Funktion)</td></tr>
   <tr><td>Datum, Unterschrift</td><td>______________________________</td></tr>
   <tr><td>Rückfragen</td><td>Emil (Passt.) – ______________________________</td></tr>
@@ -310,7 +310,20 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">21</span><code>bestand.grenzNaheM</code><span class="wert">Wert: <b>1.0</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">21</span><code>bestand.dachueberstandAnnahmeM</code><span class="wert">Wert: <b>0.3</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Annahme Passt. (Emil, 09.10.2026)</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 6: <sup>1</sup>Bei der Bemessung der Abstandsflächen bleiben außer Betracht 1. vor die Außenwand vortretende Bauteile wie Gesimse und Dachüberstände, 2. untergeordnete Vorbauten wie Balkone und eingeschossige Erker, wenn sie a) insgesamt nicht mehr als ein Drittel der Breite der Außenwand des jeweiligen Gebäudes, höchstens jeweils 5 m, in Anspruch nehmen, b) nicht mehr als 1,50 m vor diese Außenwand vortreten und c) mindestens 2 m von der gegenüberliegenden Nachbargrenze entfernt bleiben, 3. bei Gebäuden an der Grundstücksgrenze die Seitenwände von Vorbauten und Dachaufbauten, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, 4. Maßnahmen zum Zwecke der Energieeinsparung an bestehenden Gebäuden, wenn sie a) eine Stärke von nicht mehr als 0,30 m aufweisen und b) mindestens 2,50 m von der Grundstücksgrenze zurückbleiben. <sup>2</sup>Abs. 5a Satz 5 bleibt unberührt.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>Der Tipp-Umriss aus dem Luftbild ist der Dachumriss. Die Wand liegt um den Dachüberstand weiter innen. Je Seite wird der Überstand aus Laser-Wandpunkten unter der Traufe gemessen (ab 4 Punkten), sonst gilt diese Annahme. Der Nutzer kann ihn ändern. Prüfungen (Grenzbebauung, Kollision) nutzen den Wandumriss, Label „geschätzt“.</dd>
+    <dt>So rechnet Passt.</dt><dd>Per Tipp erfasster Bestand: Luftbild-Umriss = Dach. Wand = Dach minus Überstand je Seite (aus Laser-Wandpunkten unter der Traufe, sonst 0,30 m angenommen, vom Nutzer änderbar). Grenzbebauung (9 m/15 m) und Kollision rechnen mit dem Wandumriss, Label „geschätzt“; der Dachumriss wird gestrichelt mit angezeigt.</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus, Dach im Luftbild 4,50 × 3,60 m, Überstand angenommen 0,30 m → Wand 3,90 × 3,00 m. An der Ostgrenze zählen 3,90 m (nicht 4,50 m) zur 9-m-Länge.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">22</span><code>bestand.grenzNaheM</code><span class="wert">Wert: <b>1.0</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>Produktentscheidung Passt.: Objekte mit höchstens diesem Abstand zur Grenze werden bei „Steht hier schon etwas?“ der Grenze zugeordnet</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
@@ -323,7 +336,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section><h2 class="sek">Wärmepumpe</h2>
 <section class="regel">
-  <div class="kopf"><span class="nr">22</span><code>waermepumpe.verfahrensfrei</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">23</span><code>waermepumpe.verfahrensfrei</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 57 Abs. 1 Nr. 2 Buchst. b</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 57 Abs. 1 Nr. 2: folgende Anlagen der technischen Gebäudeausrüstung: … b) sonstige Anlagen der technischen Gebäudeausrüstung</dd>
@@ -336,7 +349,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">23</span><code>waermepumpe.richtwerteNachtDbA</code><span class="wert">Wert: <b>{"rein": 35, "allgemein": 40, "misch": 45}</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">24</span><code>waermepumpe.richtwerteNachtDbA</code><span class="wert">Wert: <b>{"rein": 35, "allgemein": 40, "misch": 45}</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>TA Lärm Nr. 6.1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">TA Lärm Nr. 6.1 Immissionsrichtwerte für Immissionsorte außerhalb von Gebäuden Die Immissionsrichtwerte für den Beurteilungspegel betragen für Immissionsorte außerhalb von Gebäuden a) in Industriegebieten 70 dB(A) b) in Gewerbegebieten tags 65 dB(A) nachts 50 dB(A) c) in urbanen Gebieten tags 63 dB (A) nachts 45 dB (A) d) in Kerngebieten, Dorfgebieten und Mischgebieten tags 60 dB(A) nachts 45 dB(A) e) in allgemeinen Wohngebieten und Kleinsiedlungsgebieten tags 55 dB(A) nachts 40 dB(A) f) in reinen Wohngebieten tags 50 dB(A) nachts 35 dB(A) g) in Kurgebieten, für Krankenhäuser und Pflegeanstalten tags 45 dB(A) nachts 35 dB(A) Einzelne kurzzeitige Geräuschspitzen dürfen die Immissionsrichtwerte am Tage um nicht mehr als 30 dB(A) und in der Nacht um nicht mehr als 20 dB(A) überschreiten.</dd>
@@ -349,7 +362,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">24</span><code>waermepumpe.richtwirkungQ</code><span class="wert">Wert: <b>{"frei": 2, "wand": 4, "ecke": 8}</b></span><span class="art">Fachliche Quelle</span></div>
+  <div class="kopf"><span class="nr">25</span><code>waermepumpe.richtwirkungQ</code><span class="wert">Wert: <b>{"frei": 2, "wand": 4, "ecke": 8}</b></span><span class="art">Fachliche Quelle</span></div>
   <dl>
     <dt>Quelle</dt><dd>LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden Luftwärmepumpen (Richtwirkungsmaß).</dd>
@@ -362,7 +375,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">25</span><code>waermepumpe.formel</code><span class="wert">Wert: <b>Lp = Lw + 10·log10(Q) − 11 − 20·log10(r)</b></span><span class="art">Fachliche Quelle</span></div>
+  <div class="kopf"><span class="nr">26</span><code>waermepumpe.formel</code><span class="wert">Wert: <b>Lp = Lw + 10·log10(Q) − 11 − 20·log10(r)</b></span><span class="art">Fachliche Quelle</span></div>
   <dl>
     <dt>Quelle</dt><dd>LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung).</dd>
@@ -375,7 +388,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">26</span><code>waermepumpe.knappMargeDb</code><span class="wert">Wert: <b>3</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">27</span><code>waermepumpe.knappMargeDb</code><span class="wert">Wert: <b>3</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>Produktentscheidung Passt. (Ampel gelb, wenn weniger als 3 dB unter dem Richtwert)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
@@ -388,7 +401,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">27</span><code>waermepumpe.wandabstandM</code><span class="wert">Wert: <b>3</b></span><span class="art">Fachliche Quelle</span></div>
+  <div class="kopf"><span class="nr">28</span><code>waermepumpe.wandabstandM</code><span class="wert">Wert: <b>3</b></span><span class="art">Fachliche Quelle</span></div>
   <dl>
     <dt>Quelle</dt><dd>LAI-Leitfaden für die Verbesserung des Schutzes gegen Lärm bei stationären Geräten (Luftwärmepumpen …), Richtwirkungsmaß; Wortlaut der Stufen aus dem BWP-Schallrechner (abgerufen 04.10.2026): „keine Wand näher als 3 m“ / „an einer Wand, Abstand zum Gerät bis zu 3 m“</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden / Stufen des BWP-Schallrechners.</dd>
@@ -401,7 +414,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">28</span><code>waermepumpe.quellhoeheM</code><span class="wert">Wert: <b>0.5</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">29</span><code>waermepumpe.quellhoeheM</code><span class="wert">Wert: <b>0.5</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>Annahme: Schallquelle 0,5 m über Gelände</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
@@ -414,7 +427,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">29</span><code>waermepumpe.fensterhoeheAnnahmeM</code><span class="wert">Wert: <b>1.6</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">30</span><code>waermepumpe.fensterhoeheAnnahmeM</code><span class="wert">Wert: <b>1.6</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>CLAUDE.md: ohne Eingabe Fassadenmitte auf 1,6 m Höhe</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Vorgabe aus der Projektbeschreibung.</dd>
@@ -427,7 +440,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">30</span><code>waermepumpe.abschirmungDb</code><span class="wert">Wert: <b>{"sichtfrei": 0, "verdeckt": 5, "abgewandt": 15}</b></span><span class="art">Fachliche Quelle</span></div>
+  <div class="kopf"><span class="nr">31</span><code>waermepumpe.abschirmungDb</code><span class="wert">Wert: <b>{"sichtfrei": 0, "verdeckt": 5, "abgewandt": 15}</b></span><span class="art">Fachliche Quelle</span></div>
   <dl>
     <dt>Quelle</dt><dd>LAI-Leitfaden Luftwärmepumpen, Abschirmmaß (Stufen wie im BWP-Schallrechner: Sichtkontakt 0 dB, kein Sichtkontakt 5 dB, auf abgewandter Seite 15 dB; abgerufen 04.10.2026)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden, Stufen des BWP-Schallrechners.</dd>
@@ -440,7 +453,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">31</span><code>waermepumpe.fassadenRasterM</code><span class="wert">Wert: <b>1.0</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">32</span><code>waermepumpe.fassadenRasterM</code><span class="wert">Wert: <b>1.0</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>Produktentscheidung Passt.: angenommene Fenster alle 1 m entlang der dem Grundstück zugewandten Fassade; maßgeblich ist der lauteste Punkt</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
@@ -453,7 +466,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">32</span><code>waermepumpe.fensterhoeheOGAnnahmeM</code><span class="wert">Wert: <b>4.4</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">33</span><code>waermepumpe.fensterhoeheOGAnnahmeM</code><span class="wert">Wert: <b>4.4</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>Annahme Passt.: Fenstermitte Obergeschoss (Erdgeschoss 1,6 m + Geschosshöhe 2,8 m), nur bei Traufhöhe über 4,5 m (LoD2)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
@@ -466,7 +479,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">33</span><code>waermepumpe.keymarkNennbetrieb</code><span class="wert">Wert: <b>ja</b></span><span class="art">Fachliche Quelle</span></div>
+  <div class="kopf"><span class="nr">34</span><code>waermepumpe.keymarkNennbetrieb</code><span class="wert">Wert: <b>ja</b></span><span class="art">Fachliche Quelle</span></div>
   <dl>
     <dt>Quelle</dt><dd>Heat Pump KEYMARK / EN 12102-1 über hplib (MIT, FZJ IEK-3): Schallleistung außen im Nennbetrieb</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Daten: Heat Pump KEYMARK (EN 12102-1) über hplib.</dd>
@@ -479,7 +492,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section><h2 class="sek">Hecken und Bäume (Nachbarrecht)</h2>
 <section class="regel">
-  <div class="kopf"><span class="nr">34</span><code>pflanzen.abstandKleinM</code><span class="wert">Wert: <b>0.5</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">35</span><code>pflanzen.abstandKleinM</code><span class="wert">Wert: <b>0.5</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 47 Abs. 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 47 Grenzabstand von Pflanzen – (1) Der Eigentümer eines Grundstücks kann verlangen, daß auf einem Nachbargrundstück nicht Bäume, Sträucher oder Hecken, Weinstöcke oder Hopfenstöcke in einer geringeren Entfernung als 0,50 m oder, falls sie über 2 m hoch sind, in einer geringeren Entfernung als 2 m von der Grenze seines Grundstücks gehalten werden. </dd>
@@ -492,7 +505,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">35</span><code>pflanzen.hoeheGrenzeM</code><span class="wert">Wert: <b>2</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">36</span><code>pflanzen.hoeheGrenzeM</code><span class="wert">Wert: <b>2</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 47 Abs. 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 47 Grenzabstand von Pflanzen – (1) Der Eigentümer eines Grundstücks kann verlangen, daß auf einem Nachbargrundstück nicht Bäume, Sträucher oder Hecken, Weinstöcke oder Hopfenstöcke in einer geringeren Entfernung als 0,50 m oder, falls sie über 2 m hoch sind, in einer geringeren Entfernung als 2 m von der Grenze seines Grundstücks gehalten werden. </dd>
@@ -505,7 +518,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">36</span><code>pflanzen.abstandHochM</code><span class="wert">Wert: <b>2</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">37</span><code>pflanzen.abstandHochM</code><span class="wert">Wert: <b>2</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 47 Abs. 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 47 Grenzabstand von Pflanzen – (1) Der Eigentümer eines Grundstücks kann verlangen, daß auf einem Nachbargrundstück nicht Bäume, Sträucher oder Hecken, Weinstöcke oder Hopfenstöcke in einer geringeren Entfernung als 0,50 m oder, falls sie über 2 m hoch sind, in einer geringeren Entfernung als 2 m von der Grenze seines Grundstücks gehalten werden. </dd>
@@ -518,7 +531,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">37</span><code>pflanzen.waldM</code><span class="wert">Wert: <b>0.5</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">38</span><code>pflanzen.waldM</code><span class="wert">Wert: <b>0.5</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 47 Abs. 2 Satz 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 47 Grenzabstand von Pflanzen – (2) <sup>1</sup>Zugunsten eines Waldgrundstücks kann nur die Einhaltung eines Abstands von 0,50 m verlangt werden. <sup>2</sup>Das gleiche gilt, wenn Wein oder Hopfen auf einem Grundstück angebaut wird, in dessen Lage dieser Anbau nach den örtlichen Verhältnissen üblich ist.</dd>
@@ -531,7 +544,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">38</span><code>pflanzen.landwirtschaftM</code><span class="wert">Wert: <b>4</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">39</span><code>pflanzen.landwirtschaftM</code><span class="wert">Wert: <b>4</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 48 Abs. 1, Art. 50 Abs. 2</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 48 Grenzabstand bei landwirtschaftlichen Grundstücken (1) Gegenüber einem landwirtschaftlich genutzten Grundstück, dessen wirtschaftliche Bestimmung durch Schmälerung des Sonnenlichts erheblich beeinträchtigt werden würde, ist mit Bäumen von mehr als 2 m Höhe ein Abstand von 4 m einzuhalten. (2) Die Einhaltung des in Absatz 1 bestimmten Abstands kann nur verlangt werden, wenn das Grundstück die bezeichnete wirtschaftliche Bestimmung schon zu der Zeit gehabt hat, zu der die Bäume die Höhe von 2 m überschritten haben.<br>Art. 50 Ausnahmen vom Grenzabstand – (2) Art. 48 Abs. 1 gilt auch nicht für Stein- und Kernobstbäume sowie Bäume, die sich in einem Hofraum oder einem Hausgarten befinden. </dd>
@@ -544,7 +557,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">39</span><code>pflanzen.messung</code><span class="wert">Wert: <b>stamm</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">40</span><code>pflanzen.messung</code><span class="wert">Wert: <b>stamm</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 49</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 49 Messung des Grenzabstands Der Abstand nach Art. 47 und 48 wird von der Mitte des Stammes an der Stelle, an der dieser aus dem Boden hervortritt, bei Sträuchern und Hecken von der Mitte der zunächst an der Grenze befindlichen Triebe, bei Hopfenstöcken von der Hopfenstange oder dem Steigdraht ab gemessen.</dd>
@@ -557,7 +570,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">40</span><code>pflanzen.ausnahmeEinfriedung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">41</span><code>pflanzen.ausnahmeEinfriedung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 50 Abs. 1 Satz 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 50 Ausnahmen vom Grenzabstand – (1) <sup>1</sup>Art. 47 und 48 sind nicht auf Gewächse anzuwenden, die sich hinter einer Mauer oder einer sonstigen dichten Einfriedung befinden und diese nicht oder nicht erheblich überragen. <sup>2</sup>Sie gelten ferner nicht für Bepflanzungen, die längs einer öffentlichen Straße oder auf einem öffentlichen Platz gehalten werden, sowie für Bepflanzungen, die zum Uferschutz, zum Schutz von Abhängen oder Böschungen oder zum Schutz einer Eisenbahn dienen. </dd>
@@ -570,7 +583,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">41</span><code>pflanzen.ausnahmeStrasse</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">42</span><code>pflanzen.ausnahmeStrasse</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 50 Abs. 1 Satz 2</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 50 Ausnahmen vom Grenzabstand – (1) <sup>1</sup>Art. 47 und 48 sind nicht auf Gewächse anzuwenden, die sich hinter einer Mauer oder einer sonstigen dichten Einfriedung befinden und diese nicht oder nicht erheblich überragen. <sup>2</sup>Sie gelten ferner nicht für Bepflanzungen, die längs einer öffentlichen Straße oder auf einem öffentlichen Platz gehalten werden, sowie für Bepflanzungen, die zum Uferschutz, zum Schutz von Abhängen oder Böschungen oder zum Schutz einer Eisenbahn dienen. </dd>
@@ -583,7 +596,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">42</span><code>pflanzen.verjaehrungJahre</code><span class="wert">Wert: <b>5</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">43</span><code>pflanzen.verjaehrungJahre</code><span class="wert">Wert: <b>5</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 52 Abs. 1 Sätze 2 und 3</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 52 Verjährung der nachbarrechtlichen Ansprüche – (1) <sup>1</sup>Die sich aus Art. 43 bis 45 und 46 Abs. 1 ergebenden Ansprüche unterliegen nicht der Verjährung. <sup>2</sup>Der Anspruch auf Beseitigung eines die Art. 47 bis 50 und 51 Abs. 1 und 2 verletzenden Zustands verjährt in fünf Jahren. <sup>3</sup>Die Verjährung beginnt mit dem Schluss des Jahres, in dem 1. der Anspruch entstanden ist, und 2. der Eigentümer des Grundstücks von den den Anspruch begründenden Umständen Kenntnis erlangt oder ohne grobe Fahrlässigkeit erlangen müsste. </dd>
@@ -596,7 +609,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">43</span><code>pflanzen.ersatzpflanzung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">44</span><code>pflanzen.ersatzpflanzung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>AGBGB Art. 52 Abs. 2</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Art. 52 Verjährung der nachbarrechtlichen Ansprüche – (2) Sind Ansprüche nach Absatz 1 Sätze 2 und 3 verjährt und werden die Gewächse durch neue ersetzt, so kann hinsichtlich der neuen Gewächse die Einhaltung des in Art. 47 bis 50 und 51 Abs. 1 und 2 vorgeschriebenen Abstands verlangt werden.</dd>
@@ -609,7 +622,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">44</span><code>pflanzen.nachbarNaheM</code><span class="wert">Wert: <b>3</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <div class="kopf"><span class="nr">45</span><code>pflanzen.nachbarNaheM</code><span class="wert">Wert: <b>3</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
   <dl>
     <dt>Quelle</dt><dd>Passt.-Festlegung (keine Rechtsnorm)</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
@@ -622,7 +635,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">45</span><code>pflanzen.rechtsprechungVerjaehrung</code><span class="wert">Wert: <b>BGH V ZR 230/16</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">46</span><code>pflanzen.rechtsprechungVerjaehrung</code><span class="wert">Wert: <b>BGH V ZR 230/16</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BGH, Urteil vom 1. Juni 2017, V ZR 230/16, Rn. 9–11</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BGH, Urteil vom 1. Juni 2017 – V ZR 230/16, Rn. 9–11 (sinngemäß, nicht wörtlich).</dd>
@@ -635,7 +648,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">46</span><code>pflanzen.hoeheAmHang</code><span class="wert">Wert: <b>hoeheres_gelaende</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">47</span><code>pflanzen.hoeheAmHang</code><span class="wert">Wert: <b>hoeheres_gelaende</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BGH, Urteil vom 1. Juni 2017, V ZR 230/16, Leitsatz</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BGH, Urteil vom 1. Juni 2017 – V ZR 230/16, Leitsatz (sinngemäß).</dd>
@@ -648,7 +661,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section><h2 class="sek">Verfahren und Antrag</h2>
 <section class="regel">
-  <div class="kopf"><span class="nr">47</span><code>verfahren.pflichtenAuchVerfahrensfrei</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">48</span><code>verfahren.pflichtenAuchVerfahrensfrei</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 55 Abs. 2</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 55 (Grundsatz): (1) Die Errichtung, Änderung und Nutzungsänderung von Anlagen bedürfen der Baugenehmigung, soweit in Art. 56 bis 58, 72 und 73 nichts anderes bestimmt ist. (2) Die Genehmigungsfreiheit nach Art. 56 bis 58, 72 und 73 Abs. 1 Satz 3, die Beschränkung der bauaufsichtlichen Prüfung nach Art. 59, 60, 62a Abs. 2, Art. 62b Abs. 2, Art. 73 Abs. 2 und Art. 73a sowie die Genehmigungsfiktion nach Art. 68 Abs. 2 entbinden nicht von der Verpflichtung zur Einhaltung der Anforderungen, die durch öffentlich-rechtliche Vorschriften an Anlagen gestellt werden, und lassen die bauaufsichtlichen Eingriffsbefugnisse unberührt.</dd>
@@ -661,7 +674,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">48</span><code>verfahren.genehmigungsfreistellung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">49</span><code>verfahren.genehmigungsfreistellung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 58 Abs. 1 und 2</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 58 Abs. 1 und 2 (Genehmigungsfreistellung): (1) 1 Die Errichtung, Änderung und Nutzungsänderung einer baulichen Anlage, die kein Sonderbau ist, ist genehmigungsfrei gestellt, wenn 1. sie im Geltungsbereich eines Bebauungsplans im Sinn des § 30 Abs. 1 oder der §§ 12, 30 Abs. 2 BauGB liegt, 2. sie den Festsetzungen des Bebauungsplans und den Regelungen örtlicher Bauvorschriften im Sinn des Art. 81 Abs. 1 nicht widerspricht, 3. die Erschließung im Sinn des Baugesetzbuchs gesichert ist, 4. sie nicht die Errichtung, Änderung oder Nutzungsänderung baulicher Anlagen betrifft, a) durch die dem Wohnen dienende Nutzungseinheiten mit einer Größe von insgesamt mehr als 5 000 m 2 Bruttogrundfläche geschaffen werden oder b) die öffentlich zugänglich sind und der gleichzeitigen Nutzung durch mehr als 100 Personen dienen und die Vorhaben den angemessenen Sicherheitsabstand im Sinn des Art. 13 Abs. 2 Buchst. a der Richtlinie 2012/18/EU zu einem Betriebsbereich nicht einhalten und 5. die Gemeinde nicht innerhalb der Frist nach Abs. 2 Satz 5 erklärt, dass das vereinfachte Baugenehmigungsverfahren durchgeführt werden soll, oder eine vorläufige Untersagung nach § 15 Abs. 1 Satz 2 BauGB beantragt. 2 Die Gemeinde kann durch örtliche Bauvorschrift im Sinn des Art. 81 Abs. 2 die Anwendung dieser Vorschrift auf bestimmte handwerkliche und gewerbliche Bauvorhaben ausschließen. (2) 1 Der Bauherr hat die erforderlichen Unterlagen bei der Gemeinde einzureichen; die Gemeinde legt, soweit sie nicht selbst Bauaufsichtsbehörde ist, eine Fertigung der Unterlagen unverzüglich der unteren Bauaufsichtsbehörde vor. 2 Spätestens mit der Vorlage bei der Gemeinde benachrichtigt der Bauherr die Eigentümer der benachbarten Grundstücke von dem Bauvorhaben. 3 Ist ein zu benachrichtigender Eigentümer nur unter Schwierigkeiten zu ermitteln oder zu benachrichtigen, so genügt die Benachrichtigung des unmittelbaren Besitzers. 4 Art. 66 Abs. 1 Satz 1 und 2 und Abs. 3 gilt entsprechend. 5 Mit dem Bauvorhaben darf einen Monat nach Vorlage der erforderlichen Unterlagen bei der Gemeinde begonnen werden. 6 Teilt die Gemeinde dem Bauherrn vor Ablauf der Frist schriftlich mit, dass kein Genehmigungsverfahren durchgeführt werden soll und sie eine Untersagung nach § 15 Abs. 1 Satz 2 BauGB nicht beantragen wird, darf der Bauherr mit der Ausführung des Bauvorhabens beginnen; von der Mitteilung nach Halbsatz 1 hat die Gemeinde die Bauaufsichtsbehörde zu unterrichten. 7 Will der Bauherr mit der Ausführung des Bauvorhabens mehr als vier Jahre, nachdem die Bauausführung nach den Sätzen 5 und 6 zulässig geworden ist, beginnen, gelten die Sätze 1 bis 6 entsprechend.</dd>
@@ -674,7 +687,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">49</span><code>verfahren.vereinfachtesVerfahren</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">50</span><code>verfahren.vereinfachtesVerfahren</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 59</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 59 (Vereinfachtes Baugenehmigungsverfahren): 1 Außer bei Sonderbauten prüft die Bauaufsichtsbehörde 1. die Übereinstimmung mit a) den Vorschriften über die Zulässigkeit der baulichen Anlagen nach den §§ 29 bis 38 BauGB, b) den Vorschriften über Abstandsflächen nach Art. 6, c) den Regelungen örtlicher Bauvorschriften im Sinn des Art. 81 Abs. 1, 2. beantragte Abweichungen im Sinn des Art. 63 Abs. 1 und Abs. 2 Satz 2 sowie 3. andere öffentlich-rechtliche Anforderungen, soweit wegen der Baugenehmigung eine Entscheidung nach anderen öffentlich-rechtlichen Vorschriften entfällt, ersetzt oder eingeschlossen wird. 2 Die Art. 62 bis 62b bleiben unberührt.</dd>
@@ -687,7 +700,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">50</span><code>verfahren.bauvorlageberechtigung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">51</span><code>verfahren.bauvorlageberechtigung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 61 Abs. 1 bis 3</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 61 Abs. 1 bis 3 (Bauvorlageberechtigung): (1) Bauvorlagen für die nicht verfahrensfreie Errichtung und Änderung von Gebäuden müssen von einem Entwurfsverfasser erstellt sein, der bauvorlageberechtigt ist. (2) Bauvorlageberechtigt ist, wer 1. die Berufsbezeichnung „Architektin“ oder „Architekt“ führen darf, 2. in die von der Bayerischen Ingenieurekammer-Bau geführte Liste der bauvorlageberechtigten Ingenieure eingetragen ist; vergleichbare Eintragungen anderer Länder gelten auch im Freistaat Bayern. (3) 1 Bauvorlageberechtigt sind ferner die Angehörigen der Fachrichtungen Architektur, Hochbau oder Bauingenieurwesen‚ die Absolventen einer Ausbildung sind, die dazu berechtigt, die Berufsbezeichnung „Ingenieurin“ oder „Ingenieur“ führen zu dürfen, sowie die staatlich geprüften Techniker der Fachrichtung Bautechnik und die Handwerksmeister des Maurer- und Betonbauer- sowie des Zimmererfachs für 1. freistehende oder nur einseitig angebaute oder anbaubare Wohngebäude der Gebäudeklassen 1 bis 3 mit nicht mehr als drei Wohnungen, 2. eingeschossige gewerblich genutzte Gebäude mit freien Stützweiten von nicht mehr als 12 m und nicht mehr als 250 m 2, 3. land- oder forstwirtschaftlich genutzte Gebäude, 4. Kleingaragen im Sinn der Rechtsverordnung nach Art. 80 Abs. 1 Satz 1 Nr. 3, 5. einfache Änderungen von sonstigen Gebäuden. 2 Staatsangehörige eines anderen Mitgliedstaates der Europäischen Union oder eines durch Abkommen gleichgestellten Staates sind im Sinn des Satzes 1 bauvorlageberechtigt, wenn sie eine vergleichbare Berechtigung besitzen und dafür den staatlich geprüften Technikern der Fachrichtung Bautechnik oder den Handwerksmeistern des Maurer- und Betonbauer- sowie des Zimmererfachs vergleichbare Anforderungen erfüllen mussten.</dd>
@@ -700,7 +713,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">51</span><code>verfahren.kleingarageBisM2</code><span class="wert">Wert: <b>100</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">52</span><code>verfahren.kleingarageBisM2</code><span class="wert">Wert: <b>100</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>GaStellV § 1 Abs. 7 Satz 1 Nr. 1, Abs. 1 Satz 3</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">GaStellV § 1 Abs. 1 Satz 3 und Abs. 7 (Carport, Kleingarage): 3 Stellplätze mit Schutzdächern (Carports) gelten als offene Garagen. (2) Geschlossene Garagen sind Garagen, die die Voraussetzungen nach Abs. 1 nicht erfüllen. (3) 1 Oberirdische Garagen sind Garagen, deren Fußboden im Mittel nicht mehr als 1,50 m unter oder mindestens an einer Seite in Höhe oder über der Geländeoberfläche liegt. 2 Unterirdische Garagen sind Garagen, die die Voraussetzungen des Satzes 1 nicht erfüllen. (4) Automatische Garagen sind Garagen ohne Personen- und Fahrverkehr, in denen die Kraftfahrzeuge mit mechanischen Förderanlagen von der Garagenzufahrt zu den Einstellplätzen und zum Abholen an die Garagenausfahrt befördert werden. (5) Ein Einstellplatz ist die Fläche, die dem Abstellen eines Kraftfahrzeuges in einer Garage dient. (6) 1 Die Nutzfläche einer Garage ist die Summe aller Flächen der Einstellplätze und der Verkehrsflächen. 2 Einstellplätze auf Dächern (Dacheinstellplätze) und die dazugehörigen Verkehrsflächen werden der Nutzfläche nicht zugerechnet, soweit nichts anderes bestimmt ist. (7) 1 Garagen sind mit einer Nutzfläche 1. bis 100 m 2 Kleingaragen, 2. über 100 m 2 und bis 1000 m 2 Mittelgaragen, 3. über 1000 m 2 Großgaragen. 2 Automatische Garagen mit mehr als 50 Einstellplätzen gelten als Großgaragen.</dd>
@@ -713,7 +726,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">52</span><code>verfahren.abweichung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">53</span><code>verfahren.abweichung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 63 Abs. 1 und 2</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 63 Abs. 1 bis 3 (Abweichungen): (1) 1 Die Bauaufsichtsbehörde soll Abweichungen von Anforderungen dieses Gesetzes und auf Grund dieses Gesetzes erlassener Vorschriften zulassen, wenn sie unter Berücksichtigung des Zwecks der jeweiligen Anforderung und bei Würdigung sowohl gesetzlich definierter überragender öffentlicher wie auch öffentlich-rechtlich geschützter nachbarlicher Interessen mit den öffentlichen Belangen, insbesondere den Anforderungen des Art. 3 Satz 1 vereinbar sind. 2 Dies gilt insbesondere für 1. Vorhaben, die der Weiternutzung bestehender Gebäude dienen, 2. Abweichungen von den Anforderungen des Art. 6, wenn ein rechtmäßig errichtetes Gebäude durch ein Gebäude höchstens gleicher Abmessung und Gestalt ersetzt wird, 3. Vorhaben zur Energieeinsparung und Nutzung erneuerbarer Energien, 4. Vorhaben zur Erprobung neuer Bau- und Wohnformen. 3 Der Zulassung einer Abweichung bedarf es nicht, wenn bautechnische Nachweise durch einen Prüfsachverständigen bescheinigt werden oder in den Fällen des Abs. 2 Satz 2 Halbsatz 1 das Vorliegen der Voraussetzung für eine Abweichung durch ihn bescheinigt wird. 4 Art. 81a Abs. 1 Satz 2 bleibt unberührt. (2) 1 Die Zulassung von Abweichungen nach Abs. 1 Satz 1, von Ausnahmen und Befreiungen von den Festsetzungen eines Bebauungsplans, einer sonstigen städtebaulichen Satzung oder von Regelungen der Baunutzungsverordnung ist gesondert schriftlich zu beantragen; der Antrag ist zu begründen. 2 Für Anlagen, die keiner Genehmigung bedürfen, sowie für Abweichungen von Vorschriften, die im Genehmigungsverfahren nicht geprüft werden, gilt Satz 1 entsprechend; bei Bauvorhaben, die einer Genehmigung bedürfen, ist der Abweichungsantrag mit dem Bauantrag zu stellen. (3) 1 Über Abweichungen nach Abs. 1 Satz 1 von örtlichen Bauvorschriften sowie über Ausnahmen und Befreiungen nach Abs. 2 Satz 1 entscheidet bei verfahrensfreien Bauvorhaben die Gemeinde nach Maßgabe der Abs. 1 und 2. 2 Im Übrigen lässt die Bauaufsichtsbehörde Abweichungen von örtlichen Bauvorschriften im Einvernehmen mit der Gemeinde zu; § 36 Abs. 2 Satz 2 BauGB gilt entsprechend.</dd>
@@ -726,7 +739,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">53</span><code>verfahren.bauantrag</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">54</span><code>verfahren.bauantrag</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 64</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 64 (Bauantrag, Bauvorlagen): (1) 1 Der Bauantrag ist schriftlich bei der Bauaufsichtsbehörde einzureichen. 2 Diese setzt unverzüglich die Gemeinde über Eingang und Inhalt in Kenntnis, soweit sie nicht selbst Gemeinde ist. (2) 1 Mit dem Bauantrag sind alle für die Beurteilung des Bauvorhabens und die Bearbeitung des Bauantrags erforderlichen Unterlagen (Bauvorlagen) einzureichen. 2 Es kann gestattet werden, dass einzelne Bauvorlagen nachgereicht werden. (3) In besonderen Fällen kann zur Beurteilung der Einwirkung des Bauvorhabens auf die Umgebung verlangt werden, dass es in geeigneter Weise auf dem Baugrundstück dargestellt wird. (4) 1 Der Bauherr und der Entwurfsverfasser haben den Bauantrag und die Bauvorlagen zu unterschreiben. 2 Soweit der Eigentümer oder der Erbbauberechtigte dem Bauvorhaben zugestimmt hat, ist er verpflichtet, bauaufsichtliche Maßnahmen zu dulden, die aus Nebenbestimmungen der Baugenehmigung herrühren.</dd>
@@ -739,7 +752,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">54</span><code>verfahren.nachbarbeteiligung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">55</span><code>verfahren.nachbarbeteiligung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BayBO Art. 66 Abs. 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 66 Abs. 1 (Beteiligung des Nachbarn): (1) 1 Den Eigentümern der benachbarten Grundstücke sind vom Bauherrn oder seinem Beauftragten der Lageplan und die Bauzeichnungen zur Zustimmung vorzulegen. 2 Die Zustimmung bedarf der Schriftform. 3 Im Bauantrag ist anzugeben, ob zugestimmt wurde. 4 Hat ein Nachbar nicht zugestimmt oder wird seinen Einwendungen nicht entsprochen, so ist ihm eine Ausfertigung der Baugenehmigung zuzustellen.</dd>
@@ -752,7 +765,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">55</span><code>verfahren.bauvorlagen</code><span class="wert">Wert: <b>["katasterauszug", "lageplan", "bauzeichnungen", "baubeschreibung"]</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">56</span><code>verfahren.bauvorlagen</code><span class="wert">Wert: <b>["katasterauszug", "lageplan", "bauzeichnungen", "baubeschreibung"]</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BauVorlV § 3 Nr. 1 bis 3, §§ 7 bis 9</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BauVorlV § 3 (Bauliche Anlagen): Vorzulegen sind: 1. ein aktueller Auszug aus dem Katasterwerk und, soweit es sich nicht um Änderungen baulicher Anlagen handelt, bei denen Außenwände und Dächer sowie die Nutzung nicht verändert werden, der Lageplan (§ 7), 2. die Bauzeichnungen (§ 8), 3. die Baubeschreibung (§ 9), 4. bei Sonderbauten der Nachweis der Standsicherheit (§ 10), soweit er bauaufsichtlich geprüft wird, andernfalls die Erklärung des Tragwerksplaners nach Maßgabe des Kriterienkatalogs der Anlage 2, 5. der Nachweis des Brandschutzes (§ 11), soweit er bauaufsichtlich geprüft wird und nicht bereits in den übrigen Bauvorlagen enthalten ist, 6. die erforderlichen Angaben über die gesicherte Erschließung hinsichtlich der Versorgung mit Wasser und Energie sowie der Entsorgung von Abwasser und der verkehrsmäßigen Erschließung, soweit das Bauvorhaben nicht an eine öffentliche Wasser- oder Energieversorgung oder eine öffentliche Abwasserentsorgungsanlage angeschlossen werden kann oder nicht in ausreichender Breite an einer öffentlichen Verkehrsfläche liegt, 7. bei Bauvorhaben im Geltungsbereich eines Bebauungsplans, der Festsetzungen darüber enthält, eine Berechnung des zulässigen, des vorhandenen und des geplanten Maßes der baulichen Nutzung, 8. soweit erforderlich, die Erklärung der Übernahme einer Abstandsfläche nach Art. 6 Abs. 2 Satz 3 Halbsatz 1 BayBO, 9. erforderliche Abweichungsanträge (Art. 63 BayBO).<br>BauVorlV § 7 (Auszug aus dem Katasterwerk, Lageplan): (1) 1 Der Auszug aus dem Katasterwerk (Ausschnitt aus der Flurkarte) muss das Baugrundstück und die benachbarten Grundstücke im Umkreis von mindestens 50 m darstellen. 2 Das Baugrundstück ist zu kennzeichnen. 3 Der Auszug ist mit dem Namen des Bauherrn, der Bezeichnung des Bauvorhabens und dem Datum des dazugehörigen Bauantrags oder der Unterlagen nach Art. 58 Abs. 3 Satz 1 Halbsatz 2 BayBO zu beschriften. (2) 1 Der Lageplan ist auf der Grundlage des Auszugs aus dem Katasterwerk zu erstellen. 2 Dabei ist ein Maßstab nicht kleiner als 1 : 1000 zu verwenden. 3 Ein größerer Maßstab ist zu wählen, wenn es für die Beurteilung des Bauvorhabens erforderlich ist. 4 Der Auszug muss jeweils von der katasterführenden Behörde (Art. 12 Abs. 4 des Vermessungs- und Katastergesetzes – VermKatG) beglaubigt oder durch ein automatisiertes Abrufverfahren gemäß Art. 11 Abs. 2 VermKatG zum Zweck der Bauvorlage abgerufen worden sein. (3) Der Lageplan muss, soweit dies zur Beurteilung des Bauvorhabens erforderlich ist, enthalten: 1. den Maßstab und die Nordrichtung, 2. die katastermäßigen Flächen, Flurstücksnummern und die Flurstücksgrenzen des Baugrundstücks und der benachbarten Grundstücke, 3. die im Grundbuch geführte Bezeichnung des Baugrundstücks und der benachbarten Grundstücke mit den jeweiligen Eigentümerangaben, 4. die vorhandenen baulichen Anlagen auf dem Baugrundstück und den benachbarten Grundstücken mit Angabe ihrer Nutzung, First- und Außenwandhöhe, Dachform und der Art der Außenwände und der Bedachung, 5. Baudenkmäler einschließlich Ensembles sowie geschützte Teile von Natur und Landschaft auf dem Baugrundstück und auf den Nachbargrundstücken, 6. Leitungen, die der öffentlichen Versorgung mit Wasser, Gas, Elektrizität, Wärme, der öffentlichen Abwasserentsorgung oder der Telekommunikation und Rohrleitungen, die dem Ferntransport von Stoffen dienen, sowie deren Abstände zu der geplanten baulichen Anlage, 7. die angrenzenden öffentlichen Verkehrsflächen mit Angabe der Breite, der Straßenklasse und der Höhenlage mit Bezug auf das Höhenbezugssystem, 8. Hydranten und andere Wasserentnahmestellen für die Feuerwehr, 9. die Festsetzungen eines Bebauungsplans für das Baugrundstück über die überbaubaren und die nicht überbaubaren Grundstücksflächen, 10. die geplante bauliche Anlage unter Angabe der Außenmaße, der Dachform und der Höhenlage des Erdgeschossfußbodens zur Straße, 11. die Höhenlage der Eckpunkte des Baugrundstücks und der Eckpunkte der geplanten baulichen Anlage mit Bezug auf das Höhenbezugssystem, 12. die Aufteilung der nicht überbauten Flächen unter Angabe der Lage und Breite der Zu- und Abfahrten, der Anzahl, Lage und Größe der Kinderspielplätze, der Stellplätze und der Flächen für die Feuerwehr, 13. die Abstände der geplanten baulichen Anlage zu anderen baulichen Anlagen auf dem Baugrundstück und auf den benachbarten Grundstücken, zu den Nachbargrenzen sowie die Abstandsflächen der geplanten baulichen Anlagen und der bestehenden Anlagen auf dem Baugrundstück und den Nachbargrundstücken, 14. die Abstände der geplanten baulichen Anlage zu oberirdischen Gewässern, 15. geschützten Baumbestand. (4) Der Inhalt des Lageplans nach Abs. 3 ist auf besonderen Blättern in geeignetem Maßstab darzustellen, wenn der Lageplan sonst unübersichtlich würde. (5) 1 Im Lageplan sind die Zeichen oder Farben der Anlage 1 zu verwenden; im Übrigen ist die Planzeichenverordnung 1990 entsprechend anzuwenden. 2 Sonstige Darstellungen sind zu erläutern.</dd>
@@ -765,7 +778,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">56</span><code>verfahren.anzahl</code><span class="wert">Wert: <b>3</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <div class="kopf"><span class="nr">57</span><code>verfahren.anzahl</code><span class="wert">Wert: <b>3</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
   <dl>
     <dt>Quelle</dt><dd>BauVorlV § 2 Satz 1</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">BauVorlV § 2 Satz 1 (Anzahl): 1 Bauvorlagen sind dreifach, ist die Gemeinde zugleich Bauaufsichtsbehörde, zweifach einzureichen.</dd>
@@ -778,7 +791,7 @@ sup { font-size: 6.5pt; }
     <div class="anm">Anmerkung:</div></div>
 </section>
 <section class="regel">
-  <div class="kopf"><span class="nr">57</span><code>verfahren.links</code><span class="wert">Wert: <b>Links (siehe App)</b></span><span class="art">Fachliche Quelle</span></div>
+  <div class="kopf"><span class="nr">58</span><code>verfahren.links</code><span class="wert">Wert: <b>Links (siehe App)</b></span><span class="art">Fachliche Quelle</span></div>
   <dl>
     <dt>Quelle</dt><dd>Staatsministerium für Wohnen, Bau und Verkehr, Seiten abgerufen am 04.10.2026</dd>
     <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Links zum Digitalen Bauantrag und zu den Formularen des Staatsministeriums.</dd>
@@ -825,6 +838,8 @@ sup { font-size: 6.5pt; }
 <div class="antwort">Antwort:</div></section>
 <section class="frage"><div class="kopf"><span class="nr">F16</span><b>Örtliche Satzungen</b></div><p>Hat Sulzbach-Rosenberg eine Abstandsflächensatzung (Art. 6 Abs. 5 Satz 2) oder eine Gestaltungssatzung, die Nebengebäude betrifft? Passt. berücksichtigt keine.</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F17</span><b>Formulierung der Antworten</b></div><p>Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?</p>
+<section class="frage"><div class="kopf"><span class="nr">F17</span><b>Dachüberstand</b></div><p>Art. 6 Abs. 6 Nr. 1 lässt Dachüberstände bei der Bemessung der Abstandsflächen außer Betracht – ohne Grenze im Wortlaut. Ab welchem Überstand zählt er in der Praxis doch mit (z. B. über 0,5 m oder 1,5 m wie bei Vorbauten in Nr. 2)? Zählt bei der Grenzbebauung (9 m je Seite, 15 m gesamt) die Wandlänge oder die Dachlänge? Und darf der Überstand eines Grenzgebäudes über die Grenze ragen? Passt. rechnet mit der Wand und zeigt das Dach getrennt.</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F18</span><b>Formulierung der Antworten</b></div><p>Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?</p>
 <div class="antwort">Antwort:</div></section>
 </body></html>

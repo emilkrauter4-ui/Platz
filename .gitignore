@@ -14,3 +14,6 @@ data/reference/boegen/
 # Antworten auf Nachbar-Links (SQLite, scripts/nachbar-api.mjs)
 app/.daten/
 data/reference/objekte/boegen/
+
+# Fotos vom Maßband-Termin (Privatgrundstücke, nicht ins Git)
+data/reference/vor_ort_fotos/

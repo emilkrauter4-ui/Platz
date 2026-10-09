@@ -1,0 +1,1099 @@
+{
+ "menge": "dev_raster",
+ "objekte": 18,
+ "sekunden": 174,
+ "varianten": [
+  {
+   "fenster_m": 24.0,
+   "wahl": "klein",
+   "ohne_hausumringe": true,
+   "verfeinern": false,
+   "form": true,
+   "sam": "small",
+   "auswertung": [
+    {
+     "klasse": "gartenhaus",
+     "n": 12,
+     "erfolg": 7,
+     "erfolgsquote": 0.58,
+     "iou_median": 0.54,
+     "fehler_laenge_median": 0.5,
+     "fehler_breite_median": 0.59,
+     "fehler_hoehe_median": 0.02,
+     "fehler_laenge_median_alle": 0.62,
+     "fehler_breite_median_alle": 0.7
+    },
+    {
+     "klasse": "pool",
+     "n": 2,
+     "erfolg": 1,
+     "erfolgsquote": 0.5,
+     "iou_median": 0.47,
+     "fehler_laenge_median": 0.52,
+     "fehler_breite_median": 0.2,
+     "fehler_hoehe_median": 0.13,
+     "fehler_laenge_median_alle": 2.21,
+     "fehler_breite_median_alle": 0.15
+    },
+    {
+     "klasse": "gewaechshaus",
+     "n": 2,
+     "erfolg": 1,
+     "erfolgsquote": 0.5,
+     "iou_median": 0.45,
+     "fehler_laenge_median": 2.6,
+     "fehler_breite_median": 0.17,
+     "fehler_hoehe_median": 0.06,
+     "fehler_laenge_median_alle": 1.7,
+     "fehler_breite_median_alle": 0.7
+    },
+    {
+     "klasse": "carport_garage",
+     "n": 2,
+     "erfolg": 1,
+     "erfolgsquote": 0.5,
+     "iou_median": 0.49,
+     "fehler_laenge_median": 2.76,
+     "fehler_breite_median": 1.17,
+     "fehler_hoehe_median": 0.1,
+     "fehler_laenge_median_alle": 2.58,
+     "fehler_breite_median_alle": 0.98
+    },
+    {
+     "klasse": "alle",
+     "n": 18,
+     "erfolg": 10,
+     "erfolgsquote": 0.56,
+     "iou_median": 0.51,
+     "fehler_laenge_median": 0.66,
+     "fehler_breite_median": 0.52,
+     "fehler_hoehe_median": 0.04,
+     "fehler_laenge_median_alle": 0.8,
+     "fehler_breite_median_alle": 0.7
+    }
+   ],
+   "objekte": [
+    {
+     "id": "A15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.8,
+     "ok": false,
+     "iou": 0.469,
+     "flaeche_tipp": 29.4,
+     "d_laenge": 1.7,
+     "d_breite": 1.6,
+     "d_hoehe": -0.01
+    },
+    {
+     "id": "A15_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 29.0,
+     "ok": false,
+     "iou": 0.415,
+     "flaeche_tipp": 15.1,
+     "d_laenge": -2.4,
+     "d_breite": -0.8,
+     "d_hoehe": -1.62
+    },
+    {
+     "id": "A19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.3,
+     "ok": true,
+     "iou": 0.638,
+     "flaeche_tipp": 20.9,
+     "d_laenge": 1.29,
+     "d_breite": 0.59,
+     "d_hoehe": 0.09
+    },
+    {
+     "id": "A19_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 31.5,
+     "ok": true,
+     "iou": 0.569,
+     "flaeche_tipp": 55.4,
+     "d_laenge": 2.76,
+     "d_breite": 1.17,
+     "d_hoehe": 0.1
+    },
+    {
+     "id": "H02_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 11.2,
+     "ok": true,
+     "iou": 0.629,
+     "flaeche_tipp": 14.6,
+     "d_laenge": 0.5,
+     "d_breite": 0.45,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "H09_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 12.9,
+     "ok": false,
+     "iou": 0.407,
+     "flaeche_tipp": 10.9,
+     "d_laenge": 0.48,
+     "d_breite": -0.72,
+     "d_hoehe": 0.24
+    },
+    {
+     "id": "H11_0",
+     "klasse": "pool",
+     "flaeche_ref": 20.4,
+     "ok": false,
+     "iou": 0.436,
+     "flaeche_tipp": 46.8,
+     "d_laenge": 3.9,
+     "d_breite": 0.1,
+     "d_hoehe": 0.11
+    },
+    {
+     "id": "H13_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 8.3,
+     "ok": false,
+     "iou": 0.401,
+     "flaeche_tipp": 15.5,
+     "d_laenge": 0.79,
+     "d_breite": 1.23,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "H15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 10.6,
+     "ok": false,
+     "iou": 0.18,
+     "flaeche_tipp": 11.6,
+     "d_laenge": 0.22,
+     "d_breite": 0.08,
+     "d_hoehe": -1.26
+    },
+    {
+     "id": "H19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.6,
+     "ok": false,
+     "iou": 0.447,
+     "flaeche_tipp": 14.9,
+     "d_laenge": 0.74,
+     "d_breite": 0.79,
+     "d_hoehe": 0.01
+    },
+    {
+     "id": "S03_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.7,
+     "ok": true,
+     "iou": 0.799,
+     "flaeche_tipp": 17.1,
+     "d_laenge": 0.5,
+     "d_breite": 0.38,
+     "d_hoehe": 0.0
+    },
+    {
+     "id": "S03_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 22.5,
+     "ok": false,
+     "iou": 0.402,
+     "flaeche_tipp": 9.3,
+     "d_laenge": -1.59,
+     "d_breite": -1.78,
+     "d_hoehe": -0.08
+    },
+    {
+     "id": "S05_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.2,
+     "ok": true,
+     "iou": 0.672,
+     "flaeche_tipp": 12.1,
+     "d_laenge": 0.12,
+     "d_breite": 0.75,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "S09_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 13.9,
+     "ok": true,
+     "iou": 0.508,
+     "flaeche_tipp": 22.7,
+     "d_laenge": 2.6,
+     "d_breite": 0.17,
+     "d_hoehe": 0.06
+    },
+    {
+     "id": "S09_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 19.0,
+     "ok": true,
+     "iou": 0.602,
+     "flaeche_tipp": 16.8,
+     "d_laenge": -0.8,
+     "d_breite": 0.2,
+     "d_hoehe": -0.01
+    },
+    {
+     "id": "S13_0",
+     "klasse": "pool",
+     "flaeche_ref": 10.2,
+     "ok": true,
+     "iou": 0.511,
+     "flaeche_tipp": 15.7,
+     "d_laenge": 0.52,
+     "d_breite": 0.2,
+     "d_hoehe": 0.13
+    },
+    {
+     "id": "S13_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.5,
+     "ok": true,
+     "iou": 0.557,
+     "flaeche_tipp": 28.2,
+     "d_laenge": 1.37,
+     "d_breite": 0.68,
+     "d_hoehe": 0.0
+    },
+    {
+     "id": "S13_2",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.0,
+     "ok": true,
+     "iou": 0.514,
+     "flaeche_tipp": 15.4,
+     "d_laenge": 0.44,
+     "d_breite": -0.88,
+     "d_hoehe": -0.08
+    }
+   ]
+  },
+  {
+   "fenster_m": [
+    "raster",
+    48.0,
+    24.0
+   ],
+   "wahl": "klein",
+   "ohne_hausumringe": true,
+   "verfeinern": false,
+   "form": true,
+   "sam": "small",
+   "auswertung": [
+    {
+     "klasse": "gartenhaus",
+     "n": 12,
+     "erfolg": 8,
+     "erfolgsquote": 0.67,
+     "iou_median": 0.56,
+     "fehler_laenge_median": 1.01,
+     "fehler_breite_median": 0.69,
+     "fehler_hoehe_median": 0.02,
+     "fehler_laenge_median_alle": 0.77,
+     "fehler_breite_median_alle": 0.71
+    },
+    {
+     "klasse": "pool",
+     "n": 2,
+     "erfolg": 1,
+     "erfolgsquote": 0.5,
+     "iou_median": 0.5,
+     "fehler_laenge_median": 0.51,
+     "fehler_breite_median": 0.17,
+     "fehler_hoehe_median": 0.13,
+     "fehler_laenge_median_alle": 1.58,
+     "fehler_breite_median_alle": 0.85
+    },
+    {
+     "klasse": "gewaechshaus",
+     "n": 2,
+     "erfolg": 0,
+     "erfolgsquote": 0.0,
+     "iou_median": 0.44,
+     "fehler_laenge_median": null,
+     "fehler_breite_median": null,
+     "fehler_hoehe_median": null,
+     "fehler_laenge_median_alle": 1.53,
+     "fehler_breite_median_alle": 0.69
+    },
+    {
+     "klasse": "carport_garage",
+     "n": 2,
+     "erfolg": 2,
+     "erfolgsquote": 1.0,
+     "iou_median": 0.57,
+     "fehler_laenge_median": 2.01,
+     "fehler_breite_median": 1.68,
+     "fehler_hoehe_median": 0.09,
+     "fehler_laenge_median_alle": 2.01,
+     "fehler_breite_median_alle": 1.68
+    },
+    {
+     "klasse": "alle",
+     "n": 18,
+     "erfolg": 11,
+     "erfolgsquote": 0.61,
+     "iou_median": 0.54,
+     "fehler_laenge_median": 0.9,
+     "fehler_breite_median": 0.7,
+     "fehler_hoehe_median": 0.02,
+     "fehler_laenge_median_alle": 0.85,
+     "fehler_breite_median_alle": 0.74
+    }
+   ],
+   "objekte": [
+    {
+     "id": "A15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.8,
+     "ok": true,
+     "iou": 0.522,
+     "flaeche_tipp": 26.4,
+     "d_laenge": 1.29,
+     "d_breite": 1.4,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "A15_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 29.0,
+     "ok": true,
+     "iou": 0.586,
+     "flaeche_tipp": 49.4,
+     "d_laenge": 0.9,
+     "d_breite": 2.19,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "A19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.3,
+     "ok": true,
+     "iou": 0.627,
+     "flaeche_tipp": 21.2,
+     "d_laenge": 1.25,
+     "d_breite": 0.7,
+     "d_hoehe": 0.09
+    },
+    {
+     "id": "A19_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 31.5,
+     "ok": true,
+     "iou": 0.549,
+     "flaeche_tipp": 57.4,
+     "d_laenge": 3.12,
+     "d_breite": 1.17,
+     "d_hoehe": 0.11
+    },
+    {
+     "id": "H02_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 11.2,
+     "ok": true,
+     "iou": 0.642,
+     "flaeche_tipp": 14.2,
+     "d_laenge": 0.38,
+     "d_breite": 0.47,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "H09_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 12.9,
+     "ok": false,
+     "iou": 0.406,
+     "flaeche_tipp": 10.8,
+     "d_laenge": 0.46,
+     "d_breite": -0.72,
+     "d_hoehe": 0.24
+    },
+    {
+     "id": "H11_0",
+     "klasse": "pool",
+     "flaeche_ref": 20.4,
+     "ok": false,
+     "iou": 0.488,
+     "flaeche_tipp": 27.6,
+     "d_laenge": 2.65,
+     "d_breite": -1.54,
+     "d_hoehe": -0.15
+    },
+    {
+     "id": "H13_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 8.3,
+     "ok": false,
+     "iou": 0.426,
+     "flaeche_tipp": 15.0,
+     "d_laenge": 0.79,
+     "d_breite": 1.13,
+     "d_hoehe": 1.17
+    },
+    {
+     "id": "H15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 10.6,
+     "ok": false,
+     "iou": 0.172,
+     "flaeche_tipp": 10.7,
+     "d_laenge": 0.19,
+     "d_breite": -0.11,
+     "d_hoehe": -1.25
+    },
+    {
+     "id": "H19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.6,
+     "ok": false,
+     "iou": 0.447,
+     "flaeche_tipp": 14.9,
+     "d_laenge": 0.74,
+     "d_breite": 0.79,
+     "d_hoehe": 0.01
+    },
+    {
+     "id": "S03_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.7,
+     "ok": true,
+     "iou": 0.678,
+     "flaeche_tipp": 20.0,
+     "d_laenge": 1.22,
+     "d_breite": 0.39,
+     "d_hoehe": -0.0
+    },
+    {
+     "id": "S03_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 22.5,
+     "ok": false,
+     "iou": 0.39,
+     "flaeche_tipp": 9.0,
+     "d_laenge": -1.7,
+     "d_breite": -1.78,
+     "d_hoehe": -0.09
+    },
+    {
+     "id": "S05_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.2,
+     "ok": true,
+     "iou": 0.668,
+     "flaeche_tipp": 12.6,
+     "d_laenge": 0.22,
+     "d_breite": 0.77,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "S09_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 13.9,
+     "ok": false,
+     "iou": 0.452,
+     "flaeche_tipp": 22.3,
+     "d_laenge": 2.28,
+     "d_breite": 0.25,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "S09_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 19.0,
+     "ok": true,
+     "iou": 0.64,
+     "flaeche_tipp": 17.6,
+     "d_laenge": -0.8,
+     "d_breite": 0.4,
+     "d_hoehe": -0.01
+    },
+    {
+     "id": "S13_0",
+     "klasse": "pool",
+     "flaeche_ref": 10.2,
+     "ok": true,
+     "iou": 0.517,
+     "flaeche_tipp": 15.5,
+     "d_laenge": 0.51,
+     "d_breite": 0.17,
+     "d_hoehe": 0.13
+    },
+    {
+     "id": "S13_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.5,
+     "ok": true,
+     "iou": 0.559,
+     "flaeche_tipp": 27.9,
+     "d_laenge": 1.31,
+     "d_breite": 0.68,
+     "d_hoehe": 0.0
+    },
+    {
+     "id": "S13_2",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.0,
+     "ok": true,
+     "iou": 0.562,
+     "flaeche_tipp": 13.4,
+     "d_laenge": -0.15,
+     "d_breite": -0.91,
+     "d_hoehe": -0.07
+    }
+   ]
+  },
+  {
+   "fenster_m": [
+    "raster",
+    96.0,
+    48.0
+   ],
+   "wahl": "klein",
+   "ohne_hausumringe": true,
+   "verfeinern": false,
+   "form": true,
+   "sam": "small",
+   "auswertung": [
+    {
+     "klasse": "gartenhaus",
+     "n": 12,
+     "erfolg": 7,
+     "erfolgsquote": 0.58,
+     "iou_median": 0.53,
+     "fehler_laenge_median": 0.74,
+     "fehler_breite_median": 0.74,
+     "fehler_hoehe_median": 0.02,
+     "fehler_laenge_median_alle": 0.75,
+     "fehler_breite_median_alle": 0.7
+    },
+    {
+     "klasse": "pool",
+     "n": 2,
+     "erfolg": 1,
+     "erfolgsquote": 0.5,
+     "iou_median": 0.46,
+     "fehler_laenge_median": 0.43,
+     "fehler_breite_median": 0.34,
+     "fehler_hoehe_median": 0.09,
+     "fehler_laenge_median_alle": 2.26,
+     "fehler_breite_median_alle": 0.32
+    },
+    {
+     "klasse": "gewaechshaus",
+     "n": 2,
+     "erfolg": 0,
+     "erfolgsquote": 0.0,
+     "iou_median": 0.39,
+     "fehler_laenge_median": null,
+     "fehler_breite_median": null,
+     "fehler_hoehe_median": null,
+     "fehler_laenge_median_alle": 2.68,
+     "fehler_breite_median_alle": 1.73
+    },
+    {
+     "klasse": "carport_garage",
+     "n": 2,
+     "erfolg": 2,
+     "erfolgsquote": 1.0,
+     "iou_median": 0.59,
+     "fehler_laenge_median": 1.77,
+     "fehler_breite_median": 1.58,
+     "fehler_hoehe_median": 0.09,
+     "fehler_laenge_median_alle": 1.77,
+     "fehler_breite_median_alle": 1.58
+    },
+    {
+     "klasse": "alle",
+     "n": 18,
+     "erfolg": 10,
+     "erfolgsquote": 0.56,
+     "iou_median": 0.52,
+     "fehler_laenge_median": 0.75,
+     "fehler_breite_median": 0.74,
+     "fehler_hoehe_median": 0.07,
+     "fehler_laenge_median_alle": 0.86,
+     "fehler_breite_median_alle": 0.7
+    }
+   ],
+   "objekte": [
+    {
+     "id": "A15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.8,
+     "ok": false,
+     "iou": 0.304,
+     "flaeche_tipp": 18.7,
+     "d_laenge": 1.72,
+     "d_breite": 0.06,
+     "d_hoehe": 0.08
+    },
+    {
+     "id": "A15_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 29.0,
+     "ok": true,
+     "iou": 0.654,
+     "flaeche_tipp": 44.4,
+     "d_laenge": 0.8,
+     "d_breite": 1.6,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "A19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.3,
+     "ok": true,
+     "iou": 0.583,
+     "flaeche_tipp": 22.8,
+     "d_laenge": 1.48,
+     "d_breite": 0.8,
+     "d_hoehe": 0.08
+    },
+    {
+     "id": "A19_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 31.5,
+     "ok": true,
+     "iou": 0.533,
+     "flaeche_tipp": 59.1,
+     "d_laenge": 2.75,
+     "d_breite": 1.56,
+     "d_hoehe": 0.1
+    },
+    {
+     "id": "H02_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 11.2,
+     "ok": true,
+     "iou": 0.606,
+     "flaeche_tipp": 15.8,
+     "d_laenge": 0.74,
+     "d_breite": 0.52,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "H09_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 12.9,
+     "ok": false,
+     "iou": 0.405,
+     "flaeche_tipp": 11.2,
+     "d_laenge": 0.47,
+     "d_breite": -0.66,
+     "d_hoehe": 0.24
+    },
+    {
+     "id": "H11_0",
+     "klasse": "pool",
+     "flaeche_ref": 20.4,
+     "ok": false,
+     "iou": 0.411,
+     "flaeche_tipp": 49.7,
+     "d_laenge": 4.1,
+     "d_breite": 0.3,
+     "d_hoehe": 0.11
+    },
+    {
+     "id": "H13_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 8.3,
+     "ok": false,
+     "iou": 0.317,
+     "flaeche_tipp": 17.5,
+     "d_laenge": 3.07,
+     "d_breite": 3.29,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "H15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 10.6,
+     "ok": false,
+     "iou": 0.231,
+     "flaeche_tipp": 26.8,
+     "d_laenge": 2.54,
+     "d_breite": 1.43,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "H19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.6,
+     "ok": false,
+     "iou": 0.448,
+     "flaeche_tipp": 15.9,
+     "d_laenge": 0.92,
+     "d_breite": 0.86,
+     "d_hoehe": 0.01
+    },
+    {
+     "id": "S03_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.7,
+     "ok": true,
+     "iou": 0.758,
+     "flaeche_tipp": 17.9,
+     "d_laenge": 0.76,
+     "d_breite": 0.33,
+     "d_hoehe": 0.0
+    },
+    {
+     "id": "S03_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 22.5,
+     "ok": false,
+     "iou": 0.483,
+     "flaeche_tipp": 21.7,
+     "d_laenge": 0.32,
+     "d_breite": -0.41,
+     "d_hoehe": 0.0
+    },
+    {
+     "id": "S05_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.2,
+     "ok": true,
+     "iou": 0.626,
+     "flaeche_tipp": 13.2,
+     "d_laenge": 0.38,
+     "d_breite": 0.78,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "S09_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 13.9,
+     "ok": false,
+     "iou": 0.458,
+     "flaeche_tipp": 21.8,
+     "d_laenge": 2.29,
+     "d_breite": 0.17,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "S09_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 19.0,
+     "ok": true,
+     "iou": 0.543,
+     "flaeche_tipp": 23.8,
+     "d_laenge": 0.68,
+     "d_breite": 0.39,
+     "d_hoehe": 0.08
+    },
+    {
+     "id": "S13_0",
+     "klasse": "pool",
+     "flaeche_ref": 10.2,
+     "ok": true,
+     "iou": 0.516,
+     "flaeche_tipp": 15.8,
+     "d_laenge": 0.43,
+     "d_breite": 0.34,
+     "d_hoehe": 0.09
+    },
+    {
+     "id": "S13_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.5,
+     "ok": true,
+     "iou": 0.552,
+     "flaeche_tipp": 28.8,
+     "d_laenge": 1.42,
+     "d_breite": 0.74,
+     "d_hoehe": 0.01
+    },
+    {
+     "id": "S13_2",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.0,
+     "ok": true,
+     "iou": 0.521,
+     "flaeche_tipp": 16.5,
+     "d_laenge": 0.59,
+     "d_breite": -0.75,
+     "d_hoehe": -0.06
+    }
+   ]
+  },
+  {
+   "fenster_m": [
+    "raster",
+    96.0,
+    32.0
+   ],
+   "wahl": "klein",
+   "ohne_hausumringe": true,
+   "verfeinern": false,
+   "form": true,
+   "sam": "small",
+   "auswertung": [
+    {
+     "klasse": "gartenhaus",
+     "n": 12,
+     "erfolg": 7,
+     "erfolgsquote": 0.58,
+     "iou_median": 0.53,
+     "fehler_laenge_median": 0.71,
+     "fehler_breite_median": 0.74,
+     "fehler_hoehe_median": 0.03,
+     "fehler_laenge_median_alle": 1.0,
+     "fehler_breite_median_alle": 0.73
+    },
+    {
+     "klasse": "pool",
+     "n": 2,
+     "erfolg": 0,
+     "erfolgsquote": 0.0,
+     "iou_median": 0.45,
+     "fehler_laenge_median": null,
+     "fehler_breite_median": null,
+     "fehler_hoehe_median": null,
+     "fehler_laenge_median_alle": 2.23,
+     "fehler_breite_median_alle": 0.26
+    },
+    {
+     "klasse": "gewaechshaus",
+     "n": 2,
+     "erfolg": 0,
+     "erfolgsquote": 0.0,
+     "iou_median": 0.43,
+     "fehler_laenge_median": null,
+     "fehler_breite_median": null,
+     "fehler_hoehe_median": null,
+     "fehler_laenge_median_alle": 1.38,
+     "fehler_breite_median_alle": 0.62
+    },
+    {
+     "klasse": "carport_garage",
+     "n": 2,
+     "erfolg": 1,
+     "erfolgsquote": 0.5,
+     "iou_median": 0.5,
+     "fehler_laenge_median": 3.01,
+     "fehler_breite_median": 1.55,
+     "fehler_hoehe_median": 0.1,
+     "fehler_laenge_median_alle": 1.7,
+     "fehler_breite_median_alle": 0.98
+    },
+    {
+     "klasse": "alle",
+     "n": 18,
+     "erfolg": 8,
+     "erfolgsquote": 0.44,
+     "iou_median": 0.49,
+     "fehler_laenge_median": 1.05,
+     "fehler_breite_median": 0.77,
+     "fehler_hoehe_median": 0.04,
+     "fehler_laenge_median_alle": 1.0,
+     "fehler_breite_median_alle": 0.65
+    }
+   ],
+   "objekte": [
+    {
+     "id": "A15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.8,
+     "ok": false,
+     "iou": 0.306,
+     "flaeche_tipp": 18.8,
+     "d_laenge": 1.7,
+     "d_breite": 0.09,
+     "d_hoehe": 0.08
+    },
+    {
+     "id": "A15_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 29.0,
+     "ok": false,
+     "iou": 0.486,
+     "flaeche_tipp": 24.8,
+     "d_laenge": -0.4,
+     "d_breite": -0.4,
+     "d_hoehe": -0.51
+    },
+    {
+     "id": "A19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.3,
+     "ok": true,
+     "iou": 0.57,
+     "flaeche_tipp": 23.4,
+     "d_laenge": 1.54,
+     "d_breite": 0.86,
+     "d_hoehe": 0.09
+    },
+    {
+     "id": "A19_2",
+     "klasse": "carport_garage",
+     "flaeche_ref": 31.5,
+     "ok": true,
+     "iou": 0.52,
+     "flaeche_tipp": 60.6,
+     "d_laenge": 3.01,
+     "d_breite": 1.55,
+     "d_hoehe": 0.1
+    },
+    {
+     "id": "H02_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 11.2,
+     "ok": true,
+     "iou": 0.596,
+     "flaeche_tipp": 15.8,
+     "d_laenge": 0.71,
+     "d_breite": 0.55,
+     "d_hoehe": -0.03
+    },
+    {
+     "id": "H09_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 12.9,
+     "ok": false,
+     "iou": 0.414,
+     "flaeche_tipp": 11.1,
+     "d_laenge": 0.56,
+     "d_breite": -0.72,
+     "d_hoehe": 0.24
+    },
+    {
+     "id": "H11_0",
+     "klasse": "pool",
+     "flaeche_ref": 20.4,
+     "ok": false,
+     "iou": 0.411,
+     "flaeche_tipp": 49.7,
+     "d_laenge": 4.1,
+     "d_breite": 0.3,
+     "d_hoehe": 0.11
+    },
+    {
+     "id": "H13_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 8.3,
+     "ok": false,
+     "iou": 0.433,
+     "flaeche_tipp": 14.0,
+     "d_laenge": 0.57,
+     "d_breite": 1.05,
+     "d_hoehe": 0.05
+    },
+    {
+     "id": "H15_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 10.6,
+     "ok": false,
+     "iou": 0.235,
+     "flaeche_tipp": 25.9,
+     "d_laenge": 2.38,
+     "d_breite": 1.39,
+     "d_hoehe": 0.06
+    },
+    {
+     "id": "H19_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.6,
+     "ok": false,
+     "iou": 0.452,
+     "flaeche_tipp": 16.2,
+     "d_laenge": 0.91,
+     "d_breite": 0.94,
+     "d_hoehe": 0.01
+    },
+    {
+     "id": "S03_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 13.7,
+     "ok": true,
+     "iou": 0.63,
+     "flaeche_tipp": 21.6,
+     "d_laenge": 1.39,
+     "d_breite": 0.57,
+     "d_hoehe": -0.0
+    },
+    {
+     "id": "S03_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 22.5,
+     "ok": false,
+     "iou": 0.443,
+     "flaeche_tipp": 28.2,
+     "d_laenge": 1.08,
+     "d_breite": 0.14,
+     "d_hoehe": -0.01
+    },
+    {
+     "id": "S05_0",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 9.2,
+     "ok": true,
+     "iou": 0.658,
+     "flaeche_tipp": 12.5,
+     "d_laenge": 0.16,
+     "d_breite": 0.8,
+     "d_hoehe": -0.02
+    },
+    {
+     "id": "S09_0",
+     "klasse": "gewaechshaus",
+     "flaeche_ref": 13.9,
+     "ok": false,
+     "iou": 0.432,
+     "flaeche_tipp": 21.6,
+     "d_laenge": 2.18,
+     "d_breite": 0.2,
+     "d_hoehe": 0.08
+    },
+    {
+     "id": "S09_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 19.0,
+     "ok": true,
+     "iou": 0.581,
+     "flaeche_tipp": 22.7,
+     "d_laenge": 0.4,
+     "d_breite": 0.4,
+     "d_hoehe": 0.07
+    },
+    {
+     "id": "S13_0",
+     "klasse": "pool",
+     "flaeche_ref": 10.2,
+     "ok": false,
+     "iou": 0.487,
+     "flaeche_tipp": 15.1,
+     "d_laenge": 0.36,
+     "d_breite": 0.22,
+     "d_hoehe": 0.13
+    },
+    {
+     "id": "S13_1",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.5,
+     "ok": true,
+     "iou": 0.541,
+     "flaeche_tipp": 29.0,
+     "d_laenge": 1.48,
+     "d_breite": 0.74,
+     "d_hoehe": 0.0
+    },
+    {
+     "id": "S13_2",
+     "klasse": "gartenhaus",
+     "flaeche_ref": 18.0,
+     "ok": true,
+     "iou": 0.518,
+     "flaeche_tipp": 16.1,
+     "d_laenge": 0.54,
+     "d_breite": -0.8,
+     "d_hoehe": -0.06
+    }
+   ]
+  }
+ ]
+}

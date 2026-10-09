@@ -50,7 +50,7 @@ def tipp_punkt(g):
 
 
 def objekte(menge: str) -> list[dict]:
-    if menge == "dev":
+    if menge in ("dev", "dev_raster"):
         gs = {f["properties"]["id"]: f["properties"]["split"] for f in json.load(open(ROOT / "data/reference/grundstuecke.geojson"))["features"]}
         out = []
         for f in json.load(open(ROOT / "data/reference/referenz.geojson"))["features"]:
@@ -98,13 +98,19 @@ def auswerten(zeilen: list[dict]) -> list[dict]:
 def main(menge: str) -> None:
     obj = objekte(menge)
     varianten = [(24.0, "klein", True, False, f, g) for g in ("small", "large") for f in (False, True, "laser")] \
-        if menge == "dev" else [(tp.FENSTER_M, tp.WAHL, tp.OHNE_HAUSUMRINGE, tp.VERFEINERN, tp.FORM, tp.SAM_GROESSE)]
+        if menge == "dev" else [(24.0, "klein", True, False, True, "small"), (("raster", 48.0, 24.0), "klein", True, False, True, "small"),
+                                (("raster", 96.0, 48.0), "klein", True, False, True, "small"), (("raster", 96.0, 32.0), "klein", True, False, True, "small")] \
+        if menge == "dev_raster" else [(tp.FENSTER_M, tp.WAHL, tp.OHNE_HAUSUMRINGE, tp.VERFEINERN, tp.FORM, tp.SAM_GROESSE)]
     erg = {v: [] for v in varianten}
     t0 = time.time()
     for i, r in enumerate(obj):
         pt = tipp_punkt(r["geom"])
-        for fen in sorted({v[0] for v in varianten}):
-            _, s = tp.ausschnitt_um(pt.x, pt.y, fen)
+        for fen in sorted({v[0] for v in varianten}, key=str):
+            if isinstance(fen, tuple):
+                _, bb = tp.raster_fenster(pt.x, pt.y, fen[1], fen[2])
+                s = g8.signale(bb)
+            else:
+                _, s = tp.ausschnitt_um(pt.x, pt.y, fen)
             for v in varianten:
                 if v[0] == fen:
                     erg[v].append(eins(s, r, *v[1:]))

@@ -62,7 +62,7 @@ import {
   verfahrenFuer,
   ANTRAG_LINKS,
 } from './rules';
-import { ausTipp, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
+import { ausTipp, dachWandText, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import type { TippAntwort } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, getOrigin, localToCartesian, localToLonLat, lonLatToLocal, setOrigin } from './scene/coords';
@@ -80,7 +80,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ORDER: ObjectKind[] = ['gartenhaus', 'carport', 'waermepumpe'];
 const WORD = { ok: 'passt', warn: 'knapp', bad: 'passt nicht' };
 const TAG_CLASS: Record<string, string> = {
-  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', zertifiziert: 'off',
+  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off',
 };
 
 /* ---------- Zustand ---------- */
@@ -1502,7 +1502,8 @@ function bestandHtml(): string {
     const weg = b.status === 'entfernt';
     const hinweis = !weg && b.provenance === 'erkannt';
     const herkunft = weg ? tag('verworfen', 'offen') : hinweis ? tag('Hinweis, nicht geprüft', 'erkannt') : tag(b.provenance, b.provenance);
-    return `<li><span>${hinweis ? '<small class="fine">Hier scheint noch etwas zu stehen:</small><br>' : ''}${weg ? '<s>' : ''}${esc(beschreibung(b))}${weg ? '</s>' : ''}${!weg && grund.has(b.id) ? `<br><small class="fine">${esc(grund.get(b.id)!)}</small>` : ''}</span>
+    const dw = !weg ? dachWandText(b) : null;
+    return `<li><span>${hinweis ? '<small class="fine">Hier scheint noch etwas zu stehen:</small><br>' : ''}${weg ? '<s>' : ''}${esc(beschreibung(b))}${weg ? '</s>' : ''}${dw ? `<br><small class="fine">${esc(dw)}</small>` : ''}${!weg && grund.has(b.id) ? `<br><small class="fine">${esc(grund.get(b.id)!)}</small>` : ''}</span>
       ${herkunft}
       <span class="acts">${!weg && b.provenance === 'erkannt' ? `<button type="button" data-bok="${b.id}">Stimmt</button>` : ''}
       ${!weg ? `<button type="button" data-kante="${b.id}">Umriss nachziehen</button>` : ''}
@@ -1625,12 +1626,16 @@ function renderTippSheet() {
   const it = st.bestand.find((x) => x.id === t.id)!;
   const a = t.antwort!;
   const vor = a.vorschlag?.[0];
-  verdict('Stimmt der Umriss?', `${beschreibung(it)}. Erfasst per Tipp – Umriss aus dem Luftbild 2023, Höhe aus dem Laser 2025, Maße mit Spanne. Bitte Art prüfen; die Kanten kannst du nachziehen.`);
+  const dw = dachWandText(it);
+  verdict('Stimmt der Umriss?', `${beschreibung(it)}. Erfasst per Tipp: Der Umriss im Luftbild 2023 ist das Dach, die Wand liegt um den Dachüberstand weiter innen. Geprüft wird mit der Wand. Höhe aus dem Laser 2025, Maße mit Spanne.`);
+  const u0 = it.ueberstand ? it.ueberstand.werte.reduce((a, b) => a + b, 0) / it.ueberstand.werte.length : 0;
   const kl: GartenKlasse[] = ['gartenhaus', 'carport_garage', 'gewaechshaus', 'pool', 'trampolin', 'spielturm', 'terrasse', 'teich', 'hecke', 'baum', 'strauch', 'waermepumpe'];
   const h = it.height;
   $('stepBody').innerHTML = `
     <div class="field"><span>Was ist es? ${vor ? tag(`Vorschlag: ${KLASSE_TEXT[vor.klasse]}`, 'erkannt') : ''}</span>${sel('tKl', it.kind ?? 'gartenhaus', kl.map((k) => [k, KLASSE_TEXT[k]]))}</div>
     <div class="field"><label for="tH">Mittlere Wandhöhe in m ${tag('Laser 2025', 'berechnet')}</label><input id="tH" type="number" min="0" max="8" step="0.05" value="${h.toFixed(2)}" inputmode="decimal"></div>
+    ${dw ? `<p class="fine" style="text-align:left">${esc(dw)} ${tag('geschätzt', 'geschätzt')}</p>
+    <div class="field"><label for="tU">Dachüberstand in m (rundum)</label><input id="tU" type="number" min="0" max="1.5" step="0.05" value="${u0.toFixed(2)}" inputmode="decimal"></div>` : ''}
     <div class="btnrow"><button class="primary" id="tOk" type="button">Übernehmen</button>
       <button class="sec" id="tKante" type="button">Kanten nachziehen</button>
       <button class="sec" id="tNo" type="button">Verwerfen</button></div>
@@ -1640,7 +1645,10 @@ function renderTippSheet() {
     const hw = Math.max(0, parseFloat(($('tH') as HTMLInputElement).value.replace(',', '.')) || 0);
     const i = st.bestand.findIndex((x) => x.id === t.id);
     const geaendert = Math.abs(hw - h) > 0.01 ? hw : undefined;
-    st.bestand[i] = { ...ausTipp(t.id!, a, getOrigin(), k, geaendert), footprint: st.bestand[i].footprint, status: 'aktiv' };
+    const uIn = document.getElementById('tU') as HTMLInputElement | null;
+    const uNeu = uIn ? Math.max(0, parseFloat(uIn.value.replace(',', '.')) || 0) : undefined;
+    const uGeaendert = uNeu != null && Math.abs(uNeu - u0) > 0.01 ? uNeu : undefined;
+    st.bestand[i] = { ...ausTipp(t.id!, a, getOrigin(), k, geaendert, uGeaendert), status: 'aktiv' };
     lernBeitrag('neu', st.bestand[i]);
     return st.bestand[i];
   };
@@ -1963,6 +1971,7 @@ function openInfo() {
       <li><span class="tg calc">berechnet</span>An deinem Grundstück gemessen</li>
       <li><span class="tg det">erkannt</span>Automatischer Hinweis, nicht geprüft – nie Grundlage der Prüfung</li>
       <li><span class="tg user">erfasst per Tipp</span>Du hast getippt, Passt. hat Umriss (SAM 2) und Höhe (Laser) gemessen</li>
+      <li><span class="tg assume">geschätzt</span>Wandumriss = Dachumriss minus Dachüberstand (aus Laser oder angenommen 0,3 m)</li>
       <li><span class="tg user">nutzerbestätigt</span>Von dir angegeben</li>
       <li><span class="tg assume">Annahme</span>Gilt nur, wenn es bei dir so ist</li>
       <li><span class="tg open">offen</span>Muss noch jemand prüfen</li>

@@ -528,6 +528,18 @@ export class Renderer {
       e.addProperty(KEY);
       (e as unknown as Record<string, unknown>)[KEY] = new ConstantProperty(`bestand:${b.id}`);
       this.bestandEntities.push(e);
+      if (b.dach) {
+        // Dachumriss (Luftbild) gestrichelt am Boden – der Körper darüber ist die geschätzte Wand
+        this.bestandEntities.push(v.entities.add({
+          polyline: {
+            positions: this.cart([...b.dach, b.dach[0]]),
+            width: 2,
+            clampToGround: true,
+            classificationType: this.cls(),
+            material: new PolylineDashMaterialProperty({ color: Color.fromCssColorString(this.pal().user), dashLength: 8 }),
+          },
+        }));
+      }
     }
     for (const w of st.windows) {
       this.windowEntities.push(

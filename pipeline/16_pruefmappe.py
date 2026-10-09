@@ -177,6 +177,10 @@ R: dict[str, dict] = {
         text=lambda: KEIN, link=None,
         umsetzung="Automatisch erkannte Objekte erscheinen nur als Hinweis „Hier scheint noch etwas zu stehen“ (blass, Label „Hinweis, nicht geprüft“). Sie zählen nicht zur 9-m-/15-m-Länge und lösen keine Kollision aus. Es zählen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte.",
         beispiel="Automatik meldet ein Gartenhaus 4 m an der Ostgrenze (Konfidenz 95 %) → zählt nicht. Nutzer tippt darauf, prüft Art und Kanten → zählt."),
+    "bestand.dachueberstandAnnahmeM": dict(
+        text=lambda: art6("6"), link="BayBO-6",
+        umsetzung="Per Tipp erfasster Bestand: Luftbild-Umriss = Dach. Wand = Dach minus Überstand je Seite (aus Laser-Wandpunkten unter der Traufe, sonst 0,30 m angenommen, vom Nutzer änderbar). Grenzbebauung (9 m/15 m) und Kollision rechnen mit dem Wandumriss, Label „geschätzt“; der Dachumriss wird gestrichelt mit angezeigt.",
+        beispiel="Gartenhaus, Dach im Luftbild 4,50 × 3,60 m, Überstand angenommen 0,30 m → Wand 3,90 × 3,00 m. An der Ostgrenze zählen 3,90 m (nicht 4,50 m) zur 9-m-Länge."),
     "bestand.grenzNaheM": dict(
         text=lambda: KEIN, link=None,
         umsetzung="Bestandsobjekte bis 1,0 m von der Grenze werden in der Liste „Steht hier schon etwas?“ dieser Grenze zugeordnet.",
@@ -321,6 +325,7 @@ FRAGEN = [
     ("Hang (BGH V ZR 230/16)", "Liegt das Nachbargrundstück höher, wird die zulässige Höhe vom höheren Gelände aus gemessen. An welchem Punkt (direkt an der Grenze?) – damit Passt. das rechnen könnte."),
     ("Entwurfsverfasser für Gartenhäuser", "Bei genehmigungspflichtigen Gartenhäusern (über 75 m³) nennt Passt. Architekt oder eingetragene Ingenieure. Reichen hier auch die Personen nach Art. 61 Abs. 3 (z. B. Meister, Techniker)?"),
     ("Örtliche Satzungen", "Hat Sulzbach-Rosenberg eine Abstandsflächensatzung (Art. 6 Abs. 5 Satz 2) oder eine Gestaltungssatzung, die Nebengebäude betrifft? Passt. berücksichtigt keine."),
+    ("Dachüberstand", "Art. 6 Abs. 6 Nr. 1 lässt Dachüberstände bei der Bemessung der Abstandsflächen außer Betracht – ohne Grenze im Wortlaut. Ab welchem Überstand zählt er in der Praxis doch mit (z. B. über 0,5 m oder 1,5 m wie bei Vorbauten in Nr. 2)? Zählt bei der Grenzbebauung (9 m je Seite, 15 m gesamt) die Wandlänge oder die Dachlänge? Und darf der Überstand eines Grenzgebäudes über die Grenze ragen? Passt. rechnet mit der Wand und zeigt das Dach getrennt."),
     ("Formulierung der Antworten", "Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?"),
 ]
 

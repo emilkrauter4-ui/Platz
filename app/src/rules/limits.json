@@ -136,6 +136,12 @@
       "text": "Automatisch erkannte Objekte sind nur ein Hinweis („Hier scheint noch etwas zu stehen“), klar gekennzeichnet und nie Grundlage einer Prüfung: Sie zählen nicht zur Grenzbebauung und lösen keine Kollision aus. Mit Gewicht gehen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte ein. Bis 05.10.2026 zählten erkannte ab Konfidenz 0,8 automatisch (Test-Set nach Objekten: Präzision zu gering, docs/messungen/testset_objekte.md).",
       "geprueft": false
     },
+    "dachueberstandAnnahmeM": {
+      "wert": 0.3,
+      "quelle": "Annahme Passt. (Emil, 09.10.2026)",
+      "text": "Der Tipp-Umriss aus dem Luftbild ist der Dachumriss. Die Wand liegt um den Dachüberstand weiter innen. Je Seite wird der Überstand aus Laser-Wandpunkten unter der Traufe gemessen (ab 4 Punkten), sonst gilt diese Annahme. Der Nutzer kann ihn ändern. Prüfungen (Grenzbebauung, Kollision) nutzen den Wandumriss, Label „geschätzt“.",
+      "geprueft": false
+    },
     "grenzNaheM": {
       "wert": 1.0,
       "quelle": "Produktentscheidung Passt.: Objekte mit höchstens diesem Abstand zur Grenze werden bei „Steht hier schon etwas?“ der Grenze zugeordnet"

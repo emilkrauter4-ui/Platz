@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ausTipp, beschreibung, fromRec, jeGrenze, minRect, nachgezogen, seitenAnGrenze } from '../src/site/bestand';
+import { ausTipp, dachWandText, wandAusDach, beschreibung, fromRec, jeGrenze, minRect, nachgezogen, seitenAnGrenze } from '../src/site/bestand';
 import type { TippAntwort } from '../src/site/bestand';
 import { sidesFromBoundary } from '../src/site/plot';
 import type { Vec2 } from '../src/rules';
@@ -61,14 +61,35 @@ describe('Ein Tipp erfasst', () => {
     umriss: [[699010, 5487020], [699013, 5487020], [699013, 5487022.5], [699010, 5487022.5]],
     masse: { form: 'rechteck', laenge: 3.02, breite: 2.48, spanne_laenge: 0.38, spanne_breite: 0.38, hoehe: 2.6, spanne_hoehe: 0.12, wandhoehe_mittel: 2.3, spanne_wand: 0.16 },
   };
-  it('lokale Koordinaten, Herkunft „erfasst per Tipp“, Maße mit Spanne aus dem Dienst', () => {
+  it('ohne Wand-Schätzung: Umriss = Dach, lokale Koordinaten, Herkunft „erfasst per Tipp“', () => {
     const b = ausTipp('t1', antwort, [699000, 5487000]);
     expect(b.provenance).toBe('erfasst per Tipp');
     expect(b.footprint[0]).toEqual([10, 20]);
     expect(b.kind).toBe('gartenhaus');
     expect(b.height).toBe(2.3);
-    expect(b.laenge).toEqual({ wert: 3.02, spanne: 0.38 });
-    expect(beschreibung(b)).toContain('3,02 × 2,48 m');
+    expect(b.laenge?.wert).toBeCloseTo(3);
+    expect(b.dach).toBeUndefined();
+  });
+  it('Dach und Wand getrennt: Prüfung nutzt den Wandumriss', () => {
+    const a: TippAntwort = { ...antwort, wand: { umriss: [[699010.3, 5487020.3], [699012.7, 5487020.3], [699012.7, 5487022.2], [699010.3, 5487022.2]], label: 'geschätzt', ueberstand: [0.3, 0.3, 0.3, 0.3], quelle: ['Annahme', 'Annahme', 'Annahme', 'Annahme'], laenge: 2.4, breite: 1.9 } };
+    const b = ausTipp('t2', a, [699000, 5487000]);
+    expect(b.footprint[0][0]).toBeCloseTo(10.3);
+    expect(b.dach?.[0]).toEqual([10, 20]);
+    expect(b.laenge?.wert).toBeCloseTo(2.4);
+    expect(b.laenge?.spanne).toBeCloseTo(0.48, 2);
+    expect(dachWandText(b)).toBe('Dach 3,00 × 2,50 m (Luftbild), Wand 2,40 × 1,90 m (geschätzt – Dachüberstand 0,30 m angenommen)');
+  });
+  it('Überstand vom Nutzer: rundum, Wand neu aus dem Dach', () => {
+    const b = ausTipp('t3', antwort, [699000, 5487000], undefined, undefined, 0.5);
+    expect(b.laenge?.wert).toBeCloseTo(2);
+    expect(b.breite?.wert).toBeCloseTo(1.5);
+    expect(b.ueberstand?.quelle).toEqual(['von dir', 'von dir', 'von dir', 'von dir']);
+  });
+  it('wandAusDach bei gedrehtem Dach', () => {
+    const w = wandAusDach([[0, 0], [4, 0], [4, 3], [0, 3]], 0.25);
+    const r = minRect(w);
+    expect(r.laenge).toBeCloseTo(3.5);
+    expect(r.breite).toBeCloseTo(2.5);
   });
   it('Klasse und Wandhöhe vom Nutzer gehen vor', () => {
     const b = ausTipp('t1', antwort, [699000, 5487000], 'gewaechshaus', 2.1);

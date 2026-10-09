@@ -287,7 +287,7 @@ export function zaehleBestand(site: Site): { gezaehlt: { id: string; grund: stri
     } else if (b.provenance === 'nutzerbestätigt') {
       gezaehlt.push({ id: b.id, grund: 'von dir bestätigt' });
     } else if (b.provenance === 'erfasst per Tipp') {
-      gezaehlt.push({ id: b.id, grund: 'von dir per Tipp erfasst' });
+      gezaehlt.push({ id: b.id, grund: b.dach ? 'von dir per Tipp erfasst, Wandumriss geschätzt (Dach minus Überstand)' : 'von dir per Tipp erfasst' });
     } else {
       nicht.push({ id: b.id, grund: 'nur ein Hinweis der Automatik – zählt erst, wenn du „Stimmt“ sagst' });
     }
@@ -573,7 +573,7 @@ function building(
 }
 
 /** Die „schwächste" Herkunft gewinnt: eine Annahme bleibt eine Annahme. */
-const RANK: Record<string, number> = { amtlich: 0, zertifiziert: 0.5, berechnet: 1, erkannt: 2, 'erfasst per Tipp': 2.5, nutzerbestätigt: 3, Annahme: 4, offen: 5, Demo: 6 };
+const RANK: Record<string, number> = { amtlich: 0, zertifiziert: 0.5, berechnet: 1, erkannt: 2, 'erfasst per Tipp': 2.5, nutzerbestätigt: 3, geschätzt: 3.5, Annahme: 4, offen: 5, Demo: 6 };
 function worst<T extends string>(...ps: T[]): T {
   return ps.reduce((a, b) => (RANK[b] > RANK[a] ? b : a));
 }

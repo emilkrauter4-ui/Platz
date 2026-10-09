@@ -200,7 +200,10 @@ export interface TippAntwort {
   label?: string;
   klasse?: GartenKlasse;
   vorschlag?: { klasse: GartenKlasse; p: number }[];
+  /** Dachumriss aus dem Luftbild */
   umriss?: Vec2[];
+  /** geschätzter Wandumriss (Dach minus Überstand je Seite), Label „geschätzt“ */
+  wand?: { umriss: Vec2[]; label: string; ueberstand: number[]; quelle: string[]; laenge: number; breite: number };
   masse?: {
     form?: 'kreis' | 'rechteck';
     laenge?: number; breite?: number; spanne_laenge?: number; spanne_breite?: number;
@@ -214,24 +217,58 @@ export interface TippAntwort {
  * Klasse wählt der Nutzer; ohne Wahl gilt der Vorschlag. Höhe für die Grenzbebauung: mittlere Wandhöhe aus den
  * Dachebenen, sonst die Gesamthöhe (sicher nach oben); eine vom Nutzer eingegebene Wandhöhe geht vor.
  */
-export function ausTipp(id: string, a: TippAntwort, origin: Vec2, klasse?: GartenKlasse, wandhoehe?: number): Bestand {
+export function ausTipp(id: string, a: TippAntwort, origin: Vec2, klasse?: GartenKlasse, wandhoehe?: number, ueberstand?: number): Bestand {
   if (!a.ok || !a.umriss || a.umriss.length < 3) throw new Error(a.grund ?? 'Tipp ohne Umriss');
-  const fp: Vec2[] = a.umriss.map(([x, y]) => [x - origin[0], y - origin[1]]);
+  const lokal = (p: Vec2[]): Vec2[] => p.map(([x, y]) => [x - origin[0], y - origin[1]]);
+  const dach = lokal(a.umriss);
   const m = a.masse ?? {};
-  const r = minRect(fp);
-  const mass = (wert: number | undefined, spanne: number | undefined, ersatz: number) => ({ wert: wert ?? ersatz, spanne: spanne ?? 0.3 });
+  // Wand: vom Dienst geschätzt; ein vom Nutzer eingegebener Überstand gilt rundum
+  const wandFp = ueberstand != null ? wandAusDach(dach, ueberstand) : a.wand ? lokal(a.wand.umriss) : dach;
+  const ueb = ueberstand != null ? { werte: [0, 1, 2, 3].map(() => ueberstand), quelle: [0, 1, 2, 3].map(() => 'von dir') }
+    : a.wand ? { werte: a.wand.ueberstand, quelle: a.wand.quelle } : undefined;
+  const r = minRect(wandFp);
+  // Spanne der Wandmaße: Kante im Luftbild plus Unsicherheit des Überstands (Annahme ±0,3 m, Laser ±0,15 m, Nutzer ±0,05 m)
+  const sUeb = !ueb ? 0 : ueb.quelle.some((q) => q === 'Annahme') ? 0.3 : ueb.quelle.every((q) => q === 'von dir') ? 0.05 : 0.15;
+  const sp = Math.round(Math.hypot(m.spanne_laenge ?? 0.3, sUeb) * 100) / 100;
   const hoehe = m.hoehe != null ? { wert: m.hoehe, spanne: m.spanne_hoehe ?? 0.3 } : undefined;
   const wand = m.wandhoehe_mittel != null ? { wert: m.wandhoehe_mittel, spanne: m.spanne_wand ?? 0.3 } : undefined;
+  const rund = m.form === 'kreis';
   return {
     id,
-    footprint: fp,
+    footprint: wandFp,
+    dach: a.wand || ueberstand != null ? dach : undefined,
+    ueberstand: ueb,
     height: wandhoehe ?? wand?.wert ?? hoehe?.wert ?? 0,
     provenance: 'erfasst per Tipp',
     kind: klasse ?? a.klasse,
-    laenge: mass(m.laenge, m.spanne_laenge, r.laenge),
-    breite: mass(m.breite, m.spanne_breite, r.breite),
+    laenge: { wert: rund && m.laenge != null ? m.laenge : r.laenge, spanne: sp },
+    breite: { wert: rund && m.breite != null ? m.breite : r.breite, spanne: sp },
     hoehe: wandhoehe != null ? { wert: wandhoehe, spanne: 0 } : hoehe,
     wand: wandhoehe != null ? undefined : wand,
-    rund: m.form === 'kreis',
+    rund,
   };
+}
+
+/** Wandumriss aus dem Dachumriss: gedrehtes Rechteck um das Dach, jede Seite um `u` nach innen. */
+export function wandAusDach(dach: Vec2[], u: number): Vec2[] {
+  const r = minRect(dach);
+  const l = Math.max(r.laenge - 2 * u, 0.2);
+  const b = Math.max(r.breite - 2 * u, 0.2);
+  const c = r.ecken.reduce<Vec2>((s, p) => [s[0] + p[0] / 4, s[1] + p[1] / 4], [0, 0]);
+  const dx: Vec2 = [Math.cos(r.winkel), Math.sin(r.winkel)];
+  const dy: Vec2 = [-dx[1], dx[0]];
+  const p = (a: number, q: number): Vec2 => [c[0] + dx[0] * a + dy[0] * q, c[1] + dx[1] * a + dy[1] * q];
+  return [p(-l / 2, -b / 2), p(l / 2, -b / 2), p(l / 2, b / 2), p(-l / 2, b / 2)];
+}
+
+/** Kurztext zu Dach und Wand eines Tipp-Objekts, z. B. „Dach 4,50 × 3,60 m (Luftbild), Wand geschätzt …“. */
+export function dachWandText(b: Bestand): string | null {
+  if (!b.dach) return null;
+  const d = minRect(b.dach);
+  const w = minRect(b.footprint);
+  const u = b.ueberstand;
+  const q = !u ? '' : u.quelle.every((x) => x === 'Annahme') ? ` – Dachüberstand ${fmt(u.werte[0])} m angenommen`
+    : u.quelle.every((x) => x === 'von dir') ? ` – Dachüberstand ${fmt(u.werte[0])} m von dir`
+      : ` – Dachüberstand ${u.werte.map((x) => fmt(x)).join(' / ')} m; ${u.quelle.filter((x) => x !== 'Annahme').length} von 4 Seiten aus Laser, sonst angenommen`;
+  return `Dach ${fmt(d.laenge)} × ${fmt(d.breite)} m (Luftbild), Wand ${fmt(w.laenge)} × ${fmt(w.breite)} m (geschätzt${q})`;
 }

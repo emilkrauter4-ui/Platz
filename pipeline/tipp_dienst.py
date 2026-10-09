@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Tipp-Dienst für „Ein Tipp erfasst“: kleiner HTTP-Dienst nur auf localhost, hält SAM 2 und den Klassifikator im
-Speicher (erste Anfrage ≈ 10 s, danach ≈ 4–8 s auf CPU). Der Node-Server (app/scripts/serve.mjs) und der Vite-Dev-Server
-leiten /api/tipp hierher weiter.
+Speicher. Beim Start lädt er alles und macht einen Probe-Tipp (≈ 1 min), danach braucht jeder Tipp – auch der erste
+echte – mit vorberechneten Embeddings (20_tipp_embeddings.py) nur den Prompt-Decoder: < 1 s. Ohne Embeddings für die
+Kachel ≈ 2 s. Der Node-Server (app/scripts/serve.mjs) und der Vite-Dev-Server leiten /api/tipp hierher weiter.
 
   cd pipeline && python3 tipp_dienst.py [port]       Standard 8765
 
@@ -32,7 +33,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):  # Lebenszeichen
-        self._antwort(200, {"ok": True, "dienst": "passt-tipp"})
+        self._antwort(200, {"ok": True, "dienst": "passt-tipp", "bereit": True})
 
     def do_POST(self):
         if not self.path.rstrip("/").endswith("/tipp"):
@@ -62,5 +63,7 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
-    print(f"Tipp-Dienst auf http://127.0.0.1:{port}/tipp (SAM 2 lädt bei der ersten Anfrage)", flush=True)
+    print("Tipp-Dienst lädt SAM 2, Klassifikator, Gebäude und Embeddings …", flush=True)
+    t = tipp.aufwaermen()
+    print(f"bereit nach {t:.0f} s – http://127.0.0.1:{port}/tipp", flush=True)
     ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()

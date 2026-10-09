@@ -18,7 +18,8 @@ export type Provenance =
   | 'offen'
   | 'Demo'
   | 'zertifiziert'
-  | 'erfasst per Tipp';
+  | 'erfasst per Tipp'
+  | 'geschätzt';
 
 export type Status = 'ok' | 'warn' | 'bad';
 
@@ -101,6 +102,10 @@ export interface Bestand {
   /** geometrisch gemittelte Wandhöhe aus Dachebenen (Laser) */
   wand?: Mass;
   rund?: boolean;
+  /** Per Tipp: Dachumriss aus dem Luftbild. `footprint` ist dann der geschätzte Wandumriss (Dach minus Überstand). */
+  dach?: Vec2[];
+  /** Dachüberstand je Seite des Dach-Rechtecks und woher er kommt („Laser (n Wandpunkte)“ oder „Annahme“) */
+  ueberstand?: { werte: number[]; quelle: string[] };
   /** Bäume/Sträucher: vom Nutzer angetippte Stammmitte am Boden (Art. 49 AGBGB) und Spanne als Radius */
   stamm?: Vec2;
   stammSpanne?: number;

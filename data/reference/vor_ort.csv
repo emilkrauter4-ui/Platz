@@ -1,1 +1,1 @@
-objekt_id,grundstueck,klasse,laenge_m,breite_m,wandhoehe_traufe_m,firsthoehe_m,gemessen_am,messmittel,einverstaendnis_eigentuemer,notiz
+objekt_id,klasse,rechtswert,hochwert,testset_id,wand_nord_m,wand_ost_m,wand_sued_m,wand_west_m,ueberstand_nord_m,ueberstand_ost_m,ueberstand_sued_m,ueberstand_west_m,traufhoehe_m,firsthoehe_m,abstand_grenzstein_m,grenzstein_wand,fotos,gemessen_am,messmittel,einverstaendnis_eigentuemer,notiz
