@@ -1,4 +1,4 @@
-# BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a und b, Nr. 2 (Auszug, Wortlaut)
+# BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a und b, Nr. 2 und Nr. 10 Buchst. a (Auszug, Wortlaut)
 #
 # Abgerufen am 4. Oktober 2026. gesetze-bayern.de per CAPTCHA gesperrt. Text aus lxgesetze.de/baybo/57
 # (BayBO vom 14.8.2007, zuletzt geändert am 23.4.2026), verglichen mit lexmea.de/de/gesetz/baybo/art-57: identisch.
@@ -22,4 +22,13 @@ a)
 Abgasanlagen in, auf und an Gebäuden sowie freistehende Abgasanlagen mit einer freien Höhe bis zu 10 m,
 b)
 sonstige Anlagen der technischen Gebäudeausrüstung,
+…
+#
+# Nr. 10 Buchst. a ergänzt am 10. Oktober 2026 (AUFTRAG_V3 Phase A), Text aus https://www.lxgesetze.de/baybo/57
+# (BayBO vom 14.8.2007, zuletzt geändert am 23.4.2026). Nr. 10 lautet insgesamt: „folgende Anlagen in Gärten und zur
+# Freizeitgestaltung: a) …“ – hier nur Buchst. a. Nicht auf gesetze-bayern.de bestätigt (CAPTCHA), von einer Person zu prüfen.
+10.
+folgende Anlagen in Gärten und zur Freizeitgestaltung:
+a)
+Schwimmbecken einschließlich dazugehöriger temporärer luftgetragener Überdachungen, außer im Außenbereich,
 …

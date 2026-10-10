@@ -61,6 +61,12 @@ import {
   type Koerper,
   verfahrenFuer,
   ANTRAG_LINKS,
+  GERAETE_NAME,
+  geraeteKlasse,
+  richtwertFuer,
+  standardLw,
+  standardMasse,
+  type GeraeteKlasse,
 } from './rules';
 import { ausTipp, dachWandText, wandLabelVon, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import type { TippAntwort } from './site/bestand';
@@ -615,7 +621,7 @@ function renderVerdict() {
     if (!b) return;
     b.setAttribute('aria-selected', String(st.modus === 'objekt' && k === st.selected));
     b.querySelector('.d')!.className = `d ${st.res![k].status}`;
-    b.setAttribute('aria-label', `${NAMES[k].name}, ${WORD[st.res![k].status]}`);
+    b.setAttribute('aria-label', `${tabName(k)}, ${WORD[st.res![k].status]}`);
   });
   const rows = document.getElementById('rows');
   if (rows) rows.innerHTML = r.rows.map((x) => `<li><span>${esc(x.text)}</span>${tag(x.tag, x.kind)}</li>`).join('');
@@ -638,14 +644,14 @@ const CTL: Record<ObjectKind, { k: keyof Placed | 'deg'; l: string; min: number;
     { k: 'deg', l: 'Drehung', min: -90, max: 90, step: 1 },
   ],
   waermepumpe: [
-    { k: 'lw', l: 'Lautstärke nachts laut Datenblatt', min: 48, max: 68, step: 1 },
+    { k: 'lw', l: 'Schallleistung laut Datenblatt der Außeneinheit', min: 40, max: 75, step: 1 },
     { k: 'deg', l: 'Drehung', min: -90, max: 90, step: 1 },
   ],
 };
 
 function valText(k: string) {
   const o = st.objs![st.selected];
-  if (k === 'lw') return `${Math.round(o.lw ?? 58)} dB(A)`;
+  if (k === 'lw') return `${Math.round(o.lw ?? standardLw(geraeteKlasse(o)))} dB(A)`;
   if (k === 'deg') return `${Math.round(CMath.toDegrees(o.angle))}°`;
   if (k === 'neigung') return (o.neigung ?? 0) > 0 ? `${Math.round(o.neigung!)}° · First ${fmt(o.h + dachHoehe(o), 2)} m` : 'Flachdach';
   return `${fmt(o[k as 'w'] as number, k === 'h' ? 2 : 1)} m`;
@@ -729,10 +735,14 @@ function renderSheet() {
       const v = parseFloat(inp.value);
       if (inp.dataset.k === 'deg') ob.angle = CMath.toRadians(v);
       else (ob as unknown as Record<string, number>)[inp.dataset.k!] = v;
-      if (inp.dataset.k === 'lw' && ob.geraet) {
-        ob.geraet = undefined; // eigener Wert statt KEYMARK-Gerät
-        renderSheet();
-        return;
+      if (inp.dataset.k === 'lw') {
+        const warGeraet = !!ob.geraet;
+        ob.geraet = undefined; // eigener Wert statt Gerät aus der Datenbank
+        ob.lwVomNutzer = true; // Label nutzerbestätigt
+        if (warGeraet) {
+          renderSheet();
+          return;
+        }
       }
       update();
     }),
@@ -809,8 +819,13 @@ function renderSheet() {
 /* ---------- Hecke, Baum (AGBGB Art. 47–52) ---------- */
 const PFL_ART: [PflanzenArt, string][] = [['hecke', 'Hecke'], ['baum', 'Baum'], ['strauch', 'Strauch']];
 
+/** Beschriftung der Objektart: das Modul „Außengeräte“ heißt in der Oberfläche Außengerät (Klasse im Blatt) */
+function tabName(k: ObjectKind): string {
+  return k === 'waermepumpe' ? 'Außengerät' : NAMES[k].name;
+}
+
 function tabsHtml(): string {
-  return `${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${NAMES[k].name}</button>`).join('')}
+  return `${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${tabName(k)}</button>`).join('')}
     <button class="obj" role="tab" type="button" data-modus="pflanzen"><span class="d"></span>Hecke, Baum</button>`;
 }
 
@@ -1041,7 +1056,8 @@ const HINWEIS_LINK = 'Der Link ersetzt keine Unterschrift deines Nachbarn auf am
 function objektText(k: ObjectKind, o: Placed): string {
   if (k === 'gartenhaus') return `Gartenhaus ${fmt(o.w, 1)} × ${fmt(o.d, 1)} m, Wandhöhe ${fmt(o.h, 1)} m${(o.neigung ?? 0) > 0 ? `, Satteldach ${Math.round(o.neigung!)}°, First ${fmt(o.h + dachHoehe(o), 1)} m` : ', Flachdach'}`;
   if (k === 'carport') return `Carport ${fmt(o.w, 1)} × ${fmt(o.d, 1)} m, ${fmt(o.h, 1)} m hoch`;
-  return `Wärmepumpe (Außengerät)${o.lw ? `, Schallleistung ${Math.round(o.lw)} dB(A) laut Angabe` : ''}`;
+  const gk = geraeteKlasse(o);
+  return `${GERAETE_NAME[gk].name} (Außengerät)${o.lw ? `, Schallleistung ${Math.round(o.lw)} dB(A) ${o.lwVomNutzer || o.geraet ? 'laut Angabe' : 'angenommen'}` : ''}${gk === 'pool' && o.nurTags ? ', nur tagsüber' : ''}`;
 }
 function pflanzeText(p: Pflanze): string {
   return p.art === 'hecke' ? `Hecke ${fmt(p.laenge, 1)} m lang, bis ${fmt(p.hoehe, 1)} m hoch` : `${p.art === 'baum' ? 'Baum' : 'Strauch'} bis ${fmt(p.hoehe, 1)} m hoch`;
@@ -1508,39 +1524,73 @@ async function gartenblick(an: boolean) {
   render();
 }
 
-/* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */
+/* ---------- Außengeräte: Geräteklasse und Gerätesuche über alle Klassen (lazy geladen) ---------- */
 type GeraetRow = [string, string, number, string, number | null];
-let geraete: Promise<{ quelle: string; geraete: GeraetRow[] }> | null = null;
-const ladeGeraete = () => (geraete ??= fetch(`${DATA_ROOT}/waermepumpen.json`).then((r) => r.json() as Promise<{ quelle: string; geraete: GeraetRow[] }>));
+type GeraeteListe = { klasse: GeraeteKlasse; quelle: string; geraete: GeraetRow[] };
+/** Gerätelisten je Klasse. Fehlt die Datei (Klimageräte, Pool-Wärmepumpen: noch keine Datenquelle), ist die Liste leer. */
+const GERAETE_DATEIEN: [GeraeteKlasse, string][] = [['lwwp', 'waermepumpen.json'], ['klima', 'klimageraete.json'], ['pool', 'poolwaermepumpen.json']];
+let geraete: Promise<GeraeteListe[]> | null = null;
+const ladeGeraete = () =>
+  (geraete ??= Promise.all(
+    GERAETE_DATEIEN.map(async ([klasse, datei]): Promise<GeraeteListe> => {
+      try {
+        const r = await fetch(`${DATA_ROOT}/${datei}`);
+        const j = r.ok && (r.headers.get('content-type') ?? '').includes('json') ? ((await r.json()) as { quelle: string; geraete: GeraetRow[] }) : null;
+        return { klasse, quelle: j?.quelle ?? '', geraete: j?.geraete ?? [] };
+      } catch {
+        return { klasse, quelle: '', geraete: [] };
+      }
+    }),
+  ));
+
+/** Klasse wechseln: Platzhalter-Schallleistung und übliche Maße der Klasse, Gerät und Nutzerwert zurücksetzen. */
+function setzeGeraeteklasse(k: GeraeteKlasse) {
+  const ob = st.objs!.waermepumpe;
+  const m = standardMasse(k);
+  Object.assign(ob, { geraeteklasse: k, lw: standardLw(k), geraet: undefined, lwVomNutzer: false, nurTags: false, w: m.w, d: m.d, h: m.h });
+}
 
 function geraetHtml(o: Placed): string {
+  const k = geraeteKlasse(o);
+  const labelLw = o.geraet ? tag('zertifiziert', 'zertifiziert') : o.lwVomNutzer ? tag('nutzerbestätigt', 'nutzerbestätigt') : tag('Annahme', 'Annahme');
+  const rw = richtwertFuer(o, st.gebiet.value);
   return `<div class="field" style="display:block">
-    <label for="gSuche" style="display:block;margin-bottom:4px">Gerät suchen (Hersteller, Modell) ${o.geraet ? tag('zertifiziert', 'zertifiziert') : tag('nutzerbestätigt', 'nutzerbestätigt')}</label>
+    <label for="gKlasse" style="display:block;margin-bottom:4px">Art des Außengeräts</label>
+    ${sel('gKlasse', k, (Object.keys(GERAETE_NAME) as GeraeteKlasse[]).map((c) => [c, GERAETE_NAME[c].name]))}
+    ${k === 'pool' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="gTags" ${o.nurTags ? 'checked' : ''}> Läuft nur tagsüber (06–22 Uhr) – dann gelten die Tagwerte</label>` : ''}
+    <p class="fine" style="text-align:left">Richtwert am Nachbarfenster: ${rw.limit} dB(A) ${rw.zeit.toLowerCase()} (TA Lärm Nr. 6.1) ${tag('TA Lärm', 'rule')} · Schallleistung ${labelLw}</p>
+    ${k === 'klima' ? '<p class="fine" style="text-align:left">Klimageräte laufen vor allem im Sommer und oft auch nachts. Dann sind Fenster häufiger offen – Passt. rechnet deshalb nachts.</p>' : ''}
+    <label for="gSuche" style="display:block;margin:8px 0 4px">Gerät suchen (Hersteller, Modell) – alle Klassen</label>
     <input id="gSuche" type="search" autocomplete="off" placeholder="z. B. Vaillant VWL 105 oder Daikin EDLA" value="${o.geraet ? esc(`${o.geraet.hersteller} ${o.geraet.modell}`) : ''}" style="width:100%">
     <ul class="rows" id="gTreffer" style="margin-top:6px"></ul>
-    <p class="fine" style="text-align:left">Schallleistung im Nennbetrieb nach EN 12102 aus Heat Pump KEYMARK (über hplib, Datenblätter 2016–2021, technische Typbezeichnungen). Neuere Geräte fehlen. Nachts im Silent-Modus oft leiser – dann den Wert aus dem Datenblatt mit dem Regler einstellen.</p>
+    <p class="fine" style="text-align:left">Luft-Wasser-Wärmepumpen: Schallleistung im Nennbetrieb nach EN 12102 aus Heat Pump KEYMARK (über hplib, Datenblätter 2016–2021). Für <b>Klimageräte</b> und <b>Pool-Wärmepumpen</b> gibt es noch keine Gerätedatenbank (EPREL braucht einen Schlüssel, KEYMARK enthält nur Wasser-Wärmepumpen): Schallleistung der Außeneinheit aus dem Datenblatt mit dem Regler einstellen. Nachts im Silent-Modus oft leiser.</p>
   </div>`;
 }
 
 function geraetSuche() {
+  const kl = document.getElementById('gKlasse') as HTMLSelectElement | null;
+  kl?.addEventListener('change', () => { setzeGeraeteklasse(kl.value as GeraeteKlasse); renderSheet(); update(); });
+  document.getElementById('gTags')?.addEventListener('change', (e) => { st.objs!.waermepumpe.nurTags = (e.target as HTMLInputElement).checked; renderSheet(); update(); });
   const inp = document.getElementById('gSuche') as HTMLInputElement | null;
   if (!inp) return;
   const liste = $('gTreffer');
   inp.addEventListener('input', async () => {
     const q = inp.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     if (!q.length) { liste.innerHTML = ''; return; }
-    const d = await ladeGeraete();
-    const treffer = d.geraete.filter(([h, m]) => q.every((w) => `${h} ${m}`.toLowerCase().includes(w))).slice(0, 8);
+    const alle = await ladeGeraete();
+    const treffer = alle.flatMap((l) => l.geraete.map((g) => ({ klasse: l.klasse, g }))).filter(({ g: [h, m] }) => q.every((w) => `${h} ${m}`.toLowerCase().includes(w))).slice(0, 8);
     liste.innerHTML = treffer.length
-      ? treffer.map(([h, m, lw, datum, kw], i) => `<li><span>${esc(h)} ${esc(m)}${kw ? ` · ${fmt(kw, 1)} kW` : ''}<br><small class="fine">${fmt(lw, 0)} dB(A) · Datenblatt ${esc(datum)}</small></span><span class="acts"><button type="button" data-g="${i}">Übernehmen</button></span></li>`).join('')
-      : '<li><span class="fine">Kein Gerät gefunden. Wert aus dem Datenblatt mit dem Regler einstellen.</span></li>';
+      ? treffer.map(({ klasse, g: [h, m, lw, datum, kw] }, i) => `<li><span>${esc(h)} ${esc(m)}${kw ? ` · ${fmt(kw, 1)} kW` : ''}<br><small class="fine">${esc(GERAETE_NAME[klasse].name)} · ${fmt(lw, 0)} dB(A) · Datenblatt ${esc(datum)}</small></span><span class="acts"><button type="button" data-g="${i}">Übernehmen</button></span></li>`).join('')
+      : `<li><span class="fine">Kein Gerät gefunden.${alle.some((l) => l.klasse !== 'lwwp' && l.geraete.length) ? '' : ' Für Klimageräte und Pool-Wärmepumpen gibt es noch keine Gerätedatenbank.'} Wert aus dem Datenblatt mit dem Regler einstellen.</span></li>`;
     liste.querySelectorAll<HTMLButtonElement>('[data-g]').forEach((b) =>
       b.addEventListener('click', () => {
-        const [h, m, lw, datum] = treffer[Number(b.dataset.g)];
+        const { klasse, g: [h, m, lw, datum] } = treffer[Number(b.dataset.g)];
+        setzeGeraeteklasse(klasse);
         const ob = st.objs!.waermepumpe;
         ob.lw = lw;
         ob.geraet = { hersteller: h, modell: m, datum };
         renderSheet();
+        update();
       }),
     );
   });
@@ -1968,7 +2018,7 @@ function openReport() {
   let h = `<p class="m-sub">${esc(st.address ?? `Grundstück in ${data.site.gemeinde.name}`)}, ${fmt(area(st.plot!), 0)} m², erstellt am ${esc(today)}</p>`;
   for (const k of ORDER) {
     const r: Result = st.res[k];
-    h += `<div class="rep"><div class="rep-h"><span class="d ${r.status}"></span><strong>${NAMES[k].name}</strong><span class="rep-s">${WORD[r.status]}</span></div><p class="rep-t">${esc(r.head)} ${esc(r.sub)}</p></div>`;
+    h += `<div class="rep"><div class="rep-h"><span class="d ${r.status}"></span><strong>${tabName(k)}</strong><span class="rep-s">${WORD[r.status]}</span></div><p class="rep-t">${esc(r.head)} ${esc(r.sub)}</p></div>`;
   }
   if (pflSt.benutzt && st.pflanzRes && st.pflanze) {
     const r = st.pflanzRes;

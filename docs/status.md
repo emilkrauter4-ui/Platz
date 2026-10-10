@@ -545,6 +545,44 @@ Ausführlich: `docs/messungen/scharhof_daten.md`. Fertig, bis auf die Maßband-W
 - Tests: App 154 grün (neu: Außenbereich-Zeilen), Python 14 grün (neu: `test_gebiet.py`).
 - Danach wieder pausiert bis zu den Maßband-Werten.
 
+## AUFTRAG_V3 Phase A – Außengeräte (10. Oktober 2026)
+
+Das Wärmepumpen-Modul ist das Modul „Außengeräte“. Alle neuen Regeln stehen in `limits.json → aussengeraete` mit
+`geprueft: false`; Wortlaut aus Art. 57 und Art. 6 BayBO (lxgesetze.de, gesetze-bayern.de ist per CAPTCHA gesperrt) und
+TA Lärm Nr. 6.1/6.4 (verwaltungsvorschriften-im-internet.de), Abruf 10.10.2026. Tipp-Erfassung und Messauswertung unverändert.
+
+- **Geräteklassen** (`Placed.geraeteklasse`): Luft-Wasser-Wärmepumpe (wie bisher), **Klimagerät** (Split-Außeneinheit),
+  **Pool-Wärmepumpe**. Intern bleibt die Objektart `waermepumpe`, in der App heißt der Reiter „Außengerät“.
+- **Regeln aus dem Wortlaut:**
+  - Klimagerät: verfahrensfrei als „sonstige Anlage der technischen Gebäudeausrüstung“ (Art. 57 Abs. 1 Nr. 2 Buchst. b). Der
+    Wortlaut nennt Klimageräte **nicht**, die Zuordnung ist eine Auslegung → Zeile `offen`.
+  - Abstandsfläche: Art. 6 Abs. 1 Satz 3 Nr. 4 nennt „Wärmepumpen und zugehörige Einhausungen bis 2 m“. Beim Klimagerät
+    als `Annahme` angewendet, bei der Pool-Wärmepumpe als `offen` markiert.
+  - Pool-Wärmepumpe: Becken selbst Art. 57 Abs. 1 Nr. 10 Buchst. a („außer im Außenbereich“), von Passt. nicht geprüft, Hinweiszeile.
+  - Lärm: gleiche Formel und Abschirmung für alle Klassen, Nachtwerte aus Nr. 6.1. Nur die Pool-Wärmepumpe lässt sich auf
+    „nur tagsüber“ stellen (Tagwerte 50/55/60 dB(A), Tag = 06–22 Uhr nach Nr. 6.4). Klimagerät: Hinweis „Sommer, oft nachts,
+    Fenster häufiger offen“, gerechnet wird nachts. Zuschlag Nr. 6.5 (6 dB) nicht berücksichtigt.
+- **Gerätedaten (A2) – Ergebnis:**
+  - **EPREL:** Die Schnittstelle antwortet ohne API-Schlüssel mit 403. Den Schlüssel beantragt man über die EPREL-Website; das kann
+    ich nicht. Die Bedingungen (Stand 03.06.2024) erlauben die Nutzung in Apps, verlangen Quellenangabe und Aktualität
+    lokaler Kopien und verbieten verkaufen und irreführende Umformung. **Ob die Außen-Schallleistung als Feld geliefert
+    wird, ist ohne Schlüssel nicht geprüft.**
+  - **KEYMARK/hplib 1.9:** nur Luft/Wasser (2 885), Sole/Wasser (330), Wasser/Wasser (10), **keine Luft-Luft-Geräte**.
+  - Für Klimageräte und Pool-Wärmepumpen gibt es deshalb **keine Gerätedatenbank**. Der Nutzer gibt die Schallleistung aus dem
+    Datenblatt ein (`nutzerbestätigt`), bis dahin gilt ein **Platzhalter** (Klimagerät 60, Pool 55 dB(A), `Annahme`, nicht belegt).
+    Lizenzlage in `docs/attributions.md`.
+- **Oberfläche (A4):** Auswahl der Art des Außengeräts, **eine Gerätesuche über alle Klassen** (liest `waermepumpen.json`,
+  `klimageraete.json`, `poolwaermepumpen.json`; fehlende Dateien = leere Liste), gleiche Ampel und gleicher Schallkreis.
+  Übernehmen eines Geräts setzt dessen Klasse.
+- **Tests (A5):** 11 neue Tests (`app/test/aussengeraete.test.ts`), App insgesamt 165 grün. Der Vergleich mit dem
+  BWP-Schallrechner gilt nur für Luft-Wasser-Wärmepumpen (Formel dort unverändert, 37,4 dB(A) bleibt grün). Für Klimageräte und Pool
+  gibt es keinen vergleichbaren Rechner; geprüft ist nur, dass dieselbe Schallleistung klassenunabhängig denselben Pegel ergibt.
+- **Prüfmappe:** 9 neue Regeln, 4 neue Fragen (jetzt 67 Regeln, 22 Fragen), PDF neu erzeugt; `docs/recht/BayBO_Art57.txt`
+  um Nr. 10 Buchst. a ergänzt (nicht auf gesetze-bayern.de bestätigt).
+- **Offen für Emil/Fachperson:** EPREL-API-Schlüssel beantragen und prüfen, ob die Außen-Schallleistung enthalten ist;
+  die vier neuen Auslegungsfragen; Platzhalterwerte 60/55 dB(A) belegen oder ersetzen.
+- Pausiert vor Phase B.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

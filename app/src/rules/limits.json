@@ -221,6 +221,86 @@
       "geprueft": false
     }
   },
+  "aussengeraete": {
+    "_hinweis": "Modul „Außengeräte“ (AUFTRAG_V3 Phase A): Luft-Wasser-Wärmepumpe (Block waermepumpe), Klimagerät (Split-Außeneinheit) und Pool-Wärmepumpe. Gemeinsam sind Schallmodell und Richtwerte aus dem Block waermepumpe. Hier stehen nur die Unterschiede. Alle Einträge geprueft: false.",
+    "klimaVerfahrensfrei": {
+      "wert": true,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 2 Buchst. b (Auslegung)",
+      "text": "Der Wortlaut nennt Klimageräte nicht. Passt. ordnet die Außeneinheit eines Klimageräts den „sonstigen Anlagen der technischen Gebäudeausrüstung“ zu (verfahrensfrei) – eine Auslegung, die das Bauamt bestätigen muss. Ergebnis offen markiert.",
+      "wortlaut": "docs/recht/BayBO_Art57.txt (Abs. 1 Nr. 2 Buchst. b: „sonstige Anlagen der technischen Gebäudeausrüstung“; Abruf 10.10.2026, lxgesetze.de/baybo/57)",
+      "geprueft": false
+    },
+    "klimaAbstandsflaecheBisM": {
+      "wert": 2,
+      "quelle": "BayBO Art. 6 Abs. 1 Satz 3 Nr. 4 (Auslegung)",
+      "text": "Satz 2 (Abstandsflächen für andere Anlagen) gilt nach dem Wortlaut nicht für „Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m“. Ein Klimagerät wird dort nicht genannt; reversible Split-Geräte arbeiten technisch als Luft-Luft-Wärmepumpe. Passt. wendet die 2 m deshalb als Annahme auch auf Klimageräte an. Offen.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Abs. 1 Satz 3 Nr. 4)",
+      "geprueft": false
+    },
+    "poolVerfahrensfrei": {
+      "wert": true,
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 2 Buchst. b (Auslegung) und Nr. 10 Buchst. a",
+      "text": "Die Wärmepumpe eines Pools ordnet Passt. den „sonstigen Anlagen der technischen Gebäudeausrüstung“ zu (Auslegung, offen). Das Schwimmbecken selbst ist nach Nr. 10 Buchst. a verfahrensfrei, „außer im Außenbereich“; Passt. prüft das Becken nicht.",
+      "wortlaut": "docs/recht/BayBO_Art57.txt (Abs. 1 Nr. 2 Buchst. b; Nr. 10 Buchst. a: „Schwimmbecken einschließlich dazugehöriger temporärer luftgetragener Überdachungen, außer im Außenbereich“; Abruf 10.10.2026)",
+      "geprueft": false
+    },
+    "poolAbstandsflaecheBisM": {
+      "wert": 2,
+      "quelle": "BayBO Art. 6 Abs. 1 Satz 3 Nr. 4",
+      "text": "Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m brauchen nach dem Wortlaut keine Abstandsfläche. Eine Pool-Wärmepumpe ist eine Wärmepumpe (Wasser als Wärmesenke); ob die Vorschrift auf sie zielt, sagt der Wortlaut nicht ausdrücklich. Offen.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Abs. 1 Satz 3 Nr. 4)",
+      "geprueft": false
+    },
+    "richtwerteTagDbA": {
+      "wert": {
+        "rein": 50,
+        "allgemein": 55,
+        "misch": 60
+      },
+      "quelle": "TA Lärm Nr. 6.1 Buchst. d, e, f; Nr. 6.4",
+      "text": "Immissionsrichtwerte tags: reines Wohngebiet 50, allgemeines Wohngebiet 55, Mischgebiet 60 dB(A). Tags gilt 06.00–22.00 Uhr, nachts 22.00–06.00 Uhr (Nr. 6.4). Passt. rechnet für alle Außengeräte nachts (strengerer Wert); nur die Pool-Wärmepumpe kann auf „nur tagsüber“ gestellt werden. Der Zuschlag für Zeiten mit erhöhter Empfindlichkeit (Nr. 6.5, 6 dB) ist nicht berücksichtigt.",
+      "wortlaut": "docs/recht/TA_Laerm_6_1.txt; Nr. 6.4 und 6.5 abgerufen am 10.10.2026 von verwaltungsvorschriften-im-internet.de",
+      "geprueft": false
+    },
+    "standardLwDbA": {
+      "wert": {
+        "klima": 60,
+        "pool": 55
+      },
+      "quelle": "Annahme Passt. (Platzhalter, nicht belegt)",
+      "text": "Solange der Nutzer keine Schallleistung aus dem Datenblatt der Außeneinheit eingibt, rechnet Passt. mit diesen Platzhaltern (Label Annahme). Es gibt keine Gerätedatenbank für Klimageräte und Pool-Wärmepumpen (EPREL nur mit API-Schlüssel, KEYMARK nur Wasser-Wärmepumpen).",
+      "geprueft": false
+    },
+    "standardMasseM": {
+      "wert": {
+        "klima": {
+          "w": 0.8,
+          "d": 0.35,
+          "h": 0.6
+        },
+        "pool": {
+          "w": 0.5,
+          "d": 0.9,
+          "h": 0.7
+        }
+      },
+      "quelle": "Annahme Passt. (übliche Außeneinheit, Breite × Tiefe × Höhe)",
+      "text": "Nur für Kollision und Darstellung.",
+      "geprueft": false
+    },
+    "klimaSommerNachtHinweis": {
+      "wert": true,
+      "quelle": "Passt.-Hinweis (keine Rechtsnorm)",
+      "text": "Klimageräte laufen vor allem im Sommer und oft auch nachts. Dann sind Fenster häufiger offen, der Schall gelangt leichter in Schlafräume. Passt. nennt das als Hinweis und rechnet nachts.",
+      "geprueft": false
+    },
+    "geraetedatenbank": {
+      "wert": "offen",
+      "quelle": "EPREL Public API Terms and Conditions (gültig ab 03.06.2024); Heat Pump KEYMARK",
+      "text": "EPREL: Die öffentliche Schnittstelle antwortet ohne API-Schlüssel mit 403; der Schlüssel wird über die EPREL-Website beantragt. Bedingungen: Nutzung in Apps erlaubt (Art. 4 § 1), nicht die Daten für sich verkaufen, Quelle behalten, lokal gespeicherte Daten aktuell halten (Art. 4 § 2 f), keine verändernden Zusammenführungen, die irreführen (Art. 4 § 2 d), Massenabruf nur über freigegebene Konten. KEYMARK (hplib 1.9): nur Luft/Wasser, Sole/Wasser und Wasser/Wasser, keine Luft-Luft-Geräte. Für Klimageräte und Pool-Wärmepumpen liegt deshalb keine Gerätedatenbank vor; die Gerätesuche liest klimageraete.json und poolwaermepumpen.json, sobald sie existieren.",
+      "geprueft": false
+    }
+  },
   "pflanzen": {
     "_hinweis": "Grenzabstand von Pflanzen nach dem bayerischen AGBGB (Nachbarrecht, Zivilrecht). Kein Baurecht: Das Bauamt prüft das nicht, es geht um Ansprüche zwischen Nachbarn.",
     "abstandKleinM": {

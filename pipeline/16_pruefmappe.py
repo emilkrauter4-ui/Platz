@@ -84,6 +84,8 @@ def art57(teil: str) -> str:
         return "Art. 57 Abs. 1 Nr. 1 Buchst. a: " + re.search(r"a\) (.*?), b\)", s).group(1)
     if teil == "b":
         return "Art. 57 Abs. 1 Nr. 1 Buchst. b: " + re.search(r"b\) (Garagen.*?Außenbereich),", s).group(1)
+    if teil == "10a":
+        return "Art. 57 Abs. 1 Nr. 10 Buchst. a: folgende Anlagen in Gärten und zur Freizeitgestaltung: a) Schwimmbecken einschließlich dazugehöriger temporärer luftgetragener Überdachungen, außer im Außenbereich"
     return "Art. 57 Abs. 1 Nr. 2: folgende Anlagen der technischen Gebäudeausrüstung: … b) sonstige Anlagen der technischen Gebäudeausrüstung"
 
 
@@ -229,6 +231,40 @@ R: dict[str, dict] = {
         text=lambda: KEIN + " Daten: Heat Pump KEYMARK (EN 12102-1) über hplib.", link="KEYMARK",
         umsetzung="Mit einem KEYMARK-Gerät rechnet Passt. mit der Schallleistung im Nennbetrieb (nicht Nachtmodus), Label „zertifiziert“. Status der Datennutzung: angefragt, nur Demo.",
         beispiel="Gerät mit Lw 58 dB(A) laut KEYMARK, Hersteller nennt 52 dB(A) im Nachtmodus → Passt. rechnet mit 58."),
+    "aussengeraete.klimaVerfahrensfrei": dict(
+        text=lambda: art57("2"), link="BayBO-57",
+        umsetzung="Außeneinheit eines Klimageräts: verfahrensfrei als „sonstige Anlage der technischen Gebäudeausrüstung“. Der Wortlaut nennt Klimageräte nicht; Passt. zeigt die Zeile mit dem Zusatz „Auslegung, das Bauamt bestätigt sie“ (offen).",
+        beispiel="Split-Außeneinheit 0,8 × 0,35 × 0,6 m an der Hauswand → keine Baugenehmigung, Ergebnis hängt am Lärm."),
+    "aussengeraete.klimaAbstandsflaecheBisM": dict(
+        text=lambda: art6("1", (2, 3)), link="BayBO-6",
+        umsetzung="Klimagerät bis 2,00 m Höhe: keine Abstandsfläche, als Annahme gewendet (Art. 6 Abs. 1 Satz 3 Nr. 4 nennt „Wärmepumpen“). Darüber: Hinweis „Abstandsfläche nötig – nicht geprüft“ (offen).",
+        beispiel="Außeneinheit 0,6 m hoch, 0,5 m von der Grenze → keine Abstandsfläche (Annahme), Lärm wird getrennt geprüft."),
+    "aussengeraete.poolVerfahrensfrei": dict(
+        text=lambda: art57("2") + "<br>" + art57("10a"), link="BayBO-57",
+        umsetzung="Pool-Wärmepumpe wie sonstige Anlage der technischen Gebäudeausrüstung (Auslegung, offen). Das Schwimmbecken selbst prüft Passt. nicht; im Außenbereich weist die Zeile darauf hin, dass es dort nicht freigestellt ist.",
+        beispiel="Pool-Wärmepumpe 0,5 × 0,9 × 0,7 m neben einem Becken im Innenbereich → keine Baugenehmigung für das Gerät, Lärm wird geprüft."),
+    "aussengeraete.poolAbstandsflaecheBisM": dict(
+        text=lambda: art6("1", (2, 3)), link="BayBO-6",
+        umsetzung="Pool-Wärmepumpe bis 2,00 m Höhe: keine Abstandsfläche (Art. 6 Abs. 1 Satz 3 Nr. 4 „Wärmepumpen“). Ob die Vorschrift auf Pool-Wärmepumpen zielt, steht nicht im Wortlaut – Zeile als offen markiert.",
+        beispiel="Gerät 0,7 m hoch an der Grundstücksgrenze → keine Abstandsfläche; Lärm entscheidet."),
+    "aussengeraete.richtwerteTagDbA": dict(
+        text=ta_laerm, link="TA-Laerm",
+        umsetzung="Nur die Pool-Wärmepumpe kann auf „nur tagsüber“ gestellt werden: dann Tagwerte reines WA 50, allgemeines WA 55, Mischgebiet 60 dB(A). Sonst und bei allen anderen Außengeräten gilt der Nachtwert. Tags 06–22 Uhr, nachts 22–06 Uhr (Nr. 6.4). Zuschlag für Ruhezeiten (Nr. 6.5) nicht berücksichtigt.",
+        beispiel="Pool-Wärmepumpe 66 dB(A), 5 m vor dem Nachbarfenster: nachts rot, tagsüber (Richtwert 55) je nach Pegel gelb oder grün."),
+    "aussengeraete.standardLwDbA": dict(
+        text=lambda: KEIN + " Platzhalter ohne Beleg: Klimagerät 60, Pool-Wärmepumpe 55 dB(A).", link=None,
+        umsetzung="Gilt nur, bis der Nutzer die Schallleistung aus dem Datenblatt eingibt; Zeile mit Label „Annahme“.",
+        beispiel="Klimagerät ohne Eingabe: 60 dB(A) angenommen, Zeile „Wert aus dem Datenblatt eingeben“."),
+    "aussengeraete.standardMasseM": dict(
+        text=lambda: KEIN, link=None, umsetzung="Übliche Maße der Außeneinheit, nur für Kollision und Darstellung.", beispiel="–"),
+    "aussengeraete.klimaSommerNachtHinweis": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Hinweiszeile beim Klimagerät: läuft vor allem im Sommer und oft nachts, Fenster häufiger offen; Passt. rechnet nachts.",
+        beispiel="–"),
+    "aussengeraete.geraetedatenbank": dict(
+        text=lambda: KEIN + " Bedingungen: EPREL Public API Terms and Conditions (gültig ab 03.06.2024).", link=None,
+        umsetzung="Für Klimageräte und Pool-Wärmepumpen gibt es keine Gerätedatenbank: EPREL braucht einen API-Schlüssel, KEYMARK enthält nur Wasser-Wärmepumpen. Die Gerätesuche liest klimageraete.json und poolwaermepumpen.json, sobald sie existieren.",
+        beispiel="Suche nach „Daikin“ findet nur Luft-Wasser-Wärmepumpen aus KEYMARK."),
     "pflanzen.abstandKleinM": dict(
         text=lambda: agbgb(47, 1), link="AGBGB-47", umsetzung="Pflanzen bis 2,00 m Höhe: mindestens 0,50 m Abstand.",
         beispiel="Hecke 1,8 m hoch, Triebe 0,6 m von der Grenze → eingehalten."),
@@ -319,6 +355,10 @@ FRAGEN = [
     ("Bestand automatisch mitzählen", "Aus Luftbild und Laser erkannte Nebengebäude zählen ab Konfidenz 0,8 automatisch zur Grenzlänge, darunter muss der Nutzer bestätigen. Ist das als Orientierung vertretbar?"),
     ("Fläche eines Carports", "Passt. nimmt für die 50-m²-Grenze Breite × Tiefe des Carports. Zählt der Dachüberstand mit, oder nur die von Stützen umschlossene Fläche?"),
     ("Wärmepumpe", "Passt. ordnet die Wärmepumpe Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige TGA) zu. Und: Zählt bei „Höhe bis zu 2 m über der Geländeoberfläche“ (Art. 6 Abs. 1) ein Sockel oder eine Wandkonsole mit?"),
+    ("Klimagerät: Art. 57", "Passt. ordnet die Außeneinheit eines Klimageräts (Split) Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige Anlagen der technischen Gebäudeausrüstung) zu, weil der Wortlaut Klimageräte nicht nennt. Ist das richtig, und gilt es auch bei Geräten über 2 m Höhe oder mit Einhausung?"),
+    ("Klimagerät und Pool-Wärmepumpe: Art. 6 Abs. 1 Satz 3 Nr. 4", "Dort sind „Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m“ von der Abstandsfläche ausgenommen. Zählen reversible Split-Klimageräte und Wärmepumpen zur Beheizung eines Schwimmbeckens dazu? Passt. wendet die 2 m bei beiden an (Klimagerät als Annahme, Pool als offen)."),
+    ("Pool-Wärmepumpe und Schwimmbecken", "Art. 57 Abs. 1 Nr. 10 Buchst. a stellt Schwimmbecken frei, „außer im Außenbereich“. Passt. prüft das Becken nicht, nennt im Außenbereich nur den Hinweis. Genügt das, und gibt es für das Gerät eigene Anforderungen (z. B. Schalldämmung, Aufstellort)?"),
+    ("Tages- und Nachtwerte bei Außengeräten", "Passt. rechnet alle Außengeräte nachts (Nr. 6.1, strengerer Wert) und lässt nur die Pool-Wärmepumpe auf „nur tagsüber“ stellen. Klimageräte laufen oft nachts, Pool-Wärmepumpen oft nur tagsüber. Ist das als Orientierung vertretbar? Gilt für ein Klimagerät im Ruhezeitenfenster (Nr. 6.5, 6 dB Zuschlag) eine andere Praxis?"),
     ("Lärm: Immissionsort und Zuschläge", "Passt. rechnet den Pegel auf Fenstermitte an der Fassade (1,6 m / 4,4 m), ohne Messpunkt 0,5 m vor dem geöffneten Fenster (TA Lärm Anhang A.1.3), ohne Ton- und Impulszuschlag, nur Nachtwert. Gebietsarten: rein/allgemein/Misch. Reicht das als Orientierung, oder wo liegen wir systematisch zu niedrig?"),
     ("Pflanzen hinter Mauern", "Art. 50 Abs. 1: „nicht oder nicht erheblich überragen“. Passt. nimmt die Ausnahme nur an, wenn die Pflanze die Einfriedung nicht überragt; alles darüber ist „offen“. Gibt es eine übliche Grenze (z. B. 0,5 m)?"),
     ("Messpunkt bei Hecken", "Art. 49: „Mitte der zunächst an der Grenze befindlichen Triebe“. Passt. nähert das aus Luftbild/Laser als Heckenrand + halbe Breite an. Vertretbar?"),
@@ -348,7 +388,7 @@ def seite() -> str:
     if fehlt:
         raise SystemExit(f"Regeln ohne Eintrag in der Prüfmappe: {fehlt}")
     titel = {"gartenhaus": "Gartenhaus", "carport": "Carport", "abstand": "Abstandsflächen", "grenzbebauung": "Bebauung an der Grenze",
-             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
+             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
              "verfahren": "Verfahren und Antrag"}
     karten, akt, nr = [], None, 0
     for rid, sek, r in regeln:
@@ -414,7 +454,7 @@ sup {{ font-size: 6.5pt; }}
  <div>
   <h1>Passt<span>.</span> – Prüfmappe Regelwerk</h1>
   <p style="font-size:12pt">Bitte prüfen Sie jede Regel, mit der Passt. Hausbesitzern eine erste Orientierung gibt:
-  „Darf ich das hier hinstellen?“ (Gartenhaus, Carport, Wärmepumpe, Hecken und Bäume in Sulzbach-Rosenberg).</p>
+  „Darf ich das hier hinstellen?“ (Gartenhaus, Carport, Außengeräte wie Wärmepumpe, Klimagerät und Pool-Wärmepumpe, Hecken und Bäume in Sulzbach-Rosenberg).</p>
   <div class="hinweis"><b>Wichtig:</b> Passt. gibt Orientierung, keine Genehmigung. Jede Regel steht in
   <code>limits.json</code> mit <code>geprueft: false</code> und wird erst nach Ihrer Prüfung freigegeben.
   Gesetzestexte wurden am 04.10.2026 aus zwei unabhängigen Wiedergaben übernommen und Wort für Wort verglichen;

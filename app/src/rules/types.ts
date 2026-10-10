@@ -129,6 +129,9 @@ export interface NeighborWindow {
 
 export type ObjectKind = 'gartenhaus' | 'carport' | 'waermepumpe';
 
+/** Klassen des Moduls „Außengeräte“ (Objektart `waermepumpe`): Luft-Wasser-Wärmepumpe, Klimagerät (Split-Außeneinheit), Pool-Wärmepumpe. */
+export type GeraeteKlasse = 'lwwp' | 'klima' | 'pool';
+
 export interface Placed {
   kind: ObjectKind;
   center: Vec2;
@@ -142,9 +145,15 @@ export interface Placed {
   neigung?: number;
   /** Drehung in Bogenmaß, gegen den Uhrzeigersinn */
   angle: number;
-  /** nur Wärmepumpe: Schallleistungspegel nachts laut Datenblatt */
+  /** nur Außengerät: Klasse (fehlt = Luft-Wasser-Wärmepumpe) */
+  geraeteklasse?: GeraeteKlasse;
+  /** nur Außengerät: Schallleistungspegel nachts laut Datenblatt */
   lw?: number;
-  /** nur Wärmepumpe: Gerät aus der KEYMARK-Liste (dann ist lw zertifiziert, Nennbetrieb) */
+  /** nur Außengerät: true = Schallleistung hat der Nutzer aus dem Datenblatt eingegeben (Label nutzerbestätigt), sonst Annahme */
+  lwVomNutzer?: boolean;
+  /** nur Pool-Wärmepumpe: Betrieb nur tagsüber (06–22 Uhr, TA Lärm Nr. 6.4) – dann gelten die Tagwerte; sonst nachts */
+  nurTags?: boolean;
+  /** nur Außengerät: Gerät aus einer Gerätedatenbank (KEYMARK: lw zertifiziert, Nennbetrieb) */
   geraet?: { hersteller: string; modell: string; datum?: string };
   /** Fußbodenhöhe; fehlt: höchster Geländepunkt unter dem Grundriss (Annahme). */
   baseElevation?: number;

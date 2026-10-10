@@ -20,7 +20,7 @@ import {
   projectedLength,
 } from './geometry';
 import { pruefeAbstandsflaechen, rauminhalt, waende, wandhoeheArt7 } from './abstand';
-import type { Befund, Bestand, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
+import type { Befund, Bestand, GeraeteKlasse, Gebietsart, ObjectKind, Placed, Result, Row, Site, Status, Vec2 } from './types';
 
 export const LIMITS = L;
 
@@ -671,16 +671,42 @@ function immissionsorte(w: Site['windows'][number]): { pos: Vec2; z: number }[] 
   return out;
 }
 
+/* ---------- Außengeräte: Klassen (Wärmepumpe, Klimagerät, Pool-Wärmepumpe) ---------- */
+
+export const GERAETE_NAME: Record<GeraeteKlasse, { name: string; art: string }> = {
+  lwwp: { name: 'Luft-Wasser-Wärmepumpe', art: 'die Wärmepumpe' },
+  klima: { name: 'Klimagerät (Außeneinheit)', art: 'das Klimagerät' },
+  pool: { name: 'Pool-Wärmepumpe', art: 'die Pool-Wärmepumpe' },
+};
+
+export const geraeteKlasse = (o: Placed): GeraeteKlasse => o.geraeteklasse ?? 'lwwp';
+
+/** Platzhalter für die Schallleistung, solange der Nutzer keinen Datenblattwert eingibt (Label Annahme). */
+export const standardLw = (k: GeraeteKlasse): number => (k === 'lwwp' ? 58 : L.aussengeraete.standardLwDbA.wert[k]);
+
+/** Übliche Abmessungen der Außeneinheit (Annahme) für Kollision und Darstellung. */
+export const standardMasse = (k: GeraeteKlasse): { w: number; d: number; h: number } =>
+  k === 'lwwp' ? { w: 0.45, d: 1, h: 0.9 } : L.aussengeraete.standardMasseM.wert[k];
+
+/** Richtwert für das Gerät: nachts, bei der Pool-Wärmepumpe auf Wunsch tagsüber (TA Lärm Nr. 6.1, 6.4). */
+export function richtwertFuer(o: Placed, gebiet: Gebietsart): { limit: number; zeit: 'Nachts' | 'Tagsüber' } {
+  const tags = geraeteKlasse(o) === 'pool' && !!o.nurTags;
+  return tags ? { limit: L.aussengeraete.richtwerteTagDbA.wert[gebiet], zeit: 'Tagsüber' } : { limit: L.waermepumpe.richtwerteNachtDbA.wert[gebiet], zeit: 'Nachts' };
+}
+
 function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): Result {
   const o = objs.waermepumpe;
   const fp = fps.waermepumpe;
   const W = L.waermepumpe;
+  const klasse = geraeteKlasse(o);
+  const gn = GERAETE_NAME[klasse];
+  const AG = L.aussengeraete;
   const inside = insidePolygon(fp, site.plot.boundary);
   const collide = collision(site, fps, 'waermepumpe');
   const place = placement(site, fp);
   const Q = W.richtwirkungQ.wert[place];
-  const limit = W.richtwerteNachtDbA.wert[site.gebiet.value];
-  const lw = o.lw ?? 58;
+  const { limit, zeit } = richtwertFuer(o, site.gebiet.value);
+  const lw = o.lw ?? standardLw(klasse);
   const srcZ = W.quellhoeheM.wert;
 
   // maßgeblich: der lauteste Punkt über alle Fenster bzw. abgetasteten Fassaden (Abstand und Abschirmung)
@@ -694,25 +720,43 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
     }
   }
   const rLimit = limitRadius(lw, Q, limit);
-  const rows: Row[] = [
-    { text: 'Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus', tag: ART57, kind: 'rule' },
-  ];
-  if (o.h <= L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert) {
-    rows.push({ text: `Bis ${fmt(L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert, 0)} m Höhe braucht sie keine Abstandsfläche`, tag: 'BayBO Art. 6 Abs. 1', kind: 'rule' });
+  const rows: Row[] = [];
+  if (klasse === 'lwwp') {
+    rows.push({ text: 'Keine Baugenehmigung nötig am Ein- oder Zweifamilienhaus', tag: ART57, kind: 'rule' });
+  } else if (klasse === 'klima') {
+    rows.push({ text: 'Außeneinheit eines Klimageräts: verfahrensfrei als „sonstige Anlage der technischen Gebäudeausrüstung“ (Art. 57 Abs. 1 Nr. 2 Buchst. b)', tag: ART57, kind: 'rule' });
+    rows.push({ text: 'Klimageräte nennt der Wortlaut nicht ausdrücklich; die Zuordnung ist eine Auslegung, das Bauamt bestätigt sie', tag: 'offen', kind: 'offen' });
   } else {
-    rows.push({ text: `Über ${fmt(L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert, 0)} m Höhe (mit Einhausung): Abstandsfläche nötig – nicht geprüft`, tag: 'offen', kind: 'offen' });
+    rows.push({ text: 'Wärmepumpe eines Pools: verfahrensfrei als „sonstige Anlage der technischen Gebäudeausrüstung“ (Art. 57 Abs. 1 Nr. 2 Buchst. b)', tag: ART57, kind: 'rule' });
+    rows.push({ text: 'Die Zuordnung der Pool-Wärmepumpe ist eine Auslegung, das Bauamt bestätigt sie', tag: 'offen', kind: 'offen' });
+    rows.push({ text: `Das Schwimmbecken selbst prüft Passt. nicht (Art. 57 Abs. 1 Nr. 10 Buchst. a: verfahrensfrei, außer im Außenbereich${site.bereich.value === 'aussen' ? ' – hier angenommen: Außenbereich' : ''})`, tag: 'offen', kind: 'offen' });
+  }
+  const abstandBis = klasse === 'klima' ? AG.klimaAbstandsflaecheBisM.wert : klasse === 'pool' ? AG.poolAbstandsflaecheBisM.wert : L.abstand.waermepumpeOhneAbstandsflaecheBisM.wert;
+  if (o.h <= abstandBis) {
+    rows.push({ text: `Bis ${fmt(abstandBis, 0)} m Höhe braucht sie keine Abstandsfläche`, tag: 'BayBO Art. 6 Abs. 1', kind: 'rule' });
+    if (klasse !== 'lwwp') rows.push({ text: klasse === 'klima' ? 'Art. 6 Abs. 1 Satz 3 Nr. 4 nennt „Wärmepumpen“; ob ein Klimagerät darunter fällt, regelt der Wortlaut nicht – Passt. wendet die 2 m als Annahme an' : 'Art. 6 Abs. 1 Satz 3 Nr. 4 nennt „Wärmepumpen“; ob die Vorschrift auch auf Pool-Wärmepumpen zielt, sagt der Wortlaut nicht ausdrücklich', tag: klasse === 'klima' ? 'Annahme' : 'offen', kind: klasse === 'klima' ? 'Annahme' : 'offen' });
+  } else {
+    rows.push({ text: `Über ${fmt(abstandBis, 0)} m Höhe (mit Einhausung): Abstandsfläche nötig – nicht geprüft`, tag: 'offen', kind: 'offen' });
   }
   if (o.geraet) {
     rows.push({ text: `${o.geraet.hersteller} ${o.geraet.modell}: Schallleistung ${fmt(lw, 0)} dB(A) im Nennbetrieb (EN 12102, Heat Pump KEYMARK)`, tag: 'zertifiziert', kind: 'zertifiziert' });
     rows.push({ text: 'Nachtbetrieb (Silent-Modus) ist oft leiser – laut Hersteller-Datenblatt prüfen', tag: 'offen', kind: 'offen' });
+  } else if (klasse !== 'lwwp') {
+    rows.push(o.lwVomNutzer
+      ? { text: `Schallleistung ${fmt(lw, 0)} dB(A) von dir aus dem Datenblatt der Außeneinheit`, tag: 'nutzerbestätigt', kind: 'nutzerbestätigt' }
+      : { text: `Schallleistung ${fmt(lw, 0)} dB(A) angenommen (Platzhalter) – Wert aus dem Datenblatt der Außeneinheit eingeben`, tag: 'Annahme', kind: 'Annahme' });
   }
+  if (klasse === 'klima') rows.push({ text: 'Klimageräte laufen vor allem im Sommer und oft nachts. Dann sind Fenster häufiger offen. Passt. rechnet nachts (strengerer Richtwert)', tag: 'Annahme', kind: 'Annahme' });
+  if (klasse === 'pool') rows.push(o.nurTags
+    ? { text: 'Betrieb nur tagsüber (06–22 Uhr): Tagwerte nach TA Lärm Nr. 6.1 und 6.4', tag: 'nutzerbestätigt', kind: 'nutzerbestätigt' }
+    : { text: 'Betrieb auch nachts angenommen (strengerer Richtwert). Läuft sie nur tagsüber, kannst du das einstellen', tag: 'Annahme', kind: 'Annahme' });
 
   if (!best) {
     rows.push({ text: 'Kein Nachbarfenster bekannt. Tipp auf die Fassade des Nachbarhauses.', tag: 'offen', kind: 'offen' });
     rows.push({ text: `${PLACEMENT_TEXT[place]}, ${GEBIET_TEXT[site.gebiet.value]}`, tag: site.gebiet.provenance, kind: site.gebiet.provenance });
     rows.push(...contextRows(site).filter((r) => r.kind === 'Demo'));
     const base = { rows, badSegments: [], dim: null, rLimit };
-    if (!inside) return { ...base, status: 'bad', head: 'Steht nicht ganz auf deinem Grundstück.', sub: 'Schieb die Wärmepumpe weiter nach innen.' };
+    if (!inside) return { ...base, status: 'bad', head: 'Steht nicht ganz auf deinem Grundstück.', sub: `Schieb ${gn.art} weiter nach innen.` };
     if (collide) return { ...base, status: 'bad', head: `Kollidiert ${collide}.`, sub: 'Such dir eine freie Stelle auf dem Grundstück.' };
     return { ...base, status: 'warn', head: 'Lärm noch nicht geprüft.', sub: `Ohne Nachbarfenster können wir den Pegel nicht berechnen. Ab ${fmt(rLimit, 1)} m Abstand sind es höchstens ${limit} dB(A).` };
   }
@@ -720,7 +764,7 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
   const lp = best.lp;
   const Lr = Math.round(lp);
   rows.push(
-    { text: `Nachts am nächsten Fenster: ${Lr} dB(A). Richtwert: ${limit} dB(A)`, tag: 'TA Lärm', kind: 'rule' },
+    { text: `${zeit} am nächsten Fenster: ${Lr} dB(A). Richtwert: ${limit} dB(A)`, tag: 'TA Lärm', kind: 'rule' },
     { text: `Abstand zum nächsten Nachbarfenster: ${fmt(best.d, 1)} m`, tag: 'berechnet', kind: 'berechnet' },
   );
   if (best.ab.db > 0) {
@@ -731,7 +775,7 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
   }
   rows.push(
     { text: `${PLACEMENT_TEXT[place]}, ${GEBIET_TEXT[site.gebiet.value]}`, tag: site.gebiet.provenance, kind: site.gebiet.provenance },
-    { text: 'Vereinfachtes Schallmodell, ersetzt keine Schallprognose', tag: 'Annahme', kind: 'Annahme' },
+    { text: klasse === 'lwwp' ? 'Vereinfachtes Schallmodell, ersetzt keine Schallprognose' : 'Vereinfachtes Schallmodell der Luftwärmepumpe (LAI) auch für diese Geräteklasse übernommen, ersetzt keine Schallprognose', tag: 'Annahme', kind: 'Annahme' },
     { text: 'Zuschlag für Ton- oder Informationshaltigkeit (TA Lärm) nicht berücksichtigt', tag: 'offen', kind: 'offen' },
   );
   if (site.demo) rows.push({ text: 'Grundstück und Nachbarhäuser sind erfunden', tag: 'Demo', kind: 'Demo' });
@@ -740,11 +784,11 @@ function heatpump(site: Site, objs: Objects, fps: Record<ObjectKind, Vec2[]>): R
   let head: string;
   let sub: string;
   const marge = W.knappMargeDb.wert;
-  if (!inside) { status = 'bad'; head = 'Steht nicht ganz auf deinem Grundstück.'; sub = 'Schieb die Wärmepumpe weiter nach innen.'; }
+  if (!inside) { status = 'bad'; head = 'Steht nicht ganz auf deinem Grundstück.'; sub = `Schieb ${gn.art} weiter nach innen.`; }
   else if (collide) { status = 'bad'; head = `Kollidiert ${collide}.`; sub = 'Such dir eine freie Stelle auf dem Grundstück.'; }
-  else if (lp > limit) { status = 'bad'; head = 'Nachts zu laut für die Nachbarn.'; sub = `Am nächsten Fenster kommen etwa ${Lr} dB(A) an, erlaubt sind ${limit}. Stell sie weiter weg oder nimm ein leiseres Gerät.`; }
-  else if (lp > limit - marge) { status = 'warn'; head = 'Knapp, aber im Rahmen.'; sub = `Nachts etwa ${Lr} dB(A) am nächsten Nachbarfenster. Der Richtwert liegt bei ${limit}.`; }
-  else { status = 'ok'; head = 'Passt so.'; sub = `Keine Baugenehmigung nötig. Nachts kommen am nächsten Nachbarfenster etwa ${Lr} dB(A) an.`; }
+  else if (lp > limit) { status = 'bad'; head = `${zeit} zu laut für die Nachbarn.`; sub = `Am nächsten Fenster kommen etwa ${Lr} dB(A) an, erlaubt sind ${limit}. Stell sie weiter weg oder nimm ein leiseres Gerät.`; }
+  else if (lp > limit - marge) { status = 'warn'; head = 'Knapp, aber im Rahmen.'; sub = `${zeit} etwa ${Lr} dB(A) am nächsten Nachbarfenster. Der Richtwert liegt bei ${limit}.`; }
+  else { status = 'ok'; head = 'Passt so.'; sub = `Keine Baugenehmigung nötig. ${zeit} kommen am nächsten Nachbarfenster etwa ${Lr} dB(A) an.`; }
 
   return { status, head, sub, rows, badSegments: [], rLimit, lp, dim: { p: o.center, q: best.pos, label: `${Lr} dB(A)` } };
 }
