@@ -1,7 +1,7 @@
 /**
  * Zufahrt (AUFTRAG_V3 B2): freier Korridor von der öffentlichen Straße bis zum Vorhaben und seine schmalste Stelle.
  *
- * Verfahren: Das Grundstück wird auf einem 10-cm-Raster abgetastet. Hindernisse sind Gebäude (LoD2/Hausumringe),
+ * Verfahren: Das Grundstück wird auf einem 10-cm-Raster abgetastet (bei großen Grundstücken gröber, höchstens 300 000 Zellen). Hindernisse sind Gebäude (LoD2/Hausumringe),
  * vom Nutzer bestätigter Bestand und Baumstämme. Die lichte Breite einer Zelle ist der doppelte Abstand zum nächsten
  * Hindernis (bzw. zur Grundstücksgrenze). Gesucht ist der Weg von der Straße zum Haus, dessen schmalste Stelle am
  * breitesten ist (Widest-Path, Dijkstra mit Maximum-Minimum). Das ist die Zahl, die ausgegeben wird.
@@ -245,7 +245,7 @@ export function berechneZufahrt(e: ZufahrtEingabe): ZufahrtErgebnis {
   const by0 = Math.min(...ys) - rand;
   const bw = Math.max(...xs) + rand - bx0;
   const bh = Math.max(...ys) + rand - by0;
-  const res = Math.max(0.1, Math.sqrt((bw * bh) / 600000));
+  const res = Math.max(0.1, Math.sqrt((bw * bh) / 300000));
   const r: Raster = { x0: bx0, y0: by0, res, nx: Math.ceil(bw / res), ny: Math.ceil(bh / res) };
   const n = r.nx * r.ny;
 
@@ -430,8 +430,9 @@ function reihen(e: ZufahrtEingabe, schmal: number | null, req: { m: number; grun
     { text: 'Welche Fassung der Richtlinie über Flächen für die Feuerwehr in Bayern gilt (Muster 02/2007 hier verwendet), ist offen.', tag: 'offen', kind: 'offen' },
     { text: 'Wie breit die Erschließung „angemessen“ sein muss (BayBO Art. 4 Abs. 1 Nr. 2), nennt das Gesetz nicht (offen). Passt. zeigt die Breite des freien Korridors auf deinem Grundstück.', tag: 'offen', kind: 'offen' },
   ];
+  if (e.bruestung > BRUESTUNG_GRENZE) rows.push({ text: 'Bei Brüstung über 8 m kommen Aufstellflächen für Hubrettungsfahrzeuge hinzu, wenn die Feuerwehr sie für die Personenrettung braucht (Art. 5 Abs. 1 Satz 3; Richtlinie Nr. 8: mindestens 3,50 m breit). Passt. prüft sie nicht.', tag: 'offen', kind: 'offen' });
   if (entfernung != null) rows.push({ text: `Der weiteste Punkt des Hauses ist ${entfernung.toFixed(0)} m Luftlinie von der öffentlichen Verkehrsfläche entfernt${entfernung > ENTFERNUNG ? ` (über ${ENTFERNUNG} m: Art. 5 Abs. 1 Satz 4, ob Zufahrten nötig sind, entscheidet die Feuerwehr – offen)` : ''}.`, tag: G.feuerwehrEntfernungM.quelle, kind: entfernung > ENTFERNUNG ? 'offen' : 'rule' });
-  if (schmal != null) rows.push({ text: `Hindernisse: Gebäude (LoD2, Hausumringe), von dir bestätigter Bestand, Baumstämme. Gemessen auf einem 10-cm-Raster, Mittellinie des breitesten Weges.`, tag: 'berechnet', kind: 'berechnet' });
+  if (schmal != null) rows.push({ text: `Hindernisse: Gebäude (LoD2, Hausumringe), von dir bestätigter Bestand, Baumstämme. Gemessen auf einem Raster von etwa 10 cm, Mittellinie des breitesten Weges.`, tag: 'berechnet', kind: 'berechnet' });
   if (begrenzt != null && begrenzt > BEGRENZT_LAENGE) rows.push({ text: `Strecke unter ${ZUFAHRT_BEGRENZT} m zwischen Gebäuden: ${begrenzt.toFixed(1)} m.`, tag: G.zufahrtBreiteBegrenztM.quelle, kind: 'rule' });
   return rows;
 }

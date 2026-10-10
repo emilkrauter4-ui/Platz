@@ -67,6 +67,29 @@ import {
   standardLw,
   standardMasse,
   type GeraeteKlasse,
+  bewerteVorhaben,
+  berechneVerschattung,
+  berechneZufahrt,
+  eigeneGebaeude,
+  fragenAnGemeinde,
+  gemeindeAbschnitt,
+  neuesVorhaben,
+  umfeldStatistik,
+  vorhabenStart,
+  vorhabenModell,
+  vorhabenKoerper as grKoerper,
+  zufahrtPunkt,
+  STICHTAGE,
+  STICHTAG_NAME,
+  VORHABEN_NAME,
+  type BPlanTreffer,
+  type GemeindeAbschnitt,
+  type Pruefpunkt,
+  type SchattenErgebnis,
+  type Vorhaben as GVorhaben,
+  type VorhabenArt,
+  type VorhabenErgebnis,
+  type ZufahrtErgebnis,
 } from './rules';
 import { ausTipp, dachWandText, wandLabelVon, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import type { TippAntwort } from './site/bestand';
@@ -78,7 +101,9 @@ import { Terrain } from './scene/terrain';
 import { createScene, type Scene } from './scene/viewer';
 import { Renderer, type RenderState } from './scene/render';
 import { assumedWindows, awayFromBoundary, ccw, classifyBuildings, initialObjects, isSimple, sidesFromBoundary, snap } from './site/plot';
-import { denkmaeler, searchAddress, wasserschutz, type Denkmal, type Place } from './ui/services';
+import { bebauungsplaene, denkmaeler, searchAddress, wasserschutz, type Denkmal, type Place } from './ui/services';
+import { VorhabenLayer, KEY_VORHABEN } from './scene/vorhaben';
+import { gemeindeHtml, kennzahlenHtml, punkteHtml, rowsHtml, schattenHtml } from './ui/vorhabenSheet';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -86,7 +111,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ORDER: ObjectKind[] = ['gartenhaus', 'carport', 'waermepumpe'];
 const WORD = { ok: 'passt', warn: 'knapp', bad: 'passt nicht' };
 const TAG_CLASS: Record<string, string> = {
-  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off',
+  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off', Orientierung: 'orient',
 };
 
 /* ---------- Zustand ---------- */
@@ -306,6 +331,8 @@ function plotFrame(animate = true) {
 /* ---------- Schritt 1: Adresse ---------- */
 function showStart(msg?: string) {
   $('gbBtn').hidden = true;
+  grLayer?.weg();
+  if (st.modus === 'gross') st.modus = 'objekt';
   if (gbSt.an) void gartenblick(false);
   zonenAus();
   st.step = 'start';
@@ -563,6 +590,15 @@ async function confirmPlot() {
     st.denkmal = d;
     if (st.step === 'pruefen') renderSheet();
   });
+  grLayer?.weg();
+  Object.assign(grSt, { v: null, res: null, zufahrt: null, schatten: null, gemeinde: null, fragen: [], plaene: undefined, zonen: false, zonenErg: null, benutzt: false, offen: false });
+  bebauungsplaene([c, ...b.slice(0, 7)]).then((pl) => {
+    grSt.plaene = pl;
+    if (st.step !== 'pruefen') return;
+    buildSite();
+    update();
+    if (st.modus === 'gross') grRechnen();
+  });
   buildSite();
   renderer.syncDraftPoints();
   renderer.syncPlot(badSegments);
@@ -586,10 +622,19 @@ function buildSite() {
     groundProvenance: 'amtlich',
     gebiet: st.gebiet,
     bereich: st.bereich,
-    bplan: { status: 'unbekannt', provenance: 'offen' },
+    bplan: bplanStatus(),
     aufenthaltsraum: st.aufenthaltsraum,
     feuerstaette: st.feuerstaette,
   };
+}
+
+/** Bebauungsplan laut Landesportal (nur Verweis): vorhanden, keiner im Portal oder unbekannt. */
+function bplanStatus(): Site['bplan'] {
+  const pl = grSt.plaene;
+  if (!pl) return { status: 'unbekannt', provenance: 'offen' };
+  const rk = pl.filter((x) => x.art === 'rechtskraft');
+  if (!rk.length) return { status: 'keiner', provenance: 'amtlich', plaene: pl };
+  return { status: 'vorhanden', name: rk[0].name, url: rk[0].planUrl, provenance: 'amtlich', plaene: pl };
 }
 
 function badSegments(): Set<number> {
@@ -604,6 +649,7 @@ function update() {
   st.res = evaluate(site, st.objs);
   st.pflanzRes = st.pflanze ? pruefePflanze(site, st.pflanze, pflSt.angaben) : null;
   zonenNeu();
+  if (st.modus === 'gross') grNeu();
   renderer.updateDim();
   renderVerdict();
   render();
@@ -627,6 +673,8 @@ function renderVerdict() {
   if (rows) rows.innerHTML = r.rows.map((x) => `<li><span>${esc(x.text)}</span>${tag(x.tag, x.kind)}</li>`).join('');
   document.querySelectorAll<HTMLOutputElement>('#controls output').forEach((out) => (out.textContent = valText(out.dataset.k!)));
   if (st.modus === 'pflanzen') pflanzInfo();
+  document.querySelector('[data-modus="gross"]')?.setAttribute('aria-selected', String(st.modus === 'gross'));
+  if (st.modus === 'gross') grVerdict();
 }
 
 const CTL: Record<ObjectKind, { k: keyof Placed | 'deg'; l: string; min: number; max: number; step: number }[]> = {
@@ -658,6 +706,7 @@ function valText(k: string) {
 }
 
 function select(k: ObjectKind) {
+  grAus();
   st.selected = k;
   if (st.modus === 'pflanzen') {
     st.modus = 'objekt';
@@ -687,6 +736,7 @@ function renderSheet() {
   if (st.ansicht === 'nachbar') return nbSt.v ? renderNachbarSheet() : undefined;
   if (st.kante || st.zeichnen || tippSt) return renderEditSheet();
   if (st.modus === 'pflanzen') return renderPflanzenSheet();
+  if (st.modus === 'gross') return renderGrossSheet();
   const bestHtml = bestandHtml();
   const wins = st.windows;
   $('stepBody').innerHTML = `
@@ -816,6 +866,383 @@ function renderSheet() {
   update();
 }
 
+/* ---------- Großes Vorhaben (AUFTRAG_V3 Phase B): zweites Wohnhaus, Anbau, Aufstockung ---------- */
+const GR_ART: [VorhabenArt, string][] = [['wohnhaus', 'Zweites Wohnhaus'], ['anbau', 'Anbau'], ['aufstockung', 'Aufstockung']];
+const grSt: {
+  v: GVorhaben | null;
+  res: VorhabenErgebnis | null;
+  zufahrt: ZufahrtErgebnis | null;
+  /** Zufahrt und Schatten werden nach dem Ziehen neu gerechnet */
+  offen: boolean;
+  schatten: SchattenErgebnis | null;
+  gemeinde: GemeindeAbschnitt | null;
+  fragen: string[];
+  /** Bebauungspläne laut Landesportal; undefined = wird abgefragt, null = nicht erreichbar */
+  plaene: BPlanTreffer[] | null | undefined;
+  zonen: boolean;
+  zonenErg: null | { beste: { p: Vec2; angle: number; farbe: number } | null; msGesamt: number };
+  benutzt: boolean;
+  ms: { zufahrt: number; schatten: number };
+} = { v: null, res: null, zufahrt: null, offen: false, schatten: null, gemeinde: null, fragen: [], plaene: undefined, zonen: false, zonenErg: null, benutzt: false, ms: { zufahrt: 0, schatten: 0 } };
+let grLayer: VorhabenLayer | null = null;
+let grTimer: ReturnType<typeof setTimeout> | null = null;
+let grZonenTimer: ReturnType<typeof setTimeout> | null = null;
+const grStrassen = (): Vec2[][] => data.strassen ?? [];
+const RICHTUNG8 = ['Osten', 'Nordosten', 'Norden', 'Nordwesten', 'Westen', 'Südwesten', 'Süden', 'Südosten'];
+const richtungVon = (n: Vec2) => RICHTUNG8[Math.floor((((Math.atan2(n[1], n[0]) * 180) / Math.PI + 360 + 22.5) % 360) / 45)];
+
+function grStart() {
+  if (!site) return;
+  st.modus = 'gross';
+  grSt.benutzt = true;
+  zonenAus();
+  pflanzLayer?.weg();
+  pflSt.stammTippen = null;
+  grSt.v ??= vorhabenStart(site, neuesVorhaben('wohnhaus', site));
+  grSt.zufahrt = null;
+  grSt.schatten = null;
+  grSt.res = null;
+  renderSheet();
+  hint(st.hasDragged ? null : grSt.v.art === 'aufstockung' ? 'Wähl das Haus, das du aufstocken willst.' : 'Zieh das Haus an eine andere Stelle.');
+}
+
+function grAus() {
+  if (st.modus !== 'gross') return;
+  st.modus = 'objekt';
+  grLayer?.weg();
+  grSt.zonen = false;
+  grSt.zonenErg = null;
+  if (grZonenTimer) clearTimeout(grZonenTimer);
+  zonenLayer?.weg();
+}
+
+function grArt(art: VorhabenArt) {
+  if (!site) return;
+  const alt = grSt.v;
+  grSt.v = art === 'wohnhaus' ? vorhabenStart(site, neuesVorhaben(art, site)) : neuesVorhaben(art, site);
+  if (alt) grSt.v.geschosshoehe = alt.geschosshoehe;
+  grSt.zufahrt = null;
+  grSt.schatten = null;
+  grSt.zonen = false;
+  zonenLayer?.weg();
+  renderSheet();
+}
+
+/** Wo steht das Vorhaben? Mitte des Grundrisses (für Umfeld, Kamera). */
+function grMitte(): Vec2 {
+  const g = grSt.res?.grundriss;
+  return g ? centroid(g.fp) : centroid(st.plot!);
+}
+
+function grBewerten() {
+  if (!site || !grSt.v) return;
+  const z: Pruefpunkt = grSt.zufahrt && !grSt.offen
+    ? zufahrtPunkt(grSt.zufahrt)
+    : { id: 'zufahrt', name: 'Zufahrt', status: null, text: 'Wird neu berechnet …' };
+  grSt.res = bewerteVorhaben(site, grSt.v, z, grStrassen());
+}
+
+/** Nach jeder Änderung: sofort prüfen und zeichnen; Zufahrt, Schatten und Planungsrecht verzögert (nach dem Ziehen). */
+function grNeu() {
+  if (!site || !grSt.v || st.modus !== 'gross' || st.ansicht === 'nachbar') return;
+  grSt.offen = true;
+  grBewerten();
+  grZeichnen();
+  grVerdict();
+  grInfo();
+  if (grSt.zonen) grZonenNeu();
+  if (grTimer) clearTimeout(grTimer);
+  grTimer = setTimeout(grRechnen, 350);
+}
+
+function grRechnen() {
+  if (!site || !grSt.v || !grSt.res || st.modus !== 'gross') return;
+  const v = grSt.v;
+  const res = grSt.res;
+  grSt.zufahrt = berechneZufahrt({
+    site, ziel: res.grundriss.fp, ausgenommen: v.art === 'aufstockung' && v.zielId ? [v.zielId] : [],
+    bruestung: res.kennzahlen.bruestung, strassen: grStrassen(),
+  });
+  grSt.ms.zufahrt = grSt.zufahrt.ms;
+  const t0 = performance.now();
+  grSt.schatten = berechneVerschattung(site, v, geoLage());
+  grSt.ms.schatten = performance.now() - t0;
+  grSt.gemeinde = gemeindeAbschnitt(site, v.art, umfeldStatistik(site, grMitte(), grStrassen()), grSt.plaene, data.site.gemeinde.name);
+  grSt.fragen = fragenAnGemeinde(v.art, site, grSt.plaene, umfeldStatistik(site, grMitte(), grStrassen()), (grSt.res?.af.ausserhalbM2 ?? 0) > 0.05);
+  grSt.offen = false;
+  grBewerten();
+  grZeichnen();
+  grVerdict();
+  grInfo();
+}
+
+function grZeichnen() {
+  if (!site || !grSt.v || !grSt.res) return;
+  grLayer ??= new VorhabenLayer(scene.viewer);
+  const v = grSt.v;
+  const g = grSt.res.grundriss;
+  const ground = (p: Vec2) => terrain.heightOrCoarse(p);
+  const base = v.art === 'aufstockung' ? Math.min(...g.fp.map(ground)) : v.baseElevation ?? Math.max(...g.fp.map(ground));
+  const r = grSt.res;
+  grLayer.zeige({
+    flaechen: vorhabenModell(v, g, base),
+    af: r.af.waende.map((w) => w.flaeche),
+    afSchlecht: r.punkte.some((p) => (p.id === 'grenze' || p.id === 'abstandsflaechen') && p.status === 'bad'),
+    status: st.ansicht === 'nachbar' ? null : r.status,
+    zufahrt: grSt.offen ? null : grSt.zufahrt,
+    showAF: st.showAF,
+    dark: st.dark,
+    mesh: st.mesh,
+  });
+  render();
+}
+
+function grVerdict() {
+  if (st.ansicht === 'nachbar') return;
+  const r = grSt.res;
+  if (!r) return verdict('Wähl ein Gebäude.', 'Dann prüft Passt. das Vorhaben.');
+  verdict(r.head, r.sub, r.status ?? 'none');
+  const d = document.querySelector('[data-modus="gross"] .d');
+  if (d) d.className = `d ${r.status ?? ''}`;
+}
+
+function grWandOptionen(v: GVorhaben): [string, string][] {
+  const host = st.buildings.find((b) => b.id === v.hostId);
+  if (!host) return [];
+  const ccw = signedArea(host.footprint) > 0;
+  return edges(host.footprint).map(([a, b], i) => {
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const n: Vec2 = ccw ? [(b[1] - a[1]) / l, -(b[0] - a[0]) / l] : [-(b[1] - a[1]) / l, (b[0] - a[0]) / l];
+    return [String(i), `Wand nach ${richtungVon(n)} (${fmt(l, 1)} m)`] as [string, string];
+  }).filter((_, i) => {
+    const [a, b] = edges(host.footprint)[i];
+    return Math.hypot(b[0] - a[0], b[1] - a[1]) > 1.5;
+  });
+}
+
+interface GrCtl { k: string; l: string; min: number; max: number; step: number }
+function grRegler(v: GVorhaben): GrCtl[] {
+  const dach: GrCtl[] = v.dachform === 'flach' ? [] : [{ k: 'neigung', l: 'Dachneigung', min: 5, max: 60, step: 1 }];
+  if (v.art === 'aufstockung') return [
+    { k: 'geschosse', l: 'Zusätzliche Geschosse', min: 1, max: 2, step: 1 },
+    { k: 'geschosshoehe', l: 'Geschosshöhe', min: 2.4, max: 3.4, step: 0.05 },
+  ];
+  if (v.art === 'anbau') return [
+    { k: 'w', l: 'Länge entlang der Hauswand', min: 2, max: 14, step: 0.1 },
+    { k: 'd', l: 'Tiefe', min: 2, max: 10, step: 0.1 },
+    { k: 'versatz', l: 'Verschiebung entlang der Wand', min: -12, max: 12, step: 0.1 },
+    { k: 'geschosse', l: 'Geschosse', min: 1, max: 3, step: 1 },
+    { k: 'geschosshoehe', l: 'Geschosshöhe', min: 2.4, max: 3.4, step: 0.05 },
+    ...dach,
+  ];
+  return [
+    { k: 'w', l: 'Breite', min: 4, max: 20, step: 0.1 },
+    { k: 'd', l: 'Tiefe', min: 4, max: 20, step: 0.1 },
+    { k: 'geschosse', l: 'Geschosse', min: 1, max: 4, step: 1 },
+    { k: 'geschosshoehe', l: 'Geschosshöhe', min: 2.4, max: 3.4, step: 0.05 },
+    ...dach,
+    { k: 'deg', l: 'Drehung', min: -90, max: 90, step: 1 },
+  ];
+}
+
+function grWert(v: GVorhaben, k: string): number {
+  if (k === 'deg') return Math.round(CMath.toDegrees(v.angle));
+  return (v[k as 'w'] as number | undefined) ?? 0;
+}
+function grText(v: GVorhaben, k: string): string {
+  const x = grWert(v, k);
+  if (k === 'deg') return `${x}°`;
+  if (k === 'neigung') return `${Math.round(x)}°`;
+  if (k === 'geschosse') return `${x}`;
+  return `${fmt(x, k === 'geschosshoehe' ? 2 : 1)} m`;
+}
+
+function renderGrossSheet() {
+  if (!site || !grSt.v) return;
+  const v = grSt.v;
+  const eigene = eigeneGebaeude(site);
+  const ctl = grRegler(v).map((s, i) => `<div class="ctl"><label for="g${i}"><span>${s.l}</span><output data-gk="${s.k}" for="g${i}">${grText(v, s.k)}</output></label><input id="g${i}" type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${grWert(v, s.k)}" data-gk="${s.k}"></div>`).join('');
+  const gebTxt = (b: Building) => `Haus ${fmt(area(b.footprint), 0)} m²${b.trauf != null ? `, Traufe ${fmt(b.trauf, 1)} m` : ''}`;
+  const hostSel = v.art === 'anbau' || v.art === 'aufstockung'
+    ? eigene.length
+      ? `<div class="field"><span>${v.art === 'anbau' ? 'Woran bauen?' : 'Welches Haus?'} ${tag('amtlich', 'amtlich')}</span>${sel('gHost', (v.art === 'anbau' ? v.hostId : v.zielId) ?? eigene[0].id, eigene.map((b) => [b.id, gebTxt(b)] as [string, string]))}</div>`
+      : '<p class="warnbox">Auf deinem Grundstück ist kein Haus in den Daten. Anbau und Aufstockung brauchen eines.</p>'
+    : '';
+  const wandSel = v.art === 'anbau' ? `<div class="field"><span>An welcher Wand?</span>${sel('gWand', String(v.hostKante ?? 0), grWandOptionen(v))}</div>` : '';
+  const dachSel = v.art !== 'aufstockung'
+    ? `<div class="field"><span>Dach ${tag('Annahme', 'Annahme')}</span>${sel('gDach', v.dachform, [['sattel', 'Satteldach'], ['pult', 'Pultdach'], ['flach', 'Flachdach']])}</div>
+       ${v.art === 'anbau' && v.dachform === 'sattel' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:4px 0"><input type="checkbox" id="gQuer" ${v.firstQuer ? 'checked' : ''}> First quer zur Hauswand</label>` : ''}`
+    : '<p class="fine" style="text-align:left">Das Dach wird nicht verändert. Passt. kennt von deinem Haus nur Trauf- und Firsthöhe (LoD2) und rechnet mit einer Neigung bis 70°.</p>';
+  $('stepBody').innerHTML = `
+    <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">${tabsHtml()}</div>
+    <p class="fine" style="text-align:left;margin:4px 0 8px">Großes Vorhaben: Ob gebaut werden darf, entscheidet die Gemeinde. Passt. prüft nur, was sich messen lässt, und zeigt, was die Gemeinde klärt.</p>
+    <div class="objects" role="group" aria-label="Was baust du?">${GR_ART.map(([a, n]) => `<button class="obj" type="button" data-gart="${a}" aria-selected="${v.art === a}">${n}</button>`).join('')}</div>
+    ${hostSel}${wandSel}${dachSel}
+    <div class="controls" id="grControls">${ctl}</div>
+    ${v.art === 'wohnhaus' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="gZonen" ${grSt.zonen ? 'checked' : ''}> Wo darf das Haus hin? Zonen zeigen</label><div id="gZonenInfo"></div>` : ''}
+    <div id="grInfo"></div>`;
+  bindTabs();
+  document.querySelectorAll<HTMLButtonElement>('[data-gart]').forEach((b) => b.addEventListener('click', () => grArt(b.dataset.gart as VorhabenArt)));
+  document.querySelectorAll<HTMLInputElement>('#grControls input').forEach((inp) =>
+    inp.addEventListener('input', () => {
+      const x = parseFloat(inp.value);
+      const k = inp.dataset.gk!;
+      if (k === 'deg') v.angle = CMath.toRadians(x);
+      else (v as unknown as Record<string, number>)[k] = k === 'geschosse' ? Math.round(x) : x;
+      inp.parentElement!.querySelector('output')!.textContent = grText(v, k);
+      grNeu();
+    }),
+  );
+  document.getElementById('gHost')?.addEventListener('change', (e) => {
+    const id = (e.target as HTMLSelectElement).value;
+    if (v.art === 'anbau') { v.hostId = id; v.hostKante = 0; v.versatz = 0; const n = grWandOptionen(v); if (n.length) v.hostKante = Number(n[0][0]); }
+    else v.zielId = id;
+    grSt.zufahrt = null;
+    renderSheet();
+  });
+  document.getElementById('gWand')?.addEventListener('change', (e) => { v.hostKante = Number((e.target as HTMLSelectElement).value); v.versatz = 0; renderSheet(); });
+  document.getElementById('gDach')?.addEventListener('change', (e) => { v.dachform = (e.target as HTMLSelectElement).value as GVorhaben['dachform']; renderSheet(); });
+  document.getElementById('gQuer')?.addEventListener('change', (e) => { v.firstQuer = (e.target as HTMLInputElement).checked; grNeu(); });
+  document.getElementById('gZonen')?.addEventListener('change', (e) => {
+    grSt.zonen = (e.target as HTMLInputElement).checked;
+    if (grSt.zonen) grZonenNeu(); else { zonenLayer?.weg(); grSt.zonenErg = null; grZonenInfo(); }
+  });
+  grNeu();
+}
+
+function grInfo() {
+  const el = document.getElementById('grInfo');
+  const r = grSt.res;
+  if (!el) return;
+  if (!r || !grSt.v) { el.innerHTML = ''; return; }
+  const v = grSt.v;
+  el.innerHTML = `
+    ${punkteHtml(r.punkte, tag)}
+    ${kennzahlenHtml(r.kennzahlen, v.art, tag)}
+    <details open><summary>So haben wir geprüft</summary><ul class="rows">${rowsHtml([...r.rows, ...(grSt.zufahrt && !grSt.offen ? grSt.zufahrt.rows : [])], tag)}</ul></details>
+    <details open><summary>Schatten auf die Nachbarn</summary>${schattenHtml(grSt.schatten, grSt.offen, tag)}</details>
+    ${grSt.gemeinde ? gemeindeHtml(grSt.gemeinde, tag) : '<p class="fine" style="text-align:left">Planungsrecht wird zusammengestellt …</p>'}
+    <p class="fine" style="text-align:left">Orientierung, keine Genehmigung. Verbindlich entscheidet die Gemeinde bzw. das Bauamt. ${LIMITS.geprueft ? '' : 'Die Grenzwerte sind noch nicht von einer Fachperson geprüft.'}</p>
+    <div class="btnrow">
+      <button class="primary" id="grVoranfrage" type="button" aria-haspopup="dialog">Bauvoranfrage vorbereiten</button>
+      <button class="sec" id="grTeilen" type="button" aria-haspopup="dialog">Nachbarn fragen</button>
+      <button class="sec" id="grReport" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
+    </div>`;
+  document.getElementById('grVoranfrage')?.addEventListener('click', () => void openVoranfrage());
+  document.getElementById('grTeilen')?.addEventListener('click', openTeilen);
+  document.getElementById('grReport')?.addEventListener('click', openReport);
+  grZonenInfo();
+}
+
+/* ----- Zonen „Wo darf das Haus hin?“ ----- */
+function grZonenNeu() {
+  if (!site || !st.objs || !grSt.v || grSt.v.art !== 'wohnhaus' || !grSt.zonen) return;
+  if (grZonenTimer) clearTimeout(grZonenTimer);
+  grZonenTimer = setTimeout(async () => {
+    const z = await import('./scene/zonen');
+    zonenLayer ??= new z.ZonenLayer(scene.viewer);
+    const vv = grSt.v;
+    if (!vv || !site) return;
+    const r = await z.berechneZonen(site, st.objs!, 'vorhaben', { ...vv });
+    if (!grSt.zonen || st.modus !== 'gross') return;
+    zonenLayer.zeige(r.feld, r.geo.nx, r.geo.ny, r.rect);
+    grSt.zonenErg = { beste: r.beste, msGesamt: r.msGesamt };
+    grZonenInfo();
+    render();
+  }, 250);
+}
+
+function grZonenInfo() {
+  const el = document.getElementById('gZonenInfo');
+  if (!el) return;
+  if (!grSt.zonen) { el.innerHTML = ''; return; }
+  const e = grSt.zonenErg;
+  if (!e) { el.innerHTML = '<p class="fine" style="text-align:left">Rechne …</p>'; return; }
+  const v = grSt.v!;
+  const d = e.beste ? Math.hypot(e.beste.p[0] - v.center[0], e.beste.p[1] - v.center[1]) : 0;
+  el.innerHTML = `<p class="fine" style="text-align:left"><span style="color:var(--ok)">■</span> passt so · <span style="color:var(--warn)">■</span> passt gedreht · <span style="color:var(--red)">■</span> geht nicht – für das ganze Haus in der jetzigen Größe (Abstandsflächen, Grenze, Kollisionen; ohne Zufahrt). ${tag('berechnet', 'berechnet')} <span style="opacity:.6">(${Math.round(e.msGesamt)} ms)</span></p>
+    ${e.beste ? (d < 0.3 && e.beste.farbe === 1 ? '<p class="fine" style="text-align:left">Die jetzige Stelle passt.</p>' : `<p class="fine" style="text-align:left">Nächste passende Stelle: ${fmt(d, 1)} m entfernt${e.beste.farbe === 2 ? ', gedreht' : ''}. <button class="link" type="button" id="gHin">Hierhin setzen</button></p>`) : '<p class="fine" style="text-align:left">Auf diesem Grundstück passt das Haus in dieser Größe nirgends. Mach es kleiner oder niedriger.</p>'}`;
+  document.getElementById('gHin')?.addEventListener('click', () => {
+    const b = grSt.zonenErg?.beste;
+    if (!b || !grSt.v) return;
+    grSt.v.center = [b.p[0], b.p[1]];
+    grSt.v.angle = b.angle > Math.PI / 2 ? b.angle - Math.PI : b.angle;
+    renderSheet();
+  });
+}
+
+/** Ziehen des Hauses (Wohnhaus: Mitte; Anbau: Wand und Versatz). */
+function grZiehen(g: Vec2, off: Vec2) {
+  const v = grSt.v;
+  if (!v || !site) return;
+  if (v.art === 'wohnhaus') {
+    v.center = [Math.round((g[0] + off[0]) * 20) / 20, Math.round((g[1] + off[1]) * 20) / 20];
+  } else if (v.art === 'anbau') {
+    const host = st.buildings.find((b) => b.id === v.hostId);
+    if (!host) return;
+    let best = { d: Infinity, i: 0, t: 0, len: 1 };
+    edges(host.footprint).forEach(([a, b], i) => {
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (len < 1.5) return;
+      const r = pointSegment(g, a, b);
+      if (r.d < best.d) best = { d: r.d, i, t: Math.hypot(r.q[0] - a[0], r.q[1] - a[1]), len };
+    });
+    if (best.d === Infinity) return;
+    const wechsel = best.i !== v.hostKante;
+    v.hostKante = best.i;
+    const platz = Math.max(0, best.len / 2 - v.w / 2);
+    v.versatz = Math.max(-platz, Math.min(platz, Math.round((best.t - best.len / 2) * 20) / 20));
+    if (wechsel) {
+      const regler = document.querySelector<HTMLSelectElement>('#gWand');
+      if (regler) regler.value = String(best.i);
+    }
+  } else return;
+  const vs = document.querySelector<HTMLInputElement>('#grControls input[data-gk="versatz"]');
+  if (vs) { vs.value = String(v.versatz ?? 0); vs.parentElement!.querySelector('output')!.textContent = grText(v, 'versatz'); }
+  grNeu();
+}
+
+/* ----- Bauvoranfrage ----- */
+async function openVoranfrage() {
+  if (!site || !grSt.v || !grSt.res) return;
+  if (grSt.offen) grRechnen();
+  const res = grSt.res;
+  const vf = await import('./antrag/voranfrage');
+  const gem = grSt.gemeinde ?? gemeindeAbschnitt(site, grSt.v.art, null, grSt.plaene, data.site.gemeinde.name);
+  const p = vf.voranfrageBauen({
+    site, v: grSt.v, res, zufahrt: grSt.zufahrt, schatten: grSt.schatten, gemeinde: gem,
+    fragen: grSt.fragen.length ? grSt.fragen : fragenAnGemeinde(grSt.v.art, site, grSt.plaene, null, res.af.ausserhalbM2 > 0.05),
+    bestand: st.bestand.filter((b) => b.status === 'aktiv'), ursprung: getOrigin(), adresse: st.address, erstellt: new Date(), links: ANTRAG_LINKS, version: APP_VERSION,
+  });
+  openModal('Bauvoranfrage vorbereiten', `
+    <p class="warnbox">${esc(vf.HINWEIS_VORANFRAGE)}</p>
+    <p>Mit einer Bauvoranfrage (Vorbescheid, Art. 71 BayBO) klärst du einzelne Fragen, <b>bevor</b> du Pläne zeichnen lässt und einen Bauantrag stellst. Passt. legt dir Lageplan-Skizze, Kubatur und die Fragen an die Gemeinde zusammen.</p>
+    <h3>Kubatur</h3>
+    <p>${esc(p.vorhaben.name)}: Grundfläche ${fmt(p.vorhaben.kubatur.grundflaeche, 0)} m², Wandhöhe ${fmt(p.vorhaben.kubatur.wandhoehe, 1)} m, höchster Punkt ${fmt(p.vorhaben.kubatur.firsthoehe, 1)} m, Brutto-Rauminhalt ${fmt(p.vorhaben.kubatur.rauminhalt, 0)} m³ ${tag('berechnet', 'berechnet')}</p>
+    <h3>Fragen an die Gemeinde</h3>
+    <ol>${p.fragen.map((f) => `<li>${esc(f)}</li>`).join('')}</ol>
+    <h3>Lageplan-Skizze</h3>
+    <p class="warnbox">${esc(vf.HINWEIS_SKIZZE_V)}</p>
+    <div style="overflow:auto;background:#fff;border-radius:8px">${p.zeichnungen.lageplan.svg.replace(/width="[\d.]+mm" height="[\d.]+mm"/, 'width="100%"')}</div>
+    <div class="btnrow">
+      <button class="primary" id="vHtml" type="button">Voranfrage speichern (zum Drucken)</button>
+      <button class="sec" id="vJson" type="button">Daten exportieren (JSON)</button>
+    </div>
+    <p class="m-fine">Die HTML-Datei im Browser öffnen und als PDF drucken. Welche Unterlagen die Bauaufsichtsbehörde für den Vorbescheid verlangt, steht nicht im Wortlaut, den Passt. kennt – vorher erfragen ${tag('offen', 'offen')}. Nichts davon ist eine amtliche Bauvorlage.</p>
+    <p class="m-fine">Offizielle Stellen: <a href="${esc(ANTRAG_LINKS.digitalerBauantrag)}" target="_blank" rel="noopener">Digitaler Bauantrag Bayern</a> · <a href="${esc(ANTRAG_LINKS.baybo)}" target="_blank" rel="noopener">Bayerische Bauordnung</a></p>`);
+  const name = `passt-bauvoranfrage-${grSt.v.art}-${new Date().toISOString().slice(0, 10)}`;
+  const speichern = (inhalt: string, typ: string, datei: string) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([inhalt], { type: typ }));
+    a.download = datei;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  };
+  document.getElementById('vHtml')?.addEventListener('click', () => speichern(vf.voranfrageHtml(p), 'text/html;charset=utf-8', `${name}.html`));
+  document.getElementById('vJson')?.addEventListener('click', () => speichern(JSON.stringify(p, null, 2), 'application/json', `${name}.json`));
+}
+
 /* ---------- Hecke, Baum (AGBGB Art. 47–52) ---------- */
 const PFL_ART: [PflanzenArt, string][] = [['hecke', 'Hecke'], ['baum', 'Baum'], ['strauch', 'Strauch']];
 
@@ -826,13 +1253,19 @@ function tabName(k: ObjectKind): string {
 
 function tabsHtml(): string {
   return `${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${tabName(k)}</button>`).join('')}
-    <button class="obj" role="tab" type="button" data-modus="pflanzen"><span class="d"></span>Hecke, Baum</button>`;
+    <button class="obj" role="tab" type="button" data-modus="pflanzen"><span class="d"></span>Hecke, Baum</button>
+    <button class="obj" role="tab" type="button" data-modus="gross" aria-selected="${st.modus === 'gross'}"><span class="d"></span>Großes Vorhaben</button>`;
 }
 
 function bindTabs() {
   document.querySelectorAll<HTMLButtonElement>('[data-obj]').forEach((b) => b.addEventListener('click', () => select(b.dataset.obj as ObjectKind)));
+  document.querySelector<HTMLButtonElement>('[data-modus="gross"]')?.addEventListener('click', () => {
+    if (st.modus === 'gross') return;
+    grStart();
+  });
   document.querySelector<HTMLButtonElement>('[data-modus="pflanzen"]')?.addEventListener('click', () => {
     if (st.modus === 'pflanzen') return;
+    grAus();
     st.modus = 'pflanzen';
     pflSt.benutzt = true;
     zonenAus();
@@ -1063,11 +1496,19 @@ function pflanzeText(p: Pflanze): string {
   return p.art === 'hecke' ? `Hecke ${fmt(p.laenge, 1)} m lang, bis ${fmt(p.hoehe, 1)} m hoch` : `${p.art === 'baum' ? 'Baum' : 'Strauch'} bis ${fmt(p.hoehe, 1)} m hoch`;
 }
 
+function grText2(g: GVorhaben): string {
+  return g.art === 'aufstockung' ? `Aufstockung um ${g.geschosse} Geschoss${g.geschosse === 1 ? '' : 'e'}` : `${VORHABEN_NAME[g.art].name} ${fmt(g.w, 1)} × ${fmt(g.d, 1)} m, ${g.geschosse} Geschoss${g.geschosse === 1 ? '' : 'e'}`;
+}
+
 /** Dialog für den Ersteller: Objekte wählen, Ablauf, Link erstellen; eigene Links verwalten. */
 function openTeilen() {
   if (!st.objs || !st.plot) return;
-  const vor = st.modus === 'pflanzen' ? 'pflanze' : st.selected;
-  const opts: [string, string][] = [...ORDER.map((k) => [k, objektText(k, st.objs![k])] as [string, string]), ...(st.pflanze ? [['pflanze', pflanzeText(st.pflanze)] as [string, string]] : [])];
+  const vor = st.modus === 'pflanzen' ? 'pflanze' : st.modus === 'gross' ? 'gross' : st.selected;
+  const opts: [string, string][] = [
+    ...ORDER.map((k) => [k, objektText(k, st.objs![k])] as [string, string]),
+    ...(st.pflanze ? [['pflanze', pflanzeText(st.pflanze)] as [string, string]] : []),
+    ...(grSt.v && grSt.benutzt ? [['gross', grText2(grSt.v)] as [string, string]] : []),
+  ];
   openModal('Nachbarn fragen', `
     <p>Dein Nachbar bekommt einen Link ohne Anmeldung. Er sieht dein Vorhaben in 3D, kann von seinem Fenster oder Garten aus schauen und den Schatten über den Tag prüfen. Dann kann er antworten: „Passt für mich“ oder „Ich habe eine Frage“.</p>
     <p class="m-fine">Das Vorhaben steht nur im Link selbst – Passt. speichert es nicht. Gespeichert wird nur die Antwort: Zeitpunkt, Antwort und eine Prüfsumme des Vorhabens.</p>
@@ -1089,10 +1530,10 @@ function openTeilen() {
     const l = await linkIdAus(s);
     const o: Vorhaben['o'] = {};
     for (const k of ORDER) if (teile.includes(k)) o[k] = { ...st.objs![k], baseElevation: undefined, geraet: undefined };
-    const v: Vorhaben = { v: VERSION, u: getOrigin(), b: st.plot!, o, ...(teile.includes('pflanze') && st.pflanze ? { p: st.pflanze } : {}), bis, l };
+    const v: Vorhaben = { v: VERSION, u: getOrigin(), b: st.plot!, o, ...(teile.includes('pflanze') && st.pflanze ? { p: st.pflanze } : {}), ...(teile.includes('gross') && grSt.v ? { g: { ...grSt.v, baseElevation: undefined } } : {}), bis, l };
     const url = `${location.origin}${location.pathname}#n=${await kodieren(v)}`;
     const hash = await projektHash(v);
-    const titel = teile.map((k) => (k === 'pflanze' ? PFL_ART.find((a) => a[0] === st.pflanze!.art)![1] : NAMES[k as ObjectKind].name)).join(', ');
+    const titel = teile.map((k) => (k === 'pflanze' ? PFL_ART.find((a) => a[0] === st.pflanze!.art)![1] : k === 'gross' ? VORHABEN_NAME[grSt.v!.art].name : NAMES[k as ObjectKind].name)).join(', ');
     speichereLinks([{ l, s, bis, hash, titel, erstellt: new Date().toISOString() }, ...meineLinks()]);
     $('tLink').innerHTML = `<div class="field"><input id="tUrl" readonly value="${esc(url)}" style="width:100%"></div>
       <div class="btnrow"><button class="sec" id="tCopy" type="button">Kopieren</button>${'share' in navigator ? '<button class="sec" id="tShare" type="button">Teilen</button>' : ''}</div>
@@ -1148,8 +1589,10 @@ const nbSt: {
   gesendet: NachbarAntwort | null;
   meldung: string;
   stunden: { ohne: number; mit: number } | null;
+  /** großes Vorhaben: Sonnenstunden am Blickpunkt an den festen Stichtagen */
+  stichtage: { name: string; ohne: number; mit: number }[] | null;
   jetzt: string;
-} = { v: null, hash: '', datum: '', minuten: 15 * 60, mit: true, tippen: null, antwortId: null, gesendet: null, meldung: '', stunden: null, jetzt: '' };
+} = { v: null, hash: '', datum: '', minuten: 15 * 60, mit: true, tippen: null, antwortId: null, gesendet: null, meldung: '', stunden: null, stichtage: null, jetzt: '' };
 
 const ANTWORT_KEY = (l: string) => `passt.antwort.${l}`;
 
@@ -1181,6 +1624,7 @@ async function startNachbar(fragment: string) {
   v.b = v.b.map(sh);
   for (const k of Object.keys(v.o) as ObjectKind[]) v.o[k]!.center = sh(v.o[k]!.center);
   if (v.p) v.p.center = sh(v.p.center);
+  if (v.g) v.g.center = sh(v.g.center);
   nbSt.v = v;
   const c = centroid(v.b);
   await Promise.all([details, terrain.ensure([c[0] - 90, c[1] - 90], [c[0] + 90, c[1] + 90])]);
@@ -1192,6 +1636,14 @@ async function startNachbar(fragment: string) {
   for (const k of Object.keys(v.o) as ObjectKind[]) st.objs![k] = v.o[k]!;
   st.sichtbar = Object.keys(v.o) as ObjectKind[];
   st.pflanze = v.p ?? null;
+  if (v.g && site) {
+    // großes Vorhaben: nur ansehen (3D + Schatten), ohne Abstandsflächen
+    grSt.v = v.g;
+    grSt.res = bewerteVorhaben(site, v.g, null, grStrassen());
+    grLayer ??= new VorhabenLayer(scene.viewer);
+    st.modus = 'gross';
+    grZeichnen();
+  }
   // Blickpunkt: angenommenes Fenster, das dem Vorhaben am nächsten liegt
   const ziel = vorhabenMitte();
   const w = st.windows.filter((x) => !st.buildings.find((b) => b.id === x.buildingId)?.own).sort((a, b) => Math.hypot(a.pos[0] - ziel[0], a.pos[1] - ziel[1]) - Math.hypot(b.pos[0] - ziel[0], b.pos[1] - ziel[1]))[0];
@@ -1205,10 +1657,11 @@ async function startNachbar(fragment: string) {
 function vorhabenKoerper(): Koerper[] {
   const v = nbSt.v;
   if (!v) return [];
-  return [...(Object.values(v.o) as Placed[]).map((o) => koerperAus(o)), ...(v.p ? [koerperPflanze(v.p)] : [])];
+  const g = v.g && site ? grKoerper(site, v.g) : null;
+  return [...(Object.values(v.o) as Placed[]).map((o) => koerperAus(o)), ...(v.p ? [koerperPflanze(v.p)] : []), ...(g ? [g] : [])];
 }
 function vorhabenMitte(): Vec2 {
-  const ps = [...(Object.values(nbSt.v?.o ?? {}) as Placed[]).map((o) => o.center), ...(nbSt.v?.p ? [nbSt.v.p.center] : [])];
+  const ps = [...(Object.values(nbSt.v?.o ?? {}) as Placed[]).map((o) => o.center), ...(nbSt.v?.p ? [nbSt.v.p.center] : []), ...(nbSt.v?.g ? [nbSt.v.g.center] : [])];
   return ps.length ? [ps.reduce((a, p) => a + p[0], 0) / ps.length, ps.reduce((a, p) => a + p[1], 0) / ps.length] : centroid(st.plot!);
 }
 /** Breite, Länge und Meridiankonvergenz (UTM 32, Mittelmeridian 9°) am Grundstück. */
@@ -1250,6 +1703,14 @@ function schattenNeu(tagNeu = false) {
     if (tagNeu) {
       const tag = new Date(`${nbSt.datum}T00:00:00Z`);
       nbSt.stunden = { ohne: sonnenstunden(st.blick.p, st.blick.z, hk, tag, lat, lon, konv), mit: sonnenstunden(st.blick.p, st.blick.z, [...vk, ...hk], tag, lat, lon, konv) };
+      if (nbSt.v.g) {
+        const b = st.blick;
+        nbSt.stichtage = STICHTAGE.map((s) => {
+          const [m, d] = s.split('-').map(Number);
+          const t = new Date(Date.UTC(new Date().getUTCFullYear(), m - 1, d));
+          return { name: STICHTAG_NAME[s] ?? s, ohne: sonnenstunden(b.p, b.z, hk, t, lat, lon, konv), mit: sonnenstunden(b.p, b.z, [...vk, ...hk], t, lat, lon, konv) };
+        });
+      }
     }
   } else nbSt.jetzt = '';
   const el = document.getElementById('nbSonne');
@@ -1263,13 +1724,14 @@ function sonneHtml(): string {
   if (!st.blick) return '<p class="fine" style="text-align:left">Tipp auf dein Fenster oder in deinen Garten, dann rechnet Passt. den Schatten für diese Stelle.</p>';
   const s = nbSt.stunden;
   return `<p style="text-align:left;margin:6px 0">${esc(nbSt.jetzt)} ${tag('berechnet', 'berechnet')}</p>
-    ${s ? `<p class="fine" style="text-align:left">Sonne an deinem Blickpunkt an diesem Tag: ohne Vorhaben ${stdText(s.ohne)}, mit Vorhaben ${stdText(s.mit)}${s.ohne - s.mit > 0.01 ? ` – ${stdText(s.ohne - s.mit)} weniger` : ' – kein Unterschied'}.</p>` : ''}`;
+    ${s ? `<p class="fine" style="text-align:left">Sonne an deinem Blickpunkt an diesem Tag: ohne Vorhaben ${stdText(s.ohne)}, mit Vorhaben ${stdText(s.mit)}${s.ohne - s.mit > 0.01 ? ` – ${stdText(s.ohne - s.mit)} weniger` : ' – kein Unterschied'}.</p>` : ''}
+    ${nbSt.stichtage ? `<ul class="rows best">${nbSt.stichtage.map((x) => `<li><span><b>${esc(x.name)}</b>: ohne Vorhaben ${stdText(x.ohne)}, mit Vorhaben ${stdText(x.mit)}${x.ohne - x.mit > 0.01 ? ` – <b>${stdText(x.ohne - x.mit)} weniger Sonne</b>` : ' – kein Unterschied'}</span>${tag('berechnet', 'berechnet')}</li>`).join('')}</ul>` : ''}`;
 }
 
 function nachbarVerdict() {
   const v = nbSt.v;
   if (!v) return;
-  const teile = [...(Object.entries(v.o) as [ObjectKind, Placed][]).map(([k, o]) => objektText(k, o)), ...(v.p ? [pflanzeText(v.p)] : [])];
+  const teile = [...(Object.entries(v.o) as [ObjectKind, Placed][]).map(([k, o]) => objektText(k, o)), ...(v.p ? [pflanzeText(v.p)] : []), ...(v.g ? [grText2(v.g)] : [])];
   verdict('Dein Nachbar zeigt dir sein Vorhaben.', teile.join(' · '));
 }
 
@@ -1277,8 +1739,8 @@ function renderNachbarSheet() {
   const v = nbSt.v!;
   nachbarVerdict();
   const b = st.blick;
-  const fp = [...(Object.values(v.o) as Placed[]).map((o) => footprint(o)), ...(v.p ? [koerperPflanze(v.p).fp] : [])];
-  const abst = b ? Math.min(...fp.map((f) => polygonDistance([b.p], f))) : null;
+  const fp = [...(Object.values(v.o) as Placed[]).map((o) => footprint(o)), ...(v.p ? [koerperPflanze(v.p).fp] : []), ...(v.g && grSt.res ? [grSt.res.grundriss.fp] : [])];
+  const abst = b && fp.length ? Math.min(...fp.map((f) => polygonDistance([b.p], f))) : null;
   const antwort = nbSt.gesendet ?? (nbSt.antwortId ? 'gesendet' : null);
   $('stepBody').innerHTML = `
     <h3 style="font-size:15px;margin:16px 0 6px">Von wo schaust du?</h3>
@@ -1833,6 +2295,7 @@ function setupInput() {
   const h = new ScreenSpaceEventHandler(v.scene.canvas);
   let drag: { k: ObjectKind; off: Vec2 } | null = null;
   let pDrag: Vec2 | null = null;
+  let gDrag: Vec2 | null = null;
   let ecke: number | null = null;
   let downAt: Cartesian2 | null = null;
 
@@ -1849,6 +2312,15 @@ function setupInput() {
     }
     const key = Renderer.keyOf(v.scene.pick(e.position));
     if (!key || key.startsWith('bestand:')) return;
+    if (key === KEY_VORHABEN && st.modus === 'gross' && grSt.v && grSt.v.art !== 'aufstockung') {
+      const g = pickGround(e.position);
+      if (!g) return;
+      gDrag = grSt.v.art === 'wohnhaus' ? [grSt.v.center[0] - g[0], grSt.v.center[1] - g[1]] : [0, 0];
+      v.scene.screenSpaceCameraController.enableInputs = false;
+      st.hasDragged = true;
+      hint(null);
+      return;
+    }
     if (key === 'pflanze' && st.pflanze) {
       const g = pickGround(e.position);
       if (!g) return;
@@ -1880,6 +2352,11 @@ function setupInput() {
       }
       return;
     }
+    if (gDrag) {
+      const g = pickGround(e.endPosition);
+      if (g) grZiehen(g, gDrag);
+      return;
+    }
     if (pDrag && st.pflanze) {
       const g = pickGround(e.endPosition);
       if (!g) return;
@@ -1896,9 +2373,10 @@ function setupInput() {
   }, ScreenSpaceEventType.MOUSE_MOVE);
 
   h.setInputAction((e: { position: Cartesian2 }) => {
-    const wasDrag = !!drag || ecke != null || !!pDrag;
+    const wasDrag = !!drag || ecke != null || !!pDrag || !!gDrag;
     drag = null;
     pDrag = null;
+    gDrag = null;
     ecke = null;
     v.scene.screenSpaceCameraController.enableInputs = true;
     // Tippen = kaum Bewegung zwischen Drücken und Loslassen
@@ -1937,6 +2415,19 @@ function setupInput() {
   // Tastatur: Pfeile verschieben relativ zur Blickrichtung, R dreht um 90°
   $('stage').addEventListener('keydown', (e) => {
     if (e.target !== $('stage') || st.step !== 'pruefen' || !st.objs || st.ansicht === 'nachbar') return;
+    if (st.modus === 'gross') {
+      const gv = grSt.v;
+      if (!gv || gv.art !== 'wohnhaus') return;
+      if (e.key === 'r' || e.key === 'R') { gv.angle = ((gv.angle + Math.PI / 2 + Math.PI / 2) % Math.PI) - Math.PI / 2; renderSheet(); e.preventDefault(); return; }
+      const mg = ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] } as Record<string, [number, number]>)[e.key];
+      if (!mg) return;
+      const sg = e.shiftKey ? 0.5 : 0.1;
+      const hg = v.camera.heading;
+      gv.center = [gv.center[0] + (Math.cos(hg) * mg[0] + Math.sin(hg) * mg[1]) * sg, gv.center[1] + (-Math.sin(hg) * mg[0] + Math.cos(hg) * mg[1]) * sg];
+      e.preventDefault();
+      grNeu();
+      return;
+    }
     const o: { center: Vec2; angle: number } = st.modus === 'pflanzen' && st.pflanze ? st.pflanze : st.objs[st.selected];
     if (e.key === 'r' || e.key === 'R') {
       o.angle = ((o.angle + Math.PI / 2 + Math.PI / 2) % Math.PI) - Math.PI / 2;
@@ -2028,6 +2519,7 @@ function openReport() {
       ${nb.length ? `<p class="rep-t">Pflanzen an der Grenze (Messung, keine Bewertung):</p><ul class="plain">${nb.map((x) => `<li>${esc(pflanzenText(site!, x))} (${esc(x.provenance)})</li>`).join('')}</ul>` : ''}
       <p class="m-fine">Wortlaut AGBGB Art. 47–52 aus gesetze.legal und GVBl 1982 verglichen, nicht von einer Fachperson geprüft.</p></div>`;
   }
+  if (grSt.benutzt && grSt.res && grSt.v) h += grossReport();
   const best = st.bestand.filter((b) => b.status === 'aktiv');
   h += `<h3>Was wir angenommen haben</h3><ul class="plain">
     <li>${plotProvenance === 'Demo' ? 'Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet (Demo) – nicht amtlich' : 'Grundstücksgrenze von dir gesetzt (nutzerbestätigt), Flurkarte nur als Hilfslinie'}</li>
@@ -2042,12 +2534,34 @@ function openReport() {
     <li>Schall vereinfacht nach LAI-Leitfaden, ohne Zuschläge</li>
     <li>Denkmal: ${st.denkmal == null ? 'nicht abgefragt (offen)' : st.denkmal.length ? st.denkmal.map((d) => `${esc(d.art)} ${esc(d.aktennummer)}`).join(', ') + ' (amtlich, © BLfD)' : 'kein Denkmal am Grundstück (amtlich, © BLfD)'}</li>
     <li>Trinkwasserschutzgebiet: ${st.wsg == null ? 'nicht abgefragt (offen)' : st.wsg.length ? esc(st.wsg.join(', ')) : 'nein'}${st.wsg != null ? ' (amtlich, Datenquelle: Bayerisches Landesamt für Umwelt)' : ''}</li>
-    <li>Bebauungsplan nicht geprüft${data.site.gemeinde.bauleitplanung_url ? ` – <a href="${esc(data.site.gemeinde.bauleitplanung_url)}" target="_blank" rel="noopener">Pläne der Stadt</a>` : ''}</li>
+    <li>Bebauungsplan: ${bplanReport()}${data.site.gemeinde.bauleitplanung_url ? ` – <a href="${esc(data.site.gemeinde.bauleitplanung_url)}" target="_blank" rel="noopener">Pläne der Stadt</a>` : ''}</li>
   </ul>`;
   if (!LIMITS.geprueft) h += `<p class="m-fine">Die Grenzwerte sind noch nicht von einer Fachperson geprüft.</p>`;
   h += `<p class="m-fine">Orientierung, keine Genehmigung. Verbindlich entscheidet das Bauamt.</p>`;
   h += `<p class="m-fine">Datenquelle: Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (LoD2, Hausumringe, DGM1, DOM20, DOP20; CC BY 4.0). Quasigeoid GCG2016: © BKG (CC BY 4.0).</p>`;
   openModal('Prüfbericht', h);
+}
+
+function bplanReport(): string {
+  const pl = grSt.plaene;
+  if (pl === undefined) return 'nicht abgefragt (offen)';
+  if (pl === null) return 'Landesportal nicht erreichbar (offen)';
+  const rk = pl.filter((x) => x.art === 'rechtskraft');
+  if (!rk.length) return 'laut Landesportal keiner (das Portal ist nicht flächendeckend; amtlich, Bauleitplanung Bayern). Inhalt wird nie ausgelesen';
+  return `${rk.map((x) => `„${esc(x.name)}“${x.planUrl ? ` (<a href="${esc(x.planUrl)}" target="_blank" rel="noopener">Plan</a>)` : ''}`).join(', ')} laut Landesportal (amtlich, nur Verweis – Festsetzungen nicht geprüft)`;
+}
+
+/** Prüfbericht: Abschnitt „Großes Vorhaben“ (Ampel nur für Messbares, Planungsrecht als Wegweiser). */
+function grossReport(): string {
+  const r = grSt.res!;
+  const v = grSt.v!;
+  const g = grSt.gemeinde;
+  return `<div class="rep"><div class="rep-h"><span class="d ${r.status ?? ''}"></span><strong>${esc(VORHABEN_NAME[v.art].name)} (Stockwerk 3)</strong><span class="rep-s">${r.status ? WORD[r.status] : 'offen'}</span></div><p class="rep-t">${esc(r.head)} ${esc(r.sub)}</p>
+    ${punkteHtml(r.punkte, tag)}
+    ${kennzahlenHtml(r.kennzahlen, v.art, tag)}
+    <ul class="plain">${r.rows.map((x) => `<li>${esc(x.text)} (${esc(x.tag)})</li>`).join('')}</ul>
+    ${schattenHtml(grSt.schatten, false, tag)}
+    ${g ? gemeindeHtml(g, tag) : ''}</div>`;
 }
 
 /** Prüfbericht: welche bestehenden Objekte bei der Grenzbebauung mitgezählt wurden und welche nicht. */
@@ -2204,6 +2718,11 @@ async function main() {
         zonen: zonenSt,
         pflSt,
         nbSt,
+        gr: grSt,
+        grStart,
+        grArt,
+        grRechnen,
+        grNeu,
         goToPlot,
         startDemo: (id: string) => startDemo((data.site.demos ?? []).find((d) => d.id === id)!),
         setBoundary: async (pts: Vec2[]) => {

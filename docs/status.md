@@ -581,7 +581,57 @@ TA Lärm Nr. 6.1/6.4 (verwaltungsvorschriften-im-internet.de), Abruf 10.10.2026.
   um Nr. 10 Buchst. a ergänzt (nicht auf gesetze-bayern.de bestätigt).
 - **Offen für Emil/Fachperson:** EPREL-API-Schlüssel beantragen und prüfen, ob die Außen-Schallleistung enthalten ist;
   die vier neuen Auslegungsfragen; Platzhalterwerte 60/55 dB(A) belegen oder ersetzen.
-- Pausiert vor Phase B.
+- Phase B siehe unten.
+
+## AUFTRAG_V3 Phase B – Stockwerk 3 „Großes Vorhaben“ (10. Oktober 2026)
+
+Zweites Wohnhaus, Anbau, Aufstockung. **Das Ergebnis ist Orientierung, nie eine Zusage; ob gebaut werden darf, entscheidet die Gemeinde.**
+Alle neuen Regeln stehen in `limits.json → grossesVorhaben` mit `geprueft: false`; Wortlaut aus BayBO Art. 4, 5, 6, 71 (lxgesetze.de),
+BauGB §§ 30, 34, 35, 246e (gesetze-im-internet.de) und der Muster-Feuerwehrrichtlinie (bauministerium.bayern.de) in `docs/recht/`.
+Tipp-Erfassung und Messauswertung unverändert.
+
+- **B1 Objekte** (`rules/vorhaben.ts`): Wohnhaus (Grundriss, Geschosse × Geschosshöhe, Dach Sattel/Pult/Flach, Wand- und
+  Firsthöhe), **Anbau** (dockt an einer Wand eines eigenen Hauses an, Wand und Versatz, First parallel oder quer),
+  **Aufstockung** (LoD2-Haus um n Geschosse höher). Geschosshöhe 2,80 m und Brüstungshöhe sind `Annahme`.
+- **B2 Geometrie:**
+  - **Abstandsflächen** Art. 6 Abs. 4/5 wie bei Gartenhaus (neu: Pultdach, Anbau ohne angebaute Wand, Aufstockung), **Überdeckung
+    nach Abs. 3** mit den Abstandsflächen eigener Gebäude (Ausnahme Wände über 75°), Abstandsfläche über Grenze (Abs. 2), auf
+    Straßenflächen nur „offen“ (Mitte unbekannt), Kleinbauten ≤ 3 m in der Abstandsfläche zulässig (Abs. 7).
+  - **Zonen „Wo darf es hin?“** für den ganzen Grundriss (`zonenVorhaben`, Worker). **Gemessen** (Node, 30 × 40 m, 0,25-m-Raster):
+    **125 ms**; im Chromium des Containers (Software-Rendering) 319 ms inkl. Übertragung. Auf iPhone nicht gemessen.
+  - **Zufahrt** (`rules/zufahrt.ts`): Widest-Path auf einem Raster von etwa 10 cm (bei großen Grundstücken gröber, max. 300 000
+    Zellen), Hindernisse Gebäude, bestätigter Bestand, Baumstämme; Straße aus **ALKIS Tatsächliche Nutzung** (neue Datei
+    `strassen.json`, `04_export_app.py`). Rechenzeit **203 ms** (Node, 30 × 40 m), im Chromium des Containers (Software-Rendering,
+    Demo-Grundstück) **1,4 bis 2,3 s** – zu langsam für iPhone-Erwartungen nicht belegt, aber nicht gemessen; läuft deshalb erst 350 ms
+    nach dem Ziehen und blockiert den Hauptthread (Verschieben in den Worker wäre der nächste Schritt).
+    Geforderte Breite: Brüstung ≤ 8 m → Zugang **1,25 m** (Richtlinie Nr. 14), darüber → Zufahrt **3 m** (Art. 5 Abs. 1 Satz 2,
+    Richtlinie Nr. 2); > 50 m von der Straße: gelb „offen“ (Art. 5 Abs. 1 Satz 4); 3,50 m bei beidseitiger Begrenzung > 12 m nur als
+    `offen`-Hinweis. Art. 4 „angemessene Breite“ nennt keine Zahl → `offen`. Aufstellflächen für Hubrettungsfahrzeuge werden nicht geprüft.
+  - **Schatten auf Nachbarn** (`rules/verschattung.ts`): zusätzliche Sonnenstunden am **21. März und 21. Dezember** für Nachbarfenster
+    und Gartenpunkte (2/5/8 m hinter der Grenze, `Annahme`), als Zahl (größter Wert, Mittel). **87 ms** für 152 Punkte (Node).
+    Keine gesetzliche Grenze, keine Ampel; ebenes Gelände angenommen.
+- **B3 Planungsrecht als Wegweiser** (`rules/planungsrecht.ts`, `ui/services.ts → bebauungsplaene`): Bebauungsplan über den WMS der
+  Bauleitplanung Bayern (Hinweis + Link auf Plan und Text, Inhalt nie ausgelesen; Test mit echter Antwort „Pantzerhöhe“);
+  ohne Plan **§ 34-Orientierung** (Hauptgebäude im Umkreis 100 m: Trauf-, Firsthöhen, Grundflächen, Zahl in zweiter Reihe; Label
+  **`Orientierung`**, keine Ampel, kein Urteil); **Bau-Turbo** (§ 246e, § 34 Abs. 3b) mit dem Satz „Deine Gemeinde kann davon Gebrauch
+  machen, das liegt in ihrem Ermessen.“; **Außenbereich** (§ 35) als deutlicher Hinweis; Teilung nur als Information.
+- **B4 Ergebnis:** Ampel nur für **Abstandsflächen, Grenze, Zufahrt, Kollisionen**; Abschnitt **„Was die Gemeinde entscheidet“** mit
+  Weg **„Bauvoranfrage empfohlen“**; **Bauvoranfrage** (`antrag/voranfrage.ts`, Schema `passt.bauvoranfrage/1`, HTML zum Drucken):
+  Lageplan-Skizze (mit Zufahrt und schmalster Stelle), Kubatur, Prüfergebnis, Schattentabelle, Fragen an die Gemeinde (Vorbescheid,
+  Art. 71). Welche Unterlagen die Behörde dafür verlangt, steht nicht im Wortlaut → `offen`. **Nachbar-Link** trägt das große
+  Vorhaben (Feld `g`), zeigt es in 3D und nennt die Sonnenstunden am Blickpunkt für beide Stichtage. Prüfbericht um den Abschnitt ergänzt.
+- **Oberfläche:** neuer Reiter „Großes Vorhaben“ (Ziehen, Regler, Zonen, Zufahrt als Linie mit Maß, Abstandsflächen am Boden).
+  Im Browser (Chromium, Software-Rendering) mit dem Demo-Grundstück durchgespielt: Wohnhaus, Anbau, Aufstockung, Zonen, Voranfrage-Dialog
+  und HTML-Export, Nachbar-Link; keine Fehler in der Konsole.
+- **B5 Tests:** `vorhaben.test.ts` (33: Abstandsflächen-Überdeckung inkl. 75°-Ausnahme, Zufahrtsbreite an Lücken von 0,9/2,6/3,2 m,
+  zwei Lücken, Baumstamm, Schattenstunden, Aufstockung, Anbau, Pultdach, Zonen, Planungsrecht), `voranfrage.test.ts` (4),
+  `services.test.ts` (+2); App insgesamt grün.
+- **Prüfmappe:** 19 neue Regeln, 14 neue Fragen (jetzt 86 Regeln, 36 Fragen), PDF neu erzeugt.
+- **Offen für Emil/Fachperson:** die 14 neuen Fragen; **Fassung der Feuerwehrrichtlinie in Bayern**; **Lizenz des Bauleitplanung-WMS**;
+  „Mitte der Verkehrsfläche“ (Art. 6 Abs. 2 Satz 2); Pultdach-Auslegung; Zufahrtsmaße für Wohnhäuser; ob die Ampel für das große
+  Vorhaben so zurückhaltend sein soll.
+- **Nicht gemacht (bewusst):** Aufstellflächen, Höhe der Zufahrt, Stellplätze, GRZ/GFZ-Berechnung, Inhalt des Bebauungsplans.
+- Pausiert vor Phase C (nicht Teil des Auftrags).
 
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 

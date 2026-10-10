@@ -185,3 +185,26 @@ export function zonenMit(site: Site, pruef: (center: Vec2, angle: number) => Sta
   }
   return { feld, winkelIdx, winkel, beste, ms: performance.now() - t0, pruefungen };
 }
+
+/**
+ * Startstelle für ein neues Wohnhaus: die nächste passende Stelle zur Grundstücksmitte (1-m-Raster, aktuelle und
+ * grundstücksparallele Ausrichtungen). Passt nirgends etwas, bleibt das Haus in der Mitte.
+ */
+export function vorhabenStart(site: Site, v: Vorhaben): Vorhaben {
+  const pruef = vorhabenPruefer(site, v);
+  const plot = site.plot.boundary;
+  const xs = plot.map((p) => p[0]);
+  const ys = plot.map((p) => p[1]);
+  const c = v.center;
+  const kand: { p: Vec2; d: number }[] = [];
+  for (let x = Math.min(...xs); x <= Math.max(...xs); x += 1) {
+    for (let y = Math.min(...ys); y <= Math.max(...ys); y += 1) {
+      if (pointInPolygon([x, y], plot)) kand.push({ p: [x, y], d: Math.hypot(x - c[0], y - c[1]) });
+    }
+  }
+  kand.sort((a, b) => a.d - b.d);
+  for (const w of ausrichtungen(plot, v.angle)) {
+    for (const k of kand) if (pruef(k.p, w) === 'ok') return { ...v, center: k.p, angle: w > Math.PI / 2 ? w - Math.PI : w };
+  }
+  return v;
+}

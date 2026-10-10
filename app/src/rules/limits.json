@@ -387,7 +387,7 @@
     "paragraf34": {
       "wert": "orientierung",
       "quelle": "BauGB § 34 Abs. 1",
-      "text": "„Innerhalb der im Zusammenhang bebauten Ortsteile ist ein Vorhaben zulässig, wenn es sich nach Art und Maß der baulichen Nutzung, der Bauweise und der Grundfläche, die überbaut werden soll, in die Eigenart der näheren Umgebung einfügt und die Erschließung gesichert ist.“ Passt. zeigt nur Zahlen aus der Umgebung als Orientierung, keine Ampel und keine Aussage, ob es sich einfügt.",
+      "text": "„Innerhalb der im Zusammenhang bebauten Ortsteile ist ein Vorhaben zulässig, wenn es sich nach Art und Maß der baulichen Nutzung, der Bauweise und der Grundstücksfläche, die überbaut werden soll, in die Eigenart der näheren Umgebung einfügt und die Erschließung gesichert ist.“ Passt. zeigt nur Zahlen aus der Umgebung als Orientierung, keine Ampel und keine Aussage, ob es sich einfügt.",
       "wortlaut": "docs/recht/BauGB_34_246e.txt",
       "geprueft": false
     },

@@ -560,3 +560,57 @@ export function vorhabenPruefer(site: Site, v: Vorhaben): (center: Vec2, angle: 
     return 'ok';
   };
 }
+
+/* ---------- 3D-Modell (nur zur Anzeige) ---------- */
+
+/** Eine Fläche des Anzeigemodells: Punkte im Grundriss mit absoluten Höhen; Wände optional mit Unterkante. */
+export interface Flaeche3D {
+  art: 'wand' | 'dach' | 'aufsatz';
+  pts: Vec2[];
+  z: number[];
+  /** nur Wand: Unterkante je Punkt */
+  zUnten?: number[];
+}
+
+const mitte = (p: Vec2, q: Vec2): Vec2 => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+
+/**
+ * Anzeigemodell des Vorhabens. `base` = Fußboden (Wohnhaus, Anbau) bzw. tiefster Geländepunkt am Haus (Aufstockung:
+ * die Höhen aus LoD2 sind relativ zum Grund).
+ */
+export function vorhabenModell(v: Vorhaben, g: Grundriss, base: number): Flaeche3D[] {
+  if (v.art === 'aufstockung') {
+    if (!g.host || g.host.trauf == null) return [];
+    const unten = base + g.host.trauf;
+    const oben = unten + v.geschosse * v.geschosshoehe;
+    const out: Flaeche3D[] = edges(g.fp).map(([a, b]) => ({ art: 'aufsatz' as const, pts: [a, b], z: [oben, oben], zUnten: [unten, unten] }));
+    out.push({ art: 'aufsatz', pts: g.fp, z: g.fp.map(() => oben) });
+    return out;
+  }
+  const o = g.proxy!;
+  const W = base + o.h;
+  const dh = vorhabenDachHoehe(v, g);
+  const p = footprint(o); // Ecken des Dach-Hilfsobjekts (First entlang w)
+  const out: Flaeche3D[] = [];
+  if (v.dachform === 'pult') {
+    const low = g.niedrigKante ?? 0;
+    const zc = g.fp.map((_, i) => W + ((low === 0 ? i >= 2 : i < 2) ? dh : 0));
+    edges(g.fp).forEach(([a, b], i) => out.push({ art: 'wand', pts: [a, b], z: [zc[i], zc[(i + 1) % 4]], zUnten: [base, base] }));
+    out.push({ art: 'dach', pts: g.fp, z: zc });
+    return out;
+  }
+  if (v.dachform === 'sattel' && dh > 0) {
+    const r0 = mitte(p[0], p[3]);
+    const r1 = mitte(p[1], p[2]);
+    out.push({ art: 'wand', pts: [p[0], p[1]], z: [W, W], zUnten: [base, base] });
+    out.push({ art: 'wand', pts: [p[2], p[3]], z: [W, W], zUnten: [base, base] });
+    out.push({ art: 'wand', pts: [p[1], r1, p[2]], z: [W, W + dh, W], zUnten: [base, base, base] });
+    out.push({ art: 'wand', pts: [p[3], r0, p[0]], z: [W, W + dh, W], zUnten: [base, base, base] });
+    out.push({ art: 'dach', pts: [p[0], p[1], r1, r0], z: [W, W, W + dh, W + dh] });
+    out.push({ art: 'dach', pts: [p[2], p[3], r0, r1], z: [W, W, W + dh, W + dh] });
+    return out;
+  }
+  edges(g.fp).forEach(([a, b]) => out.push({ art: 'wand', pts: [a, b], z: [W, W], zUnten: [base, base] }));
+  out.push({ art: 'dach', pts: g.fp, z: g.fp.map(() => W) });
+  return out;
+}

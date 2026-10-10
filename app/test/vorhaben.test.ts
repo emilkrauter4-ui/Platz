@@ -417,3 +417,12 @@ describe('Planungsrecht als Wegweiser', () => {
     expect(q.some((x) => /Bau-Turbo/.test(x))).toBe(true);
   });
 });
+
+describe('Startstelle des Wohnhauses', () => {
+  it('liegt auf einer passenden Stelle (kein Kollision, Abstandsflächen auf dem Grundstück)', async () => {
+    const { vorhabenStart, vorhabenPruefer } = await import('../src/rules');
+    const s = standort();
+    const v = vorhabenStart(s, haus(s, { center: [15, 20] }));
+    expect(vorhabenPruefer(s, v)(v.center, v.angle)).toBe('ok');
+  });
+});

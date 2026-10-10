@@ -60,7 +60,7 @@ export interface RenderState {
   /** Abstandsflächen am Boden zeigen */
   showAF: boolean;
   /** Reiter „Hecke, Baum“: geplante Pflanze und Ergebnis nach AGBGB */
-  modus: 'objekt' | 'pflanzen';
+  modus: 'objekt' | 'pflanzen' | 'gross';
   pflanze: Pflanze | null;
   pflanzRes: PflanzenErgebnis | null;
   /** 'nachbar' = Ansicht über einen Nachbar-Link: nur lesen, nur die geteilten Objekte */
@@ -74,7 +74,7 @@ export interface RenderState {
 
 /** Maßkette des gerade gewählten Reiters. */
 function dimOf(s: RenderState) {
-  if (s.step !== 'pruefen' || s.ansicht === 'nachbar') return null;
+  if (s.step !== 'pruefen' || s.ansicht === 'nachbar' || s.modus === 'gross') return null;
   return s.modus === 'pflanzen' ? s.pflanzRes?.dim ?? null : s.res?.[s.selected].dim ?? null;
 }
 
@@ -311,7 +311,7 @@ export class Renderer {
 
   private buildObjects() {
     const st = this.s;
-    const obj = (k: ObjectKind) => (st().step === 'pruefen' && st().objs && (!st().sichtbar || st().sichtbar!.includes(k)) ? st().objs![k] : null);
+    const obj = (k: ObjectKind) => (st().step === 'pruefen' && !(st().modus === 'gross' && st().ansicht !== 'nachbar') && st().objs && (!st().sichtbar || st().sichtbar!.includes(k)) ? st().objs![k] : null);
     const sel = (k: ObjectKind, c: string) => () => {
       const col = Color.fromCssColorString(c);
       return st().selected === k ? col : Color.lerp(col, Color.fromCssColorString(this.s().dark ? '#121614' : '#ffffff'), 0.25, new Color());

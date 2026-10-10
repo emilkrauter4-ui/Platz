@@ -88,6 +88,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 #map .cesium-widget-credits,#map .cesium-viewer-bottom{display:none!important}
 .tg.off{background:var(--soft);box-shadow:none;color:var(--ink);font-weight:700}
 .tg.det{color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
+.tg.orient{color:var(--ink);box-shadow:inset 0 0 0 1px var(--muted);font-style:italic}
 .tg.user{color:var(--focus);box-shadow:inset 0 0 0 1px var(--focus)}
 .search{display:flex;gap:8px;margin-top:16px}
 .search input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;padding:11px 13px;min-height:46px}

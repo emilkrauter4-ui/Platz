@@ -171,7 +171,7 @@ export function gemeindeAbschnitt(
     hinweise.push({
       id: 'paragraf34',
       titel: 'Einfügen in die Umgebung (§ 34 BauGB)',
-      text: `Ohne Bebauungsplan ist ein Vorhaben im bebauten Ortsteil zulässig, wenn es sich „nach Art und Maß der baulichen Nutzung, der Bauweise und der Grundfläche, die überbaut werden soll, in die Eigenart der näheren Umgebung einfügt und die Erschließung gesichert ist“. ${zahlen} Das ist Orientierung aus amtlichen Gebäudedaten, keine Aussage, ob sich das Vorhaben einfügt – das beurteilt die Gemeinde. Es gibt dafür keine Ampel.`,
+      text: `Ohne Bebauungsplan ist ein Vorhaben im bebauten Ortsteil zulässig, wenn es sich „nach Art und Maß der baulichen Nutzung, der Bauweise und der Grundstücksfläche, die überbaut werden soll, in die Eigenart der näheren Umgebung einfügt und die Erschließung gesichert ist“. ${zahlen} Das ist Orientierung aus amtlichen Gebäudedaten, keine Aussage, ob sich das Vorhaben einfügt – das beurteilt die Gemeinde. Es gibt dafür keine Ampel.`,
       quelle: G.paragraf34.quelle,
       kind: 'Orientierung',
       umfeld: u ?? undefined,

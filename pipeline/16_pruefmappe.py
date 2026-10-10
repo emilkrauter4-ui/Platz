@@ -33,6 +33,10 @@ LINKS = {
     "BGH": "https://juris.bundesgerichtshof.de/cgi-bin/rechtsprechung/list.py?Gericht=bgh&Art=en (Az. V ZR 230/16)",
     "KEYMARK": "https://www.heatpumpkeymark.com",
     "STMB": "https://www.stmb.bayern.de/buw/baurechtundtechnik/digitaler_bauantrag/index.php",
+    "BayBO-4": GB + "BayBO-4", "BayBO-5": GB + "BayBO-5", "BayBO-71": GB + "BayBO-71",
+    "BauGB-30": "https://www.gesetze-im-internet.de/bbaug/__30.html", "BauGB-34": "https://www.gesetze-im-internet.de/bbaug/__34.html",
+    "BauGB-35": "https://www.gesetze-im-internet.de/bbaug/__35.html", "BauGB-246e": "https://www.gesetze-im-internet.de/bbaug/__246e.html",
+    "Feuerwehr": "https://www.bauministerium.bayern.de/assets/stmi/buw/baurechtundtechnik/27_richtlinie-flaechen-feuerwehr.pdf",
 }
 
 
@@ -87,6 +91,42 @@ def art57(teil: str) -> str:
     if teil == "10a":
         return "Art. 57 Abs. 1 Nr. 10 Buchst. a: folgende Anlagen in Gärten und zur Freizeitgestaltung: a) Schwimmbecken einschließlich dazugehöriger temporärer luftgetragener Überdachungen, außer im Außenbereich"
     return "Art. 57 Abs. 1 Nr. 2: folgende Anlagen der technischen Gebäudeausrüstung: … b) sonstige Anlagen der technischen Gebäudeausrüstung"
+
+
+def _ein_absatz(name: str) -> str:
+    return " ".join(t.strip() for t in _lesen(name) if t.strip())
+
+
+def baybo_art(nr: int, von: str | None = None, bis: str | None = None) -> str:
+    """BayBO Art. 4/5/71 aus docs/recht/BayBO_Art4_5_71.txt: ganzer Artikel oder Ausschnitt zwischen zwei Textmarken."""
+    s = _ein_absatz("BayBO_Art4_5_71.txt")
+    i = s.index(f"Art. {nr} ")
+    j = s.find(f"Art. {nr + 1} ", i + 1) if nr < 71 else len(s)
+    t = s[i:len(s) if j < 0 else j].strip()
+    if von:
+        a = t.index(von)
+        b = t.index(bis, a) if bis else len(t)
+        t = f"Art. {nr} " + t[a:b].strip()
+    return html.escape(t, quote=False)
+
+
+def baugb(par: int | str, von: str | None = None, bis: str | None = None) -> str:
+    """BauGB-Auszug aus docs/recht/BauGB_34_246e.txt: der Paragraf (alle Zeilen bis zum nächsten „§ “ am Zeilenanfang)."""
+    z = [t.strip() for t in _lesen("BauGB_34_246e.txt") if t.strip()]
+    i = next(k for k, t in enumerate(z) if t.startswith(f"§ {par} "))
+    j = next((k for k in range(i + 1, len(z)) if z[k].startswith("§ ")), len(z))
+    t = " ".join(z[i:j])
+    if von:
+        a = t.index(von)
+        b = t.index(bis, a) if bis else len(t)
+        t = f"§ {par} BauGB " + t[a:b].strip()
+    return html.escape(t.strip(), quote=False)
+
+
+def feuerwehr(nr: int) -> str:
+    z = [t.strip() for t in _lesen("Feuerwehr_Flaechen_Richtlinie.txt") if t.strip()]
+    t = next(x for x in z if x.startswith(f"{nr} "))
+    return "Richtlinie über Flächen für die Feuerwehr (Muster, Fassung 02/2007) Nr. " + html.escape(t, quote=False)
 
 
 def ta_laerm() -> str:
@@ -327,6 +367,62 @@ R: dict[str, dict] = {
     "verfahren.abweichung": dict(
         text=lambda: verf("BayBO Art. 63"), link="BayBO-63", umsetzung="Bei verfahrensfreien Vorhaben mit Abstandsflächen-Befund: „Abweichung beantragen“ (gesondert, schriftlich, begründet).",
         beispiel="Gartenhaus 3,5 m hoch direkt an der Grenze → Weg „verfahrensfrei mit Abweichung“."),
+    "grossesVorhaben.geschosshoeheAnnahmeM": dict(
+        text=lambda: KEIN, link=None, umsetzung="Wandhöhe des Neubaus = Geschosse × Geschosshöhe (Standard 2,80 m), vom Nutzer einstellbar; Basis für H nach Art. 6 Abs. 4.",
+        beispiel="2 Geschosse × 2,80 m = Wandhöhe 5,60 m; mit Satteldach 35° und 8 m Tiefe: H = 5,60 + 1/3 · 2,80 = 6,53 m → Abstandsfläche 3,00 m (Mindestmaß)."),
+    "grossesVorhaben.bruestungshoeheAnnahmeM": dict(
+        text=lambda: KEIN, link=None, umsetzung="Oberkante der Brüstung des obersten Anleiterfensters = (Geschosse − 1) × Geschosshöhe + 1,0 m; Dachgeschossfenster nicht berücksichtigt. Entscheidet, ob Zugang (≤ 8 m) oder Zufahrt (> 8 m) gefordert wird.",
+        beispiel="3 Geschosse: 2 × 2,80 + 1,0 = 6,6 m → Zugang genügt; 4 Geschosse: 3 × 2,80 + 1,0 = 9,4 m → Zufahrt nötig."),
+    "grossesVorhaben.feuerwehrBruestungGrenzeM": dict(
+        text=lambda: baybo_art(5, "(1) 1", "3 Ist für"), link="BayBO-5", umsetzung="Brüstung über 8 m → Zufahrt (3 m) statt Zugang (1,25 m); Ergebnis nur für die Breite des freien Korridors auf dem eigenen Grundstück. Aufstellflächen für Hubrettungsfahrzeuge (Satz 3) prüft Passt. nicht (offen, steht in den Zeilen).",
+        beispiel="Aufstockung auf 3 Geschosse bei 2,80 m Geschosshöhe: Brüstung 6,6 m → 1,25 m Zugang; 4. Geschoss → 9,4 m → 3 m Zufahrt, bei 2,6 m schmalster Stelle rot."),
+    "grossesVorhaben.feuerwehrEntfernungM": dict(
+        text=lambda: baybo_art(5, "4 Bei Gebäuden", "(2)"), link="BayBO-5", umsetzung="Weitester Gebäudepunkt über 50 m Luftlinie von der öffentlichen Verkehrsfläche: Zufahrt „wenn aus Gründen des Feuerwehreinsatzes erforderlich“ – das entscheidet die Feuerwehr; Passt. zeigt gelb, wenn die schmalste Stelle unter 3 m liegt (offen).",
+        beispiel="Haus im Hinterland, 62 m von der Straße, Weg 2,2 m breit: Zugang erfüllt, aber gelb mit Hinweis auf Satz 4."),
+    "grossesVorhaben.zugangBreiteM": dict(
+        text=lambda: feuerwehr(14), link="Feuerwehr", umsetzung="Breite des freien Korridors (Rasterberechnung, schmalste Stelle) gegen 1,25 m. Gilt für den Zugang bei Brüstung bis 8 m. Welche Fassung der Richtlinie in Bayern gilt, ist offen.",
+        beispiel="Gasse zwischen Garage und Grenze 1,0 m breit: rot; 1,3 m: grün."),
+    "grossesVorhaben.zufahrtBreiteM": dict(
+        text=lambda: feuerwehr(2), link="Feuerwehr", umsetzung="Zufahrt bei Brüstung über 8 m: schmalste Stelle des Korridors mindestens 3 m. Höhe (3,50 m), Kurven, Tragfähigkeit prüft Passt. nicht.",
+        beispiel="Einfahrt zwischen zwei Häusern 2,9 m: rot; 3,0 m: grün."),
+    "grossesVorhaben.zufahrtBreiteBegrenztM": dict(
+        text=lambda: feuerwehr(2), link="Feuerwehr", umsetzung="Über 12 m beidseitig durch Bauteile begrenzt: 3,50 m. Passt. erkennt nur die Strecke unter 3,50 m Breite zwischen Gebäuden (eine Seite genügt) und zeigt gelb mit „offen“.",
+        beispiel="Durchgang zwischen Haus und Garage, 14 m lang, 3,2 m breit: gelb."),
+    "grossesVorhaben.zufahrtBegrenztLaengeM": dict(
+        text=lambda: feuerwehr(2), link="Feuerwehr", umsetzung="Siehe oben: Strecke, ab der 3,50 m gelten.", beispiel="–"),
+    "grossesVorhaben.zweiterRettungswegFeuerwehr": dict(
+        text=lambda: baybo_art(5, "(1) 1", "2 Zu Gebäuden"), link="BayBO-5", umsetzung="Annahme: Der zweite Rettungsweg führt über Rettungsgeräte der Feuerwehr; Passt. prüft deshalb für jedes Vorhaben den Zugang. Das Rettungswegkonzept kennt Passt. nicht.",
+        beispiel="Zweites Wohnhaus im Garten, 25 m hinter dem Vorderhaus: Zugang von der Straße mindestens 1,25 m."),
+    "grossesVorhaben.erschliessung": dict(
+        text=lambda: baybo_art(4), link="BayBO-4", umsetzung="Passt. prüft nur die Breite des freien Korridors auf dem eigenen Grundstück. „Angemessene Breite“ des Grundstücks an der Straße, Wohnwege (Abs. 2) und Außenbereichszufahrt (Abs. 3) sind offen.",
+        beispiel="Hinterliegergrundstück an einem 2,5 m breiten Weg: Passt. zeigt 2,5 m, das Bauamt sagt, ob das „angemessen“ ist."),
+    "grossesVorhaben.verfahrenWohnhaus": dict(
+        text=lambda: art57("a") + "<br>" + baybo_art(71), link="BayBO-71", umsetzung="Wohnhaus, Anbau und Aufstockung gelten als genehmigungspflichtig (Rauminhalt über 75 m³ bzw. Wohngebäude); empfohlener erster Schritt ist die Bauvoranfrage (Vorbescheid, Art. 71). Das Antrag-Paket liefert Lageplan-Skizze, Kubatur und Fragen an die Gemeinde statt der Unterlagen für einen Bauantrag.",
+        beispiel="Zweites Wohnhaus 10 × 8 m, 2 Geschosse (560 m³): Baugenehmigung; Passt. erstellt die Voranfrage mit 6–8 Fragen."),
+    "grossesVorhaben.umfeldRadiusM": dict(
+        text=lambda: KEIN, link=None, umsetzung="Umkreis um das Vorhaben, in dem Passt. Hauptgebäude (Grundfläche ≥ 40 m², Traufe ≥ 3 m) zählt: Traufhöhen, Firsthöhen, Grundflächen, Zahl in zweiter Reihe. Daten: LoD2 und Hausumringe, Label „Orientierung“, keine Ampel.",
+        beispiel="Umkreis 100 m: 14 Hauptgebäude, Traufe 5,5–7,0 m, Grundflächen 70–140 m², 3 in zweiter Reihe."),
+    "grossesVorhaben.paragraf34": dict(
+        text=lambda: baugb(34, "(1)", "(2)"), link="BauGB-34", umsetzung="Nur Zahlen aus der Umgebung als Orientierung; ob sich das Vorhaben „einfügt“, beurteilt die Gemeinde. Keine Ampel, keine Aussage. Der Abschnitt erscheint nur ohne Bebauungsplan und im Innenbereich.",
+        beispiel="Neubau mit 8,4 m Firsthöhe, Umgebung bis 10 m: Passt. zeigt beide Zahlen, urteilt nicht."),
+    "grossesVorhaben.bauTurbo": dict(
+        text=lambda: baugb("246e", "(1)", "Hat eine Abweichung") + "<br>" + baugb(34, "(3b)"), link="BauGB-246e", umsetzung="Nur Hinweis: „Deine Gemeinde kann davon Gebrauch machen, das liegt in ihrem Ermessen.“ Passt. prüft keine Voraussetzung (Zustimmung der Gemeinde, Umweltprüfung im Außenbereich u. a.).",
+        beispiel="Zweites Wohnhaus passt nicht in die Umgebung: Hinweis auf § 246e / § 34 Abs. 3b, Frage in der Bauvoranfrage."),
+    "grossesVorhaben.aussenbereich": dict(
+        text=lambda: baugb(35, "(1)", "(Nr. 1") + " … (2) Sonstige Vorhaben können im Einzelfall zugelassen werden, wenn ihre Ausführung oder Benutzung öffentliche Belange nicht beeinträchtigt und die Erschließung gesichert ist.", link="BauGB-35", umsetzung="Lage „Außenbereich“ (Nutzerangabe oder Annahme) → eigener, deutlicher Hinweis, dass dort deutlich strengere Regeln gelten; ein zweites Wohnhaus ist in der Regel nicht privilegiert (Nr. 1–8 nicht im Wortlaut übernommen). Keine Prüfung.",
+        beispiel="Wohnhaus auf dem Betriebsgelände (Scharhof): Hinweis „Außenbereich“ statt § 34-Zahlen."),
+    "grossesVorhaben.bebauungsplan": dict(
+        text=lambda: baugb(30, "(1)", "(2)"), link="BauGB-30", umsetzung="Abfrage des Landesportals (Bauleitplanung Bayern, WMS) an Schwerpunkt und Grenzecken: Plan vorhanden → Hinweis und Links auf Plan und Text; Inhalt wird nicht ausgelesen. Das Portal ist nicht flächendeckend; „keiner im Portal“ heißt nicht „keiner“. Lizenz des Dienstes offen.",
+        beispiel="Grundstück im Plan „Pantzerhöhe“: Hinweis mit Link auf Rasterbild und Festsetzungen."),
+    "grossesVorhaben.grundstuecksteilung": dict(
+        text=lambda: baybo_art(4, "(1)", "(2)") + "<br>" + art6("2", (1,)), link="BayBO-4", umsetzung="Nur Information beim zweiten Wohnhaus, keine Prüfung.",
+        beispiel="Zweites Haus soll eigenes Grundstück bekommen: Hinweis auf Zufahrt in angemessener Breite und Abstandsflächen auf jedem Teilgrundstück."),
+    "grossesVorhaben.schattenStichtage": dict(
+        text=lambda: KEIN, link=None, umsetzung="Zusätzliche Verschattung als Stunden an zwei Stichtagen (21. März, 21. Dezember), Sonnenhöhe ≥ 5°, Sonnenstand NOAA/Meeus, ebenes Gelände. Eine gesetzliche Grenze gibt es nicht; die Zahl ist für das Gespräch mit den Nachbarn.",
+        beispiel="Aufstockung 2,8 m: Nachbarfenster 12 m nördlich verliert am 21. Dezember 1 h 20 min Sonne."),
+    "grossesVorhaben.schattenGartenRingeM": dict(
+        text=lambda: KEIN, link=None, umsetzung="Gartenpunkte in 2, 5 und 8 m Abstand hinter der Grenze, alle 2 m, 1 m über Boden, nicht in Gebäuden. Die Nachbargrundstücke sind nicht bekannt – Annahme.",
+        beispiel="Grenze 30 m lang: etwa 45 Gartenpunkte."),
     "verfahren.bauantrag": dict(
         text=lambda: verf("BayBO Art. 64"), link="BayBO-64", umsetzung="Checkliste: schriftlich, alle Bauvorlagen, Unterschriften Bauherr und Entwurfsverfasser.",
         beispiel="–"),
@@ -366,6 +462,20 @@ FRAGEN = [
     ("Entwurfsverfasser für Gartenhäuser", "Bei genehmigungspflichtigen Gartenhäusern (über 75 m³) nennt Passt. Architekt oder eingetragene Ingenieure. Reichen hier auch die Personen nach Art. 61 Abs. 3 (z. B. Meister, Techniker)?"),
     ("Örtliche Satzungen", "Hat Sulzbach-Rosenberg eine Abstandsflächensatzung (Art. 6 Abs. 5 Satz 2) oder eine Gestaltungssatzung, die Nebengebäude betrifft? Passt. berücksichtigt keine."),
     ("Dachüberstand", "Art. 6 Abs. 6 Nr. 1 lässt Dachüberstände bei der Bemessung der Abstandsflächen außer Betracht – ohne Grenze im Wortlaut. Ab welchem Überstand zählt er in der Praxis doch mit (z. B. über 0,5 m oder 1,5 m wie bei Vorbauten in Nr. 2)? Zählt bei der Grenzbebauung (9 m je Seite, 15 m gesamt) die Wandlänge oder die Dachlänge? Und darf der Überstand eines Grenzgebäudes über die Grenze ragen? Passt. rechnet mit der Wand und zeigt das Dach getrennt."),
+    ("Großes Vorhaben: Pultdach", "Art. 6 Abs. 4 Satz 3 rechnet die Höhe von Dächern zu einem Drittel zur Wandhöhe. Beim Pultdach rechnet Passt. 1/3 der Dachhöhe an allen Wänden an, auch an der hohen Wand, an der die Dachhaut endet (sicher nach oben). Richtig, oder zählt die hohe Wand nur bis zum oberen Abschluss?"),
+    ("Großes Vorhaben: Dach der bestehenden Häuser", "Für Aufstockung und Abstandsflächen des Hauses kennt Passt. nur Trauf- und Firsthöhe (LoD2) und rechnet mit Dachneigung bis 70° (1/3). Eine Aufstockung verschiebt die Traufe um Geschosse × Geschosshöhe (Annahme 2,80 m). Vertretbar?"),
+    ("Überdeckung der Abstandsflächen (Art. 6 Abs. 3)", "Passt. lässt Überdeckungen nur bei Wänden über 75° zueinander zu (Nr. 1). Die Ausnahme „fremder Sicht entzogener Gartenhof“ bei Gebäudeklassen 1 und 2 (Nr. 2) erkennt Passt. nicht, ebenso wenig die Gebäude „in den Abstandsflächen zulässig“ außer Kleinbauten bis 3 m. Reicht das als Orientierung?"),
+    ("Anbau: Abstandsfläche der angebauten Wand", "Beim Anbau lässt Passt. die Abstandsfläche der angebauten Hauswand auf der Länge des Anbaus weg und rechnet Reststücke weiter. Anbau und Haus gelten als ein Gebäude. Passt das – auch bei abweichender Höhe des Anbaus?"),
+    ("Abstandsflächen auf öffentlichen Verkehrsflächen", "Art. 6 Abs. 2 Satz 2: „nur bis zu deren Mitte“. Passt. kennt die Mitte der Straße nicht und zeigt Abstandsflächen auf Straßen (ALKIS Tatsächliche Nutzung) gelb mit „offen“. Gibt es eine praktikable Regel (halbe Breite der Fläche)?"),
+    ("Zufahrt: Breite und Fassung der Richtlinie", "Passt. nimmt die Muster-Richtlinie über Flächen für die Feuerwehr (Fassung 02/2007): Zugang 1,25 m (Nr. 14), Zufahrt 3 m, 3,50 m bei beidseitiger Begrenzung über 12 m (Nr. 2), Aufstellflächen 3,50 m (Nr. 8, nicht geprüft). Welche Fassung gilt in Bayern, und gilt sie für Wohnhäuser der Gebäudeklasse 1–2 mit Brüstung unter 8 m überhaupt?"),
+    ("Zufahrt: Brüstungshöhe und 50-m-Regel", "Passt. nimmt für das oberste Anleiterfenster (Geschosse − 1) × Geschosshöhe + 1,0 m an und prüft den Zugang immer (Annahme: zweiter Rettungsweg über die Feuerwehr). Bei mehr als 50 m Entfernung zur Straße (Art. 5 Abs. 1 Satz 4) zeigt Passt. gelb, wenn weniger als 3 m frei sind. Vertretbar?"),
+    ("Erschließung: angemessene Breite", "Art. 4 Abs. 1 Nr. 2 nennt keine Mindestbreite. Passt. zeigt die Breite des freien Korridors auf dem eigenen Grundstück und bewertet nur gegen die Feuerwehr-Maße. Gibt es eine übliche Mindestbreite für die Zufahrt eines Hinterliegerhauses (Wohnweg nach Art. 4 Abs. 2)?"),
+    ("Straßen aus ALKIS Tatsächliche Nutzung", "Für die Zufahrt gelten Flächen der Nutzungsarten Straßenverkehr, Weg und Platz als öffentliche Verkehrsfläche; ein Spielraum von 1,5 m gleicht Abweichungen zur selbst gesetzten Grenze aus. Eine Zufahrt über Nachbargrundstücke (Baulast) rechnet Passt. nicht. Genügt das?"),
+    ("§ 34 BauGB: Umgebung als Zahlen", "Passt. zeigt für das Einfügen nur Zahlen aus LoD2 und Hausumringen im Umkreis von 100 m (Traufhöhen, Firsthöhen, Grundflächen, Zahl der Gebäude in zweiter Reihe), ohne Urteil. Ist die Abgrenzung der „näheren Umgebung“ mit 100 m als Orientierung vertretbar, und ist die Zählung der zweiten Reihe (anderes Hauptgebäude zwischen Straße und Haus) sinnvoll?"),
+    ("Bau-Turbo (§ 246e, § 34 Abs. 3b BauGB)", "Passt. nennt den Bau-Turbo nur als Hinweis („Deine Gemeinde kann davon Gebrauch machen, das liegt in ihrem Ermessen“). Ist die Formulierung zutreffend und vollständig genug, insbesondere zu Zustimmung der Gemeinde, Befristung bis 31.12.2030 und Außenbereich (Abs. 3)?"),
+    ("Bebauungsplan-Abfrage", "Passt. fragt den WMS des Landesportals (Bauleitplanung Bayern) ab und zeigt Plan und Textlink, ohne den Inhalt zu lesen. Ist das ein zulässiger und ausreichender Hinweis? Lizenz und Nutzungsbedingungen des Dienstes sind noch nicht geklärt."),
+    ("Bauvoranfrage statt Bauantrag", "Passt. empfiehlt vor dem Bauantrag eine Bauvoranfrage (Vorbescheid, Art. 71) mit Lageplan-Skizze, Kubatur und Fragenliste. Welche Unterlagen verlangt die Bauaufsichtsbehörde dafür üblicherweise (BauVorlV), und fehlt in der Fragenliste etwas Wichtiges?"),
+    ("Schatten auf Nachbarn", "Passt. nennt zusätzliche Sonnenstunden an zwei Stichtagen (21. März, 21. Dezember) für Nachbarfenster und Gartenpunkte, ohne Bewertung. Gibt es in Bayern eine übliche Messgröße oder Rechtsprechung (z. B. DIN 5034, Besonnungsdauer), die Passt. verwenden sollte?"),
     ("Formulierung der Antworten", "Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?"),
 ]
 
@@ -388,7 +498,7 @@ def seite() -> str:
     if fehlt:
         raise SystemExit(f"Regeln ohne Eintrag in der Prüfmappe: {fehlt}")
     titel = {"gartenhaus": "Gartenhaus", "carport": "Carport", "abstand": "Abstandsflächen", "grenzbebauung": "Bebauung an der Grenze",
-             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
+             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
              "verfahren": "Verfahren und Antrag"}
     karten, akt, nr = [], None, 0
     for rid, sek, r in regeln:
@@ -454,7 +564,7 @@ sup {{ font-size: 6.5pt; }}
  <div>
   <h1>Passt<span>.</span> – Prüfmappe Regelwerk</h1>
   <p style="font-size:12pt">Bitte prüfen Sie jede Regel, mit der Passt. Hausbesitzern eine erste Orientierung gibt:
-  „Darf ich das hier hinstellen?“ (Gartenhaus, Carport, Außengeräte wie Wärmepumpe, Klimagerät und Pool-Wärmepumpe, Hecken und Bäume in Sulzbach-Rosenberg).</p>
+  „Darf ich das hier hinstellen?“ (Gartenhaus, Carport, Außengeräte wie Wärmepumpe, Klimagerät und Pool-Wärmepumpe, Hecken und Bäume, dazu das „große Vorhaben“: zweites Wohnhaus, Anbau, Aufstockung – in Sulzbach-Rosenberg).</p>
   <div class="hinweis"><b>Wichtig:</b> Passt. gibt Orientierung, keine Genehmigung. Jede Regel steht in
   <code>limits.json</code> mit <code>geprueft: false</code> und wird erst nach Ihrer Prüfung freigegeben.
   Gesetzestexte wurden am 04.10.2026 aus zwei unabhängigen Wiedergaben übernommen und Wort für Wort verglichen;

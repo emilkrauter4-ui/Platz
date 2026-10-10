@@ -8,6 +8,7 @@
  */
 import type { ObjectKind, Placed, Vec2 } from '../rules/types';
 import type { Pflanze } from '../rules/pflanzen';
+import type { Vorhaben as GrossesVorhaben } from '../rules/vorhaben';
 
 export const VERSION = 1;
 
@@ -20,6 +21,8 @@ export interface Vorhaben {
   /** geteilte Objekte */
   o: Partial<Record<ObjectKind, Placed>>;
   p?: Pflanze;
+  /** großes Vorhaben (Wohnhaus, Anbau, Aufstockung), Stockwerk 3 */
+  g?: GrossesVorhaben;
   /** Ablauf (YYYY-MM-DD) */
   bis: string;
   /** Link-Kennung */
@@ -35,17 +38,23 @@ function kompakt(v: Omit<Vorhaben, 'bis' | 'l'>): unknown {
     o[k] = [r2(x.center[0]), r2(x.center[1]), r2(x.w), r2(x.d), r2(x.h), Math.round(x.angle * 1e4) / 1e4, x.neigung ?? 0, x.lw ?? 0];
   }
   const p = v.p ? [v.p.art, r2(v.p.center[0]), r2(v.p.center[1]), r2(v.p.laenge), Math.round(v.p.angle * 1e4) / 1e4, r2(v.p.hoehe)] : undefined;
-  return { v: v.v, u: v.u, b: v.b.map(rp), o, ...(p ? { p } : {}) };
+  const g = v.g
+    ? [v.g.art, r2(v.g.center[0]), r2(v.g.center[1]), r2(v.g.w), r2(v.g.d), Math.round(v.g.angle * 1e4) / 1e4, v.g.geschosse, r2(v.g.geschosshoehe), v.g.dachform, r2(v.g.neigung), v.g.hostId ?? '', v.g.hostKante ?? 0, r2(v.g.versatz ?? 0), v.g.firstQuer ? 1 : 0, v.g.zielId ?? '']
+    : undefined;
+  return { v: v.v, u: v.u, b: v.b.map(rp), o, ...(p ? { p } : {}), ...(g ? { g } : {}) };
 }
 
-function auspacken(j: { v: number; u: Vec2; b: Vec2[]; o: Record<string, number[]>; p?: [Pflanze['art'], number, number, number, number, number]; bis: string; l: string }): Vorhaben {
+function auspacken(j: { v: number; u: Vec2; b: Vec2[]; o: Record<string, number[]>; p?: [Pflanze['art'], number, number, number, number, number]; g?: [GrossesVorhaben['art'], number, number, number, number, number, number, number, GrossesVorhaben['dachform'], number, string, number, number, number, string]; bis: string; l: string }): Vorhaben {
   const o: Vorhaben['o'] = {};
   for (const [k, a] of Object.entries(j.o)) {
     const kind = k as ObjectKind;
     o[kind] = { kind, center: [a[0], a[1]], w: a[2], d: a[3], h: a[4], angle: a[5], ...(a[6] ? { neigung: a[6] } : {}), ...(a[7] ? { lw: a[7] } : {}) };
   }
   const p = j.p ? { art: j.p[0], center: [j.p[1], j.p[2]] as Vec2, laenge: j.p[3], angle: j.p[4], hoehe: j.p[5] } : undefined;
-  return { v: j.v, u: j.u, b: j.b, o, ...(p ? { p } : {}), bis: j.bis, l: j.l };
+  const g: GrossesVorhaben | undefined = j.g
+    ? { art: j.g[0], center: [j.g[1], j.g[2]], w: j.g[3], d: j.g[4], angle: j.g[5], geschosse: j.g[6], geschosshoehe: j.g[7], dachform: j.g[8], neigung: j.g[9], ...(j.g[10] ? { hostId: j.g[10] } : {}), hostKante: j.g[11], versatz: j.g[12], ...(j.g[13] ? { firstQuer: true } : {}), ...(j.g[14] ? { zielId: j.g[14] } : {}) }
+    : undefined;
+  return { v: j.v, u: j.u, b: j.b, o, ...(p ? { p } : {}), ...(g ? { g } : {}), bis: j.bis, l: j.l };
 }
 
 const b64u = (b: Uint8Array) => btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

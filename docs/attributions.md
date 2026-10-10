@@ -21,7 +21,8 @@ Lizenzen geprüft am 3. Oktober 2026 im Katalog `geodaten.bayern.de/opengeodata/
 | Parzellarkarte WMS `by_alkis_parzellarkarte_umr_gelb` | Bayerische Vermessungsverwaltung | CC BY 4.0 (AccessConstraints) | Hilfslinie beim Grenze-Setzen, unverändert angezeigt | nein |
 | Quasigeoid GCG2016 (`de_bkg_gcg2016.tif`, PROJ-CDN) | © Bundesamt für Kartographie und Geodäsie (BKG) | CC BY 4.0 | Normalhöhe → Ellipsoidhöhe | nein |
 | Laserpunkte (LAZ), 4 × 1 km, Befliegung März 2025 | Bayerische Vermessungsverwaltung | CC BY 4.0 | zweite Epoche für die Bestandserkennung | ja: zu nDSM gerastert |
-| ALKIS Tatsächliche Nutzung (Landkreis Amberg-Sulzbach) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Verkehrsflächen ausmaskieren | nur ausgewertet |
+| ALKIS Tatsächliche Nutzung (Landkreis Amberg-Sulzbach) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Verkehrsflächen ausmaskieren; seit Phase B zusätzlich `strassen.json` (Nutzungsarten Straßenverkehr, Weg, Platz als öffentliche Verkehrsfläche) für die Zufahrtsprüfung und die Zweite-Reihe-Zählung | ja: Polygone auf 0,3 m vereinfacht, lokale Koordinaten, Zehntelmeter gerundet (erlaubt) |
+| Bauleitplanung Bayern, WMS `gdiserv.bayern.de/bauleitplanung/wms` (Ebenen `bplan_rechtskraft`, `bplan_im_verfahren`) | Bayerische Landesverwaltung, Landesportal Bauleitplanung | **Lizenz nicht geklärt** (GetCapabilities geprüft am 10.10.2026; keine CC-Angabe gefunden) | GetFeatureInfo am Schwerpunkt und an Grenzecken: Name, Nummer, Links auf Plan und Festsetzungen. Nur Abfrage und Verweis, kein Auslesen des Plans, nichts gespeichert, Quelle in der App sichtbar. Das Portal ist nicht flächendeckend. | nein |
 | DOM-Mesh SLPK, Los 123028_1 | Bayerische Vermessungsverwaltung | CC BY 4.0 | Foto-3D-Ansicht (optional, nicht im Repo) | ja: Ausschnitt nach 3D Tiles umgewandelt, Texturen unverändert |
 | Trinkwasserschutzgebiete WMS `twsg` | Bayerisches Landesamt für Umwelt | **CC BY 4.0** (Geoportal-Metadaten 7d264700-d887-11e0-b7aa-0000779eba3a); Quellenangabe „Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de“ | GetFeatureInfo über eigenen Proxy, Warnhinweis | nein |
 | Denkmal-Daten WMS (`od/wms/gdi/v1/denkmal`) | Bayerisches Landesamt für Denkmalpflege | **CC BY-ND 4.0**, Namensnennung „© BLfD“ (Metadaten 224e744a-ee17-426d-969c-e3f29244cf17) | nur GetFeatureInfo; Bezeichnung und Aktennummer unverändert angezeigt, keine gekürzten Texte | nein |
@@ -89,6 +90,10 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | BayBO Art. 6 (`docs/recht/BayBO_Art6.txt`) | Amtliche Werke sind gemeinfrei (§ 5 UrhG); Wortlaut über lxgesetze.de und lexmea.de abgerufen und verglichen | gesetze-bayern.de per CAPTCHA gesperrt; Abgleich von Hand offen |
 | BayBO Art. 2, 55, 58, 59, 61, 63, 64, 66; BauVorlV §§ 1–3, 7–9; GaStellV § 1 (`docs/recht/BayBO_Verfahren_BauVorlV.txt`) | gemeinfrei (§ 5 UrhG); gesetze.legal, lxgesetze.de, lexmea.de verglichen | Links zum Digitalen Bauantrag und zu den Formularen: Staatsministerium für Wohnen, Bau und Verkehr (nur verlinkt) |
 | AGBGB Art. 47–52 (`docs/recht/AGBGB_Art47-52.txt`) | gemeinfrei (§ 5 UrhG); gesetze.legal (aktuelle Fassung) und Bayerisches GVBl Nr. 25/1982 (verkuendung-bayern.de, amtlich) verglichen | Art. 52 Abs. 1 Satz 3 nur in einer Quelle in aktueller Fassung (offen) |
+
+| BayBO Art. 4, 5, 71 (`docs/recht/BayBO_Art4_5_71.txt`) | gemeinfrei (§ 5 UrhG); lxgesetze.de, Abruf 10.10.2026 | nicht am amtlichen Text bestätigt (gesetze-bayern.de per CAPTCHA gesperrt) |
+| BauGB §§ 30, 34, 35 (Anfang, Abs. 2), 246e (`docs/recht/BauGB_34_246e.txt`) | gemeinfrei (§ 5 UrhG); gesetze-im-internet.de (Bundesministerium der Justiz, amtlich), Abruf 10.10.2026 | § 34 bis Abs. 3b, § 35 Abs. 1 Nr. 1–8 nicht übernommen |
+| Muster-Richtlinien über Flächen für die Feuerwehr, Fassung 02/2007, Nr. 2, 8, 14 (`docs/recht/Feuerwehr_Flaechen_Richtlinie.txt`) | Bayerisches Staatsministerium für Wohnen, Bau und Verkehr (bauministerium.bayern.de, PDF), Abruf 10.10.2026 | Verwaltungsvorschrift/Muster; **ob die in Bayern eingeführte Fassung wörtlich übereinstimmt und welche gilt, ist offen** |
 
 ## Nicht verwendet
 
