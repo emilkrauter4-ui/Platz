@@ -77,6 +77,15 @@ import {
   vorhabenModell,
   vorhabenKoerper as grKoerper,
   zufahrtPunkt,
+  huelleModell,
+  hoeheAn,
+  dachAnteilSattel,
+  vorhabenDachHoehe,
+  HUELLE_RASTER_M,
+  UMFELD_RADIUS_M,
+  type Flaeche3D,
+  type HuelleModell,
+  type HuelleRaster,
   STICHTAGE,
   STICHTAG_NAME,
   VORHABEN_NAME,
@@ -102,6 +111,7 @@ import { assumedWindows, awayFromBoundary, ccw, classifyBuildings, initialObject
 import { bebauungsplaene, denkmaeler, searchAddress, wasserschutz, type Denkmal, type Place } from './ui/services';
 import { VorhabenLayer, KEY_VORHABEN } from './scene/vorhaben';
 import { rechne } from './scene/rechner';
+import { HuelleLayer, type HuelleAnzeige, type RotesPaneel } from './scene/huelle';
 import { gemeindeHtml, kennzahlenHtml, punkteHtml, rowsHtml, schattenHtml } from './ui/vorhabenSheet';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
@@ -110,7 +120,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ORDER: ObjectKind[] = ['gartenhaus', 'carport', 'waermepumpe'];
 const WORD = { ok: 'passt', warn: 'knapp', bad: 'passt nicht' };
 const TAG_CLASS: Record<string, string> = {
-  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off', Orientierung: 'orient',
+  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off', Orientierung: 'orient', Annäherung: 'assume',
 };
 
 /* ---------- Zustand ---------- */
@@ -331,6 +341,7 @@ function plotFrame(animate = true) {
 function showStart(msg?: string) {
   $('gbBtn').hidden = true;
   grLayer?.weg();
+  hlLayer?.weg();
   if (st.modus === 'gross') st.modus = 'objekt';
   if (gbSt.an) void gartenblick(false);
   zonenAus();
@@ -589,6 +600,10 @@ async function confirmPlot() {
     st.denkmal = d;
     if (st.step === 'pruefen') renderSheet();
   });
+  hlLayer?.weg();
+  hlSt.modell = null;
+  hlSt.raster = null;
+  hlAusnahme = null;
   grLayer?.weg();
   Object.assign(grSt, { v: null, res: null, zufahrt: null, schatten: null, gemeinde: null, fragen: [], plaene: undefined, zonen: false, zonenErg: null, benutzt: false, offen: false });
   bebauungsplaene([c, ...b.slice(0, 7)]).then((pl) => {
@@ -625,6 +640,7 @@ function buildSite() {
     aufenthaltsraum: st.aufenthaltsraum,
     feuerstaette: st.feuerstaette,
   };
+  if (hlSt.an) hlPlanen();
 }
 
 /** Bebauungsplan laut Landesportal (nur Verweis): vorhanden, keiner im Portal oder unbekannt. */
@@ -745,6 +761,7 @@ function renderSheet() {
     ${st.selected === 'waermepumpe' ? geraetHtml(o) : ''}
     <div class="controls" id="controls">${ctl}</div>
     <div class="btnrow"><button class="sec" id="arBtn" type="button">In AR ansehen (1:1)</button></div>
+    ${hlHtml()}
     ${st.denkmal?.length ? `<p class="warnbox">Denkmalschutz: ${st.denkmal.map((d) => `${esc(d.art)}${d.bezeichnung ? ` „${esc(d.bezeichnung)}“` : ''} (${esc(d.aktennummer)})`).join('; ')}. Hier kann auch ein kleines Nebengebäude oder eine Wärmepumpe eine denkmalrechtliche Erlaubnis brauchen (Art. 6 BayDSchG). ${tag('amtlich', 'amtlich')} <span class="attr">© BLfD</span></p>` : ''}
     ${st.wsg?.length ? `<p class="warnbox">Das Grundstück liegt in einem Trinkwasserschutzgebiet (${esc(st.wsg.join(', '))}). Dort gelten eigene Auflagen. ${tag('amtlich', 'amtlich')}</p>` : ''}
     <details ${st.bestand.length ? 'open' : ''} id="bestandBox">
@@ -897,6 +914,7 @@ function grStart() {
   zonenAus();
   pflanzLayer?.weg();
   pflSt.stammTippen = null;
+  if (hlSt.an) hlSt.dach = 'planung';
   grSt.v ??= vorhabenStart(site, neuesVorhaben('wohnhaus', site));
   grSt.zufahrt = null;
   grSt.schatten = null;
@@ -908,6 +926,9 @@ function grStart() {
 function grAus() {
   if (st.modus !== 'gross') return;
   st.modus = 'objekt';
+  if (hlSt.dach === 'planung') hlSt.dach = 'flach';
+  hlLayer?.zeigeRot([]);
+  hlSt.durchstoss = 0;
   grLayer?.weg();
   grSt.zonen = false;
   grSt.zonenErg = null;
@@ -1007,7 +1028,9 @@ function grZeichnen() {
     showAF: st.showAF,
     dark: st.dark,
     mesh: st.mesh,
+    neutral: hlSt.an,
   });
+  if (hlSt.an) hlRotNeu();
   render();
 }
 
@@ -1094,6 +1117,7 @@ function renderGrossSheet() {
     ${hostSel}${wandSel}${dachSel}
     <div class="controls" id="grControls">${ctl}</div>
     ${v.art === 'wohnhaus' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="gZonen" ${grSt.zonen ? 'checked' : ''}> Wo darf das Haus hin? Zonen zeigen</label><div id="gZonenInfo"></div>` : ''}
+    ${hlHtml()}
     <div id="grInfo"></div>`;
   bindTabs();
   document.querySelectorAll<HTMLButtonElement>('[data-gart]').forEach((b) => b.addEventListener('click', () => grArt(b.dataset.gart as VorhabenArt)));
@@ -1257,6 +1281,199 @@ async function openVoranfrage() {
   document.getElementById('vJson')?.addEventListener('click', () => speichern(JSON.stringify(p, null, 2), 'application/json', `${name}.json`));
 }
 
+/* ---------- Hülle des Baurechts (AUFTRAG_V4 C1) ---------- */
+const hlSt: {
+  an: boolean;
+  modell: HuelleModell | null;
+  raster: HuelleRaster | null;
+  laeuft: boolean;
+  /** Dach, das von H abgezogen wird: Flachdach, Satteldach 35°/8 m (Annahme) oder das Dach der Planung (nur im Reiter „Großes Vorhaben“) */
+  dach: 'flach' | 'sattel' | 'planung';
+  referenz: { median: number; n: number } | null;
+  ms: number;
+  /** Wandlänge des geplanten Hauses (m), die durch die Hülle stößt */
+  durchstoss: number;
+  hoechste: number;
+  anteilGezeichnet: number;
+} = { an: false, modell: null, raster: null, laeuft: false, dach: 'flach', referenz: null, ms: 0, durchstoss: 0, hoechste: 0, anteilGezeichnet: 0 };
+let hlLayer: HuelleLayer | null = null;
+let hlSeq = 0;
+let hlTimer: ReturnType<typeof setTimeout> | null = null;
+/** Modell ohne das angebaute/aufgestockte Haus (für die Prüfung des geplanten Hauses), Cache je Haus */
+let hlAusnahme: { key: string; modell: HuelleModell } | null = null;
+
+/** Dachanteil von H (Art. 6 Abs. 4: ein Drittel der Dachhöhe) des Vorhabens. */
+function hlAnteilVorhaben(): number {
+  const r = grSt.res;
+  const v = grSt.v;
+  if (!r || !v) return 0;
+  if (v.art !== 'aufstockung' && v.dachform === 'flach') return 0;
+  const dh = vorhabenDachHoehe(v, r.grundriss);
+  const neig = v.art === 'aufstockung' ? 0 : v.neigung;
+  return dh * (neig > LIMITS.abstand.dachVollAbGrad.wert ? 1 : 1 / 3);
+}
+const hlAnteil = (): number => (hlSt.dach === 'planung' && st.modus === 'gross' && grSt.v ? hlAnteilVorhaben() : hlSt.dach === 'sattel' ? dachAnteilSattel() : 0);
+
+function hlHtml(): string {
+  const gross = st.modus === 'gross';
+  return `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:8px 0"><input type="checkbox" id="hlAn" ${hlSt.an ? 'checked' : ''}> Baurechts-Hülle zeigen ${tag('Annäherung', 'Annäherung')}</label>
+    ${hlSt.an ? `<div class="field"><span>Dach, das die Hülle abzieht</span>${sel('hlDach', hlSt.dach === 'planung' && !gross ? 'flach' : hlSt.dach, [['flach', 'Flachdach (H = Wandhöhe)'], ['sattel', 'Satteldach 35°, 8 m tief'], ...(gross ? [['planung', 'Dach meiner Planung'] as [string, string]] : [])] as ['flach' | 'sattel' | 'planung', string][])}</div>` : ''}
+    <div id="hlInfo"></div>`;
+}
+
+function hlBind() {
+  document.getElementById('hlAn')?.addEventListener('change', (e) => {
+    hlSt.an = (e.target as HTMLInputElement).checked;
+    if (hlSt.an) {
+      if (st.modus === 'gross') hlSt.dach = 'planung';
+      renderSheet();
+      hlPlanen(true);
+    } else {
+      hlLayer?.weg();
+      hlSt.durchstoss = 0;
+      renderSheet();
+    }
+  });
+  document.getElementById('hlDach')?.addEventListener('change', (e) => {
+    hlSt.dach = (e.target as HTMLSelectElement).value as typeof hlSt.dach;
+    hlZeichnen();
+    hlInfo();
+  });
+  hlInfo();
+}
+
+/** Hülle (neu) rechnen, kurz verzögert. */
+function hlPlanen(sofort = false) {
+  if (!hlSt.an) return;
+  if (hlTimer) clearTimeout(hlTimer);
+  hlTimer = setTimeout(() => void hlRechnen(), sofort ? 0 : 400);
+}
+
+async function hlRechnen() {
+  if (!site || !hlSt.an || !st.plot) return;
+  const id = ++hlSeq;
+  hlSt.laeuft = true;
+  hlInfo();
+  hlSt.modell = huelleModell(site, grStrassenNah());
+  hlAusnahme = null;
+  const u = umfeldStatistik(site, centroid(st.plot), grStrassen());
+  hlSt.referenz = u.traufe && u.n > 0 ? { median: u.traufe.median, n: u.n } : null;
+  const a = await rechne({ art: 'huelle', modell: hlSt.modell, step: HUELLE_RASTER_M });
+  if (id !== hlSeq || !hlSt.an) return;
+  hlSt.laeuft = false;
+  if (a?.art === 'huelle') {
+    hlSt.raster = a.raster;
+    hlSt.ms = a.ms;
+    hlSt.hoechste = a.raster.h.reduce((m, x) => Math.max(m, x), 0);
+  }
+  hlZeichnen();
+  if (st.modus === 'gross') grZeichnen();
+  hlInfo();
+}
+
+function hlAnzeige(): HuelleAnzeige | null {
+  if (!hlSt.raster || !st.plot) return null;
+  const ground = (p: Vec2) => terrain.heightOrCoarse(p);
+  hlSt.anteilGezeichnet = hlAnteil();
+  return {
+    raster: hlSt.raster,
+    boden: ground,
+    anteil: hlSt.anteilGezeichnet,
+    paneele: [],
+    referenz: hlSt.referenz ? { plot: st.plot, hoehe: ground(centroid(st.plot)) + hlSt.referenz.median } : null,
+    dark: st.dark,
+  };
+}
+
+function hlZeichnen() {
+  if (!hlSt.an) return;
+  const a = hlAnzeige();
+  if (!a) return;
+  hlLayer ??= new HuelleLayer(scene.viewer);
+  hlLayer.zeige(a);
+  if (st.modus === 'gross') hlRotNeu();
+  render();
+}
+
+/** Wandstücke des geplanten Hauses über der Hülle (rot). Exakte Rechnung am Modell, nicht am Raster. */
+function hlRot(flaechen: Flaeche3D[]): { paneele: RotesPaneel[]; laenge: number } {
+  const v = grSt.v;
+  if (!v || !hlSt.modell || !site) return { paneele: [], laenge: 0 };
+  let m = hlSt.modell;
+  const host = v.art === 'anbau' ? v.hostId : v.art === 'aufstockung' ? v.zielId : undefined;
+  if (host) {
+    if (hlAusnahme?.key !== host) hlAusnahme = { key: host, modell: huelleModell(site, grStrassenNah(), [host]) };
+    m = hlAusnahme.modell;
+  }
+  const anteil = hlAnteilVorhaben();
+  const boden = (p: Vec2) => terrain.heightOrCoarse(p);
+  const paneele: RotesPaneel[] = [];
+  let laenge = 0;
+  for (const f of flaechen) {
+    if (f.art === 'dach') continue;
+    for (let k = 0; k < f.pts.length - 1; k++) {
+      const a = f.pts[k];
+      const b = f.pts[k + 1];
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      const n = Math.max(1, Math.ceil(len / 0.5));
+      let lauf: RotesPaneel | null = null;
+      for (let s = 0; s <= n; s++) {
+        const t = s / n;
+        const q: Vec2 = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+        const zOben = f.z[k] + (f.z[k + 1] - f.z[k]) * t;
+        // Giebelfläche (3 Punkte): für H zählt die Traufhöhe, der Giebel wird als Dachanteil gerechnet
+        const zFuerH = f.pts.length === 3 ? Math.min(...f.z) : zOben;
+        const g = boden(q);
+        const H = zFuerH - g + anteil;
+        const hm = hoeheAn(m, q);
+        if (H > hm + 0.01) {
+          const unten = Math.max(g + Math.max(0, hm - anteil), f.zUnten ? f.zUnten[k] + (f.zUnten[k + 1] - f.zUnten[k]) * t : -Infinity);
+          if (!lauf) { lauf = { pts: [], unten: [], oben: [] }; paneele.push(lauf); }
+          lauf.pts.push(q);
+          lauf.unten.push(Math.min(unten, zOben - 0.05));
+          lauf.oben.push(zOben);
+          if (s > 0) laenge += len / n;
+        } else lauf = null;
+      }
+    }
+  }
+  return { paneele: paneele.filter((p) => p.pts.length >= 2), laenge };
+}
+
+/** Nach jeder Änderung des Vorhabens: rote Stellen neu, Glaskörper bleibt. */
+function hlRotNeu() {
+  if (!hlSt.an || !hlLayer || !grSt.v || !grSt.res || st.modus !== 'gross' || st.ansicht === 'nachbar') return;
+  const g = grSt.res.grundriss;
+  const ground = (p: Vec2) => terrain.heightOrCoarse(p);
+  const base = grSt.v.art === 'aufstockung' ? Math.min(...g.fp.map(ground)) : grSt.v.baseElevation ?? Math.max(...g.fp.map(ground));
+  const r = hlRot(vorhabenModell(grSt.v, g, base));
+  hlSt.durchstoss = r.laenge;
+  hlLayer.zeigeRot(r.paneele);
+  // Dach der Planung geändert: der Glaskörper zeigt dann eine andere Wandhöhe
+  if (hlSt.dach === 'planung' && Math.abs(hlAnteil() - hlSt.anteilGezeichnet) > 0.01) {
+    const a = hlAnzeige();
+    if (a) hlLayer.glasNeu(a);
+  }
+  hlInfo();
+}
+
+function hlInfo() {
+  const el = document.getElementById('hlInfo');
+  if (!el) return;
+  if (!hlSt.an) { el.innerHTML = ''; return; }
+  if (!hlSt.raster) { el.innerHTML = '<p class="fine" style="text-align:left">Rechne die Hülle …</p>'; return; }
+  const aussen = site?.bereich.value === 'aussen';
+  const ref = hlSt.referenz
+    ? `<p class="fine" style="text-align:left">Gestrichelte Ebene: mittlere Traufhöhe der Nachbarhäuser im Umkreis von ${UMFELD_RADIUS_M} m, ${fmt(hlSt.referenz.median, 1)} m (${hlSt.referenz.n} Gebäude aus LoD2). ${tag('Orientierung', 'Orientierung')} Höhengrenzen aus einem Bebauungsplan${site?.bplan.status === 'vorhanden' ? ` („${esc(site.bplan.name ?? 'Plan')}“, laut Landesportal vorhanden)` : ''} oder aus dem Einfügen nach § 34 BauGB zeigt die Hülle nicht.${aussen ? ' Im Außenbereich gelten ohnehin andere Regeln (§ 35 BauGB).' : ''}</p>`
+    : '<p class="fine" style="text-align:left">Keine Referenzebene: In der Umgebung sind keine Hauptgebäude mit Höhe in den Daten. Höhengrenzen aus Bebauungsplan oder § 34 BauGB zeigt die Hülle nicht.</p>';
+  const rot = st.modus === 'gross' && grSt.v && grSt.res
+    ? hlSt.durchstoss > 0.05
+      ? `<p class="warnbox">Das geplante Haus stößt an ${fmt(hlSt.durchstoss, 0)} m Wandlänge durch die Hülle (rot markiert). An diesen Stellen reichen die Abstandsflächen für diese Höhe nicht aus.</p>`
+      : '<p class="fine" style="text-align:left">Das geplante Haus bleibt überall unter der Hülle.</p>'
+    : '';
+  el.innerHTML = `<p class="fine" style="text-align:left">Der Glaskörper zeigt, wie hoch eine Wand an jeder Stelle werden darf, <b>soweit es die Abstandsflächen betrifft</b>: Tiefe 0,4 H, mindestens 3 m, auf dem eigenen Grundstück (an Straßen bis zur Mitte), ohne Überdeckung mit den Abstandsflächen deines Hauses (BayBO Art. 6). Höchster Wert: ${fmt(hlSt.hoechste, 0)} m. Die Hülle ist eine <b>Annäherung</b>: Sie rechnet mit dem Abstand in alle Richtungen (sichere Seite), kennt weder Ausnahmen (Art. 6 Abs. 3 und 7, Garagen und Nebengebäude bis 3 m) noch Grün- und Wasserflächen, und zieht vom Dach nur ein Drittel der Dachhöhe ab. Raster ${HUELLE_RASTER_M} m, gerechnet in ${fmt(hlSt.ms, 0)} ms im Hintergrund.</p>${ref}${rot}`;
+}
+
 /* ---------- Hecke, Baum (AGBGB Art. 47–52) ---------- */
 const PFL_ART: [PflanzenArt, string][] = [['hecke', 'Hecke'], ['baum', 'Baum'], ['strauch', 'Strauch']];
 
@@ -1272,6 +1489,7 @@ function tabsHtml(): string {
 }
 
 function bindTabs() {
+  hlBind();
   document.querySelectorAll<HTMLButtonElement>('[data-obj]').forEach((b) => b.addEventListener('click', () => select(b.dataset.obj as ObjectKind)));
   document.querySelector<HTMLButtonElement>('[data-modus="gross"]')?.addEventListener('click', () => {
     if (st.modus === 'gross') return;
@@ -2733,6 +2951,9 @@ async function main() {
         pflSt,
         nbSt,
         gr: grSt,
+        hl: hlSt,
+        hlRechnen: () => hlRechnen(),
+        hlPlanen,
         grStart,
         grArt,
         grRechnen: () => grRechnen(),

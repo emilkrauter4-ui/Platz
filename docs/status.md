@@ -655,6 +655,42 @@ Tipp-Erfassung und Messauswertung unverändert.
 - **Nicht gemacht (bewusst):** Aufstellflächen, Höhe der Zufahrt, Stellplätze, GRZ/GFZ-Berechnung, Inhalt des Bebauungsplans.
 - Pausiert vor Phase C (nicht Teil des Auftrags).
 
+## AUFTRAG_V4 C1 – Die unsichtbare Hülle des Baurechts (10. Oktober 2026)
+
+Über dem Grundstück steht ein gläserner Körper: die größte zulässige Höhe H an jedem Punkt, **soweit es die Abstandsflächen betrifft**.
+Alles ist **Annäherung** (neues Label `Annäherung`); die Hülle ist nie Grundlage einer Ampel. Neue Regeln in `limits.json → huelle`
+(`geprueft: false`), Wortlaut BayBO Art. 6 (`docs/recht/BayBO_Art6.txt`, nicht am amtlichen Text bestätigt).
+
+- **Rechnung** (`rules/huelle.ts`): Tiefe 0,4 H, mindestens 3 m, auf dem eigenen Grundstück (Abs. 2 Satz 1, Abs. 5 Satz 1) umgekehrt:
+  Abstand d zum nächsten Hindernis → **H = d / 0,4 = 2,5 d für d ≥ 3 m**, darunter 0. Der Abstand zählt in alle Richtungen (Kreisscheibe
+  um jeden Wandpunkt): Liegt die Scheibe im erlaubten Bereich, liegt die ganze Abstandsfläche darin, für **jede** Ausrichtung der Wand –
+  die sichere Seite (wer der Grenze den Rücken kehrt, dürfte höher bauen).
+  - **Öffentliche Flächen** (Abs. 2 Satz 2, Wortlaut „nur bis zu deren Mitte“): Grundstückskanten an Straßenverkehr, Weg, Platz
+    (ALKIS TN) werden um die halbe Breite der Fläche nach außen verschoben (Breite quer zur Grenze gemessen, Lücke > 0,5 m → keine
+    Verschiebung). **Grün- und Wasserflächen sind nicht berücksichtigt** (keine Daten) – dort gilt die Grundstücksgrenze.
+  - **Überdeckung** (Abs. 3): eigene Häuser und ihre Abstandsflächen sind Hindernis in jeder Richtung. Die Ausnahme „Wände über 75°“ nutzt
+    die Hülle nicht (Ausrichtung unbekannt); die Einzelprüfung des geplanten Hauses nutzt sie.
+  - **Dach und Giebel:** Die Hülle zeigt die **Wandhöhe** = H minus Dachanteil. Wahl: Flachdach, Satteldach 35°/8 m (Annahme, ≈ 0,93 m)
+    oder (im Reiter „Großes Vorhaben“) das Dach der Planung; die Giebel-Auslegung (`giebelAlsDach`, offen) steckt darin.
+  - **Nicht Teil der Hülle:** Höhengrenzen aus Bebauungsplan oder § 34; Ausnahmen (Abs. 7: Garagen und Nebengebäude bis 3 m); Grün- und
+    Wasserflächen. Referenz: **gestrichelte Ebene** auf der mittleren Traufhöhe der Hauptgebäude im Umkreis von 100 m (aus Stockwerk 3,
+    Label `Orientierung`); bei Bebauungsplan im Landesportal weist die Info darauf hin.
+- **Darstellung:** halbtransparentes Glas mit auslaufender Deckkraft zu den Rändern, Schalter „Baurechts-Hülle zeigen“ (Reiter der
+  Kleinbauten und „Großes Vorhaben“). **Geplantes Haus, das durch die Hülle stößt, leuchtet an genau dieser Stelle rot** (exakte Rechnung
+  alle 0,5 m an den Wänden, nicht aus dem Raster); beim Anbau und bei der Aufstockung zählt das angebaute/aufgestockte Haus nicht als Hindernis.
+  Die Info nennt die Wandlänge (m), die durchstößt. Kleinbauten (Gartenhaus, Carport) werden nicht rot markiert (Art. 6 Abs. 7).
+- **Im Hintergrund:** Raster 0,5 m im Rechen-Worker (`rules/rechner.worker.ts`), Modell auf dem Oberflächen-Thread (wenige ms).
+  Gemessen: Raster 8 265 Zellen (Fröschau 41) in **66 ms** im Container-Chromium; im Test (30 × 40 m) wenige ms.
+- **Tests** (`huelle.test.ts`, 15): 3-m-Band (3,00 m → 7,5 m, 2,99 m → 0), schräge Grenze, Straße bis zur Mitte (10 m breit → +5 m,
+  Lücke → 0), Überdeckung mit eigenem Haus, Kleinbauten, ausgenommenes Haus, Dachanteil, Raster = exakte Rechnung, Worker. **Hülle gegen
+  die Einzelprüfung der Abstandsflächen** (die echten `pruefeAF`-Funktionen mit einem 10-cm-Häuschen an Zufallspunkten, 8 Ausrichtungen):
+  nur Grundstück 0 Abweichungen, mit eigenem Haus **0 Abweichungen** in Richtung „Hülle sagt ja, Einzelprüfung sagt nein“; in Gegenrichtung
+  (3 m über der Hülle fällt die Einzelprüfung durch) bis auf die 75°-Ausnahme überall – dort bleibt die Hülle bewusst auf der sicheren Seite.
+  Am 3-m-Band zählt der Abstand, nicht die Höhe (Mindesttiefe 3 m): Zufallspunkte mit d < 3,2 m sind ausgenommen (das Häuschen hat 7 cm).
+- **Prüfmappe:** 6 neue Regeln, 3 neue Fragen (jetzt 95 Regeln, 39 Fragen); Kurzfassung unverändert (Hülle kommt in den drei Demos nicht vor).
+- **Grenzen, offen:** Raster 0,5 m (Höhenfehler bis ≈ 0,6 m zwischen den Punkten); die Glasdarstellung zeigt feine senkrechte Streifen an den
+  Schürzen (Darstellung, keine Rechnung); auf iPhone nicht gemessen; Fachprüfung der Auslegung (3 neue Fragen) steht aus.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

@@ -11,3 +11,4 @@ export * from './zufahrt';
 export * from './verschattung';
 export * from './planungsrecht';
 export * from './rechner';
+export * from './huelle';

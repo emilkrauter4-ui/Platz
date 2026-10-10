@@ -305,6 +305,29 @@ R: dict[str, dict] = {
         text=lambda: KEIN + " Bedingungen: EPREL Public API Terms and Conditions (gültig ab 03.06.2024).", link=None,
         umsetzung="Für Klimageräte und Pool-Wärmepumpen gibt es keine Gerätedatenbank: EPREL braucht einen API-Schlüssel, KEYMARK enthält nur Wasser-Wärmepumpen. Die Gerätesuche liest klimageraete.json und poolwaermepumpen.json, sobald sie existieren.",
         beispiel="Suche nach „Daikin“ findet nur Luft-Wasser-Wärmepumpen aus KEYMARK."),
+    "huelle.hoeheAusAbstand": dict(
+        text=lambda: art6("5", (1,)) + "<br>" + art6("2", (1,)), link="BayBO-6",
+        umsetzung="Umkehrung: Eine Wand im Abstand d vom nächsten Hindernis (Grenze, eigenes Haus samt Abstandsfläche) darf H = d / 0,4 hoch sein, wenn d ≥ 3 m; darunter nichts. Der Abstand gilt in alle Richtungen (Kreisscheibe um jeden Wandpunkt): sichere Seite, weil jedes Gebäude eine Wand zur Grenze hat; wer der Grenze den Rücken zukehrt, dürfte höher bauen. Dargestellt als Glaskörper über dem Grundstück, Label „Annäherung“.",
+        beispiel="Wand 5 m von der Grenze: H ≤ 12,5 m; 3,00 m: 7,5 m; 2,99 m: nichts (Garagen und Nebengebäude bis 3 m fallen unter Art. 6 Abs. 7, nicht unter die Hülle)."),
+    "huelle.strasseBisMitte": dict(
+        text=lambda: art6("2", (2,)), link="BayBO-6",
+        umsetzung="An Grundstücksseiten, die an Straßenverkehr, Weg oder Platz (ALKIS Tatsächliche Nutzung) grenzen, wird die Grenze um die halbe Breite der Fläche nach außen verschoben (Breite quer zur Grenze, im Datensatz gemessen; Lücke über 0,5 m → keine Verschiebung). Grün- und Wasserflächen: nicht berücksichtigt (keine Daten).",
+        beispiel="Grundstück an einer 10 m breiten Straße: 5 m darf die Abstandsfläche auf die Straße reichen; Abstand 3 m zur Grenze → d = 8 m → H ≤ 20 m."),
+    "huelle.ueberdeckungKonservativ": dict(
+        text=lambda: art6("3"), link="BayBO-6",
+        umsetzung="Eigene Häuser und ihre Abstandsflächen sind Hindernis in jeder Richtung. Die Ausnahme für Wände über 75° kennt die Hülle nicht (Ausrichtung künftiger Wände unbekannt) und bleibt auf der sicheren Seite; die Einzelprüfung des geplanten Hauses nutzt sie.",
+        beispiel="Neubau neben der Giebelwand des eigenen Hauses: Hülle zeigt dort weniger Höhe, als die Einzelprüfung zulässt, wenn die Wände rechtwinklig stehen."),
+    "huelle.rasterM": dict(
+        text=lambda: KEIN, link=None, umsetzung="Rasterweite 0,5 m. Der Höhenfehler zwischen den Rasterpunkten beträgt bis etwa 0,6 m; die roten Stellen am geplanten Haus rechnet Passt. exakt (nicht aus dem Raster).",
+        beispiel="Wand 0,25 m neben einem Rasterpunkt: Hülle bis 0,6 m ungenau, rote Markierung exakt."),
+    "huelle.dachAnteilAnnahme": dict(
+        text=lambda: art6("4", (3,)), link="BayBO-6",
+        umsetzung="Die Hülle zeigt die Wandhöhe (H minus Dachanteil). Wahl: Flachdach (kein Abzug), Satteldach 35° mit 8 m Tiefe (ein Drittel der Dachhöhe, ≈ 0,93 m) oder das Dach der eigenen Planung. Giebelflächen wie Dach angerechnet (giebelAlsDach, offen).",
+        beispiel="Satteldach 35°, 8 m tief: Dachhöhe 2,8 m → 0,93 m Zuschlag; bei H = 7,5 m darf die Wand 6,57 m hoch sein."),
+    "huelle.referenzebeneUmgebung": dict(
+        text=lambda: baugb(34, "(1)", "(2)"), link="BauGB-34",
+        umsetzung="Gestrichelte Ebene auf der mittleren Traufhöhe der Hauptgebäude im Umkreis von 100 m (LoD2). Label „Orientierung“: Höhengrenzen aus Bebauungsplan oder § 34 zeigt die Hülle nicht, und Passt. beurteilt das Einfügen nicht.",
+        beispiel="Umgebung mit 5,0 m mittlerer Traufe: Ebene bei 5,0 m über dem Gelände; ein 8-m-Haus überragt sie, was § 34 nicht automatisch ausschließt."),
     "pflanzen.abstandKleinM": dict(
         text=lambda: agbgb(47, 1), link="AGBGB-47", umsetzung="Pflanzen bis 2,00 m Höhe: mindestens 0,50 m Abstand.",
         beispiel="Hecke 1,8 m hoch, Triebe 0,6 m von der Grenze → eingehalten."),
@@ -488,6 +511,9 @@ FRAGEN = [
     ("Bebauungsplan-Abfrage", "Passt. fragt den WMS des Landesportals (Bauleitplanung Bayern) ab und zeigt Plan und Textlink, ohne den Inhalt zu lesen. Ist das ein zulässiger und ausreichender Hinweis? Lizenz und Nutzungsbedingungen des Dienstes sind noch nicht geklärt."),
     ("Bauvoranfrage statt Bauantrag", "Passt. empfiehlt vor dem Bauantrag eine Bauvoranfrage (Vorbescheid, Art. 71) mit Lageplan-Skizze, Kubatur und Fragenliste. Welche Unterlagen verlangt die Bauaufsichtsbehörde dafür üblicherweise (BauVorlV), und fehlt in der Fragenliste etwas Wichtiges?"),
     ("Schatten auf Nachbarn", "Passt. nennt zusätzliche Sonnenstunden an zwei Stichtagen (21. März, 21. Dezember) für Nachbarfenster und Gartenpunkte, ohne Bewertung. Gibt es in Bayern eine übliche Messgröße oder Rechtsprechung (z. B. DIN 5034, Besonnungsdauer), die Passt. verwenden sollte?"),
+    ("Hülle: Abstand in alle Richtungen", "Die Hülle zeigt je Punkt die größte Höhe H = d / 0,4 (ab d = 3 m), wobei d der Abstand zum nächsten Hindernis in alle Richtungen ist – unabhängig von der Ausrichtung der Wand. Das ist die sichere Seite. Ist diese Vereinfachung für eine Orientierung vertretbar, und was würden Sie zusätzlich kennzeichnen (z. B. Wände, die der Grenze den Rücken kehren, Grenzbebauung nach Abs. 7)?"),
+    ("Hülle: Straße bis zur Mitte", "Art. 6 Abs. 2 Satz 2: Abstandsflächen dürfen auf öffentlichen Verkehrs-, Grün- und Wasserflächen „nur bis zu deren Mitte“ liegen. Passt. nimmt die halbe Breite der Verkehrsfläche aus den amtlichen Nutzungsdaten, quer zur Grenze gemessen. Ist das die richtige Auslegung der „Mitte“ (z. B. bei Kreuzungen, Plätzen, Gehwegen mit Grünstreifen)?"),
+    ("Hülle: Überdeckung und eigene Gebäude", "Passt. behandelt Abstandsflächen eigener Häuser in der Hülle als Hindernis in jeder Richtung und nutzt die Ausnahme „Wände über 75°“ (Art. 6 Abs. 3 Nr. 1) dort nicht. Die Einzelprüfung des geplanten Hauses nutzt sie. Ist die Darstellung so verständlich, oder verwirrt der Unterschied?"),
     ("Formulierung der Antworten", "Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?"),
 ]
 
@@ -535,7 +561,7 @@ def seite(kurz: bool = False) -> str:
         assert all(t in titel_fragen for t in KURZ_FRAGEN), [t for t in KURZ_FRAGEN if t not in titel_fragen]
         fragen_liste = [f for t in KURZ_FRAGEN for f in FRAGEN if f[0] == t]
     titel = {"gartenhaus": "Gartenhaus", "carport": "Carport", "abstand": "Abstandsflächen", "grenzbebauung": "Bebauung an der Grenze",
-             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
+             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "huelle": "Hülle des Baurechts (größte zulässige Höhe aus den Abstandsflächen)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
              "verfahren": "Verfahren und Antrag"}
     karten, akt, nr = [], None, 0
     for rid, sek, r in regeln:

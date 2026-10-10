@@ -21,6 +21,8 @@ export interface VorhabenAnzeige {
   showAF: boolean;
   dark: boolean;
   mesh: boolean;
+  /** neutrale Körperfarbe (mit eingeblendeter Hülle, damit die roten Durchstoßstellen auffallen) */
+  neutral?: boolean;
 }
 
 export class VorhabenLayer {
@@ -48,7 +50,7 @@ export class VorhabenLayer {
     this.weg();
     if (!a) return;
     const cls = a.mesh ? ClassificationType.BOTH : ClassificationType.TERRAIN;
-    const koerper = Color.fromCssColorString(a.status === 'bad' ? '#E0A19D' : '#E4D3B8');
+    const koerper = Color.fromCssColorString(a.status === 'bad' && !a.neutral ? '#E0A19D' : '#E4D3B8');
     const dach = Color.fromCssColorString(a.status === 'bad' ? '#B5544E' : '#A8765A');
     const aufsatz = Color.fromCssColorString('#F0A94A');
     // Abstandsflächen

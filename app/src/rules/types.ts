@@ -21,7 +21,9 @@ export type Provenance =
   | 'erfasst per Tipp'
   | 'geschätzt'
   /** Zahlen aus amtlichen Daten zur Einordnung, ohne Urteil und ohne Ampel (Planungsrecht, § 34 BauGB) */
-  | 'Orientierung';
+  | 'Orientierung'
+  /** Vereinfachung des Gesetzestextes, im Ergebnis so gekennzeichnet (z. B. die Baurechts-Hülle) */
+  | 'Annäherung';
 
 export type Status = 'ok' | 'warn' | 'bad';
 

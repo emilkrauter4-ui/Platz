@@ -460,6 +460,51 @@
       "geprueft": false
     }
   },
+  "huelle": {
+    "_hinweis": "AUFTRAG_V4 C1 „Die unsichtbare Hülle des Baurechts“: größte zulässige Höhe H an jedem Punkt des Grundstücks, soweit es die Abstandsflächen (BayBO Art. 6) betrifft. Rechnet den Wortlaut um: Tiefe 0,4 H, mindestens 3 m, auf dem eigenen Grundstück, keine Überdeckung. Die Hülle ist eine ANNÄHERUNG (Label „Annäherung“), kein Rechtsurteil. Sie zeigt keine Höhengrenzen aus Bebauungsplan oder § 34. Alle Einträge geprueft: false.",
+    "hoeheAusAbstand": {
+      "wert": "H = d / 0,4 ab d = 3 m",
+      "quelle": "BayBO Art. 6 Abs. 5 Satz 1, Abs. 2 Satz 1",
+      "text": "Die Abstandsfläche hat die Tiefe 0,4 H, mindestens 3 m, und muss auf dem Grundstück selbst liegen. Liegt eine Wand im Abstand d von der nächsten Grenze (bzw. vom nächsten Hindernis), passt sie, wenn max(3 m, 0,4 H) ≤ d ist. Daraus folgt die größte Höhe H = d / 0,4 = 2,5 · d für d ≥ 3 m; bei d < 3 m darf keine Wand mit Abstandsfläche stehen (Hülle = 0). Gerechnet wird mit dem Abstand in alle Richtungen (Scheibe um den Punkt): Das gilt für jede Ausrichtung der Wand, ist also die sichere Seite – eine Wand, die der Grenze den Rücken zukehrt, dürfte höher sein, ein Gebäude hat aber immer eine Wand zur Grenze.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Abs. 2 Satz 1, Abs. 5 Satz 1)",
+      "geprueft": false
+    },
+    "strasseBisMitte": {
+      "wert": true,
+      "quelle": "BayBO Art. 6 Abs. 2 Satz 2",
+      "text": "„Sie dürfen auch auf öffentlichen Verkehrs-, Grün- und Wasserflächen liegen, jedoch nur bis zu deren Mitte.“ Passt. verschiebt die Grundstücksgrenze an Seiten, die an eine öffentliche Verkehrsfläche (ALKIS Tatsächliche Nutzung: Straßenverkehr, Weg, Platz) grenzen, um die halbe Breite dieser Fläche nach außen (Breite quer zur Grenze, gemessen im Datensatz). Das ist eine Annäherung an „deren Mitte“. Grün- und Wasserflächen sind nicht berücksichtigt (keine Daten): dort rechnet Passt. mit der Grundstücksgrenze (sichere Seite).",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Abs. 2 Satz 2)",
+      "geprueft": false
+    },
+    "ueberdeckungKonservativ": {
+      "wert": true,
+      "quelle": "BayBO Art. 6 Abs. 3",
+      "text": "„Die Abstandsflächen dürfen sich nicht überdecken; das gilt nicht für 1. Außenwände, die in einem Winkel von mehr als 75 Grad zueinander stehen …“ Die Hülle kennt die Ausrichtung künftiger Wände nicht. Deshalb gelten die Abstandsflächen und Grundrisse eigener bestehender Gebäude als Hindernis in jeder Richtung (sichere Seite): Die Ausnahme für Wände über 75° nutzt die Hülle nicht. Die Einzelprüfung des geplanten Hauses nutzt sie.",
+      "wortlaut": "docs/recht/BayBO_Art6.txt (Abs. 3)",
+      "geprueft": false
+    },
+    "rasterM": {
+      "wert": 0.5,
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4)",
+      "text": "Rasterweite der Hülle in Metern. Höhenfehler bis 2,5 · 0,25 m ≈ 0,6 m zwischen den Rasterpunkten; die Prüfung geplanter Gebäude rechnet exakt, nicht aus dem Raster.",
+      "geprueft": false
+    },
+    "dachAnteilAnnahme": {
+      "wert": {
+        "neigungGrad": 35,
+        "tiefeM": 8
+      },
+      "quelle": "Annahme Passt. zu BayBO Art. 6 Abs. 4 Sätze 2 und 3",
+      "text": "Dach- und Giebelanteile erhöhen H: Dächer bis 70° zu einem Drittel ihrer Höhe. Wählt der Nutzer „Satteldach“, zeigt die Hülle die Wandhöhe = H minus ein Drittel der Dachhöhe eines Satteldachs von 35° und 8 m Tiefe (≈ 0,9 m). Das ist eine Annäherung; die Giebel-Auslegung (giebelAlsDach, offen) steckt darin.",
+      "geprueft": false
+    },
+    "referenzebeneUmgebung": {
+      "wert": "mittlere Traufhöhe der Hauptgebäude im Umkreis",
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4), keine Rechtsnorm",
+      "text": "Gestrichelte Ebene auf der mittleren Traufhöhe der Hauptgebäude im Umkreis von 100 m (aus LoD2, wie in Stockwerk 3). Label „Orientierung“: Höhengrenzen aus einem Bebauungsplan oder dem Einfügen nach § 34 BauGB zeigt die Hülle nicht und beurteilt Passt. nicht.",
+      "geprueft": false
+    }
+  },
   "pflanzen": {
     "_hinweis": "Grenzabstand von Pflanzen nach dem bayerischen AGBGB (Nachbarrecht, Zivilrecht). Kein Baurecht: Das Bauamt prüft das nicht, es geht um Ansprüche zwischen Nachbarn.",
     "abstandKleinM": {
