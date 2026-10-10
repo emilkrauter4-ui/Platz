@@ -1,0 +1,15 @@
+# Muster-Richtlinien über Flächen für die Feuerwehr, Fassung Februar 2007 (zuletzt geändert Oktober 2009) – Auszug Nr. 2, 8, 14
+#
+# Abgerufen am 10. Oktober 2026 von
+# https://www.bauministerium.bayern.de/assets/stmi/buw/baurechtundtechnik/27_richtlinie-flaechen-feuerwehr.pdf
+# Das Dokument trägt den Titel „Muster-Richtlinien … Zur Ausführung des § 5 MBO“. Der Landesfeuerwehrverband Bayern nennt für
+# Privatgrundstücke in Bayern die als Technische Baubestimmung eingeführte „Richtlinie über Flächen für die Feuerwehr
+# (Ausgabe Februar 2007)“ als verbindlich. OFFEN: ob die in Bayern eingeführte Fassung wörtlich mit diesem Muster übereinstimmt
+# und welche Fassung aktuell gilt – von einer Fachperson zu prüfen.
+# Aus der PDF-Textextraktion wurden vereinzelte Leerzeichen innerhalb von Wörtern entfernt (sonst wortgleich).
+
+2 Zu- oder Durchfahrten Die lichte Breite der Zu- oder Durchfahrten muß mindestens 3 m, die lichte Höhe mindestens 3,50 m betragen. Die lichte Höhe der Zu- oder Durchfahrten ist senkrecht zur Fahrbahn zu messen. Wird eine Zu- oder Durchfahrt auf eine Länge von mehr als 12 m beidseitig durch Bauteile, wie Wände oder Pfeiler, begrenzt, so muß die lichte Breite mindestens 3,50 m betragen. Wände und Decken von Durchfahrten müssen feuerbeständig sein.
+
+8 Aufstellflächen auf dem Grundstück Aufstellflächen müssen mindestens 3,50 m breit und so angeordnet sein, daß alle zum Anleitern bestimmten Stellen von Hubrettungsfahrzeugen erreicht werden können.
+
+14 Zu- oder Durchgänge Zu- oder Durchgänge für die Feuerwehr sind geradlinig und mindestens 1,25 m breit auszubilden. Für Türöffnungen und andere geringfügige Einengungen in diesen Zu- oder Durchgängen genügt eine lichte Breite von 1 m.

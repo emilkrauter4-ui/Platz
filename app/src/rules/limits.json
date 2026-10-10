@@ -301,6 +301,144 @@
       "geprueft": false
     }
   },
+  "grossesVorhaben": {
+    "_hinweis": "Stockwerk 3 „Großes Vorhaben“ (AUFTRAG_V3 Phase B): zweites Wohnhaus, Anbau, Aufstockung. Das Ergebnis ist Orientierung, nie eine Zusage; ob gebaut werden darf, entscheidet die Gemeinde. Abstandsflächen nutzen den Block abstand (Art. 6). Alle Einträge geprueft: false.",
+    "geschosshoeheAnnahmeM": {
+      "wert": 2.8,
+      "quelle": "Annahme Passt.",
+      "text": "Geschosshöhe (Fußboden bis Fußboden) für die Wandhöhe: Wandhöhe = Geschosse × Geschosshöhe. Der Nutzer kann sie einstellen.",
+      "geprueft": false
+    },
+    "bruestungshoeheAnnahmeM": {
+      "wert": 1.0,
+      "quelle": "Annahme Passt.",
+      "text": "Oberkante der Brüstung des obersten zum Anleitern bestimmten Fensters über dem Fußboden seines Geschosses. Damit liegt sie bei n Geschossen auf (n − 1) × Geschosshöhe + 1,0 m über dem Gelände (Dachgeschossfenster nicht berücksichtigt).",
+      "geprueft": false
+    },
+    "feuerwehrBruestungGrenzeM": {
+      "wert": 8,
+      "quelle": "BayBO Art. 5 Abs. 1 Satz 2",
+      "text": "„Zu Gebäuden, bei denen die Oberkante der Brüstung von zum Anleitern bestimmten Fenstern oder Stellen mehr als 8 m über dem Gelände liegt, ist in den Fällen des Satzes 1 an Stelle eines Zu- oder Durchgangs eine Zu- oder Durchfahrt zu schaffen.“",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 5 Abs. 1 Satz 2)",
+      "geprueft": false
+    },
+    "feuerwehrEntfernungM": {
+      "wert": 50,
+      "quelle": "BayBO Art. 5 Abs. 1 Satz 4",
+      "text": "„Bei Gebäuden, die ganz oder mit Teilen mehr als 50 m von einer öffentlichen Verkehrsfläche entfernt sind, sind Zufahrten oder Durchfahrten nach Satz 2 zu den vor und hinter den Gebäuden gelegenen Grundstücksteilen und Bewegungsflächen herzustellen, wenn sie aus Gründen des Feuerwehreinsatzes erforderlich sind.“ Ob es „erforderlich“ ist, entscheidet die Feuerwehr: Passt. markiert das als offen.",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 5 Abs. 1 Satz 4)",
+      "geprueft": false
+    },
+    "zugangBreiteM": {
+      "wert": 1.25,
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 14 (Muster, Fassung 02/2007)",
+      "text": "„Zu- oder Durchgänge für die Feuerwehr sind geradlinig und mindestens 1,25 m breit auszubilden. Für Türöffnungen und andere geringfügige Einengungen … genügt eine lichte Breite von 1 m.“ Art. 5 Abs. 1 Satz 1 BayBO verlangt den geradlinigen Zu- oder Durchgang zu rückwärtigen Gebäuden. Welche Fassung der Richtlinie in Bayern gilt, ist offen.",
+      "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 14)",
+      "geprueft": false
+    },
+    "zufahrtBreiteM": {
+      "wert": 3,
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (Muster, Fassung 02/2007)",
+      "text": "„Die lichte Breite der Zu- oder Durchfahrten muß mindestens 3 m … betragen.“",
+      "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
+      "geprueft": false
+    },
+    "zufahrtBreiteBegrenztM": {
+      "wert": 3.5,
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (Muster, Fassung 02/2007)",
+      "text": "„Wird eine Zu- oder Durchfahrt auf eine Länge von mehr als 12 m beidseitig durch Bauteile, wie Wände oder Pfeiler, begrenzt, so muß die lichte Breite mindestens 3,50 m betragen.“ Passt. prüft das an Gebäuden beidseits des Korridors.",
+      "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
+      "geprueft": false
+    },
+    "zufahrtBegrenztLaengeM": {
+      "wert": 12,
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (Muster, Fassung 02/2007)",
+      "text": "Länge, ab der die beidseitige Begrenzung durch Bauteile die Breite von 3,50 m verlangt.",
+      "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
+      "geprueft": false
+    },
+    "zweiterRettungswegFeuerwehr": {
+      "wert": true,
+      "quelle": "Annahme Passt. zu BayBO Art. 5 Abs. 1 Satz 1",
+      "text": "Art. 5 Abs. 1 Satz 1 verlangt den Zugang auch zu Gebäuden, bei denen „der zweite Rettungsweg … über Rettungsgeräte der Feuerwehr führt“. Ob das für das Vorhaben zutrifft, hängt vom Rettungswegkonzept ab. Passt. nimmt an, dass es zutrifft (sicher nach oben), und prüft deshalb immer den Zugang.",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 5 Abs. 1 Satz 1)",
+      "geprueft": false
+    },
+    "erschliessung": {
+      "wert": true,
+      "quelle": "BayBO Art. 4 Abs. 1 Nr. 2, Abs. 2, 3",
+      "text": "Das Grundstück muss „in einer angemessenen Breite an einer befahrbaren öffentlichen Verkehrsfläche“ liegen. Wie breit „angemessen“ ist, nennt das Gesetz nicht (offen). Für Wohnwege begrenzter Länge und im Außenbereich gelten Ausnahmen (Abs. 2, 3). Passt. prüft nur die Breite des freien Korridors auf dem Grundstück.",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 4)",
+      "geprueft": false
+    },
+    "verfahrenWohnhaus": {
+      "wert": "baugenehmigung",
+      "quelle": "BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a (Umkehrschluss) und Art. 71",
+      "text": "Gebäude über 75 m³ Brutto-Rauminhalt sind nicht verfahrensfrei (Innenbereich). Passt. nimmt für Wohnhaus, Anbau und Aufstockung ein Baugenehmigungsverfahren an. Vor dem Bauantrag kann der Bauherr einen Vorbescheid zu einzelnen Fragen beantragen (Art. 71): „Vor Einreichung des Bauantrags ist auf Antrag des Bauherrn zu einzelnen Fragen des Bauvorhabens ein Vorbescheid zu erteilen.“ In der Praxis heißt das Bauvoranfrage.",
+      "wortlaut": "docs/recht/BayBO_Art57.txt; docs/recht/BayBO_Art4_5_71.txt (Art. 71)",
+      "geprueft": false
+    },
+    "umfeldRadiusM": {
+      "wert": 100,
+      "quelle": "Passt.-Festlegung (AUFTRAG_V3), keine Rechtsnorm",
+      "text": "Umkreis um das Vorhaben, in dem Passt. aus LoD2 und Hausumringen übliche Gebäudehöhen, Grundflächen und die Zahl der Gebäude in zweiter Reihe zeigt. § 34 Abs. 1 BauGB spricht von der „näheren Umgebung“ ohne Zahl; die Abgrenzung ist Sache der Gemeinde.",
+      "geprueft": false
+    },
+    "paragraf34": {
+      "wert": "orientierung",
+      "quelle": "BauGB § 34 Abs. 1",
+      "text": "„Innerhalb der im Zusammenhang bebauten Ortsteile ist ein Vorhaben zulässig, wenn es sich nach Art und Maß der baulichen Nutzung, der Bauweise und der Grundfläche, die überbaut werden soll, in die Eigenart der näheren Umgebung einfügt und die Erschließung gesichert ist.“ Passt. zeigt nur Zahlen aus der Umgebung als Orientierung, keine Ampel und keine Aussage, ob es sich einfügt.",
+      "wortlaut": "docs/recht/BauGB_34_246e.txt",
+      "geprueft": false
+    },
+    "bauTurbo": {
+      "wert": "hinweis",
+      "quelle": "BauGB § 246e Abs. 1 und 2; § 34 Abs. 3b",
+      "text": "„Mit Zustimmung der Gemeinde kann bis zum Ablauf des 31. Dezember 2030 von den Vorschriften dieses Gesetzbuchs oder den aufgrund dieses Gesetzbuchs erlassenen Vorschriften abgewichen werden, wenn die Abweichung unter Würdigung nachbarlicher Interessen mit den öffentlichen Belangen vereinbar ist“ und das Vorhaben der Errichtung von Wohngebäuden oder der Erweiterung, Änderung oder Erneuerung von Gebäuden dient, durch die neue Wohnungen entstehen (§ 246e). Ähnlich § 34 Abs. 3b für Wohngebäude im Innenbereich. Passt. nennt das nur als Hinweis: Die Gemeinde kann davon Gebrauch machen, das liegt in ihrem Ermessen.",
+      "wortlaut": "docs/recht/BauGB_34_246e.txt",
+      "geprueft": false
+    },
+    "aussenbereich": {
+      "wert": "hinweis",
+      "quelle": "BauGB § 35 Abs. 1 und 2",
+      "text": "Im Außenbereich ist ein Vorhaben „nur zulässig“, wenn öffentliche Belange nicht entgegenstehen, die Erschließung gesichert ist und es zu den in Abs. 1 genannten privilegierten Vorhaben gehört; sonstige Vorhaben „können im Einzelfall zugelassen werden“, wenn sie öffentliche Belange nicht beeinträchtigen (Abs. 2). Ein zweites Wohnhaus gehört in der Regel nicht zu den privilegierten Vorhaben. Passt. weist nur darauf hin, dass dort deutlich strengere Regeln gelten.",
+      "wortlaut": "docs/recht/BauGB_34_246e.txt",
+      "geprueft": false
+    },
+    "bebauungsplan": {
+      "wert": "hinweis",
+      "quelle": "BauGB § 30 Abs. 1",
+      "text": "Im Geltungsbereich eines qualifizierten Bebauungsplans ist ein Vorhaben zulässig, wenn es den Festsetzungen nicht widerspricht und die Erschließung gesichert ist. Passt. fragt nur ab, ob das Landesportal einen Plan zeigt, und verlinkt ihn. Der Inhalt wird nicht ausgelesen und nicht geprüft.",
+      "wortlaut": "docs/recht/BauGB_34_246e.txt",
+      "geprueft": false
+    },
+    "grundstuecksteilung": {
+      "wert": "information",
+      "quelle": "BayBO Art. 4 Abs. 1 Nr. 2 (Hinweis)",
+      "text": "Nur Information, keine Prüfung: Wird das Grundstück geteilt, braucht jedes Teilgrundstück den Anschluss an eine befahrbare öffentliche Verkehrsfläche in angemessener Breite (Art. 4 Abs. 1 Nr. 2), und die Abstandsflächen müssen auf dem jeweiligen Grundstück liegen (Art. 6 Abs. 2). Das Bauamt und das Vermessungsamt klären die Teilung.",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 4); docs/recht/BayBO_Art6.txt (Art. 6 Abs. 2)",
+      "geprueft": false
+    },
+    "schattenStichtage": {
+      "wert": [
+        "03-21",
+        "12-21"
+      ],
+      "quelle": "Passt.-Festlegung (AUFTRAG_V3), keine Rechtsnorm",
+      "text": "Zusätzliche Verschattung wird an zwei Stichtagen als Zahl angegeben: 21. März (Tag-und-Nacht-Gleiche) und 21. Dezember (kürzester Tag). Eine gesetzliche Grenze für zumutbare Verschattung kennt die BayBO nicht (offen); Passt. bewertet die Zahlen nicht.",
+      "geprueft": false
+    },
+    "schattenGartenRingeM": {
+      "wert": [
+        2,
+        5,
+        8
+      ],
+      "quelle": "Annahme Passt.",
+      "text": "Nachbargärten: Punkte in 2, 5 und 8 m Abstand außerhalb der Grundstücksgrenze, alle 2 m, nicht in Gebäuden, 1 m über dem Boden. Die Nachbargrundstücke sind nicht bekannt (keine amtlichen Flurstücke); die Lage der Gärten ist deshalb eine Annahme.",
+      "geprueft": false
+    }
+  },
   "pflanzen": {
     "_hinweis": "Grenzabstand von Pflanzen nach dem bayerischen AGBGB (Nachbarrecht, Zivilrecht). Kein Baurecht: Das Bauamt prüft das nicht, es geht um Ansprüche zwischen Nachbarn.",
     "abstandKleinM": {
