@@ -363,22 +363,29 @@ interface Limit {
   sub: string;
 }
 
-function limitFor(k: ObjectKind, o: Placed): Limit {
+/** Größengrenze nach Art. 57. Im Außenbereich gelten andere Grenzen: Gebäude nur bis 20 m³ (ohne Aufenthaltsraum, Toilette,
+ *  Feuerstätte), Garagen und Carports sind dort nicht freigestellt (die Ampel bleibt dort ohnehin rot, siehe building()). */
+function limitFor(k: ObjectKind, o: Placed, bereich: 'innen' | 'aussen' = 'innen'): Limit {
+  const aussen = bereich === 'aussen';
   if (k === 'gartenhaus') {
     const v = rauminhalt(o);
-    const max = L.gartenhaus.maxBruttoRauminhaltM3.wert;
+    const max = aussen ? L.gartenhaus.aussenbereichMaxM3.wert : L.gartenhaus.maxBruttoRauminhaltM3.wert;
     return {
       ok: v <= max + 1e-9,
-      row: `Ohne Baugenehmigung bis ${max} m³ umbauten Raum. Deins: ${fmt(v, 1)} m³`,
+      row: aussen
+        ? `Im Außenbereich ohne Baugenehmigung nur bis ${max} m³, ohne Aufenthaltsraum, Toilette und Feuerstätte. Deins: ${fmt(v, 1)} m³`
+        : `Ohne Baugenehmigung bis ${max} m³ umbauten Raum. Deins: ${fmt(v, 1)} m³`,
       head: 'Zu groß für ohne Genehmigung.',
-      sub: `Dein Gartenhaus hat ${fmt(v, 1)} m³ umbauten Raum. Ohne Bauantrag gehen bis ${max} m³.`,
+      sub: `Dein Gartenhaus hat ${fmt(v, 1)} m³ umbauten Raum. Ohne Bauantrag gehen ${aussen ? 'im Außenbereich' : ''} bis ${max} m³.`.replace('  ', ' '),
     };
   }
   const a = o.w * o.d;
   const max = L.carport.maxFlaecheM2.wert;
   return {
     ok: a <= max + 1e-9,
-    row: `Ohne Baugenehmigung bis ${max} m² Fläche. Deiner: ${fmt(a, 1)} m²`,
+    row: aussen
+      ? `Im Außenbereich sind Garagen und Carports nicht freigestellt (Art. 57: bis ${max} m² nur außerhalb des Außenbereichs). Deiner: ${fmt(a, 1)} m²`
+      : `Ohne Baugenehmigung bis ${max} m² Fläche. Deiner: ${fmt(a, 1)} m²`,
     head: 'Zu groß für ohne Genehmigung.',
     sub: `Dein Carport hat ${fmt(a, 1)} m². Ohne Bauantrag gehen bis ${max} m².`,
   };
@@ -403,7 +410,7 @@ function building(
   const fp = fps[k];
   const sides = site.plot.sides;
   const inside = schnell || insidePolygon(fp, site.plot.boundary); // schnell: Vorprüfung in zonenPruefer hat es geklärt
-  const lim = limitFor(k, o);
+  const lim = limitFor(k, o, site.bereich.value);
   const closest = segs.reduce((a, b) => (b.d < a.d ? b : a));
   const near = segs.filter((s) => s.near);
   const nearSides = [...new Set(near.map((s) => s.side))];

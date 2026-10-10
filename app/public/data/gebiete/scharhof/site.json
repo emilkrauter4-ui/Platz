@@ -1,0 +1,33 @@
+{
+ "name": "Scharhof, Hirschau (Mess-Adresse)",
+ "crs": "EPSG:25832",
+ "origin": [
+  715500.0,
+  5492000.0
+ ],
+ "bbox": [
+  -500.0,
+  -1000.0,
+  500.0,
+  1000.0
+ ],
+ "gemeinde": {
+  "name": "Hirschau",
+  "ags": "09371127",
+  "bauleitplanung_url": null,
+  "quelle": "Bauleitplanungsportal Bayern (geoportal.bayern.de/bauleitplanungsportal)"
+ },
+ "demos": [],
+ "mess": {
+  "id": "scharhof",
+  "adresse": "Scharhof 1, 92242 Hirschau",
+  "start": [
+   -80.0,
+   -90.0
+  ]
+ },
+ "lage": {
+  "bereich": "aussen",
+  "grund": "Scharhof 1 ist laut OpenStreetMap das Betriebsgelände Gebrüder Dorfner (Kaolinwerk). Die amtliche Tatsächliche Nutzung (ALKIS) weist dort Tagebau und Industrie-/Gewerbefläche aus, die nächste Wohnbaufläche liegt rund 650 m entfernt. Das ist kein Teil des zusammenhängend bebauten Ortes Hirschau, daher vermutlich Außenbereich (§ 35 BauGB). Ob ein Bebauungsplan gilt, ist offen. Nicht amtlich geprüft."
+ }
+}

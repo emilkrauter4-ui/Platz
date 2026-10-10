@@ -25,7 +25,7 @@ from rasterio.merge import merge
 from rasterio.transform import from_bounds
 from rasterio.warp import reproject
 
-from common import app_data_dir, cfg, raw_dir
+from common import app_data_dir, cfg, gebiet_id, raw_dir
 from geoid import to_geographic3d
 
 TILE = 256
@@ -113,6 +113,8 @@ def parz_tiles(out, rect):
 
 
 def main() -> int:
+    if gebiet_id():
+        raise SystemExit("Offline-Kacheln gibt es nur für das Demo-Gebiet (Mess-Adressen sind nur online nutzbar).")
     out = app_data_dir()
     rect = area_rect()
     print("Gebiet (Grad):", [round(v, 5) for v in rect])

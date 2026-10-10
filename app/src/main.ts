@@ -64,7 +64,7 @@ import {
 } from './rules';
 import { ausTipp, dachWandText, wandLabelVon, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import type { TippAntwort } from './site/bestand';
-import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
+import { DATA_ROOT, DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, getOrigin, localToCartesian, localToLonLat, lonLatToLocal, setOrigin } from './scene/coords';
 import { abgelaufen, dekodieren, kodieren, linkIdAus, neuerSchluessel, projektHash, VERSION, type Vorhaben } from './nachbar/link';
 import { apiLernSpeicher, apiSpeicher, kachelAus, type LernAktion, type NachbarAntwort } from './speicher';
@@ -306,11 +306,26 @@ function showStart(msg?: string) {
   st.draft = [];
   scene.parzellar.show = false;
   const online = navigator.onLine && !new URLSearchParams(location.search).has('offline');
+  const mess = data.site.mess;
   verdict(
-    'Wo steht dein Haus?',
-    msg ?? (online ? 'Such deine Adresse oder tipp auf dein Grundstück in der Karte.' : 'Ohne Internet gibt es keine Adresssuche. Tipp auf dein Grundstück oder wähl eine Demo-Adresse.'),
+    mess ? 'Mess-Adresse.' : 'Wo steht dein Haus?',
+    msg ?? (mess ? 'Wähl die Mess-Adresse oder tipp auf das Grundstück in der Karte.' : online ? 'Such deine Adresse oder tipp auf dein Grundstück in der Karte.' : 'Ohne Internet gibt es keine Adresssuche. Tipp auf dein Grundstück oder wähl eine Demo-Adresse.'),
   );
   const demos = data.site.demos ?? [];
+  // Mess-Adressen sind keine Demo: nur mit ?mess sichtbar, nie mit ?pitch (Vorführung), nie in den Demo-Adressen.
+  const q = new URLSearchParams(location.search);
+  const verweise = !mess && q.has('mess') && !q.has('pitch') ? data.site.messadressen ?? [] : [];
+  const messHtml = mess
+    ? `<div class="messbox" style="border:1px solid var(--line,#8886);border-radius:10px;padding:10px 12px;margin:12px 0;text-align:left">
+        <strong>Mess-Adresse – keine Demo</strong>
+        <p class="fine" style="margin:4px 0 8px">Hier werden Objekte vor Ort mit dem Maßband gemessen und mit der Tipp-Erfassung verglichen. Die Lage ist angenommen (Außenbereich), nicht amtlich geprüft.</p>
+        <button type="button" id="messGo">${esc(mess.adresse)}</button></div>
+        <p class="fine" style="text-align:left"><a href="${esc(gebietLink(null))}">Zurück zum Demo-Gebiet</a></p>`
+    : verweise.length
+      ? `<h3 style="font-size:14px;margin:16px 0 2px">Mess-Adressen <small class="fine">(nur zum Messen vor Ort, keine Demo)</small></h3><ul class="results">${verweise
+          .map((v) => `<li><button type="button" data-gebiet="${esc(v.id)}"><strong>${esc(v.titel)}</strong><br>${esc(v.adresse)}</button></li>`)
+          .join('')}</ul>`
+      : '';
   const demoHtml = demos.length
     ? `<h3 style="font-size:14px;margin:16px 0 2px">Demo-Adressen</h3><ul class="results">${demos
         .map((d) => `<li><button type="button" data-demo="${esc(d.id)}"><strong>${esc(d.titel)}</strong><br>${esc(d.adresse)}</button></li>`)
@@ -323,8 +338,16 @@ function showStart(msg?: string) {
       <button type="submit">Suchen</button>
     </form>
     <ul class="results" id="results"></ul>
-    ${demoHtml}
-    <p class="fine">Daten liegen für 2 × 2 km in ${esc(data.site.gemeinde.name)} vor.${online ? ' Adresssuche: © OpenStreetMap-Mitwirkende (Nominatim).' : ''}</p>`;
+    ${messHtml}
+    ${mess ? '' : demoHtml}
+    <p class="fine">Daten liegen für ${esc(gebietGroesse())} in ${esc(data.site.gemeinde.name)} vor.${online ? ' Adresssuche: © OpenStreetMap-Mitwirkende (Nominatim).' : ''}</p>`;
+  document.querySelectorAll<HTMLButtonElement>('[data-gebiet]').forEach((b) =>
+    b.addEventListener('click', () => { location.href = gebietLink(b.dataset.gebiet!); }),
+  );
+  document.getElementById('messGo')?.addEventListener('click', () => {
+    st.address = mess!.adresse;
+    void goToPlot(mess!.start);
+  });
   document.querySelectorAll<HTMLButtonElement>('[data-demo]').forEach((b) =>
     b.addEventListener('click', () => startDemo(demos.find((d) => d.id === b.dataset.demo)!)),
   );
@@ -350,6 +373,23 @@ function showStart(msg?: string) {
   renderer.syncDraftPoints();
   renderer.syncContext();
   renderer.updateDim();
+}
+
+/** Adresse der Seite für ein Gebiet (null = Demo-Gebiet); Parameter wie ?debug bleiben, ?mess/?gebiet werden ersetzt. */
+function gebietLink(id: string | null): string {
+  const u = new URL(location.href);
+  u.hash = '';
+  u.searchParams.delete('gebiet');
+  u.searchParams.delete('mess');
+  if (id) u.searchParams.set('gebiet', id);
+  return u.pathname + u.search;
+}
+
+/** „2 × 2 km“ aus der Begrenzung des Gebiets */
+function gebietGroesse(): string {
+  const [x0, y0, x1, y1] = data.site.bbox;
+  const km = (v: number) => String(Math.round(v / 100) / 10).replace('.', ',');
+  return `${km(x1 - x0)} × ${km(y1 - y0)} km`;
 }
 
 /** Demo-Adresse: Grenze ist vorgezeichnet (Label `Demo`), danach geht es direkt ins Prüfen. */
@@ -399,7 +439,7 @@ function tippVorbereiten(umriss: Vec2[]) {
 
 async function goToPlot(p: Vec2) {
   if (!inBbox(data.site, p, 20)) {
-    showStart('Hier haben wir noch keine Daten. Die Demo deckt 2 × 2 km rund um die Altstadt ab.');
+    showStart(`Hier haben wir noch keine Daten. Das Gebiet deckt ${gebietGroesse()} rund um ${data.site.mess ? data.site.mess.adresse : 'die Altstadt'} ab.`);
     return;
   }
   // Grenze noch unbekannt: vorläufig Adresspunkt ± 30 m (typisches Grundstück); nach „Grenze bestätigen" das echte
@@ -666,6 +706,7 @@ function renderSheet() {
       <summary>Deine Angaben und Annahmen</summary>
       <div class="field"><span>Gebiet ${tag(st.gebiet.provenance, st.gebiet.provenance)}</span>${sel('fGebiet', st.gebiet.value, [['rein', GEBIET_TEXT.rein], ['allgemein', GEBIET_TEXT.allgemein], ['misch', GEBIET_TEXT.misch]])}</div>
       <div class="field"><span>Lage ${tag(st.bereich.provenance, st.bereich.provenance)}</span>${sel('fBereich', st.bereich.value, [['innen', 'im Ort (Innenbereich)'], ['aussen', 'außerhalb (Außenbereich)']])}</div>
+      ${data.site.lage && st.bereich.provenance === 'Annahme' ? `<p class="fine" style="text-align:left;margin:-4px 0 8px">${esc(data.site.lage.grund)} Im Außenbereich gilt Art. 57 enger: Gebäude nur bis ${LIMITS.gartenhaus.aussenbereichMaxM3.wert} m³ und ohne Aufenthaltsraum, Toilette, Feuerstätte; Garagen und Carports sind dort nicht freigestellt.</p>` : ''}
       <div class="field"><span>Gartenhaus mit Aufenthaltsraum ${tag(st.aufenthaltsraum.provenance, st.aufenthaltsraum.provenance)}</span>${sel('fAuf', st.aufenthaltsraum.value ? 'ja' : 'nein', [['nein', 'nein'], ['ja', 'ja']])}</div>
       <div class="field"><span>Gartenhaus mit Ofen ${tag(st.feuerstaette.provenance, st.feuerstaette.provenance)}</span>${sel('fOfen', st.feuerstaette.value ? 'ja' : 'nein', [['nein', 'nein'], ['ja', 'ja']])}</div>
       <div class="field"><span>Nachbarfenster</span><span>${wins.filter((w) => w.provenance !== 'Annahme').length} gesetzt, ${wins.filter((w) => w.provenance === 'Annahme').length} angenommen</span></div>
@@ -1470,7 +1511,7 @@ async function gartenblick(an: boolean) {
 /* ---------- Wärmepumpe: Gerät aus der KEYMARK-Liste (lazy geladen) ---------- */
 type GeraetRow = [string, string, number, string, number | null];
 let geraete: Promise<{ quelle: string; geraete: GeraetRow[] }> | null = null;
-const ladeGeraete = () => (geraete ??= fetch(`${DATA_URL}/waermepumpen.json`).then((r) => r.json() as Promise<{ quelle: string; geraete: GeraetRow[] }>));
+const ladeGeraete = () => (geraete ??= fetch(`${DATA_ROOT}/waermepumpen.json`).then((r) => r.json() as Promise<{ quelle: string; geraete: GeraetRow[] }>));
 
 function geraetHtml(o: Placed): string {
   return `<div class="field" style="display:block">
@@ -1941,6 +1982,8 @@ function openReport() {
   h += `<h3>Was wir angenommen haben</h3><ul class="plain">
     <li>${plotProvenance === 'Demo' ? 'Grundstücksgrenze für die Demo nach der Flurkarte nachgezeichnet (Demo) – nicht amtlich' : 'Grundstücksgrenze von dir gesetzt (nutzerbestätigt), Flurkarte nur als Hilfslinie'}</li>
     <li>${esc(GEBIET_TEXT[st.gebiet.value])} (${esc(st.gebiet.provenance)}), ${st.bereich.value === 'innen' ? 'Innenbereich' : 'Außenbereich'} (${esc(st.bereich.provenance)})</li>
+    ${data.site.lage && st.bereich.provenance === 'Annahme' ? `<li>Lage-Annahme: ${esc(data.site.lage.grund)} Im Außenbereich gilt Art. 57 enger: ${LIMITS.gartenhaus.aussenbereichMaxM3.wert} m³ statt ${LIMITS.gartenhaus.maxBruttoRauminhaltM3.wert} m³ und keine Garagen-Freistellung (Annahme)</li>` : ''}
+    ${data.site.mess ? '<li>Mess-Adresse, keine Demo: Objekte werden vor Ort mit dem Maßband gemessen</li>' : ''}
     <li>Gartenhaus ${st.aufenthaltsraum.value ? 'mit' : 'ohne'} Aufenthaltsraum und ${st.feuerstaette.value ? 'mit' : 'ohne'} Feuerstätte (${esc(st.aufenthaltsraum.provenance)})</li>
     <li>Abstandsfläche 0,4 H, mindestens 3 m; Gemeindesatzungen können abweichen</li>
     <li>Wandhöhe über dem Gelände aus DGM1 gemessen, Fußboden am höchsten Geländepunkt</li>
@@ -2047,6 +2090,8 @@ async function main() {
     const site = await loadSite();
     data = { site, buildings: [], bestand: [] };
     setOrigin(site.origin);
+    // Lage-Annahme des Gebiets (Mess-Adresse im Außenbereich): Label Annahme, im Formular änderbar
+    if (site.lage) st.bereich = { value: site.lage.bereich, provenance: 'Annahme' };
     terrain = await Terrain.load(`${DATA_URL}/terrain`);
     // Offline-Demo: Luftbild und Flurkarte aus vorab erzeugten Kacheln statt aus den WMS
     scene = createScene($('map'), terrain, DATA_URL, site.bbox, await localImagery());
@@ -2075,8 +2120,8 @@ async function main() {
   document.addEventListener('keydown', (e) => e.key === 'Escape' && !$('modal').hidden && closeModal());
   $('infoBtn').addEventListener('click', openInfo);
 
-  // Startansicht: Altstadt schräg von Süden
-  frame([-150, -100], 260, '3d', false);
+  // Startansicht: Altstadt (Demo) bzw. Mess-Adresse schräg von Süden
+  frame(data.site.mess?.start ?? [-150, -100], 260, '3d', false);
   // Grundrisse und Bestand erst laden, wenn die Startansicht steht (oder sobald jemand sucht/tippt),
   // damit sie auf langsamem Netz nicht mit Cesium und dem Luftbild um Bandbreite konkurrieren.
   let detailsP: Promise<unknown> | null = null;

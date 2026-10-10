@@ -16,7 +16,7 @@ import numpy as np
 import rasterio
 from rasterio.merge import merge
 
-from common import app_data_dir, cfg, origin, raw_dir
+from common import app_data_dir, cfg, kachel_dateien, origin, raw_dir
 from geoid import undulation
 
 CHUNK_M = 250
@@ -26,7 +26,7 @@ def main() -> int:
     c = cfg()
     x0, y0, x1, y1 = c["gebiet"]["bbox"]
     res = c["terrain"]["aufloesung_m"]
-    srcs = [rasterio.open(p) for p in sorted((raw_dir() / "dgm1").glob("*.tif"))]
+    srcs = [rasterio.open(p) for p in kachel_dateien(raw_dir() / "dgm1", "tif")]
     for s in srcs:
         if s.crs.to_epsg() != 25832:
             raise SystemExit(f"{s.name}: unerwartetes CRS {s.crs}")
@@ -42,6 +42,8 @@ def main() -> int:
     und = undulation(E.ravel(), N.ravel()).reshape(E.shape)
     h_ell = H + und
     print(f"Undulation GCG2016 im Gebiet: {und.min():.3f} … {und.max():.3f} m")
+    if not (40 < und.min() and und.max() < 55):
+        raise SystemExit("Geoid-Grid greift im Gebiet nicht (Undulation außerhalb 40–55 m)")
 
     out = app_data_dir() / "terrain"
     out.mkdir(parents=True, exist_ok=True)

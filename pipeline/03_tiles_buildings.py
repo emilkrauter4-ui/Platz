@@ -19,7 +19,7 @@ from collections import defaultdict
 import mapbox_earcut as earcut
 import numpy as np
 
-from common import app_data_dir, build_dir, cfg
+from common import app_data_dir, cfg, gebiet_build_dir
 from geoid import to_ecef, to_geographic3d
 
 TILE_M = 250
@@ -105,7 +105,7 @@ def glb(positions: dict[str, np.ndarray], normals: dict[str, np.ndarray]) -> byt
 
 def main() -> int:
     x0, y0, x1, y1 = cfg()["gebiet"]["bbox"]
-    surfaces = pickle.load(open(build_dir() / "surfaces.pkl", "rb"))
+    surfaces = pickle.load(open(gebiet_build_dir() / "surfaces.pkl", "rb"))
     out = app_data_dir() / "tiles"
     out.mkdir(parents=True, exist_ok=True)
     geo, ecef = to_geographic3d(), to_ecef()

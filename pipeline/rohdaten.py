@@ -18,7 +18,7 @@ from rasterio.enums import Resampling
 from rasterio.transform import from_origin
 from rasterio.warp import reproject
 
-from common import build_dir, raw_dir
+from common import build_dir, kachel_dateien, raw_dir
 
 QUELLEN = {
     "dop20": ("raw", "dop20"),
@@ -68,8 +68,9 @@ def _zellen_dir() -> Path:
 
 
 def zellen_bauen() -> None:
-    """LAZ-Kacheln einmalig in 100-m-Zellen zerlegen (npz), damit Ausschnitte schnell lesbar sind."""
-    for p in sorted((raw_dir() / "laser").glob("*.laz")):
+    """LAZ-Kacheln des gewählten Gebiets (PASST_GEBIET) einmalig in 100-m-Zellen zerlegen (npz), damit Ausschnitte
+    schnell lesbar sind. Die Zellen liegen gemeinsam für alle Gebiete (Name = absolute Zellkoordinaten)."""
+    for p in kachel_dateien(raw_dir() / "laser", "laz"):
         xk, yk = (int(v) for v in p.stem.split("_"))
         teile: dict[tuple[int, int], list] = {}
         with laspy.open(p) as f:

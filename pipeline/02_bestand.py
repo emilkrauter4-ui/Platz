@@ -25,7 +25,7 @@ from rasterio.warp import reproject
 from scipy import ndimage
 from shapely.geometry import mapping, shape
 
-from common import build_dir, cfg, raw_dir
+from common import alle_bboxen, build_dir, cfg, gebiet_build_dir, kachel_dateien, raw_dir
 
 
 def load_resampled(path, like, resampling=Resampling.bilinear) -> np.ndarray:
@@ -104,14 +104,14 @@ _TN = {}
 
 def _tn_verkehr(klassen):
     if klassen not in _TN:
-        x0, y0, x1, y1 = cfg()["gebiet"]["bbox"]
         files = sorted((raw_dir() / "tn" / "data").rglob("*.gpkg")) + sorted((raw_dir() / "tn" / "data").rglob("*.shp"))
         frames = []
-        for f in files:
-            g = gpd.read_file(f, bbox=(x0, y0, x1, y1))
-            if g.crs and g.crs.to_epsg() != 25832:
-                g = g.to_crs(25832)
-            frames.append(g)
+        for x0, y0, x1, y1 in alle_bboxen():  # alle Gebiete: der Tipp-Dienst arbeitet gebietsübergreifend
+            for f in files:
+                g = gpd.read_file(f, bbox=(x0, y0, x1, y1))
+                if g.crs and g.crs.to_epsg() != 25832:
+                    g = g.to_crs(25832)
+                frames.append(g)
         tn = gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=25832)
         # Verkehrsflächen nach Nutzungsart, dazu Parkplätze (Bezeichnung innerhalb anderer Nutzungsarten)
         _TN[klassen] = tn[tn["nutzart"].isin(klassen) | (tn["bez"] == "Parkplatz")]
@@ -141,13 +141,13 @@ def laser_band(dom, c) -> tuple[np.ndarray, np.ndarray]:
 
 def main(ausgabe: str = "bestand.geojson") -> int:
     c = cfg()["bestand"]
-    raw, out = raw_dir(), build_dir()
+    raw, out = raw_dir(), gebiet_build_dir()
     buildings = gpd.read_file(out / "buildings.geojson").set_crs(25832, allow_override=True)
     masks = buildings.geometry.buffer(c["gebaeude_puffer_m"])
     stats = {"kandidaten": 0, "flaeche_form": 0, "laser": 0, "rauigkeit": 0, "umfeld": 0}  # „rauigkeit“ zählt nach Anbau-Filter
 
     results = []
-    for dom_path in sorted((raw / "dom20").glob("*.tif")):
+    for dom_path in kachel_dateien(raw / "dom20", "tif"):
         name = dom_path.name
         print(f"Kachel {name}")
         with rasterio.open(dom_path) as dom:

@@ -24,6 +24,7 @@ from functools import lru_cache
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 from rasterio import features
 from rasterio.enums import Resampling
 from rasterio.transform import from_origin
@@ -31,7 +32,7 @@ from scipy import ndimage
 from shapely.geometry import Point, Polygon, mapping, shape
 from shapely.ops import unary_union
 
-from common import build_dir, cfg
+from common import build_dir, cfg, gebiet_build_dir
 from rohdaten import laser, raster
 
 RES = 0.2
@@ -46,8 +47,10 @@ FAMILIEN = ["bau", "vegetation", "streifen", "wasser", "flach", "rund"]
 
 @lru_cache
 def _gebaeude():
-    b = gpd.read_file(build_dir() / "buildings.geojson").set_crs(25832, allow_override=True)
-    return b
+    # Demo-Gebiet und alle Mess-Gebiete (data/build/gebiete/<id>/buildings.geojson): der Tipp-Dienst arbeitet übergreifend
+    teile = [build_dir() / "buildings.geojson"] + sorted((build_dir() / "gebiete").glob("*/buildings.geojson"))
+    frames = [gpd.read_file(p).set_crs(25832, allow_override=True) for p in teile if p.exists()]
+    return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=25832)
 
 
 def _rasterize(geoms, bb, shape_):
@@ -824,7 +827,7 @@ def gebiet(bbox=None) -> int:
         f["properties"]["id"] = f"G{i}"
     fc = {"type": "FeatureCollection", "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
           "features": feats}
-    (build_dir() / "garten.geojson").write_text(json.dumps(fc), encoding="utf-8")
+    (gebiet_build_dir() / "garten.geojson").write_text(json.dumps(fc), encoding="utf-8")
     from collections import Counter
     print(Counter(f["properties"]["klasse"] for f in feats))
     return 0

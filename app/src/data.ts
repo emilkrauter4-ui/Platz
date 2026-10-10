@@ -8,6 +8,18 @@ export interface SiteMeta {
   gemeinde: { name: string; ags: string; bauleitplanung_url: string | null; quelle: string };
   /** Demo-Adressen mit vorgezeichneter Grenze (Label `Demo`) – siehe docs/demo-adressen.md */
   demos?: DemoAdresse[];
+  /** nur im Demo-Gebiet: Verweise auf Mess-Gebiete (nicht als Demo; nur mit ?mess sichtbar) */
+  messadressen?: MessVerweis[];
+  /** nur in einem Mess-Gebiet: die Mess-Adresse und ihr Kartenstart (lokale Meter) */
+  mess?: { id: string; adresse: string; start: Vec2 };
+  /** Lage-Annahme des Gebiets (Label `Annahme`, vom Nutzer änderbar) mit Begründung */
+  lage?: { bereich: 'innen' | 'aussen'; grund: string };
+}
+
+export interface MessVerweis {
+  id: string;
+  titel: string;
+  adresse: string;
 }
 
 export interface DemoAdresse {
@@ -45,7 +57,16 @@ export interface Data {
   modell?: number | null;
 }
 
-export const DATA_URL = `${import.meta.env.BASE_URL}data`;
+/** Mess-Gebiet aus ?gebiet=<id> (nur Kleinbuchstaben, Ziffern, _ und -); ohne Angabe das Demo-Gebiet. */
+export const GEBIET_ID: string | null = (() => {
+  const g = new URLSearchParams(location.search).get('gebiet');
+  return g && /^[a-z0-9_-]{1,32}$/.test(g) ? g : null;
+})();
+
+/** Gemeinsame Daten (Geräteliste, Gartenblick): immer die Wurzel */
+export const DATA_ROOT = `${import.meta.env.BASE_URL}data`;
+/** Daten des gewählten Gebiets: Demo-Gebiet `data`, Mess-Gebiet `data/gebiete/<id>` */
+export const DATA_URL = GEBIET_ID ? `${DATA_ROOT}/gebiete/${GEBIET_ID}` : DATA_ROOT;
 
 const json = (f: string) => fetch(`${DATA_URL}/${f}`).then((r) => {
   if (!r.ok) throw new Error(`${f} fehlt (${r.status})`);

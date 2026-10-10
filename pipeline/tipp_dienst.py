@@ -24,9 +24,19 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import tipp
+from common import alle_bboxen
 
 LOCK = threading.Lock()
-GEBIET = (698000.0, 5486000.0, 700000.0, 5488000.0)  # Datenkachel 2 × 2 km
+# Alle Gebiete mit aufbereiteten Daten: Demo-Gebiet (2 × 2 km) und Mess-Gebiete (config.yaml → gebiete)
+GEBIETE = [tuple(float(v) for v in b) for b in alle_bboxen()]
+
+
+def gebiet_von(x: float, y: float, rand: float = 0.0):
+    """Begrenzung des Gebiets, das (x, y) mit `rand` Abstand zum Gebietsrand enthält, sonst None."""
+    for b in GEBIETE:
+        if b[0] + rand <= x <= b[2] - rand and b[1] + rand <= y <= b[3] - rand:
+            return b
+    return None
 
 # Hintergrund: Embeddings bei Bedarf. Eine Warteschlange, ein Arbeiter mit eigener SAM-Instanz. Läuft gerade ein Tipp,
 # wartet der Arbeiter vor dem nächsten Fenster, damit der Tipp die CPU möglichst für sich hat.
@@ -54,9 +64,10 @@ def arbeiter() -> None:
 
 def vorbereiten(umriss: list) -> dict:
     xs, ys = [float(p[0]) for p in umriss], [float(p[1]) for p in umriss]
-    bb = (max(min(xs), GEBIET[0]), max(min(ys), GEBIET[1]), min(max(xs), GEBIET[2]), min(max(ys), GEBIET[3]))
-    if bb[0] > bb[2] or bb[1] > bb[3]:
+    g = gebiet_von((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+    if g is None:
         return {"ok": False, "grund": "Außerhalb der aufbereiteten Daten."}
+    bb = (max(min(xs), g[0]), max(min(ys), g[1]), min(max(xs), g[2]), min(max(ys), g[3]))
     zellen = tipp.zellen_fuer_bereich(*bb)
     neu = [z for z in zellen if z not in GEPLANT and not tipp.vorhanden(z)]
     # nächstgelegene zuerst: von der Mitte des Bereichs nach außen
@@ -114,7 +125,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Klasse unbekannt")
         except Exception as e:  # noqa: BLE001
             return self._antwort(400, {"ok": False, "grund": f"Anfrage ungültig: {e}"})
-        if not (GEBIET[0] + 30 <= x <= GEBIET[2] - 30 and GEBIET[1] + 30 <= y <= GEBIET[3] - 30):
+        if gebiet_von(x, y, 30) is None:
             return self._antwort(200, {"ok": False, "grund": "Außerhalb der aufbereiteten Daten. Bitte Umriss zeichnen."})
         with LOCK:  # SAM ist nicht threadsicher
             TIPP_AKTIV.set()

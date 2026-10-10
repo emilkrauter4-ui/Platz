@@ -1,0 +1,25 @@
+{
+ "crs": "EPSG:25832",
+ "hoehe": "Ellipsoidh\u00f6he ETRS89 (DHHN2016 + GCG2016)",
+ "quelle": "DGM1, Bayerische Vermessungsverwaltung (CC BY 4.0); GCG2016, BKG (CC BY 4.0)",
+ "origin": [
+  715500.0,
+  5492000.0
+ ],
+ "first": [
+  -499.5,
+  -999.5
+ ],
+ "res": 1.0,
+ "chunk": 250,
+ "cols": 4,
+ "rows": 8,
+ "base": 370.0,
+ "scale": 0.01,
+ "undulation_mittel": 46.552,
+ "overview": {
+  "step": 8.0,
+  "nx": 125,
+  "ny": 250
+ }
+}

@@ -63,7 +63,7 @@ function offlineManifest() {
       ];
       const offline = files.filter(
         (f) =>
-          !f.startsWith('data/mesh/') && (f.startsWith('data/') || f.startsWith('cesium/Workers/') || f.startsWith('cesium/Assets/IAU2006_XYS/') ||
+          !f.startsWith('data/mesh/') && !f.startsWith('data/gebiete/') && (f.startsWith('data/') || f.startsWith('cesium/Workers/') || f.startsWith('cesium/Assets/IAU2006_XYS/') ||
             f === 'cesium/Assets/approximateTerrainHeights.json') && !shell.includes(f),
       );
       writeFileSync(join(dist, 'precache.json'), JSON.stringify(shell));

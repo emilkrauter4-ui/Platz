@@ -11,7 +11,7 @@ import sys
 from shapely.geometry import shape
 from shapely.geometry.polygon import orient
 
-from common import app_data_dir, build_dir, cfg, origin
+from common import _roh_cfg, app_data_dir, cfg, gebiet_build_dir, gebiet_id, origin
 
 
 def ring(geom, ox, oy):
@@ -28,7 +28,7 @@ def ring(geom, ox, oy):
 def main() -> int:
     ox, oy = origin()
     out = app_data_dir()
-    b = json.loads((build_dir() / "buildings.geojson").read_text(encoding="utf-8"))
+    b = json.loads((gebiet_build_dir() / "buildings.geojson").read_text(encoding="utf-8"))
     rows = []
     for f in b["features"]:
         r = ring(f["geometry"], ox, oy)
@@ -45,7 +45,7 @@ def main() -> int:
     (out / "buildings.json").write_text(json.dumps({"origin": [ox, oy], "label": "amtlich", "buildings": rows}, separators=(",", ":")), encoding="utf-8")
 
     best = []
-    gp, bp = build_dir() / "garten.geojson", build_dir() / "bestand.geojson"
+    gp, bp = gebiet_build_dir() / "garten.geojson", gebiet_build_dir() / "bestand.geojson"
     if gp.exists():
         # Garten-Erkennung (08_garten.py): alle Klassen mit Maßen und Spanne. Kurze Schlüssel, die App packt aus.
         from shapely.geometry import mapping
@@ -97,6 +97,15 @@ def main() -> int:
         },
         "demos": cfg().get("demos", []),
     }
+    g = cfg()["gebiet"]
+    if gebiet_id():
+        # Mess-Adresse (kein Demo): Adresse, Startpunkt der Karte und Lage-Annahme (Label Annahme, vom Nutzer änderbar)
+        site["mess"] = {"id": gebiet_id(), "adresse": g["adresse"], "start": [round(g["start"][0] - ox, 1), round(g["start"][1] - oy, 1)]}
+        if g.get("lage"):
+            site["lage"] = {"bereich": g["lage"]["bereich"], "grund": " ".join(str(g["lage"]["grund"]).split())}
+    else:
+        # Verweise auf Mess-Gebiete: nur Kennung, Name und Adresse – nicht als Demo, nur mit ?mess sichtbar
+        site["messadressen"] = [{"id": i, "titel": v["name"], "adresse": v["adresse"]} for i, v in _roh_cfg().get("gebiete", {}).items()]
     (out / "site.json").write_text(json.dumps(site, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"App-Daten: {len(rows)} Gebäude, {len(best)} Bestand")
     return 0

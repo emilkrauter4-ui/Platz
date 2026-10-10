@@ -1,0 +1,237 @@
+{
+ "gebiet": "scharhof",
+ "bbox": [
+  715000,
+  5491000,
+  716000,
+  5493000
+ ],
+ "origin": [
+  715500.0,
+  5492000.0
+ ],
+ "rohdaten": [
+  {
+   "art": "dop20",
+   "kachel": "715_5491",
+   "mb": 52.8,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 0.2,
+   "px": [
+    5000,
+    5000
+   ],
+   "links": 715000,
+   "unten": 5491000,
+   "flug": "16.09.2023",
+   "flugnummer": "123028",
+   "erzeugt": "2023-09-16"
+  },
+  {
+   "art": "dop20",
+   "kachel": "715_5492",
+   "mb": 60.6,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 0.2,
+   "px": [
+    5000,
+    5000
+   ],
+   "links": 715000,
+   "unten": 5492000,
+   "flug": "16.09.2023",
+   "flugnummer": "123028",
+   "erzeugt": "2023-09-16"
+  },
+  {
+   "art": "dop20cir",
+   "kachel": "715_5491",
+   "mb": 75.1,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 0.2,
+   "px": [
+    5000,
+    5000
+   ],
+   "links": 715000,
+   "unten": 5491000,
+   "flug": null,
+   "flugnummer": null,
+   "erzeugt": null
+  },
+  {
+   "art": "dop20cir",
+   "kachel": "715_5492",
+   "mb": 79.9,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 0.2,
+   "px": [
+    5000,
+    5000
+   ],
+   "links": 715000,
+   "unten": 5492000,
+   "flug": null,
+   "flugnummer": null,
+   "erzeugt": null
+  },
+  {
+   "art": "dom20",
+   "kachel": "715_5491",
+   "mb": 45.1,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 0.2,
+   "px": [
+    5000,
+    5000
+   ],
+   "links": 715000,
+   "unten": 5491000,
+   "flug": "16.09.2023",
+   "flugnummer": "123028",
+   "erzeugt": "2023-09-16"
+  },
+  {
+   "art": "dom20",
+   "kachel": "715_5492",
+   "mb": 33.0,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 0.2,
+   "px": [
+    5000,
+    5000
+   ],
+   "links": 715000,
+   "unten": 5492000,
+   "flug": "16.09.2023",
+   "flugnummer": "123028",
+   "erzeugt": "2023-09-16"
+  },
+  {
+   "art": "dgm1",
+   "kachel": "715_5491",
+   "mb": 2.5,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 1.0,
+   "px": [
+    1000,
+    1000
+   ],
+   "links": 715000,
+   "unten": 5491000,
+   "flug": null,
+   "flugnummer": null,
+   "erzeugt": "2025-02-01"
+  },
+  {
+   "art": "dgm1",
+   "kachel": "715_5492",
+   "mb": 2.2,
+   "crs": "EPSG:25832",
+   "aufloesung_m": 1.0,
+   "px": [
+    1000,
+    1000
+   ],
+   "links": 715000,
+   "unten": 5492000,
+   "flug": null,
+   "flugnummer": null,
+   "erzeugt": "2025-02-01"
+  },
+  {
+   "art": "laser",
+   "kachel": "715_5491",
+   "mb": 354.2,
+   "crs": "nicht im Header",
+   "koordinaten_passen_zur_kachel": true,
+   "punkte": 35130679,
+   "erzeugt": "2025-10-21",
+   "punkte_pro_m2": 35.1
+  },
+  {
+   "art": "laser",
+   "kachel": "715_5492",
+   "mb": 335.1,
+   "crs": "nicht im Header",
+   "koordinaten_passen_zur_kachel": true,
+   "punkte": 34405332,
+   "erzeugt": "2025-10-21",
+   "punkte_pro_m2": 34.4
+  }
+ ],
+ "geoid": {
+  "min": 46.543,
+  "max": 46.563,
+  "mittel": 46.552,
+  "konstanter_naeherungswert": 47.9,
+  "abweichung_zum_naeherungswert_m": -1.35,
+  "greift": true
+ },
+ "gebaeude": {
+  "gesamt": 241,
+  "mit_lod2": 224,
+  "grundriss_hausumringe": 239
+ },
+ "lod2_boden_minus_dgm1_tiefster_m": {
+  "n": 224,
+  "median": 0.08,
+  "p5": -0.16,
+  "p95": 0.39,
+  "min": -1.62,
+  "max": 2.79,
+  "ueber_1m": 4
+ },
+ "lod2_boden_minus_dgm1_ringmittel_m": {
+  "n": 224,
+  "median": -0.17,
+  "p5": -1.68,
+  "p95": 0.04,
+  "min": -2.68,
+  "max": 0.52,
+  "ueber_1m": 23
+ },
+ "ausserhalb_dgm1_spanne_plus_minus_0_5m": {
+  "anzahl": 3,
+  "von": 224,
+  "gebaeude": [
+   {
+    "id": "DEBY_LOD2_6022650",
+    "flaeche_m2": 19,
+    "boden_minus_dgm_min": -0.88,
+    "boden_minus_dgm_max": -1.09
+   },
+   {
+    "id": "DEBY_LOD2_6044248",
+    "flaeche_m2": 186,
+    "boden_minus_dgm_min": -1.62,
+    "boden_minus_dgm_max": -2.43
+   },
+   {
+    "id": "DEBY_LOD2_71783676",
+    "flaeche_m2": 62,
+    "boden_minus_dgm_min": -0.66,
+    "boden_minus_dgm_max": -0.91
+   }
+  ]
+ },
+ "lod2_boden_minus_app_gelaende_tiefster_m": {
+  "n": 224,
+  "median": 0.08,
+  "p5": -0.16,
+  "p95": 0.4,
+  "min": -1.62,
+  "max": 2.79,
+  "ueber_1m": 4
+ },
+ "lod2_wand_unten_minus_boden_m": {
+  "n": 224,
+  "median": 0.0,
+  "p5": -0.0,
+  "p95": 0.0,
+  "min": -0.01,
+  "max": 0.01,
+  "ueber_1m": 0
+ },
+ "bestanden": true
+}

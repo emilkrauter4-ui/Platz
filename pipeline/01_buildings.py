@@ -19,7 +19,7 @@ from lxml import etree
 from shapely.geometry import Polygon, box, mapping
 from shapely.validation import make_valid
 
-from common import build_dir, cfg, raw_dir
+from common import cfg, gebiet_build_dir, raw_dir
 
 NS = {
     "core": "http://www.opengis.net/citygml/1.0",
@@ -73,6 +73,17 @@ def parse_lod2(path):
             del el.getparent()[0]
 
 
+def lod2_dateien(bbox):
+    """LoD2-Kacheln (2 km, Name = Südwestecke in km), die das Gebiet berühren – Rohdaten liegen gemeinsam."""
+    x0, y0, x1, y1 = bbox
+    out = []
+    for p in sorted((raw_dir() / "lod2").glob("*.gml")):
+        kx, ky = (int(v) * 1000 for v in p.stem.split("_"))
+        if kx < x1 and kx + 2000 > x0 and ky < y1 and ky + 2000 > y0:
+            out.append(p)
+    return out
+
+
 def main() -> int:
     c = cfg()
     bbox = c["gebiet"]["bbox"]
@@ -88,7 +99,7 @@ def main() -> int:
     print(f"Hausumringe im Gebiet: {len(hu)}")
 
     feats, surfaces, used = [], {}, set()
-    for f in sorted((raw / "lod2").glob("*.gml")):
+    for f in lod2_dateien(bbox):
         for b in parse_lod2(f):
             ground = b["surfaces"]["ground"]
             if not ground:
@@ -143,7 +154,7 @@ def main() -> int:
             "properties": {"id": f"HU_{i}", "label": "amtlich", "quelle_grundriss": "Hausumringe", "lod2": False},
         })
 
-    out = build_dir()
+    out = gebiet_build_dir()
     fc = {"type": "FeatureCollection", "name": "buildings", "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}}, "features": feats}
     (out / "buildings.geojson").write_text(json.dumps(fc), encoding="utf-8")
     with open(out / "surfaces.pkl", "wb") as fh:

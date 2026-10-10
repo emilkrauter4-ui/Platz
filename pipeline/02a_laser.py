@@ -19,7 +19,7 @@ import numpy as np
 import rasterio
 from rasterio.transform import from_origin
 
-from common import build_dir, raw_dir
+from common import build_dir, kachel_dateien, raw_dir
 
 RES = 0.5
 SIZE = int(1000 / RES)
@@ -54,8 +54,9 @@ def rasterize(path, x0, y0):
 def main() -> int:
     out = build_dir() / "laser_ndsm"
     out.mkdir(exist_ok=True)
-    meta = {}
-    for p in sorted((raw_dir() / "laser").glob("*.laz")):
+    meta_p = out / "meta.json"
+    meta = json.loads(meta_p.read_text()) if meta_p.exists() else {}  # Kacheln anderer Gebiete behalten
+    for p in kachel_dateien(raw_dir() / "laser", "laz"):
         xk, yk = (int(v) for v in p.stem.split("_"))
         x0, y0 = xk * 1000, yk * 1000
         dst = out / f"{xk}_{yk}.tif"
@@ -73,7 +74,7 @@ def main() -> int:
         date = (datetime.datetime(1980, 1, 6) + datetime.timedelta(seconds=t + 1e9)).date().isoformat()
         meta[p.stem] = {"befliegung": date, "abdeckung": round(float(np.isfinite(nd).mean()), 3)}
         print(f"  Befliegung {date}, Abdeckung {meta[p.stem]['abdeckung']:.1%}")
-    (out / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    meta_p.write_text(json.dumps(meta, indent=1), encoding="utf-8")
     return 0
 
 

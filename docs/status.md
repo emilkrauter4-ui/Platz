@@ -518,6 +518,33 @@ Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampol
   - fp16/fp32 ist nicht die Ursache (beide fp16), die Fensterüberlappung steckt in beiden Rechnungen gleich.
 - Danach wieder pausiert bis zu den Maßband-Werten.
 
+## Nachtrag 10. Oktober 2026 (3): Mess-Adresse Scharhof 1, Hirschau
+
+Ausführlich: `docs/messungen/scharhof_daten.md`. Fertig, bis auf die Maßband-Werte (Punkt 3 der Reihenfolge bleibt pausiert).
+
+- **Vorab zu klären:** Scharhof 1 ist das **Betriebsgelände der Gebrüder Dorfner** (Kaolinwerk mit Tagebau), kein Wohn-Einzelhof.
+  Die nächste Wohnbaufläche liegt rund 650 m entfernt. Gemessen werden können nur Kleinbauten im Werk.
+- **Kacheln:** DOP20/CIR/DOM20/DGM1/Laser `715_5491` und `715_5492`, LoD2 `714_5490` und `714_5492` (Fläche der OSM-Betriebsfläche
+  plus 50 m). Neues Gebiet `scharhof` in `config.yaml`; Schritte mit `PASST_GEBIET=scharhof`, Ausgaben in
+  `data/build/gebiete/scharhof` und `app/public/data/gebiete/scharhof`. Die App-Daten des Demo-Gebiets sind unverändert (nur `site.json` bekommt die Verweisliste der Mess-Adressen).
+- **Prüfungen wie Meilenstein 1** (`24_gebiet_pruefen.py`): Geoid-Grid greift (46,54–46,56 m); LoD2-Bodenhöhe minus tiefster
+  DGM1-Wert am Umring Median +0,08 m (P5 −0,16, P95 +0,39); **kein Gebäude schwebt**, 3 von 224 stehen 0,7–1,6 m unter dem
+  Gelände (Geländeänderung vermutet, nicht geklärt). Die erste Prüfung mit dem Ringmittel sah wegen Hanglage wie ein
+  Fehler aus; `HoeheGrund` ist der tiefste Punkt.
+- **Befliegung:** Luftbild und DOM20 **16.09.2023** (Bildflug 123028/1, nicht neuer als im Demo-Gebiet), Laser **08.03.2025**,
+  DGM1 02/2025, LoD2 `714_5490` vom **09.04.2022** (älter als Luftbild und Laser), `714_5492` vom 21.01.2025.
+- **Lage:** Annahme **Außenbereich** (Label `Annahme`, im Formular änderbar), begründet mit ALKIS-Nutzung und OSM. In der App
+  ist die Ampel dort rot; die Größenzeile nennt jetzt die Außenbereichsgrenzen (**20 m³**, Garagen/Carports nicht
+  freigestellt). Vorher stand dort fälschlich „bis 75 m³“. Der Prüfbericht vermerkt die Lage-Annahme.
+- **Tipp-Dienst:** bedient beide Gebiete, rechnet Embeddings für Grundstück + 20 m Rand bei Bedarf (9 Fenster in 68 s,
+  danach 0,5–1,0 s je Tipp); keine Vorberechnung der Kacheln. **Genauigkeit am Scharhof nicht gemessen.**
+- **App:** Mess-Adressen sind keine Demo. Sichtbar nur mit `?mess` (und nie mit `?pitch`); `?gebiet=scharhof` öffnet das
+  Gebiet. **Einen „Pitch-Modus“ gibt es in der App nicht** (nicht im Repo gefunden); `?pitch` ist deshalb nur das Versteck-Signal.
+  Foto-3D und Offline-Demo gibt es dort nicht.
+- **Maßband:** `docs/vor_ort_anleitung.md` beschreibt, wie die Scharhof-Objekte in `vor_ort.csv` kommen (`SH-01` …).
+- Tests: App 154 grün (neu: Außenbereich-Zeilen), Python 14 grün (neu: `test_gebiet.py`).
+- Danach wieder pausiert bis zu den Maßband-Werten.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

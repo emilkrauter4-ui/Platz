@@ -114,5 +114,12 @@
     ]
    ]
   }
+ ],
+ "messadressen": [
+  {
+   "id": "scharhof",
+   "titel": "Scharhof, Hirschau (Mess-Adresse)",
+   "adresse": "Scharhof 1, 92242 Hirschau"
+  }
  ]
 }

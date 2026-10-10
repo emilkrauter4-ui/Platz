@@ -8,12 +8,13 @@ Lizenzen geprüft am 3. Oktober 2026 im Katalog `geodaten.bayern.de/opengeodata/
 
 | Datensatz | Herkunft | Lizenz | Nutzung in Passt. | Bearbeitet? |
 |---|---|---|---|---|
-| 3D-Gebäudemodelle LoD2 (CityGML), Kachel 698_5486 | Bayerische Vermessungsverwaltung | CC BY 4.0 | Grundrisse, Trauf-/Firsthöhe, 3D Tiles | ja: trianguliert, nach ECEF umgerechnet (erlaubt) |
+| 3D-Gebäudemodelle LoD2 (CityGML), Kacheln 698_5486, 714_5490, 714_5492 (Mess-Adresse Scharhof, Hirschau) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Grundrisse, Trauf-/Firsthöhe, 3D Tiles | ja: trianguliert, nach ECEF umgerechnet (erlaubt) |
 | Hausumringe (Regierungsbezirk Oberpfalz) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Grundrisse für Abstände und Kollisionen | ja: zugeschnitten, mit LoD2 verknüpft |
 | DGM1 (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Gelände, Wandhöhe über Gelände, Bestandserkennung | ja: Ellipsoidhöhen, 250-m-Kacheln |
 | DOM20 (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Erkennung bestehender Kleinbauten | nur ausgewertet |
 | DOP20 RGB (GeoTIFF) | Bayerische Vermessungsverwaltung | CC BY 4.0 | Qualitätscheck Bestand (Kontaktbögen aus `pipeline/qa_bestand.py`), Offline-Kacheln, Screenshots in `docs/demo` | Ausschnitte, umprojiziert |
 | DOP20 CIR (über poly2metalink) | Bayerische Vermessungsverwaltung | CC BY 4.0 | NDVI-Vegetationsfilter | nur ausgewertet |
+| OpenStreetMap (Nominatim, Overpass) – Betriebsfläche „Gebrüder Dorfner“, Scharhof 1 | © OpenStreetMap-Mitwirkende | ODbL 1.0 | nur zur Bestimmung der Kacheln und für die Begründung der Lage-Annahme in `docs/messungen/scharhof_daten.md`; nicht in die App übernommen | nein |
 | DOP20 WMS `by_dop20c` | Bayerische Vermessungsverwaltung | CC BY 4.0 (AccessConstraints) | Luftbild in der App, unverändert angezeigt | nein |
 | Parzellarkarte WMS `by_alkis_parzellarkarte_umr_gelb` | Bayerische Vermessungsverwaltung | CC BY 4.0 (AccessConstraints) | Hilfslinie beim Grenze-Setzen, unverändert angezeigt | nein |
 | Quasigeoid GCG2016 (`de_bkg_gcg2016.tif`, PROJ-CDN) | © Bundesamt für Kartographie und Geodäsie (BKG) | CC BY 4.0 | Normalhöhe → Ellipsoidhöhe | nein |

@@ -97,3 +97,31 @@ demos:
     start: [76.8, -916.65]     # Gartenseite an der Hauswand, direkt an der Grenze zur Nachbarhälfte 1a
     winkelGrad: 84
     grenze: [[77.4, -896.6], [74.6, -923.3], [87.6, -925.0], [90.4, -899.4]]
+
+# Mess-Adressen: weitere Gebiete, in denen Objekte mit dem Maßband gemessen werden (docs/vor_ort_anleitung.md).
+# Kein Demo, nicht im Pitch-Modus. Aufruf einzelner Schritte mit PASST_GEBIET=<id>, z. B.
+#   PASST_GEBIET=scharhof python3 01_buildings.py
+# Rohdaten liegen gemeinsam in data/raw (Kachelnamen sind eindeutig); Ausgaben je Gebiet in
+# data/build/gebiete/<id> und app/public/data/gebiete/<id>. Modelle, Laserzellen und Embeddings bleiben gemeinsam.
+gebiete:
+  scharhof:
+    name: Scharhof, Hirschau (Mess-Adresse)
+    gemeinde_ags: "09371127"            # Stadt Hirschau (OSM de:amtlicher_gemeindeschluessel)
+    gemeinde_name: Hirschau
+    bauleitplanung_url: null            # noch nicht ermittelt → App zeigt „unbekannt“
+    # Kacheln: Scharhof 1 ist in OSM die Industrie-/Betriebsfläche „Gebrüder Dorfner“ (way 51816594, 715227–715920 /
+    # 5491161–5492055). Mit 50 m Rand: x 715177–715970, y 5491111–5492105 → 1-km-DOP/DOM/DGM/Laser-Kacheln
+    # 715_5491 und 715_5492; LoD2-2-km-Kacheln 714_5490 und 714_5492.
+    bbox: [715000, 5491000, 716000, 5493000]
+    adresse: Scharhof 1, 92242 Hirschau
+    # Lage-Annahme (Label Annahme, vom Nutzer änderbar). Siehe docs/messungen/scharhof_daten.md
+    lage:
+      bereich: aussen
+      grund: >-
+        Scharhof 1 ist laut OpenStreetMap das Betriebsgelände Gebrüder Dorfner (Kaolinwerk). Die amtliche Tatsächliche
+        Nutzung (ALKIS) weist dort Tagebau und Industrie-/Gewerbefläche aus, die nächste Wohnbaufläche liegt rund
+        650 m entfernt. Das ist kein Teil des zusammenhängend bebauten Ortes Hirschau, daher vermutlich Außenbereich
+        (§ 35 BauGB). Ob ein Bebauungsplan gilt, ist offen. Nicht amtlich geprüft.
+    # Kartenausschnitt, auf den die App bei „Mess-Adresse wählen“ zoomt (UTM)
+    start: [715420, 5491910]
+

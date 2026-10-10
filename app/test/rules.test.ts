@@ -298,6 +298,21 @@ describe('Größengrenzen BayBO Art. 57', () => {
     expect(r.carport.status).toBe('bad');
   });
 
+  it('Außenbereich: Größenzeile nennt 20 m³ (Gartenhaus) bzw. keine Freistellung (Carport), nicht 75 m³ / 50 m²', () => {
+    const s = square();
+    s.bereich = { value: 'aussen', provenance: 'Annahme' };
+    const r = evaluate(s, objs());
+    const zeile = (res: { rows: { text: string }[] }) => res.rows.map((x) => x.text).join(' | ');
+    expect(zeile(r.gartenhaus)).toContain('Im Außenbereich ohne Baugenehmigung nur bis 20 m³');
+    expect(zeile(r.gartenhaus)).not.toContain('bis 75 m³');
+    expect(r.gartenhaus.befunde).toContain('aussenbereich');
+    expect(r.gartenhaus.befunde).toContain('groesse'); // 3 × 3 × 2,5 m = 22,5 m³ > 20 m³
+    expect(zeile(r.carport)).toContain('nicht freigestellt');
+    expect(r.carport.befunde).not.toContain('groesse'); // Fläche allein ist es nicht
+    // Innenbereich unverändert
+    expect(zeile(evaluate(square(), objs()).gartenhaus)).toContain('Ohne Baugenehmigung bis 75 m³');
+  });
+
   it('Gartenhaus mit Feuerstätte im Innenbereich: verfahrensfrei bis 75 m³ (aktueller Wortlaut), aber gelb', () => {
     const s = square();
     s.feuerstaette = { value: true, provenance: 'nutzerbestätigt' };
