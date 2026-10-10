@@ -27,7 +27,7 @@ Test-Sets in der Kachel 698_5486 (Embeddings vorberechnet mit `20_tipp_embedding
 - Gemessen im Container mit warmem Datei-Cache. Nach einem Neustart des Rechners dauert der Dienst-Start länger
   (Import und SAM laden ≈ 40 s, gemessen am 09.10.), die Tipps selbst nicht.
 - Nur Kacheln mit Embeddings sind schnell. Fröschau 41 liegt in **699_5486**, die wird ebenfalls vorberechnet.
-  Für jede weitere Kachel kommen ≈ 4 GB und ≈ 14 min dazu.
+  Für jede weitere 1 × 1 km-Kachel kommen ≈ 4 GB und ≈ 12–14 min dazu (nicht je 2 × 2 km; Abgleich in tipp_bedarf.md).
 - Rechenzeit Server-seitig gemessen. Dazu kommt in der App die Netzlaufzeit (im WLAN vernachlässigbar, im Mobilfunk ≈ 0,1–0,3 s).
 
 **Nachtrag 09.10.2026 – Kachel 699_5486 (Fröschau 41):** Embeddings ebenfalls vorberechnet (484 Fenster, 739 s, 4,06 GB;

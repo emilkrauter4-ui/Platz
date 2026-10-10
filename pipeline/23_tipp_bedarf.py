@@ -226,6 +226,10 @@ def dienst() -> int:
 BAYERN_KM2 = 70542.0
 SUV_ANTEIL = 0.124
 VORBERECHNUNG_S = 739 / 484   # 20_tipp_embeddings.py, Kachel 699_5486, 4 CPU-Kerne
+# Kachelmessungen (20_tipp_embeddings.py, index.json): je 1 × 1 km, 22 × 22 = 484 Fenster, 4,06 GB
+KACHEL_KM2 = 1.0
+KACHEL_FENSTER = 484
+KACHEL_S = (739, 836)          # 699_5486, 698_5486
 
 
 def bericht() -> int:
@@ -236,7 +240,7 @@ def bericht() -> int:
     def voll(km2):
         n = km2 * je_km2
         return {"km2": round(km2), "fenster": round(n), "tb_fp16": round(n * mb / 1e6, 1), "tb_fp32": round(n * mb * 2 / 1e6, 1),
-                "cpu_h": round(n * VORBERECHNUNG_S / 3600)}
+                "cpu_h": round(n * VORBERECHNUNG_S / 3600), "cpu_h_max": round(n * KACHEL_S[1] / KACHEL_FENSTER / 3600)}
     land, suv = voll(BAYERN_KM2), voll(BAYERN_KM2 * SUV_ANTEIL)
     je_gs = {"fenster_median": fe["fenster_median"], "fenster_p90": fe["fenster_p90"], "mb_median": round(fe["fenster_median"] * mb),
              "mb_p90": round(fe["fenster_p90"] * mb), "s_median": round(fe["fenster_median"] * di["fenster_s"]),
@@ -245,7 +249,10 @@ def bericht() -> int:
     bedarf = {"grundstuecke": 100000, "fenster": round(n100k), "tb_fp16": round(n100k * mb / 1e6, 1),
               "cpu_h": round(n100k * di["fenster_s"] / 3600)}
     cache_fenster = int(tipp.CACHE_MAX_GB * 1e3 / mb)
-    _merken("hochrechnung", {"bayern": land, "siedlung_verkehr": suv, "je_grundstueck": je_gs, "bedarf_100k": bedarf,
+    k_gb = KACHEL_FENSTER * mb / 1e3
+    kachel = {"gb": round(k_gb, 2), "tb": round(BAYERN_KM2 / KACHEL_KM2 * k_gb / 1e3), "h": [round(BAYERN_KM2 * t / 3600) for t in KACHEL_S]}
+    falsch = {"tb": round(BAYERN_KM2 / 4 * k_gb / 1e3), "tage": [round(BAYERN_KM2 / 4 * t / 86400) for t in KACHEL_S]}
+    _merken("hochrechnung", {"kachel_hochgerechnet": kachel, "annahme_2x2km": falsch, "bayern": land, "siedlung_verkehr": suv, "je_grundstueck": je_gs, "bedarf_100k": bedarf,
                              "cache_max_gb": tipp.CACHE_MAX_GB, "cache_fenster": cache_fenster})
     z = lambda v: f"{v:,.0f}".replace(",", " ")
     k = lambda v, n=2: f"{v:.{n}f}".replace(".", ",")
@@ -269,10 +276,18 @@ sichere Objekte des Test-Sets v2, dazu 80 Zufallspunkte; {f16['mit_umriss']} dav
 | fertiger Umriss, alle Tipps | {k(f16['umriss_median'], 4)} | {k(f16['umriss_min'], 4)} | {k(f16['umriss_anteil_ge_099'] * 100, 1)} % |
 | fertiger Umriss, nur echte Objekte | | {k(f16['objekte_min'], 4)} | 100 % |
 
-**Entscheidung: fp16 bleibt.** Alle SAM-Masken bleiben bei IoU ≥ 0,99, alle {f16['objekte']} echten Objekte bei ≥ 0,9995. Die
-einzige Ausnahme ist ein Zufallspunkt ohne Objekt: Die Masken sind praktisch gleich (0,996), aber die Formregel
-(„Rechteck, wenn Fläche/Rechteck ≥ 0,6“) kippt an ihrer Schwelle. An einer Schwelle reicht jeder noch so kleine
-Unterschied in der Maske für einen Sprung; bei echten Objekten trat das nicht auf. fp32 würde den Speicher verdoppeln.
+**Entscheidung: fp16 bleibt.** Alle SAM-Masken und alle fertigen Umrisse bleiben bei IoU ≥ 0,99.
+Beim ersten Lauf (10.10.) kippte genau ein Umriss (Zufallspunkt ohne Objekt, IoU 0,60): Die Masken waren praktisch
+gleich, aber die Rechteck-Regel („Rechteck ab Fläche/Rechteck 0,6“) lag mit 0,6005 (fp32) und 0,5987 (fp16) genau auf
+der Schwelle. Seitdem (`tipp.rechteck_entscheidung`, Test `pipeline/test_tipp_form.py`):
+- **Totband ± 0,05 um die Schwelle:** ab 0,65 Rechteck, unter 0,55 Umriss wie von SAM. Dazwischen entscheidet das
+  Material (Laser p90 ≥ 1,5 m und nicht grün → Rechteck), das bei so kleinen Maskenunterschieden praktisch gleich bleibt (Median über viele Pixel).
+- **„Kein Objekt gefunden“:** SAM-Score < 0,2 und P(nichts) ≥ 0,99, nur ohne vom Nutzer gewählte Klasse
+  (`docs/messungen/tipp_objektpruefung.md`). Der gekippte Fall (Score 0,064, P(nichts) 0,9997) liefert jetzt keinen
+  Umriss mehr, sondern diese Meldung.
+- Auf dem Test-Set v2 ändert das 2 von 87 Umrissen, beide schon vorher Fehlschläge (IoU < 0,5); die Erfolgsquoten
+  bleiben gleich (Gartenhaus 63 %, Pool 33 %, Trampolin 43 %).
+
 Verlustfrei komprimiert (zlib) spart ein fp16-Fenster nur 13 % und kostet 2 s – deshalb unkomprimiert.
 
 ## Ein Grundstück
@@ -294,15 +309,38 @@ Ende zu Ende über HTTP, leerer Cache, drei Referenz-Grundstücke außerhalb der
 
 ## Hochrechnung Bayern
 
-Gitter {k(tipp.RASTER_SCHRITT, 0)} m → {z(je_km2)} Fenster je km². Rechenzeit für Vorberechnung {k(VORBERECHNUNG_S)} s je Fenster (4 CPU-Kerne,
-gemessen an Kachel 699_5486). Keine GPU gemessen.
+Gitter {k(tipp.RASTER_SCHRITT, 0)} m → {z(je_km2)} Fenster je km². Rechenzeit für Vorberechnung {k(VORBERECHNUNG_S)}–{k(KACHEL_S[1] / KACHEL_FENSTER)} s je Fenster
+(4 CPU-Kerne, zwei Kachelläufe). Speicher fp16, {k(mb)} MB je Fenster. Keine GPU gemessen.
 
 | Variante | Fläche | Fenster | Speicher fp16 | (fp32) | Rechenzeit (4 Kerne) |
 |---|---|---|---|---|---|
-| ganz Bayern vorberechnen | {z(land['km2'])} km² | {z(land['fenster'])} | {k(land['tb_fp16'], 0)} TB | {k(land['tb_fp32'], 0)} TB | {z(land['cpu_h'])} h ≈ {k(land['cpu_h'] / 8760, 1)} Jahre |
-| nur Siedlungs- und Verkehrsfläche (12,4 %) | {z(suv['km2'])} km² | {z(suv['fenster'])} | {k(suv['tb_fp16'], 1)} TB | {k(suv['tb_fp32'], 1)} TB | {z(suv['cpu_h'])} h ≈ {k(suv['cpu_h'] / 24, 0)} Tage |
+| ganz Bayern vorberechnen | {z(land['km2'])} km² | {z(land['fenster'])} | {k(land['tb_fp16'], 0)} TB | {k(land['tb_fp32'], 0)} TB | {z(land['cpu_h'])}–{z(land['cpu_h_max'])} h ≈ {k(land['cpu_h'] / 8760, 1)}–{k(land['cpu_h_max'] / 8760, 1)} Jahre |
+| nur Siedlungs- und Verkehrsfläche (12,4 %) | {z(suv['km2'])} km² | {z(suv['fenster'])} | {k(suv['tb_fp16'], 1)} TB | {k(suv['tb_fp32'], 1)} TB | {z(suv['cpu_h'])}–{z(suv['cpu_h_max'])} h ≈ {k(suv['cpu_h'] / 24, 0)}–{k(suv['cpu_h_max'] / 24, 0)} Tage |
 | **bei Bedarf, je Grundstück** | | {k(fe['fenster_median'], 0)} (90 %: {k(fe['fenster_p90'], 0)}) | {je_gs['mb_median']} MB (90 %: {je_gs['mb_p90']} MB) | | {je_gs['s_median']} s (90 %: {je_gs['s_p90']} s) |
 | bei Bedarf, 100 000 Grundstücke, alles behalten | | {z(bedarf['fenster'])} | {k(bedarf['tb_fp16'], 1)} TB | | {z(bedarf['cpu_h'])} h |
+
+### Abgleich mit der Kachelmessung
+
+Die Kachelmessung (4,06 GB, 14 min) gilt für **eine 1 × 1 km große Kachel**, nicht für 2 × 2 km: Die Datenkachel
+der Demo ist 2 × 2 km, die Embedding-Kacheln (`data/build/tipp_embed/698_5486`, `699_5486`) sind die amtlichen
+1-km-Kacheln (Gitterzellen i = 0…21, j = 0…21 bei 48 m Abstand). Wer 4,06 GB auf 4 km² verteilt, kommt auf
+{z(falsch['tb'])} TB und {falsch['tage'][0]}–{falsch['tage'][1]} Tage – um den Faktor 4 zu wenig.
+
+| Ursache | Wirkung | Faktor |
+|---|---|---|
+| **Fläche je Kachel: 1 km², nicht 4 km²** | Hauptursache | × 4 |
+| Randfenster doppelt: jede Kachel rechnet ihre Randreihe und -spalte mit (22 × 22 = 484 statt {z(je_km2)} je km² im durchgehenden Gitter) | Kachelweise {k(KACHEL_FENSTER / je_km2, 3)} × mehr | × {k(KACHEL_FENSTER / je_km2, 2)} |
+| fp32 gegen fp16 | keine – beide Rechnungen in fp16 ({k(mb)} MB je Fenster = 4,19 Mio. Werte × 2 Byte); fp32 wäre × 2 | × 1 |
+| Überlappung der Fenster (96 m Fenster im 48-m-Gitter, jede Stelle liegt in ≈ 4 Fenstern) | steckt in beiden Rechnungen gleich | × 1 |
+| Rechenzeit je Fenster: zwei Läufe, {k(KACHEL_S[0] / KACHEL_FENSTER)} s und {k(KACHEL_S[1] / KACHEL_FENSTER)} s | Spanne der Zeit | × 1–{k(KACHEL_S[1] / KACHEL_S[0], 2)} |
+
+Konsistent für ganz Bayern ({z(BAYERN_KM2)} km², fp16):
+
+| Rechenweg | Speicher | Rechenzeit (4 Kerne) |
+|---|---|---|
+| kachelweise wie gemessen (1-km-Kacheln mit doppelten Rändern) | {z(kachel['tb'])} TB | {z(kachel['h'][0])}–{z(kachel['h'][1])} h ≈ {k(kachel['h'][0] / 8760, 1)}–{k(kachel['h'][1] / 8760, 1)} Jahre |
+| durchgehendes Gitter (ohne doppelte Ränder, Tabelle oben) | {k(land['tb_fp16'], 0)} TB | {z(land['cpu_h'])}–{z(land['cpu_h_max'])} h ≈ {k(land['cpu_h'] / 8760, 1)}–{k(land['cpu_h_max'] / 8760, 1)} Jahre |
+| zum Vergleich: Annahme 2 × 2 km je Kachel (falsch) | {z(falsch['tb'])} TB | {falsch['tage'][0]}–{falsch['tage'][1]} Tage |
 
 Die 100 000 Grundstücke sind eine obere Grenze: Nachbargrundstücke teilen Fenster, und der Cache ist begrenzt. Bei Bedarf
 wächst der Aufwand mit der Nutzung, nicht mit der Landesfläche – ganz Bayern vorzurechnen lohnt sich nicht.

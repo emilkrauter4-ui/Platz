@@ -96,16 +96,55 @@ def _maske_zu_poly(m: np.ndarray, bb, px: tuple[int, int]) -> Polygon | None:
     return p.simplify(GLAETTEN_M) if GLAETTEN_M else p
 
 
-def _form(p: Polygon, klasse: str | None) -> Polygon:
+# Rechteck-Regel mit Totband: Klar rechteckig (Fläche/gedrehtes Rechteck ≥ 0,65) → Rechteck, klar nicht (< 0,55) →
+# Umriss wie von SAM. Dazwischen entscheidet nicht die Form (kippt bei kleinsten Maskenunterschieden, z. B. fp16 ↔ fp32),
+# sondern das Material: Bau (Laser p90 ≥ 1,5 m und nicht grün) → Rechteck, sonst Umriss wie von SAM.
+RECHTECK_SCHWELLE = 0.6
+RECHTECK_BAND = 0.05
+
+
+def _ist_bau(s: dict | None, p: Polygon) -> bool:
+    if s is None:
+        return False
+    H, W = s["dgm"].shape
+    m, fe = g8._maske_aus_geom(p, tuple(s["_bb"]), (H, W))
+    v = np.zeros((H, W), bool)
+    v[fe[0]:fe[0] + m.shape[0], fe[1]:fe[1] + m.shape[1]] = m[:H - fe[0], :W - fe[1]]
+    if not v.any():
+        return False
+    return float(np.nanpercentile(s["las_h"][v], 90)) >= 1.5 and float(np.nanmedian(s["ndvi"][v])) < 0.25
+
+
+def rechteck_entscheidung(verhaeltnis: float, bau: bool) -> bool:
+    if verhaeltnis >= RECHTECK_SCHWELLE + RECHTECK_BAND:
+        return True
+    if verhaeltnis < RECHTECK_SCHWELLE - RECHTECK_BAND:
+        return False
+    return bau
+
+
+def _form(p: Polygon, klasse: str | None, s: dict | None = None) -> Polygon:
     """Form regularisieren: Bauten → gedrehtes Rechteck, runde Pools/Trampoline → Kreis gleicher Fläche."""
     if klasse in ("pool", "trampolin") and g8._kreisfoermigkeit(p) > 0.75:
         c = p.centroid
         return c.buffer(float(np.sqrt(p.area / np.pi)), quad_segs=16)
     if klasse in (None, "gartenhaus", "carport_garage", "gewaechshaus", "spielturm", "pool", "waermepumpe"):
         rr = p.minimum_rotated_rectangle
-        if p.area / max(rr.area, 1e-6) >= 0.6:
+        v = p.area / max(rr.area, 1e-6)
+        im_band = abs(v - RECHTECK_SCHWELLE) < RECHTECK_BAND
+        if rechteck_entscheidung(v, _ist_bau(s, p) if im_band else False):
             return rr
     return p
+
+
+# „Kein Objekt gefunden“: SAM ist selbst unsicher (Score < 0,2) und der Klassifikator sieht nichts (P(nichts) ≥ 0,99).
+# Nur ohne vom Nutzer gewählte Klasse. Gewählt auf dem Entwicklungs-Set (docs/messungen/tipp_objektpruefung.md).
+KEIN_OBJEKT_SCORE = 0.2
+KEIN_OBJEKT_NICHTS = 0.99
+
+
+def kein_objekt(score: float, p_nichts: float, klasse: str | None) -> bool:
+    return klasse is None and score < KEIN_OBJEKT_SCORE and p_nichts >= KEIN_OBJEKT_NICHTS
 
 
 FORMEN = {"embed": (256, 64, 64), "hr0": (32, 256, 256), "hr1": (64, 128, 128)}
@@ -315,9 +354,9 @@ def segmentieren(s: dict, x: float, y: float, wahl: str = WAHL, ohne_umringe: bo
             sc, p, m = k2[0]
     if form == "laser" and klasse in g8.BAUKLASSEN:
         lr = g8.laser_rechteck(s, p)
-        p = lr[0] if lr is not None else _form(p, klasse)
+        p = lr[0] if lr is not None else _form(p, klasse, s)
     elif form:
-        p = _form(p, klasse)
+        p = _form(p, klasse, s)
     return {"geom": p, "sam_score": sc}
 
 
@@ -415,7 +454,14 @@ def _modell() -> dict:
 
 
 def klasse_vorschlagen(s: dict, g: Polygon) -> list[tuple[str, float]]:
-    """Klassifikator v4 auf den Merkmalen des getippten Umrisses. Familie aus einfachen Signalen."""
+    """Die drei wahrscheinlichsten Objektklassen (ohne „nichts“)."""
+    p = wahrscheinlichkeiten(s, g)
+    return sorted(((k, v) for k, v in p.items() if k != "nichts"), key=lambda t: -t[1])[:3]
+
+
+def wahrscheinlichkeiten(s: dict, g: Polygon) -> dict[str, float]:
+    """Klassifikator v4 auf den Merkmalen des getippten Umrisses, alle Klassen inklusive „nichts“. Familie aus
+    einfachen Signalen."""
     H, W = s["dgm"].shape
     maske, fenster = g8._maske_aus_geom(g, tuple(s["_bb"]), (H, W))
     voll = np.zeros((H, W), bool)
@@ -430,8 +476,7 @@ def klasse_vorschlagen(s: dict, g: Polygon) -> list[tuple[str, float]]:
     m = _modell()
     X = np.array([[c["merkmale"][k] for k in m["spalten"]]], np.float32)
     p = g8.mit_regeln(m["modell"].predict_proba(X), m["klassen"], [c])[0]
-    out = sorted(((k, float(v)) for k, v in zip(m["klassen"], p) if k != "nichts"), key=lambda t: -t[1])
-    return out[:3]
+    return {str(k): float(v) for k, v in zip(m["klassen"], p)}
 
 
 def erfassen(x: float, y: float, klasse: str | None = None, s: dict | None = None) -> dict:
@@ -451,7 +496,12 @@ def erfassen(x: float, y: float, klasse: str | None = None, s: dict | None = Non
     if seg is None:
         return {"ok": False, "grund": "Kein Umriss gefunden. Bitte genauer tippen oder Umriss zeichnen.", "sekunden": round(time.time() - t0, 1)}
     g = seg["geom"]
-    vorschlag = klasse_vorschlagen(s, g)
+    w_alle = wahrscheinlichkeiten(s, g)
+    if kein_objekt(seg["sam_score"], w_alle.get("nichts", 0.0), klasse):
+        return {"ok": False, "kein_objekt": True, "sam_score": round(seg["sam_score"], 3),
+                "grund": "Kein Objekt gefunden. Tipp mitten auf das Objekt oder zeichne es ein.",
+                "sekunden": round(time.time() - t0, 2), "embedding": "vorberechnet" if vor else "live"}
+    vorschlag = sorted(((k, v) for k, v in w_alle.items() if k != "nichts"), key=lambda t: -t[1])[:3]
     k = klasse or (vorschlag[0][0] if vorschlag else "gartenhaus")
     ms = g8.masse(s, k, g, laser_umriss=False)
     w = wand_schaetzen(s, g, k)

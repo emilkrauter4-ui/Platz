@@ -14,13 +14,21 @@ sichere Objekte des Test-Sets v2, dazu 80 Zufallspunkte; 118 davon liefern einen
 | | Median IoU | Minimum | Anteil ≥ 0,99 |
 |---|---|---|---|
 | SAM-Maske (vor der Formregel) | 1,0000 | 0,9927 | 100,0 % |
-| fertiger Umriss, alle Tipps | 1,0000 | 0,5987 | 99,2 % |
+| fertiger Umriss, alle Tipps | 1,0000 | 0,9916 | 100,0 % |
 | fertiger Umriss, nur echte Objekte | | 0,9995 | 100 % |
 
-**Entscheidung: fp16 bleibt.** Alle SAM-Masken bleiben bei IoU ≥ 0,99, alle 55 echten Objekte bei ≥ 0,9995. Die
-einzige Ausnahme ist ein Zufallspunkt ohne Objekt: Die Masken sind praktisch gleich (0,996), aber die Formregel
-(„Rechteck, wenn Fläche/Rechteck ≥ 0,6“) kippt an ihrer Schwelle. An einer Schwelle reicht jeder noch so kleine
-Unterschied in der Maske für einen Sprung; bei echten Objekten trat das nicht auf. fp32 würde den Speicher verdoppeln.
+**Entscheidung: fp16 bleibt.** Alle SAM-Masken und alle fertigen Umrisse bleiben bei IoU ≥ 0,99.
+Beim ersten Lauf (10.10.) kippte genau ein Umriss (Zufallspunkt ohne Objekt, IoU 0,60): Die Masken waren praktisch
+gleich, aber die Rechteck-Regel („Rechteck ab Fläche/Rechteck 0,6“) lag mit 0,6005 (fp32) und 0,5987 (fp16) genau auf
+der Schwelle. Seitdem (`tipp.rechteck_entscheidung`, Test `pipeline/test_tipp_form.py`):
+- **Totband ± 0,05 um die Schwelle:** ab 0,65 Rechteck, unter 0,55 Umriss wie von SAM. Dazwischen entscheidet das
+  Material (Laser p90 ≥ 1,5 m und nicht grün → Rechteck), das bei so kleinen Maskenunterschieden praktisch gleich bleibt (Median über viele Pixel).
+- **„Kein Objekt gefunden“:** SAM-Score < 0,2 und P(nichts) ≥ 0,99, nur ohne vom Nutzer gewählte Klasse
+  (`docs/messungen/tipp_objektpruefung.md`). Der gekippte Fall (Score 0,064, P(nichts) 0,9997) liefert jetzt keinen
+  Umriss mehr, sondern diese Meldung.
+- Auf dem Test-Set v2 ändert das 2 von 87 Umrissen, beide schon vorher Fehlschläge (IoU < 0,5); die Erfolgsquoten
+  bleiben gleich (Gartenhaus 63 %, Pool 33 %, Trampolin 43 %).
+
 Verlustfrei komprimiert (zlib) spart ein fp16-Fenster nur 13 % und kostet 2 s – deshalb unkomprimiert.
 
 ## Ein Grundstück
@@ -45,15 +53,38 @@ Ende zu Ende über HTTP, leerer Cache, drei Referenz-Grundstücke außerhalb der
 
 ## Hochrechnung Bayern
 
-Gitter 48 m → 434 Fenster je km². Rechenzeit für Vorberechnung 1,53 s je Fenster (4 CPU-Kerne,
-gemessen an Kachel 699_5486). Keine GPU gemessen.
+Gitter 48 m → 434 Fenster je km². Rechenzeit für Vorberechnung 1,53–1,73 s je Fenster
+(4 CPU-Kerne, zwei Kachelläufe). Speicher fp16, 8,39 MB je Fenster. Keine GPU gemessen.
 
 | Variante | Fläche | Fenster | Speicher fp16 | (fp32) | Rechenzeit (4 Kerne) |
 |---|---|---|---|---|---|
-| ganz Bayern vorberechnen | 70 542 km² | 30 617 187 | 257 TB | 514 TB | 12 986 h ≈ 1,5 Jahre |
-| nur Siedlungs- und Verkehrsfläche (12,4 %) | 8 747 km² | 3 796 531 | 31,9 TB | 63,7 TB | 1 610 h ≈ 67 Tage |
+| ganz Bayern vorberechnen | 70 542 km² | 30 617 187 | 257 TB | 514 TB | 12 986–14 690 h ≈ 1,5–1,7 Jahre |
+| nur Siedlungs- und Verkehrsfläche (12,4 %) | 8 747 km² | 3 796 531 | 31,9 TB | 63,7 TB | 1 610–1 822 h ≈ 67–76 Tage |
 | **bei Bedarf, je Grundstück** | | 6 (90 %: 9) | 50 MB (90 %: 76 MB) | | 12 s (90 %: 18 s) |
 | bei Bedarf, 100 000 Grundstücke, alles behalten | | 600 000 | 5,0 TB | | 335 h |
+
+### Abgleich mit der Kachelmessung
+
+Die Kachelmessung (4,06 GB, 14 min) gilt für **eine 1 × 1 km große Kachel**, nicht für 2 × 2 km: Die Datenkachel
+der Demo ist 2 × 2 km, die Embedding-Kacheln (`data/build/tipp_embed/698_5486`, `699_5486`) sind die amtlichen
+1-km-Kacheln (Gitterzellen i = 0…21, j = 0…21 bei 48 m Abstand). Wer 4,06 GB auf 4 km² verteilt, kommt auf
+72 TB und 151–171 Tage – um den Faktor 4 zu wenig.
+
+| Ursache | Wirkung | Faktor |
+|---|---|---|
+| **Fläche je Kachel: 1 km², nicht 4 km²** | Hauptursache | × 4 |
+| Randfenster doppelt: jede Kachel rechnet ihre Randreihe und -spalte mit (22 × 22 = 484 statt 434 je km² im durchgehenden Gitter) | Kachelweise 1,115 × mehr | × 1,12 |
+| fp32 gegen fp16 | keine – beide Rechnungen in fp16 (8,39 MB je Fenster = 4,19 Mio. Werte × 2 Byte); fp32 wäre × 2 | × 1 |
+| Überlappung der Fenster (96 m Fenster im 48-m-Gitter, jede Stelle liegt in ≈ 4 Fenstern) | steckt in beiden Rechnungen gleich | × 1 |
+| Rechenzeit je Fenster: zwei Läufe, 1,53 s und 1,73 s | Spanne der Zeit | × 1–1,13 |
+
+Konsistent für ganz Bayern (70 542 km², fp16):
+
+| Rechenweg | Speicher | Rechenzeit (4 Kerne) |
+|---|---|---|
+| kachelweise wie gemessen (1-km-Kacheln mit doppelten Rändern) | 286 TB | 14 481–16 381 h ≈ 1,7–1,9 Jahre |
+| durchgehendes Gitter (ohne doppelte Ränder, Tabelle oben) | 257 TB | 12 986–14 690 h ≈ 1,5–1,7 Jahre |
+| zum Vergleich: Annahme 2 × 2 km je Kachel (falsch) | 72 TB | 151–171 Tage |
 
 Die 100 000 Grundstücke sind eine obere Grenze: Nachbargrundstücke teilen Fenster, und der Cache ist begrenzt. Bei Bedarf
 wächst der Aufwand mit der Nutzung, nicht mit der Landesfläche – ganz Bayern vorzurechnen lohnt sich nicht.

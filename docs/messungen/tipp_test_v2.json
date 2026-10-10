@@ -1,7 +1,7 @@
 {
  "menge": "test_v2",
  "objekte": 87,
- "sekunden": 123,
+ "sekunden": 141,
  "varianten": [
   {
    "fenster_m": 24.0,
@@ -178,11 +178,11 @@
      "klasse": "gartenhaus",
      "flaeche_ref": 7.5,
      "ok": false,
-     "iou": 0.056,
-     "flaeche_tipp": 120.9,
+     "iou": 0.051,
+     "flaeche_tipp": 75.8,
      "d_laenge": 11.05,
      "d_breite": 6.06,
-     "d_hoehe": 0.49
+     "d_hoehe": -0.49
     },
     {
      "id": "B016_01",
@@ -409,11 +409,11 @@
      "klasse": "pool",
      "flaeche_ref": 6.1,
      "ok": false,
-     "iou": 0.366,
-     "flaeche_tipp": 5.3,
+     "iou": 0.267,
+     "flaeche_tipp": 3.4,
      "d_laenge": 1.88,
      "d_breite": -1.67,
-     "d_hoehe": -0.51
+     "d_hoehe": -0.63
     },
     {
      "id": "B049_00",

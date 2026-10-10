@@ -1,0 +1,3398 @@
+{
+ "regel": {
+  "score_unter": 0.2,
+  "nichts_ab": 0.99
+ },
+ "ergebnis": {
+  "dev": {
+   "leere Stelle": {
+    "n": 101,
+    "abgelehnt": 8
+   },
+   "Bau/Pool/Trampolin": {
+    "n": 30,
+    "abgelehnt": 0
+   },
+   "Vegetation/Terrasse/Zaun": {
+    "n": 98,
+    "abgelehnt": 4
+   }
+  },
+  "test": {
+   "leere Stelle": {
+    "n": 54,
+    "abgelehnt": 2
+   },
+   "Bau/Pool/Trampolin": {
+    "n": 8,
+    "abgelehnt": 0
+   },
+   "Vegetation/Terrasse/Zaun": {
+    "n": 55,
+    "abgelehnt": 3
+   }
+  }
+ },
+ "tipps": [
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.196,
+   "nichts": 0.2343,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.549,
+   "nichts": 0.9122,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.722,
+   "nichts": 0.9879,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.558,
+   "nichts": 0.9309,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.735,
+   "nichts": 0.927,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.34,
+   "nichts": 0.9691,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.935,
+   "nichts": 0.9992,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.631,
+   "nichts": 0.9963,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "zaun_mauer",
+   "umriss": true,
+   "score": 0.847,
+   "nichts": 0.979,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.788,
+   "nichts": 0.9776,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.167,
+   "nichts": 0.9835,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.244,
+   "nichts": 0.9877,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.225,
+   "nichts": 0.9919,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.731,
+   "nichts": 0.6679,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.798,
+   "nichts": 0.9796,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.878,
+   "nichts": 0.9986,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "zaun_mauer",
+   "umriss": true,
+   "score": 0.8,
+   "nichts": 0.8704,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.863,
+   "nichts": 0.9185,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.5,
+   "nichts": 0.8719,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.677,
+   "nichts": 0.8383,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.192,
+   "nichts": 0.9264,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.554,
+   "nichts": 0.1903,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.089,
+   "nichts": 0.8902,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.069,
+   "nichts": 0.9178,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.363,
+   "nichts": 0.7095,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.056,
+   "nichts": 0.8287,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.042,
+   "nichts": 0.9973,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.838,
+   "nichts": 0.997,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.289,
+   "nichts": 0.9687,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.712,
+   "nichts": 0.9889,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.212,
+   "nichts": 0.9935,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.699,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.27,
+   "nichts": 0.99,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.683,
+   "nichts": 0.9157,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.851,
+   "nichts": 0.1955,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.163,
+   "nichts": 0.9766,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.68,
+   "nichts": 0.9976,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.822,
+   "nichts": 0.9935,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.634,
+   "nichts": 0.9911,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.123,
+   "nichts": 0.0131,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.308,
+   "nichts": 0.9412,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.839,
+   "nichts": 0.1284,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "pool",
+   "umriss": true,
+   "score": 0.882,
+   "nichts": 0.9989,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.863,
+   "nichts": 0.9962,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.329,
+   "nichts": 0.1105,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.935,
+   "nichts": 0.9968,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.896,
+   "nichts": 0.9825,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.897,
+   "nichts": 0.9753,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.9,
+   "nichts": 0.977,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.666,
+   "nichts": 0.9926,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.586,
+   "nichts": 0.9788,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.701,
+   "nichts": 0.9962,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.495,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.436,
+   "nichts": 0.9969,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.838,
+   "nichts": 0.2468,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.459,
+   "nichts": 0.8563,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "carport_garage",
+   "umriss": true,
+   "score": 0.553,
+   "nichts": 0.1613,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.789,
+   "nichts": 0.9977,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.128,
+   "nichts": 0.9895,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.762,
+   "nichts": 0.9962,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.866,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.09,
+   "nichts": 0.9998,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.712,
+   "nichts": 0.9904,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.637,
+   "nichts": 0.994,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.531,
+   "nichts": 0.9863,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.926,
+   "nichts": 0.9972,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.46,
+   "nichts": 0.9751,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.932,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.933,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.483,
+   "nichts": 0.9973,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.271,
+   "nichts": 0.9991,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.787,
+   "nichts": 0.9924,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.675,
+   "nichts": 0.998,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.64,
+   "nichts": 0.9974,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.806,
+   "nichts": 0.9989,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.824,
+   "nichts": 0.9978,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.942,
+   "nichts": 0.1301,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.783,
+   "nichts": 0.9405,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "carport_garage",
+   "umriss": true,
+   "score": 0.88,
+   "nichts": 0.7951,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.09,
+   "nichts": 0.9988,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.196,
+   "nichts": 0.9984,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.787,
+   "nichts": 0.9897,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.591,
+   "nichts": 0.9946,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.097,
+   "nichts": 0.9406,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.658,
+   "nichts": 0.731,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.412,
+   "nichts": 0.9985,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.378,
+   "nichts": 0.9959,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.946,
+   "nichts": 0.7944,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.69,
+   "nichts": 0.9691,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.609,
+   "nichts": 0.9968,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.91,
+   "nichts": 0.9956,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.156,
+   "nichts": 0.9984,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.427,
+   "nichts": 0.9921,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.746,
+   "nichts": 0.9881,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.814,
+   "nichts": 0.2754,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.579,
+   "nichts": 0.0175,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.845,
+   "nichts": 0.9928,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.248,
+   "nichts": 0.9958,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.76,
+   "nichts": 0.999,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.087,
+   "nichts": 0.9998,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.282,
+   "nichts": 0.9987,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.816,
+   "nichts": 0.9627,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.26,
+   "nichts": 0.9999,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.824,
+   "nichts": 0.1076,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.852,
+   "nichts": 0.9989,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.829,
+   "nichts": 0.9979,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.841,
+   "nichts": 0.9985,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.9,
+   "nichts": 0.2285,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.549,
+   "nichts": 0.0362,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.582,
+   "nichts": 0.2111,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.828,
+   "nichts": 0.9851,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.223,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.236,
+   "nichts": 0.9918,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.127,
+   "nichts": 0.988,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.822,
+   "nichts": 0.9973,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "carport_garage",
+   "umriss": true,
+   "score": 0.599,
+   "nichts": 0.2765,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.863,
+   "nichts": 0.9986,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.908,
+   "nichts": 0.9995,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.735,
+   "nichts": 0.9948,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.064,
+   "nichts": 0.9951,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.532,
+   "nichts": 0.9449,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.171,
+   "nichts": 0.9999,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.852,
+   "nichts": 0.9994,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.903,
+   "nichts": 0.2735,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.237,
+   "nichts": 0.8524,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.445,
+   "nichts": 0.9718,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.751,
+   "nichts": 0.9999,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.725,
+   "nichts": 0.9977,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.772,
+   "nichts": 0.9964,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.868,
+   "nichts": 0.9968,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.463,
+   "nichts": 0.9962,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.554,
+   "nichts": 0.9976,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.197,
+   "nichts": 0.9845,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.904,
+   "nichts": 0.408,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.857,
+   "nichts": 0.9975,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.386,
+   "nichts": 0.9554,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.252,
+   "nichts": 0.9846,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.437,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.698,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gewaechshaus",
+   "umriss": true,
+   "score": 0.903,
+   "nichts": 0.6473,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.78,
+   "nichts": 0.2792,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.878,
+   "nichts": 0.9965,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.276,
+   "nichts": 0.9996,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.207,
+   "nichts": 0.9979,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.825,
+   "nichts": 0.9978,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.407,
+   "nichts": 0.9565,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.892,
+   "nichts": 0.8025,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.516,
+   "nichts": 0.9997,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.829,
+   "nichts": 0.9933,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.881,
+   "nichts": 0.9976,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.349,
+   "nichts": 0.9936,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.027,
+   "nichts": 0.9982,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.797,
+   "nichts": 0.8684,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.264,
+   "nichts": 0.9931,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.917,
+   "nichts": 0.9985,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.86,
+   "nichts": 0.9898,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.849,
+   "nichts": 0.3833,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.331,
+   "nichts": 0.9981,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.219,
+   "nichts": 0.9913,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.534,
+   "nichts": 0.9977,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.271,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "pool",
+   "umriss": true,
+   "score": 0.866,
+   "nichts": 0.2871,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.942,
+   "nichts": 0.3026,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.892,
+   "nichts": 0.9082,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.247,
+   "nichts": 0.8823,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.728,
+   "nichts": 0.9833,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.433,
+   "nichts": 0.9782,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.84,
+   "nichts": 0.999,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.886,
+   "nichts": 0.9898,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.5,
+   "nichts": 0.9917,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.833,
+   "nichts": 0.9663,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.668,
+   "nichts": 0.9984,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.967,
+   "nichts": 0.9977,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.895,
+   "nichts": 0.9975,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.928,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.801,
+   "nichts": 0.9992,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.027,
+   "nichts": 0.9993,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.286,
+   "nichts": 0.9926,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.721,
+   "nichts": 0.6708,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.537,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.504,
+   "nichts": 0.9996,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.286,
+   "nichts": 0.7122,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.743,
+   "nichts": 0.9997,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.561,
+   "nichts": 0.9562,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.54,
+   "nichts": 0.9833,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.359,
+   "nichts": 0.999,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "carport_garage",
+   "umriss": true,
+   "score": 0.245,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.68,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.523,
+   "nichts": 0.1964,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.335,
+   "nichts": 0.9939,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.58,
+   "nichts": 0.9647,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.556,
+   "nichts": 0.9985,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.307,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.934,
+   "nichts": 0.7763,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.648,
+   "nichts": 0.0028,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.902,
+   "nichts": 0.9867,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.875,
+   "nichts": 0.6501,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.328,
+   "nichts": 0.4191,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.118,
+   "nichts": 0.8534,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.565,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.725,
+   "nichts": 0.9765,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.82,
+   "nichts": 0.4505,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.055,
+   "nichts": 0.9568,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.492,
+   "nichts": 0.8947,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.761,
+   "nichts": 0.9906,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.906,
+   "nichts": 0.7465,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.15,
+   "nichts": 0.0384,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.613,
+   "nichts": 0.9907,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.87,
+   "nichts": 0.9874,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.333,
+   "nichts": 0.952,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.179,
+   "nichts": 0.9799,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.623,
+   "nichts": 0.9957,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.828,
+   "nichts": 0.9991,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.631,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.215,
+   "nichts": 0.9981,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.202,
+   "nichts": 0.9972,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.891,
+   "nichts": 0.2148,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.925,
+   "nichts": 0.2131,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.811,
+   "nichts": 0.9255,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.52,
+   "nichts": 0.9991,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.83,
+   "nichts": 0.9865,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.837,
+   "nichts": 0.9988,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.936,
+   "nichts": 0.0986,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gewaechshaus",
+   "umriss": true,
+   "score": 0.77,
+   "nichts": 0.7092,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.597,
+   "nichts": 0.996,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.731,
+   "nichts": 0.9992,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.278,
+   "nichts": 0.9805,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.661,
+   "nichts": 0.9983,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.69,
+   "nichts": 0.2989,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.799,
+   "nichts": 0.9876,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.609,
+   "nichts": 0.9905,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.77,
+   "nichts": 0.9996,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.526,
+   "nichts": 0.9997,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.903,
+   "nichts": 0.74,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.874,
+   "nichts": 0.986,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.738,
+   "nichts": 0.9963,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.139,
+   "nichts": 0.9966,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.892,
+   "nichts": 0.99,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.829,
+   "nichts": 0.3112,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.602,
+   "nichts": 0.7099,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.874,
+   "nichts": 0.9846,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.386,
+   "nichts": 0.9359,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.842,
+   "nichts": 0.7501,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.754,
+   "nichts": 0.9956,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.221,
+   "nichts": 0.9763,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.158,
+   "nichts": 0.9042,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "carport_garage",
+   "umriss": true,
+   "score": 0.962,
+   "nichts": 0.0053,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.714,
+   "nichts": 0.2876,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.296,
+   "nichts": 0.9836,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.471,
+   "nichts": 0.8279,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.566,
+   "nichts": 0.9774,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.77,
+   "nichts": 0.927,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.888,
+   "nichts": 0.9643,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.632,
+   "nichts": 0.9984,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.436,
+   "nichts": 0.9967,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.571,
+   "nichts": 0.9947,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.458,
+   "nichts": 0.7751,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.894,
+   "nichts": 0.9984,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.641,
+   "nichts": 0.8937,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.857,
+   "nichts": 0.9988,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.938,
+   "nichts": 0.9988,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.48,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.248,
+   "nichts": 0.958,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.039,
+   "nichts": 0.9792,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.029,
+   "nichts": 0.8759,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.021,
+   "nichts": 0.9879,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.515,
+   "nichts": 0.9979,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.899,
+   "nichts": 0.0377,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.846,
+   "nichts": 0.2794,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.849,
+   "nichts": 0.9059,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.646,
+   "nichts": 0.9885,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.742,
+   "nichts": 0.9985,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.789,
+   "nichts": 0.4767,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.583,
+   "nichts": 0.9992,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.565,
+   "nichts": 0.9822,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.834,
+   "nichts": 0.9994,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.877,
+   "nichts": 0.9979,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.577,
+   "nichts": 0.9997,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "pool",
+   "umriss": true,
+   "score": 0.753,
+   "nichts": 0.5947,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.756,
+   "nichts": 0.5962,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.299,
+   "nichts": 0.9872,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.69,
+   "nichts": 0.3316,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.682,
+   "nichts": 0.9951,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.896,
+   "nichts": 0.9936,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.946,
+   "nichts": 0.9931,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.875,
+   "nichts": 0.9927,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.922,
+   "nichts": 0.9956,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.295,
+   "nichts": 0.9982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.415,
+   "nichts": 0.8518,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.491,
+   "nichts": 0.9983,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.509,
+   "nichts": 0.9593,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.348,
+   "nichts": 0.9947,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gewaechshaus",
+   "umriss": true,
+   "score": 0.826,
+   "nichts": 0.982,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.451,
+   "nichts": 0.9214,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.838,
+   "nichts": 0.9994,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.796,
+   "nichts": 0.9964,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.803,
+   "nichts": 0.2767,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.726,
+   "nichts": 0.9977,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.557,
+   "nichts": 0.9999,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "carport_garage",
+   "umriss": true,
+   "score": 0.637,
+   "nichts": 0.9999,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.466,
+   "nichts": 0.7855,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.047,
+   "nichts": 0.9994,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.134,
+   "nichts": 0.0194,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.69,
+   "nichts": 0.9474,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.681,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.865,
+   "nichts": 0.8802,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.752,
+   "nichts": 0.9967,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.707,
+   "nichts": 0.9777,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.902,
+   "nichts": 0.9996,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.906,
+   "nichts": 0.9967,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.84,
+   "nichts": 0.8334,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.348,
+   "nichts": 0.9922,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.847,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.883,
+   "nichts": 0.9964,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.748,
+   "nichts": 0.9993,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.775,
+   "nichts": 0.9964,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.818,
+   "nichts": 0.9988,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.688,
+   "nichts": 0.9966,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.492,
+   "nichts": 0.3392,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.576,
+   "nichts": 0.9694,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "terrasse",
+   "umriss": true,
+   "score": 0.764,
+   "nichts": 0.9508,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.705,
+   "nichts": 0.9977,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.42,
+   "nichts": 0.9981,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.513,
+   "nichts": 0.9867,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.1,
+   "nichts": 0.9995,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.815,
+   "nichts": 0.9929,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.064,
+   "nichts": 0.908,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.905,
+   "nichts": 0.989,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.11,
+   "nichts": 0.9155,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.905,
+   "nichts": 0.989,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.934,
+   "nichts": 0.0303,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "gartenhaus",
+   "umriss": true,
+   "score": 0.362,
+   "nichts": 0.9998,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "hecke",
+   "umriss": true,
+   "score": 0.801,
+   "nichts": 0.9475,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.568,
+   "nichts": 0.9866,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.067,
+   "nichts": 0.9958,
+   "abgelehnt": true
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.801,
+   "nichts": 0.9151,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.871,
+   "nichts": 0.9995,
+   "abgelehnt": false
+  },
+  {
+   "split": "dev",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.191,
+   "nichts": 0.9993,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.019,
+   "nichts": 0.9988,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.288,
+   "nichts": 0.4657,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.187,
+   "nichts": 0.9795,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "baum",
+   "umriss": true,
+   "score": 0.071,
+   "nichts": 0.6396,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "objekt",
+   "klasse": "strauch",
+   "umriss": true,
+   "score": 0.21,
+   "nichts": 0.9596,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.08,
+   "nichts": 0.9936,
+   "abgelehnt": true
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.124,
+   "nichts": 0.8439,
+   "abgelehnt": false
+  },
+  {
+   "split": "test",
+   "art": "leer",
+   "klasse": null,
+   "umriss": true,
+   "score": 0.396,
+   "nichts": 0.9978,
+   "abgelehnt": false
+  }
+ ]
+}

@@ -14,26 +14,14 @@
   "mit_umriss": 118,
   "objekte": 55,
   "umriss_median": 1.0,
-  "umriss_min": 0.5987,
-  "umriss_anteil_ge_099": 0.9915,
+  "umriss_min": 0.9916,
+  "umriss_anteil_ge_099": 1.0,
   "maske_median": 1.0,
   "maske_min": 0.9927,
   "maske_anteil_ge_099": 1.0,
   "objekte_min": 0.9995,
-  "unter_099": [
-   {
-    "art": "zufall",
-    "klasse": null,
-    "zelle": [
-     1,
-     16
-    ],
-    "iou_maske": 0.9962,
-    "iou_umriss": 0.5987,
-    "leer": false
-   }
-  ],
-  "sekunden": 425
+  "unter_099": [],
+  "sekunden": 258
  },
  "dienst": {
   "dienst_start_s": 29.5,
@@ -116,19 +104,36 @@
   "datum": "2026-10-10"
  },
  "hochrechnung": {
+  "kachel_hochgerechnet": {
+   "gb": 4.06,
+   "tb": 286,
+   "h": [
+    14481,
+    16381
+   ]
+  },
+  "annahme_2x2km": {
+   "tb": 72,
+   "tage": [
+    151,
+    171
+   ]
+  },
   "bayern": {
    "km2": 70542,
    "fenster": 30617187,
    "tb_fp16": 256.9,
    "tb_fp32": 513.8,
-   "cpu_h": 12986
+   "cpu_h": 12986,
+   "cpu_h_max": 14690
   },
   "siedlung_verkehr": {
    "km2": 8747,
    "fenster": 3796531,
    "tb_fp16": 31.9,
    "tb_fp32": 63.7,
-   "cpu_h": 1610
+   "cpu_h": 1610,
+   "cpu_h_max": 1822
   },
   "je_grundstueck": {
    "fenster_median": 6.0,

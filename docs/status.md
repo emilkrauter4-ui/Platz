@@ -464,7 +464,7 @@ Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampol
 
 ## Nachtrag 9. Oktober 2026: Tipp unter 1 s, Dach vs. Wand, Maßband-Protokoll
 
-- **Tipp unter 1 s** (`docs/messungen/tipp_latenz.md`): SAM-2-Embeddings für Kachel 698_5486 vorberechnet
+- **Tipp unter 1 s** (`docs/messungen/tipp_latenz.md`): SAM-2-Embeddings für Kachel 698_5486 (1 × 1 km) vorberechnet
   (`pipeline/20_tipp_embeddings.py`, 484 Fenster, 4,06 GB, 14 min). Pro Tipp nur noch Prompt-Decoder. Gemessen
   per HTTP: **erster Tipp nach dem Start 0,67 s**, 26 von 26 Tipps unter 1 s (Median 0,68 s, Maximum 0,84 s). Ohne
   Embeddings ≈ 2,3 s. Vorberechnet und live liefern dieselben Masken (IoU ≥ 0,998). Fröschau 41 liegt in 699_5486 –
@@ -500,6 +500,23 @@ Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampol
   - Während die Vorbereitung noch läuft, dauert ein Tipp 1–4 s; ganz ohne Vorbereitung dauerte der erste Tipp 6,8 s.
   - Ganz Bayern vorzuberechnen hieße 257 TB und ≈ 1,5 Jahre auf 4 Kernen; nur die Siedlungs- und Verkehrsfläche 32 TB.
 - Danach pausiert bis zu den Maßband-Werten (`data/reference/vor_ort.csv`).
+
+## Nachtrag 10. Oktober 2026 (2): Rechteck-Regel robuster, Hochrechnung abgeglichen
+
+- **Rechteck-Regel mit Totband** (`tipp.rechteck_entscheidung`): ab 0,65 Rechteck, unter 0,55 SAM-Umriss, dazwischen
+  entscheidet das Material (Laser p90 ≥ 1,5 m und nicht grün). fp16 ↔ fp32: jetzt 118 von 118 Umrissen IoU ≥ 0,99
+  (vorher 117).
+- **„Kein Objekt gefunden“** (`tipp.kein_objekt`): SAM-Score < 0,2 und P(nichts) ≥ 0,99, nur ohne gewählte Klasse.
+  Gewählt auf dev, gemessen auf test (`docs/messungen/tipp_objektpruefung.md`): 0 von 38 Bauten/Pools abgelehnt,
+  aber nur 4–8 % der leeren Stellen erkannt. Die Regel ist vorsichtig, nicht stark: SAM findet fast immer irgendeine
+  Fläche. Der gekippte Fall ist als Test drin (`pipeline/test_tipp_form.py`).
+- Test-Set v2 neu gemessen: 2 von 87 Umrissen anders, beide vorher schon Fehlschläge; Erfolgsquoten unverändert.
+- **Hochrechnung abgeglichen** (`docs/messungen/tipp_bedarf.md`):
+  - Die Kachelmessung (4,06 GB, 12–14 min) gilt für eine 1 × 1 km-Kachel, nicht für 2 × 2 km. Das ist der Faktor 4
+    zwischen 72 TB / 170 Tagen und 257–286 TB / 1,5–1,9 Jahren.
+  - Dazu kommen doppelte Randfenster der Kacheln (× 1,12) und zwei unterschiedlich schnelle Läufe (× 1–1,13).
+  - fp16/fp32 ist nicht die Ursache (beide fp16), die Fensterüberlappung steckt in beiden Rechnungen gleich.
+- Danach wieder pausiert bis zu den Maßband-Werten.
 
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
