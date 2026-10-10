@@ -12,7 +12,11 @@ Design-Referenz: `design/prototyp.html` (klickbarer Prototyp mit Demo-Geometrie)
 ## Grundsätze (nicht verhandelbar)
 
 1. **Nur amtliche oder selbst berechnete Daten.** Keine Google 3D Tiles, keine gescrapten Daten.
-2. **Jede Angabe trägt ein Herkunfts-Label:** `amtlich`, `berechnet`, `erkannt`, `nutzerbestätigt`, `Annahme`, `offen`, `Demo`. Das ist ein Kernfeature, kein Detail.
+2. **Jede Angabe trägt ein Herkunfts-Label:** `amtlich`, `berechnet`, `erkannt`, `erfasst per Tipp`, `geschätzt`, `nutzerbestätigt`, `Annahme`, `offen`, `Demo`. Das ist ein Kernfeature, kein Detail.
+   - `erfasst per Tipp`: Der Nutzer hat auf ein Objekt im Luftbild getippt. Passt. hat Umriss (SAM 2 aus DOP20) und Höhe (Laser) gemessen, Maße mit Spanne. Zählt bei der Prüfung mit.
+   - `geschätzt`: Aus gemessenen Werten abgeleitet, aber nicht selbst gemessen. Bisher nur der Wandumriss eines Tipp-Objekts: Dachumriss aus dem Luftbild minus Dachüberstand (aus Laser-Wandpunkten oder Annahme 0,3 m). Prüfungen nutzen den Wandumriss.
+   - `erkannt`: Vollautomatik. Nur Hinweis („Hier scheint noch etwas zu stehen“), nie Grundlage einer Prüfung.
+   - **Übergangsregel:** Zieht der Nutzer eine Kante nach oder ändert er einen Wert (Klasse, Wandhöhe, Dachüberstand), wird aus `erfasst per Tipp` bzw. `geschätzt` das Label `nutzerbestätigt`. Bei `erkannt` genügen dafür auch „Stimmt“ oder Nachziehen. Unverändert übernommen bleibt das Label, wie es war.
 3. **Entscheidungen trifft ein festes Regelwerk.** Ein LLM darf höchstens erklären, nie entscheiden.
 4. **Orientierung, keine Genehmigung.** Dieser Hinweis steht sichtbar unter jedem Ergebnis.
 5. **Lizenzen einhalten.** Quellenangabe immer sichtbar. Dienste unter CC BY-ND nur unverändert anzeigen oder abfragen, nicht umwandeln.

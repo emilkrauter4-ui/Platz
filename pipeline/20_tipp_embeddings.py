@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """SAM-2-Bild-Embeddings für „Ein Tipp erfasst“ vorab berechnen, damit pro Tipp nur noch der Prompt-Decoder läuft.
+Ganze Kacheln nur noch für Demo-Kacheln (698_5486, 699_5486). Für alle anderen Adressen rechnet der Tipp-Dienst die
+Fenster bei Bedarf (POST /vorbereiten, tipp.EmbeddingCache), sobald eine Adresse gewählt ist.
 
 Fenster RASTER_W × RASTER_W (96 m, 480 × 480 DOP20-Pixel) auf einem Gitter im Abstand RASTER_SCHRITT (48 m) ab der
 Kachelecke (tipp.raster_fenster). Ein Tipp liegt höchstens 24 m von der Fenstermitte. Gewählt auf dem Dev-Set
@@ -28,7 +30,7 @@ import numpy as np
 import tipp
 
 g8 = tipp.g8
-FORMEN = {"embed": (256, 64, 64), "hr0": (32, 256, 256), "hr1": (64, 128, 128)}
+FORMEN = tipp.FORMEN
 
 
 def ziel(kachel: str) -> Path:
@@ -43,10 +45,7 @@ def gitter(kachel: str) -> list[tuple[int, int]]:
     return [(i0 + a, j0 + b) for a in range(n) for b in range(n)]
 
 
-def rgb_fenster(bb) -> np.ndarray:
-    """Exakt das Bild, das tipp.segmentieren() aus g8.signale(bb) bauen würde."""
-    rgb = tipp.raster("dop20", bb, g8.RES)[:3]
-    return np.clip(np.nan_to_num(np.moveaxis(rgb, 0, -1)), 0, 255).astype(np.uint8)
+rgb_fenster = tipp.fenster_bild
 
 
 def berechnen(kachel: str) -> int:
@@ -55,7 +54,7 @@ def berechnen(kachel: str) -> int:
     out.mkdir(parents=True, exist_ok=True)
     zellen = gitter(kachel)
     n = len(zellen)
-    mm = {k: np.lib.format.open_memmap(out / f"{k}.npy", mode="w+", dtype=np.float16, shape=(n, *f)) for k, f in FORMEN.items()}
+    mm = {k: np.lib.format.open_memmap(out / f"{k}.npy", mode="w+", dtype=tipp.EMBED_DTYPE, shape=(n, *f)) for k, f in FORMEN.items()}
     pred = g8._sam()
     ck = g8.build_dir().parent / "raw" / "models" / "sam2.1_hiera_small.pt"
     t0 = time.time()
@@ -64,9 +63,9 @@ def berechnen(kachel: str) -> int:
         pred.set_image(rgb_fenster(bb))
         f = pred._features
         with torch.no_grad():
-            mm["embed"][k] = f["image_embed"][0].numpy().astype(np.float16)
-            mm["hr0"][k] = f["high_res_feats"][0][0].numpy().astype(np.float16)
-            mm["hr1"][k] = f["high_res_feats"][1][0].numpy().astype(np.float16)
+            mm["embed"][k] = f["image_embed"][0].numpy().astype(tipp.EMBED_DTYPE)
+            mm["hr0"][k] = f["high_res_feats"][0][0].numpy().astype(tipp.EMBED_DTYPE)
+            mm["hr1"][k] = f["high_res_feats"][1][0].numpy().astype(tipp.EMBED_DTYPE)
         if k % 25 == 0:
             print(f"  {k + 1}/{n} Fenster ({time.time() - t0:.0f} s)", flush=True)
     for a in mm.values():

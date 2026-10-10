@@ -1,0 +1,150 @@
+{
+ "fenster": {
+  "grundstuecke": 60,
+  "flaeche_median_m2": 766,
+  "fenster_median": 6.0,
+  "fenster_p90": 9.0,
+  "fenster_max": 12,
+  "fenster_min": 4,
+  "rand_m": 20.0,
+  "raster_schritt_m": 48.0
+ },
+ "fp16": {
+  "tipps": 135,
+  "mit_umriss": 118,
+  "objekte": 55,
+  "umriss_median": 1.0,
+  "umriss_min": 0.5987,
+  "umriss_anteil_ge_099": 0.9915,
+  "maske_median": 1.0,
+  "maske_min": 0.9927,
+  "maske_anteil_ge_099": 1.0,
+  "objekte_min": 0.9995,
+  "unter_099": [
+   {
+    "art": "zufall",
+    "klasse": null,
+    "zelle": [
+     1,
+     16
+    ],
+    "iou_maske": 0.9962,
+    "iou_umriss": 0.5987,
+    "leer": false
+   }
+  ],
+  "sekunden": 425
+ },
+ "dienst": {
+  "dienst_start_s": 29.5,
+  "grundstuecke": [
+   {
+    "grundstueck": "A03",
+    "flaeche_m2": 371,
+    "fenster": 6,
+    "neu": 5,
+    "anfrage_s": 0.003,
+    "fertig_s": 10.2,
+    "erster_tipp_ohne_vorbereitung": {
+     "s": 6.754,
+     "embedding": "live"
+    },
+    "tipp_waehrend": {
+     "s": 1.007,
+     "embedding": "vorberechnet"
+    },
+    "tipps_danach": [
+     {
+      "s": 0.798,
+      "embedding": "vorberechnet"
+     }
+    ]
+   },
+   {
+    "grundstueck": "A10",
+    "flaeche_m2": 403,
+    "fenster": 6,
+    "neu": 6,
+    "anfrage_s": 0.002,
+    "fertig_s": 11.6,
+    "erster_tipp_ohne_vorbereitung": null,
+    "tipp_waehrend": {
+     "s": 2.629,
+     "embedding": "vorberechnet"
+    },
+    "tipps_danach": [
+     {
+      "s": 0.895,
+      "embedding": "vorberechnet"
+     }
+    ]
+   },
+   {
+    "grundstueck": "A15",
+    "flaeche_m2": 1355,
+    "fenster": 12,
+    "neu": 12,
+    "anfrage_s": 0.005,
+    "fertig_s": 24.4,
+    "erster_tipp_ohne_vorbereitung": null,
+    "tipp_waehrend": {
+     "s": 4.179,
+     "embedding": "vorberechnet"
+    },
+    "tipps_danach": [
+     {
+      "s": 0.825,
+      "embedding": "vorberechnet"
+     },
+     {
+      "s": 0.808,
+      "embedding": "vorberechnet"
+     },
+     {
+      "s": 0.897,
+      "embedding": "vorberechnet"
+     }
+    ]
+   }
+  ],
+  "datei_mb": 8.39,
+  "fenster_s": 2.01,
+  "danach_median_s": 0.825,
+  "danach_max_s": 0.897,
+  "danach_alle_vorberechnet": true,
+  "maschine": "Container, 4 CPU-Kerne, keine GPU",
+  "datum": "2026-10-10"
+ },
+ "hochrechnung": {
+  "bayern": {
+   "km2": 70542,
+   "fenster": 30617187,
+   "tb_fp16": 256.9,
+   "tb_fp32": 513.8,
+   "cpu_h": 12986
+  },
+  "siedlung_verkehr": {
+   "km2": 8747,
+   "fenster": 3796531,
+   "tb_fp16": 31.9,
+   "tb_fp32": 63.7,
+   "cpu_h": 1610
+  },
+  "je_grundstueck": {
+   "fenster_median": 6.0,
+   "fenster_p90": 9.0,
+   "mb_median": 50,
+   "mb_p90": 76,
+   "s_median": 12,
+   "s_p90": 18
+  },
+  "bedarf_100k": {
+   "grundstuecke": 100000,
+   "fenster": 600000,
+   "tb_fp16": 5.0,
+   "cpu_h": 335
+  },
+  "cache_max_gb": 20.0,
+  "cache_fenster": 2383
+ }
+}

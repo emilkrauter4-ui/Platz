@@ -54,7 +54,7 @@ createServer((req, res) => {
   if (path.includes('/api/nachbar/')) return void nachbarApi(req, res);
   if (path.includes('/api/ar/')) return void arApi(req, res);
   if (path.includes('/api/lernen')) return void lernApi(req, res);
-  if (path.endsWith('/api/tipp')) return void tippApi(req, res);
+  if (path.endsWith('/api/tipp') || path.endsWith('/api/tipp/vorbereiten')) return void tippApi(req, res);
   let file = normalize(join(root, path));
   if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
   if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 import pickle
 import sys
 import time
@@ -107,8 +108,38 @@ def _form(p: Polygon, klasse: str | None) -> Polygon:
     return p
 
 
+FORMEN = {"embed": (256, 64, 64), "hr0": (32, 256, 256), "hr1": (64, 128, 128)}
+# Speicherformat der Embeddings. float16 halbiert den Platz; geprüft mit 23_tipp_bedarf.py fp16 (Umrisse fp32 ↔ fp16,
+# Kriterium IoU ≥ 0,99) – Ergebnis in docs/messungen/tipp_bedarf.md
+EMBED_DTYPE = np.float16
+# Embeddings bei Bedarf (tipp_dienst.py /vorbereiten): Fenster für Grundstück plus Rand, Cache mit Obergrenze
+BEDARF_RAND_M = 20.0
+CACHE_MAX_GB = 20.0
+BEREICH_MAX_M = 400.0     # größte Kantenlänge eines Bereichs, den die App vorbereiten lassen darf
+
+
+def fenster_bild(bb) -> np.ndarray:
+    """RGB-Bild eines Gitterfensters, exakt wie segmentieren() es aus g8.signale(bb) baut."""
+    rgb = raster("dop20", bb, RES)[:3]
+    return np.clip(np.nan_to_num(np.moveaxis(rgb, 0, -1)), 0, 255).astype(np.uint8)
+
+
+def zellen_fuer_bereich(xmin: float, ymin: float, xmax: float, ymax: float, rand: float = None) -> list[tuple[int, int]]:
+    """Alle Gitterfenster, die ein Tipp irgendwo im Bereich (plus Rand) benutzen würde (nächster Mittelpunkt)."""
+    rand = BEDARF_RAND_M if rand is None else rand
+    i0, j0 = raster_fenster(xmin - rand, ymin - rand)[0]
+    i1, j1 = raster_fenster(xmax + rand, ymax + rand)[0]
+    return [(i, j) for i in range(i0, i1 + 1) for j in range(j0, j1 + 1)]
+
+
+def _als_tensoren(embed, hr0, hr1) -> dict:
+    import torch
+    t = lambda a: torch.from_numpy(np.asarray(a, dtype=np.float32))[None]
+    return {"image_embed": t(embed), "high_res_feats": [t(hr0), t(hr1)]}
+
+
 class EmbeddingSpeicher:
-    """Vorberechnete SAM-2-Embeddings einer Kachel (20_tipp_embeddings.py) als Memmaps."""
+    """Vorberechnete SAM-2-Embeddings einer ganzen Kachel (20_tipp_embeddings.py) als Memmaps – nur Demo-Kacheln."""
     _offen: dict = {}
 
     def __init__(self, ordner):
@@ -128,12 +159,102 @@ class EmbeddingSpeicher:
         return cls.laden(f"{int(x // 1000)}_{int(y // 1000)}")
 
     def features(self, zelle: tuple[int, int]):
-        import torch
         k = self.pos.get(tuple(zelle))
         if k is None:
             return None
-        t = lambda a: torch.from_numpy(np.asarray(a[k], dtype=np.float32))[None]
-        return {"image_embed": t(self.mm["embed"]), "high_res_feats": [t(self.mm["hr0"]), t(self.mm["hr1"])]}
+        return _als_tensoren(self.mm["embed"][k], self.mm["hr0"][k], self.mm["hr1"][k])
+
+
+class EmbeddingCache:
+    """Embeddings bei Bedarf: ein Fenster je Datei (data/build/tipp_embed/cache/<i>_<j>.npz, EMBED_DTYPE).
+    Gefüllt von vorbereiten() (Hintergrund, sobald eine Adresse gewählt ist) und von jedem live gerechneten Tipp.
+    Obergrenze CACHE_MAX_GB: die am längsten nicht benutzten Fenster fliegen zuerst."""
+
+    def __init__(self, ordner=None):
+        self.ordner = ordner or g8.build_dir() / "tipp_embed" / "cache"
+
+    def pfad(self, zelle):
+        return self.ordner / f"{zelle[0]}_{zelle[1]}.npz"
+
+    def hat(self, zelle) -> bool:
+        return self.pfad(zelle).exists()
+
+    def features(self, zelle):
+        p = self.pfad(zelle)
+        try:
+            with np.load(p) as z:
+                f = _als_tensoren(z["embed"], z["hr0"], z["hr1"])
+            os.utime(p)  # zuletzt benutzt
+            return f
+        except (FileNotFoundError, OSError, KeyError, ValueError):
+            return None
+
+    def speichern(self, zelle, features: dict) -> None:
+        self.ordner.mkdir(parents=True, exist_ok=True)
+        a = lambda t: t[0].detach().cpu().numpy().astype(EMBED_DTYPE)
+        tmp = self.ordner / f".{zelle[0]}_{zelle[1]}.{os.getpid()}.tmp.npz"
+        np.savez(tmp, embed=a(features["image_embed"]), hr0=a(features["high_res_feats"][0]),
+                 hr1=a(features["high_res_feats"][1]))
+        os.replace(tmp, self.pfad(zelle))
+        self.aufraeumen()
+
+    def aufraeumen(self, max_gb: float = None) -> int:
+        max_b = (CACHE_MAX_GB if max_gb is None else max_gb) * 1e9
+        dateien = sorted(self.ordner.glob("*_*.npz"), key=lambda p: p.stat().st_mtime)
+        summe = sum(p.stat().st_size for p in dateien)
+        weg = 0
+        while dateien and summe > max_b:
+            p = dateien.pop(0)
+            summe -= p.stat().st_size
+            p.unlink(missing_ok=True)
+            weg += 1
+        return weg
+
+
+CACHE = EmbeddingCache()
+
+
+class _Fest:
+    def __init__(self, f):
+        self.f = f
+
+    def features(self, zelle):
+        return self.f
+
+
+class _Quelle:
+    """Embedding für ein Fenster: erst Demo-Kachel, dann Cache."""
+
+    def __init__(self, x: float, y: float):
+        self.kachel = EmbeddingSpeicher.fuer(x, y)
+
+    def features(self, zelle):
+        f = self.kachel.features(zelle) if self.kachel is not None else None
+        return f if f is not None else CACHE.features(zelle)
+
+
+def vorhanden(zelle) -> bool:
+    x, y = RASTER_URSPRUNG[0] + zelle[0] * RASTER_SCHRITT, RASTER_URSPRUNG[1] + zelle[1] * RASTER_SCHRITT
+    sp = EmbeddingSpeicher.fuer(x, y)
+    return (sp is not None and tuple(zelle) in sp.pos) or CACHE.hat(zelle)
+
+
+_PRED_HG = None
+
+
+def fenster_berechnen(zelle) -> None:
+    """Embedding eines Gitterfensters rechnen und in den Cache legen (eigene SAM-Instanz, damit ein Tipp im
+    Vordergrund nicht auf den Hintergrund warten muss)."""
+    global _PRED_HG
+    if _PRED_HG is None:
+        from sam2.build_sam import build_sam2
+        from sam2.sam2_image_predictor import SAM2ImagePredictor
+        ck = g8.build_dir().parent / "raw" / "models" / "sam2.1_hiera_small.pt"
+        _PRED_HG = SAM2ImagePredictor(build_sam2("configs/sam2.1/sam2.1_hiera_s.yaml", str(ck), device="cpu"))
+    x, y = RASTER_URSPRUNG[0] + zelle[0] * RASTER_SCHRITT, RASTER_URSPRUNG[1] + zelle[1] * RASTER_SCHRITT
+    _, bb = raster_fenster(x, y)
+    _PRED_HG.set_image(fenster_bild(bb))
+    CACHE.speichern(zelle, _PRED_HG._features)
 
 
 def segmentieren(s: dict, x: float, y: float, wahl: str = WAHL, ohne_umringe: bool = OHNE_HAUSUMRINGE,
@@ -144,7 +265,7 @@ def segmentieren(s: dict, x: float, y: float, wahl: str = WAHL, ohne_umringe: bo
     pred = _sam(groesse)
     if vorberechnet:
         if s.get("_sam_bb") != (bb, "vor"):
-            sp = speicher or EmbeddingSpeicher.fuer(x, y)
+            sp = speicher or _Quelle(x, y)
             zelle, bb_r = raster_fenster(x, y)
             f = sp.features(zelle) if sp is not None and tuple(bb_r) == bb else None
             if f is None or groesse != "small":
@@ -155,6 +276,8 @@ def segmentieren(s: dict, x: float, y: float, wahl: str = WAHL, ohne_umringe: bo
         rgb = np.clip(np.nan_to_num(np.stack([s["r"], s["g"], s["b"]], -1)), 0, 255).astype(np.uint8)
         pred.set_image(rgb)
         s["_sam_bb"] = (bb, groesse)
+        if s.get("_cache_zelle") is not None and groesse == "small":  # live gerechnet: für den nächsten Tipp merken
+            CACHE.speichern(s["_cache_zelle"], pred._features)
     col, row = (x - bb[0]) / RES, (bb[3] - y) / RES
     px = (int(row), int(col))
 
@@ -312,15 +435,18 @@ def klasse_vorschlagen(s: dict, g: Polygon) -> list[tuple[str, float]]:
 
 
 def erfassen(x: float, y: float, klasse: str | None = None, s: dict | None = None) -> dict:
-    """Ein Tipp. Mit vorberechnetem Embedding (Kachel in data/build/tipp_embed) nur Prompt-Decoder; sonst wird das
-    Fenster live kodiert (≈ 1,5 s mehr). Fenster immer das Gitterfenster (raster_fenster)."""
+    """Ein Tipp. Mit vorberechnetem Embedding (Demo-Kachel oder Cache aus vorbereiten()) nur Prompt-Decoder; sonst wird
+    das Fenster live kodiert (≈ 1,5 s mehr) und in den Cache gelegt. Fenster immer das Gitterfenster (raster_fenster)."""
     t0 = time.time()
     zelle, bb = raster_fenster(x, y)
     if s is None:
         s = g8.signale(bb)
-    sp = EmbeddingSpeicher.fuer(x, y)
-    vor = sp is not None and sp.features(zelle) is not None
-    seg = segmentieren(s, x, y, klasse=klasse, vorberechnet=vor, speicher=sp)
+    sp = _Quelle(x, y)
+    f = sp.features(zelle)
+    vor = f is not None
+    if not vor:
+        s["_cache_zelle"] = zelle
+    seg = segmentieren(s, x, y, klasse=klasse, vorberechnet=vor, speicher=_Fest(f) if vor else None)
     t_seg = time.time() - t0
     if seg is None:
         return {"ok": False, "grund": "Kein Umriss gefunden. Bitte genauer tippen oder Umriss zeichnen.", "sekunden": round(time.time() - t0, 1)}

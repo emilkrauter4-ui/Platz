@@ -5,7 +5,7 @@
  */
 import { LIMITS, fmt } from '../rules/evaluate';
 import { area, centroid, edges, pointSegment } from '../rules/geometry';
-import type { Bestand, GartenKlasse, Vec2 } from '../rules/types';
+import type { Bestand, GartenKlasse, Provenance, Vec2 } from '../rules/types';
 
 export const KLASSE_TEXT: Record<GartenKlasse, string> = {
   gartenhaus: 'Gartenhaus',
@@ -126,12 +126,16 @@ export function griffe(b: Bestand): Vec2[] {
 }
 
 /** Nachgezogener Umriss → Maße neu (Spanne 0,10 m: Fingergenauigkeit im Plan bei Einrasten). */
+/** Kanten nachgezogen: Übergangsregel – „erkannt“, „erfasst per Tipp“ und „geschätzt“ werden „nutzerbestätigt“. */
 export function nachgezogen(b: Bestand, fp: Vec2[]): Bestand {
   const r = minRect(fp);
   return {
     ...b,
     footprint: fp,
     provenance: 'nutzerbestätigt',
+    wandLabel: b.dach ? 'nutzerbestätigt' : b.wandLabel,
+    // Wand jetzt von Hand: der Überstand zum Dach ist kein Rechenweg mehr
+    ueberstand: b.dach ? undefined : b.ueberstand,
     laenge: { wert: r.laenge, spanne: 0.1 },
     breite: { wert: r.breite, spanne: 0.1 },
   };
@@ -217,6 +221,12 @@ export interface TippAntwort {
  * Klasse wählt der Nutzer; ohne Wahl gilt der Vorschlag. Höhe für die Grenzbebauung: mittlere Wandhöhe aus den
  * Dachebenen, sonst die Gesamthöhe (sicher nach oben); eine vom Nutzer eingegebene Wandhöhe geht vor.
  */
+/**
+ * Tipp-Antwort → Bestand. `klasse`, `wandhoehe`, `ueberstand`: was der Nutzer im Tipp-Blatt eingestellt hat.
+ * Übergangsregel (CLAUDE.md Grundsatz 2): Ändert der Nutzer einen Wert (andere Klasse als die Antwort, eigene
+ * Wandhöhe, eigener Überstand), wird das Objekt „nutzerbestätigt“; ein eigener Überstand macht auch die Wand
+ * „nutzerbestätigt“. Ohne Änderung bleibt es „erfasst per Tipp“, die Wand „geschätzt“.
+ */
 export function ausTipp(id: string, a: TippAntwort, origin: Vec2, klasse?: GartenKlasse, wandhoehe?: number, ueberstand?: number): Bestand {
   if (!a.ok || !a.umriss || a.umriss.length < 3) throw new Error(a.grund ?? 'Tipp ohne Umriss');
   const lokal = (p: Vec2[]): Vec2[] => p.map(([x, y]) => [x - origin[0], y - origin[1]]);
@@ -233,13 +243,16 @@ export function ausTipp(id: string, a: TippAntwort, origin: Vec2, klasse?: Garte
   const hoehe = m.hoehe != null ? { wert: m.hoehe, spanne: m.spanne_hoehe ?? 0.3 } : undefined;
   const wand = m.wandhoehe_mittel != null ? { wert: m.wandhoehe_mittel, spanne: m.spanne_wand ?? 0.3 } : undefined;
   const rund = m.form === 'kreis';
+  const geaendert = (klasse != null && klasse !== a.klasse) || wandhoehe != null || ueberstand != null;
+  const mitDach = !!a.wand || ueberstand != null;
   return {
     id,
     footprint: wandFp,
-    dach: a.wand || ueberstand != null ? dach : undefined,
+    dach: mitDach ? dach : undefined,
     ueberstand: ueb,
+    wandLabel: mitDach ? (ueberstand != null ? 'nutzerbestätigt' : 'geschätzt') : undefined,
     height: wandhoehe ?? wand?.wert ?? hoehe?.wert ?? 0,
-    provenance: 'erfasst per Tipp',
+    provenance: geaendert ? 'nutzerbestätigt' : 'erfasst per Tipp',
     kind: klasse ?? a.klasse,
     laenge: { wert: rund && m.laenge != null ? m.laenge : r.laenge, spanne: sp },
     breite: { wert: rund && m.breite != null ? m.breite : r.breite, spanne: sp },
@@ -270,5 +283,13 @@ export function dachWandText(b: Bestand): string | null {
   const q = !u ? '' : u.quelle.every((x) => x === 'Annahme') ? ` – Dachüberstand ${fmt(u.werte[0])} m angenommen`
     : u.quelle.every((x) => x === 'von dir') ? ` – Dachüberstand ${fmt(u.werte[0])} m von dir`
       : ` – Dachüberstand ${u.werte.map((x) => fmt(x)).join(' / ')} m; ${u.quelle.filter((x) => x !== 'Annahme').length} von 4 Seiten aus Laser, sonst angenommen`;
-  return `Dach ${fmt(d.laenge)} × ${fmt(d.breite)} m (Luftbild), Wand ${fmt(w.laenge)} × ${fmt(w.breite)} m (geschätzt${q})`;
+  if (wandLabelVon(b) === 'nutzerbestätigt' && !u) {
+    return `Dach ${fmt(d.laenge)} × ${fmt(d.breite)} m (Luftbild), Wand ${fmt(w.laenge)} × ${fmt(w.breite)} m (von dir nachgezogen)`;
+  }
+  return `Dach ${fmt(d.laenge)} × ${fmt(d.breite)} m (Luftbild), Wand ${fmt(w.laenge)} × ${fmt(w.breite)} m (${wandLabelVon(b) === 'nutzerbestätigt' ? 'von dir bestätigt' : 'geschätzt'}${q})`;
+}
+
+/** Label des Wandumrisses eines Tipp-Objekts (null ohne Dachumriss). Altdaten ohne `wandLabel`: 'geschätzt'. */
+export function wandLabelVon(b: Bestand): Provenance | null {
+  return b.dach ? (b.wandLabel ?? 'geschätzt') : null;
 }

@@ -106,6 +106,9 @@ export interface Bestand {
   dach?: Vec2[];
   /** Dachüberstand je Seite des Dach-Rechtecks und woher er kommt („Laser (n Wandpunkte)“ oder „Annahme“) */
   ueberstand?: { werte: number[]; quelle: string[] };
+  /** Label des Wandumrisses bei Tipp-Objekten: 'geschätzt' (Dach minus Überstand), nach Nachziehen oder eigenem
+   *  Überstand 'nutzerbestätigt' (Übergangsregel, CLAUDE.md Grundsatz 2) */
+  wandLabel?: Provenance;
   /** Bäume/Sträucher: vom Nutzer angetippte Stammmitte am Boden (Art. 49 AGBGB) und Spanne als Radius */
   stamm?: Vec2;
   stammSpanne?: number;

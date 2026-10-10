@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ausTipp, dachWandText, wandAusDach, beschreibung, fromRec, jeGrenze, minRect, nachgezogen, seitenAnGrenze } from '../src/site/bestand';
+import { ausTipp, dachWandText, wandAusDach, wandLabelVon, beschreibung, fromRec, jeGrenze, minRect, nachgezogen, seitenAnGrenze } from '../src/site/bestand';
 import type { TippAntwort } from '../src/site/bestand';
 import { sidesFromBoundary } from '../src/site/plot';
 import type { Vec2 } from '../src/rules';
@@ -101,6 +101,35 @@ describe('Ein Tipp erfasst', () => {
     const b = nachgezogen(ausTipp('t1', antwort, [699000, 5487000]), [[10, 20], [13.2, 20], [13.2, 22.5], [10, 22.5]]);
     expect(b.provenance).toBe('nutzerbestätigt');
     expect(b.laenge?.wert).toBeCloseTo(3.2);
+  });
+  describe('Übergangsregel: Nachziehen oder Wert ändern → nutzerbestätigt', () => {
+    const a: TippAntwort = { ...antwort, wand: { umriss: [[699010.3, 5487020.3], [699012.7, 5487020.3], [699012.7, 5487022.2], [699010.3, 5487022.2]], label: 'geschätzt', ueberstand: [0.3, 0.3, 0.3, 0.3], quelle: ['Annahme', 'Annahme', 'Annahme', 'Annahme'], laenge: 2.4, breite: 1.9 } };
+    it('unverändert übernommen: „erfasst per Tipp“, Wand „geschätzt“', () => {
+      const b = ausTipp('u', a, [699000, 5487000], 'gartenhaus');
+      expect(b.provenance).toBe('erfasst per Tipp');
+      expect(wandLabelVon(b)).toBe('geschätzt');
+    });
+    it('andere Klasse → Objekt nutzerbestätigt, Wand bleibt geschätzt', () => {
+      const b = ausTipp('u', a, [699000, 5487000], 'gewaechshaus');
+      expect(b.provenance).toBe('nutzerbestätigt');
+      expect(wandLabelVon(b)).toBe('geschätzt');
+    });
+    it('eigene Wandhöhe → nutzerbestätigt', () => {
+      expect(ausTipp('u', a, [699000, 5487000], 'gartenhaus', 2.4).provenance).toBe('nutzerbestätigt');
+    });
+    it('eigener Dachüberstand → Objekt und Wand nutzerbestätigt', () => {
+      const b = ausTipp('u', a, [699000, 5487000], 'gartenhaus', undefined, 0.2);
+      expect(b.provenance).toBe('nutzerbestätigt');
+      expect(wandLabelVon(b)).toBe('nutzerbestätigt');
+      expect(dachWandText(b)).toBe('Dach 3,00 × 2,50 m (Luftbild), Wand 2,60 × 2,10 m (von dir bestätigt – Dachüberstand 0,20 m von dir)');
+    });
+    it('Kante nachgezogen → Objekt und Wand nutzerbestätigt, Dach bleibt sichtbar', () => {
+      const b = nachgezogen(ausTipp('u', a, [699000, 5487000]), [[10.2, 20.2], [12.8, 20.2], [12.8, 22.3], [10.2, 22.3]]);
+      expect(b.provenance).toBe('nutzerbestätigt');
+      expect(wandLabelVon(b)).toBe('nutzerbestätigt');
+      expect(b.dach).toBeDefined();
+      expect(dachWandText(b)).toBe('Dach 3,00 × 2,50 m (Luftbild), Wand 2,60 × 2,10 m (von dir nachgezogen)');
+    });
   });
   it('ohne Umriss: Fehler mit Grund', () => {
     expect(() => ausTipp('t', { ok: false, grund: 'Kein Umriss gefunden.' }, [0, 0])).toThrow('Kein Umriss gefunden.');

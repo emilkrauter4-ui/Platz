@@ -62,7 +62,7 @@ import {
   verfahrenFuer,
   ANTRAG_LINKS,
 } from './rules';
-import { ausTipp, dachWandText, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
+import { ausTipp, dachWandText, wandLabelVon, beschreibung, fromRec, griffe, jeGrenze, KLASSE_TEXT, nachgezogen, neuesObjekt } from './site/bestand';
 import type { TippAntwort } from './site/bestand';
 import { DATA_URL, inBbox, loadDetails, loadSite, near, type Data, type DemoAdresse } from './data';
 import { cartesianToLocal, getOrigin, localToCartesian, localToLonLat, lonLatToLocal, setOrigin } from './scene/coords';
@@ -383,11 +383,27 @@ function choosePlace(p: Place) {
   goToPlot(lonLatToLocal(p.lon, p.lat));
 }
 
+/**
+ * Tipp-Embeddings bei Bedarf: Der Tipp-Dienst rechnet im Hintergrund die Bildfenster für diesen Bereich plus 20 m Rand,
+ * damit ein späterer Tipp nur noch den Prompt-Decoder braucht. Gesendet werden nur Umrisspunkte, keine Adresse.
+ * Läuft der Dienst nicht, passiert nichts (der Tipp rechnet dann live).
+ */
+function tippVorbereiten(umriss: Vec2[]) {
+  const o = getOrigin();
+  void fetch('api/tipp/vorbereiten', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ umriss: umriss.map(([x, y]) => [x + o[0], y + o[1]]) }),
+  }).catch(() => undefined);
+}
+
 async function goToPlot(p: Vec2) {
   if (!inBbox(data.site, p, 20)) {
     showStart('Hier haben wir noch keine Daten. Die Demo deckt 2 × 2 km rund um die Altstadt ab.');
     return;
   }
+  // Grenze noch unbekannt: vorläufig Adresspunkt ± 30 m (typisches Grundstück); nach „Grenze bestätigen" das echte
+  tippVorbereiten([[p[0] - 30, p[1] - 30], [p[0] + 30, p[1] + 30]]);
   await Promise.all([details, terrain.ensure([p[0] - 80, p[1] - 80], [p[0] + 80, p[1] + 80])]);
   st.view = 'plan';
   syncViewButtons();
@@ -459,6 +475,7 @@ async function confirmPlot() {
   const a = area(b);
   if (a < 40 || a > 8000) return updateGrenzeUI(`Die Fläche von ${fmt(a, 0)} m² wirkt nicht wie ein Wohngrundstück. Prüf die Punkte.`);
   st.plot = b;
+  tippVorbereiten(b);
   const c = centroid(b);
   await terrain.ensure([c[0] - 90, c[1] - 90], [c[0] + 90, c[1] + 90]);
   st.buildings = classifyBuildings(b, near(data.buildings, c, 90));
@@ -1634,7 +1651,7 @@ function renderTippSheet() {
   $('stepBody').innerHTML = `
     <div class="field"><span>Was ist es? ${vor ? tag(`Vorschlag: ${KLASSE_TEXT[vor.klasse]}`, 'erkannt') : ''}</span>${sel('tKl', it.kind ?? 'gartenhaus', kl.map((k) => [k, KLASSE_TEXT[k]]))}</div>
     <div class="field"><label for="tH">Mittlere Wandhöhe in m ${tag('Laser 2025', 'berechnet')}</label><input id="tH" type="number" min="0" max="8" step="0.05" value="${h.toFixed(2)}" inputmode="decimal"></div>
-    ${dw ? `<p class="fine" style="text-align:left">${esc(dw)} ${tag('geschätzt', 'geschätzt')}</p>
+    ${dw ? `<p class="fine" style="text-align:left">${esc(dw)} ${tag(wandLabelVon(it)!, wandLabelVon(it)!)}</p>
     <div class="field"><label for="tU">Dachüberstand in m (rundum)</label><input id="tU" type="number" min="0" max="1.5" step="0.05" value="${u0.toFixed(2)}" inputmode="decimal"></div>` : ''}
     <div class="btnrow"><button class="primary" id="tOk" type="button">Übernehmen</button>
       <button class="sec" id="tKante" type="button">Kanten nachziehen</button>
@@ -1972,7 +1989,7 @@ function openInfo() {
       <li><span class="tg det">erkannt</span>Automatischer Hinweis, nicht geprüft – nie Grundlage der Prüfung</li>
       <li><span class="tg user">erfasst per Tipp</span>Du hast getippt, Passt. hat Umriss (SAM 2) und Höhe (Laser) gemessen</li>
       <li><span class="tg assume">geschätzt</span>Wandumriss = Dachumriss minus Dachüberstand (aus Laser oder angenommen 0,3 m)</li>
-      <li><span class="tg user">nutzerbestätigt</span>Von dir angegeben</li>
+      <li><span class="tg user">nutzerbestätigt</span>Von dir angegeben – auch sobald du bei „erfasst per Tipp“ oder „geschätzt“ eine Kante nachziehst oder einen Wert änderst</li>
       <li><span class="tg assume">Annahme</span>Gilt nur, wenn es bei dir so ist</li>
       <li><span class="tg open">offen</span>Muss noch jemand prüfen</li>
     </ul>

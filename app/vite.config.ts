@@ -23,7 +23,7 @@ function nachbarApiDev() {
           const { lernApi } = await import('./scripts/lern-api.mjs');
           return void lernApi(req, res);
         }
-        if (req.url?.endsWith('/api/tipp')) {
+        if (req.url?.endsWith('/api/tipp') || req.url?.endsWith('/api/tipp/vorbereiten')) {
           const { tippApi } = await import('./scripts/tipp-proxy.mjs');
           return void tippApi(req, res);
         }

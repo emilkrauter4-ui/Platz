@@ -483,6 +483,24 @@ Pool 1/24; Trampolin und Gewächshaus 0. Die Erkennung taugt für Pools, Trampol
   Auswertung `pipeline/21_vor_ort_auswerten.py` (Wand und Dach getrennt, Ziel ≤ 0,30 m). Tests `test_vor_ort.py`.
 - **Alles andere pausiert** bis zu den Maßband-Werten (auch Gartenblick).
 
+## Nachtrag 10. Oktober 2026: Labels, Embeddings bei Bedarf
+
+- **Labels in CLAUDE.md:** „erfasst per Tipp“ und „geschätzt“ stehen jetzt in Grundsatz 2, mit Definition und
+  Übergangsregel. Zieht der Nutzer eine Kante nach oder ändert er Klasse, Wandhöhe oder Dachüberstand, wird das Objekt
+  „nutzerbestätigt“. Ein eigener Überstand oder eine nachgezogene Kante macht auch die Wand „nutzerbestätigt“. So setzen
+  es `ausTipp`, `nachgezogen` und `wandLabelVon` (app/src/site/bestand.ts) um; 5 neue Tests, 153 grün.
+- **Embeddings bei Bedarf** (`docs/messungen/tipp_bedarf.md`):
+  - Bei der Adresswahl rechnet der Tipp-Dienst im Hintergrund die Fenster für Adresspunkt ± 30 m, nach „Grenze
+    bestätigen“ für Grundstück plus 20 m Rand (`POST /api/tipp/vorbereiten`, nur Umrisspunkte, keine Adresse).
+  - Cache `data/build/tipp_embed/cache/`, höchstens 20 GB; was am längsten unbenutzt ist, fliegt zuerst.
+  - Ganze Kacheln werden nur noch für die Demo-Kacheln vorberechnet.
+  - fp16 bleibt: alle SAM-Masken IoU ≥ 0,99; alle 55 Test-Objekte ≥ 0,9995. Eine Ausnahme bei einem Zufallspunkt ohne
+    Objekt: Die Formregel kippt dort an ihrer Schwelle.
+  - Ein Grundstück braucht im Median 6 Fenster (50 MB) und ≈ 12 s Rechenzeit. Danach dauern Tipps 0,8–0,9 s.
+  - Während die Vorbereitung noch läuft, dauert ein Tipp 1–4 s; ganz ohne Vorbereitung dauerte der erste Tipp 6,8 s.
+  - Ganz Bayern vorzuberechnen hieße 257 TB und ≈ 1,5 Jahre auf 4 Kernen; nur die Siedlungs- und Verkehrsfläche 32 TB.
+- Danach pausiert bis zu den Maßband-Werten (`data/reference/vor_ort.csv`).
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.
