@@ -68,8 +68,6 @@ import {
   standardMasse,
   type GeraeteKlasse,
   bewerteVorhaben,
-  berechneVerschattung,
-  berechneZufahrt,
   eigeneGebaeude,
   fragenAnGemeinde,
   gemeindeAbschnitt,
@@ -103,6 +101,7 @@ import { Renderer, type RenderState } from './scene/render';
 import { assumedWindows, awayFromBoundary, ccw, classifyBuildings, initialObjects, isSimple, sidesFromBoundary, snap } from './site/plot';
 import { bebauungsplaene, denkmaeler, searchAddress, wasserschutz, type Denkmal, type Place } from './ui/services';
 import { VorhabenLayer, KEY_VORHABEN } from './scene/vorhaben';
+import { rechne } from './scene/rechner';
 import { gemeindeHtml, kennzahlenHtml, punkteHtml, rowsHtml, schattenHtml } from './ui/vorhabenSheet';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
@@ -597,7 +596,7 @@ async function confirmPlot() {
     if (st.step !== 'pruefen') return;
     buildSite();
     update();
-    if (st.modus === 'gross') grRechnen();
+    if (st.modus === 'gross') void grRechnen();
   });
   buildSite();
   renderer.syncDraftPoints();
@@ -952,23 +951,38 @@ function grNeu() {
   grInfo();
   if (grSt.zonen) grZonenNeu();
   if (grTimer) clearTimeout(grTimer);
-  grTimer = setTimeout(grRechnen, 350);
+  grTimer = setTimeout(() => void grRechnen(), 350);
 }
 
-function grRechnen() {
-  if (!site || !grSt.v || !grSt.res || st.modus !== 'gross') return;
-  const v = grSt.v;
+/** Laufnummer: nur das Ergebnis der letzten Rechnung zählt. */
+let grSeq = 0;
+/** Straßen im Umkreis des Grundstücks (weniger Daten für den Worker). */
+function grStrassenNah(): Vec2[][] {
+  if (!st.plot) return [];
+  const c = centroid(st.plot);
+  const r = Math.max(...st.plot.map((p) => Math.hypot(p[0] - c[0], p[1] - c[1]))) + 300;
+  return grStrassen().filter((s) => s.some((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) < r));
+}
+
+/** Zufahrt und Schatten rechnet der Hintergrund-Worker; die Oberfläche bleibt bedienbar. */
+async function grRechnen() {
+  if (!site || !grSt.v || !grSt.res || st.modus !== 'gross' || st.ansicht === 'nachbar') return;
+  const v = { ...grSt.v };
   const res = grSt.res;
-  grSt.zufahrt = berechneZufahrt({
-    site, ziel: res.grundriss.fp, ausgenommen: v.art === 'aufstockung' && v.zielId ? [v.zielId] : [],
-    bruestung: res.kennzahlen.bruestung, strassen: grStrassen(),
-  });
-  grSt.ms.zufahrt = grSt.zufahrt.ms;
-  const t0 = performance.now();
-  grSt.schatten = berechneVerschattung(site, v, geoLage());
-  grSt.ms.schatten = performance.now() - t0;
-  grSt.gemeinde = gemeindeAbschnitt(site, v.art, umfeldStatistik(site, grMitte(), grStrassen()), grSt.plaene, data.site.gemeinde.name);
-  grSt.fragen = fragenAnGemeinde(v.art, site, grSt.plaene, umfeldStatistik(site, grMitte(), grStrassen()), (grSt.res?.af.ausserhalbM2 ?? 0) > 0.05);
+  const id = ++grSeq;
+  grSt.offen = true;
+  const { ground: _g, ...ohne } = site;
+  void _g;
+  const [z, sch] = await Promise.all([
+    rechne({ art: 'zufahrt', e: { site: ohne, ziel: res.grundriss.fp, ausgenommen: v.art === 'aufstockung' && v.zielId ? [v.zielId] : [], bruestung: res.kennzahlen.bruestung, strassen: grStrassenNah() } }),
+    rechne({ art: 'schatten', site: ohne, v, lage: geoLage() }),
+  ]);
+  if (id !== grSeq || st.modus !== 'gross' || !grSt.v || !site) return; // inzwischen neu verschoben oder Reiter gewechselt
+  if (z?.art === 'zufahrt') { grSt.zufahrt = z.zufahrt; grSt.ms.zufahrt = z.ms; }
+  if (sch?.art === 'schatten') { grSt.schatten = sch.schatten; grSt.ms.schatten = sch.ms; }
+  const umfeld = umfeldStatistik(site, grMitte(), grStrassen());
+  grSt.gemeinde = gemeindeAbschnitt(site, v.art, umfeld, grSt.plaene, data.site.gemeinde.name);
+  grSt.fragen = fragenAnGemeinde(v.art, site, grSt.plaene, umfeld, (grSt.res?.af.ausserhalbM2 ?? 0) > 0.05);
   grSt.offen = false;
   grBewerten();
   grZeichnen();
@@ -1205,7 +1219,7 @@ function grZiehen(g: Vec2, off: Vec2) {
 /* ----- Bauvoranfrage ----- */
 async function openVoranfrage() {
   if (!site || !grSt.v || !grSt.res) return;
-  if (grSt.offen) grRechnen();
+  if (grSt.offen) await grRechnen();
   const res = grSt.res;
   const vf = await import('./antrag/voranfrage');
   const gem = grSt.gemeinde ?? gemeindeAbschnitt(site, grSt.v.art, null, grSt.plaene, data.site.gemeinde.name);
@@ -2721,7 +2735,8 @@ async function main() {
         gr: grSt,
         grStart,
         grArt,
-        grRechnen,
+        grRechnen: () => grRechnen(),
+        rechne,
         grNeu,
         goToPlot,
         startDemo: (id: string) => startDemo((data.site.demos ?? []).find((d) => d.id === id)!),

@@ -342,7 +342,7 @@ function contextRows(site: Site): Row[] {
   if (site.ground) rows.push({ text: 'Wandhöhe über dem Gelände gemessen (DGM1)', tag: site.groundProvenance ?? 'amtlich', kind: site.groundProvenance ?? 'amtlich' });
   const bp = site.bplan;
   if (bp.status === 'vorhanden') rows.push({ text: `Bebauungsplan „${bp.name ?? 'ohne Namen'}“: Festsetzungen gehen vor`, tag: bp.provenance, kind: bp.provenance });
-  else if (bp.status === 'keiner') rows.push({ text: 'Kein Bebauungsplan gefunden', tag: bp.provenance, kind: bp.provenance });
+  else if (bp.status === 'keiner') rows.push({ text: 'Im Landesportal kein Bebauungsplan gefunden (das Portal ist nicht flächendeckend – Gemeinde fragen)', tag: bp.provenance, kind: bp.provenance });
   else rows.push({ text: site.demo ? 'Bebauungsplan: in der Demo nicht hinterlegt' : 'Bebauungsplan: noch nicht geprüft', tag: 'offen', kind: 'offen' });
   if (site.demo) rows.push({ text: 'Grundstück und Nachbarhäuser sind erfunden', tag: 'Demo', kind: 'Demo' });
   else {

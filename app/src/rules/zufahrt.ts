@@ -8,8 +8,10 @@
  *
  * Geforderte Breite (limits.json → grossesVorhaben):
  *  - Brüstung des obersten Anleiterfensters über 8 m → Zu- oder Durchfahrt (BayBO Art. 5 Abs. 1 Satz 2), 3 m lichte Breite
- *    (Muster-Richtlinie über Flächen für die Feuerwehr Nr. 2; Fassung in Bayern offen)
- *  - sonst Zu- oder Durchgang, 1,25 m (Nr. 14)
+ *    (Muster-Richtlinie über Flächen für die Feuerwehr Nr. 2, BayTB; Wortlaut der bayerischen Fassung nicht abgeglichen)
+ *  - sonst Zu- oder Durchgang, 1,25 m (Nr. 14), und er muss GERADLINIG sein (Art. 5 Abs. 1 Satz 1): geprüft wird die breiteste gerade
+ *    Strecke von der Verkehrsfläche zum Haus (besteGerade); ein gewundener Weg genügt nicht
+ *  - lichte Höhe der Zufahrt 3,50 m: nicht gemessen → offen
  *  - Gebäude mehr als 50 m von der Straße: Zufahrt „wenn aus Gründen des Feuerwehreinsatzes erforderlich“ (Art. 5 Abs. 1 Satz 4) → offen
  *  - „angemessene Breite“ der Erschließung (Art. 4 Abs. 1 Nr. 2) nennt das Gesetz nicht → offen
  * Das Grundstück ist die vom Nutzer bestätigte Grenze; ein Weg über Nachbargrundstücke (Baulast) zählt nicht.
@@ -27,6 +29,7 @@ const ZUGANG = G.zugangBreiteM.wert;
 const ZUFAHRT = G.zufahrtBreiteM.wert;
 const ZUFAHRT_BEGRENZT = G.zufahrtBreiteBegrenztM.wert;
 const BEGRENZT_LAENGE = G.zufahrtBegrenztLaengeM.wert;
+const ZUFAHRT_HOEHE = G.zufahrtHoeheM.wert;
 
 export interface ZufahrtEingabe {
   site: Site;
@@ -54,6 +57,12 @@ export interface ZufahrtErgebnis {
   entfernungStrasseM: number | null;
   erforderlichM: number;
   erforderlichGrund: string;
+  /** Zugang (Brüstung bis 8 m): GERADLINIG, 1,25 m. Zufahrt (darüber): breitester Weg, 3 m. */
+  anforderung: 'zugang' | 'zufahrt';
+  /** breiteste GERADE Strecke von der Verkehrsfläche zum Haus (Art. 5 Abs. 1 Satz 1); null = keine gefunden */
+  gerade: { breiteM: number; von: Vec2; nach: Vec2; stelle: Vec2 } | null;
+  /** Breite des breitesten Weges, auch gewundenen (zum Vergleich) */
+  wegBreiteM: number | null;
   grund: 'ok' | 'keine_strasse' | 'kein_weg';
   text: string;
   rows: Row[];
@@ -197,23 +206,82 @@ const NACHBARN: [number, number, number][] = [
   [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2],
 ];
 
-function erforderlich(e: ZufahrtEingabe, entfernung: number | null): { m: number; grund: string; fernOffen: boolean } {
+function erforderlich(e: ZufahrtEingabe, entfernung: number | null): { art: 'zugang' | 'zufahrt'; m: number; grund: string; fernOffen: boolean } {
   if (e.bruestung > BRUESTUNG_GRENZE) {
     return {
+      art: 'zufahrt',
       m: ZUFAHRT,
-      grund: `Die Brüstung des obersten Anleiterfensters liegt bei etwa ${e.bruestung.toFixed(1).replace('.', ',')} m, also über ${BRUESTUNG_GRENZE} m: statt eines Zugangs braucht es eine Zufahrt (BayBO Art. 5 Abs. 1 Satz 2), mindestens ${String(ZUFAHRT).replace('.', ',')} m lichte Breite (Richtlinie über Flächen für die Feuerwehr Nr. 2).`,
+      grund: `Die Brüstung des obersten Anleiterfensters liegt bei etwa ${e.bruestung.toFixed(1).replace('.', ',')} m, also über ${BRUESTUNG_GRENZE} m: statt eines Zugangs braucht es eine Zufahrt (BayBO Art. 5 Abs. 1 Satz 2), mindestens ${String(ZUFAHRT).replace('.', ',')} m lichte Breite und ${String(ZUFAHRT_HOEHE).replace('.', ',')} m lichte Höhe (Richtlinie über Flächen für die Feuerwehr Nr. 2, BayTB).`,
       fernOffen: false,
     };
   }
   const fern = entfernung != null && entfernung > ENTFERNUNG;
   return {
+    art: 'zugang',
     m: ZUGANG,
-    grund: `Brüstung etwa ${e.bruestung.toFixed(1).replace('.', ',')} m, also bis ${BRUESTUNG_GRENZE} m: ein geradliniger Zugang genügt, mindestens ${String(ZUGANG).replace('.', ',')} m breit (Richtlinie über Flächen für die Feuerwehr Nr. 14).`,
+    grund: `Brüstung etwa ${e.bruestung.toFixed(1).replace('.', ',')} m, also bis ${BRUESTUNG_GRENZE} m: ein GERADLINIGER Zugang von der öffentlichen Verkehrsfläche zum Haus genügt (BayBO Art. 5 Abs. 1 Satz 1), mindestens ${String(ZUGANG).replace('.', ',')} m breit (Richtlinie über Flächen für die Feuerwehr Nr. 14, BayTB).`,
     fernOffen: fern,
   };
 }
 
 const fm = (v: number) => v.toFixed(2).replace('.', ',');
+
+/**
+ * Breiteste gerade Strecke von der Verkehrsfläche zum Haus. Ausgangspunkte: Zellen der Verkehrsfläche am Rand zum Grundstück,
+ * Ziele: freie Zellen höchstens 0,3 m vom Haus. Breite einer Strecke = kleinste Breite (doppelter Abstand zum nächsten Hindernis)
+ * der Zellen entlang der Linie; das Stück auf der Verkehrsfläche zählt nicht. Gesucht wird die Strecke mit der größten Breite.
+ */
+function besteGerade(r: Raster, frei: Uint8Array, breite: Float64Array, strasse: Uint8Array, imGrundstueck: Uint8Array, abZiel: Float32Array, istZiel: Uint8Array): ZufahrtErgebnis['gerade'] {
+  const { nx, ny, res } = r;
+  const n = nx * ny;
+  const mitte = (i: number): Vec2 => [r.x0 + ((i % nx) + 0.5) * res, r.y0 + (Math.floor(i / nx) + 0.5) * res];
+  const nahZiel = 0.3 / res + 1;
+  const stride = Math.max(1, Math.round(0.25 / res));
+  const von: number[] = [];
+  const nach: number[] = [];
+  for (let i = 0; i < n; i++) {
+    if (!frei[i]) continue;
+    const x = i % nx;
+    const y = (i - x) / nx;
+    if (strasse[i] && ((x > 0 && !strasse[i - 1]) || (x < nx - 1 && !strasse[i + 1]) || (y > 0 && !strasse[i - nx]) || (y < ny - 1 && !strasse[i + nx]))) von.push(i);
+    if (istZiel[i] && abZiel[i] <= nahZiel) nach.push(i);
+  }
+  const duenn = (a: number[], max: number) => {
+    const s = Math.max(stride, Math.ceil(a.length / max));
+    return a.filter((_, k) => k % s === 0);
+  };
+  const A = duenn(von, 400);
+  const B = duenn(nach, 400);
+  let best = 0;
+  let res_: ZufahrtErgebnis['gerade'] = null;
+  for (const a of A) {
+    const ax = a % nx;
+    const ay = (a - ax) / nx;
+    for (const b of B) {
+      const bx = b % nx;
+      const by = (b - bx) / nx;
+      const L = Math.hypot(bx - ax, by - ay);
+      const m = Math.max(1, Math.ceil(L));
+      let min = Infinity;
+      let at = -1;
+      let gut = true;
+      for (let k = 0; k <= m; k++) {
+        const cx = Math.round(ax + ((bx - ax) * k) / m);
+        const cy = Math.round(ay + ((by - ay) * k) / m);
+        const c = cy * nx + cx;
+        if (!frei[c]) { gut = false; break; }
+        if (!imGrundstueck[c] && strasse[c]) continue; // Stück auf der Verkehrsfläche zählt nicht
+        if (breite[c] <= best) { gut = false; break; }
+        if (breite[c] < min) { min = breite[c]; at = c; }
+      }
+      if (gut && at >= 0 && min > best) {
+        best = min;
+        res_ = { breiteM: min, von: mitte(a), nach: mitte(b), stelle: mitte(at) };
+      }
+    }
+  }
+  return res_;
+}
 
 export function berechneZufahrt(e: ZufahrtEingabe): ZufahrtErgebnis {
   const t0 = performance.now();
@@ -228,7 +296,7 @@ export function berechneZufahrt(e: ZufahrtEingabe): ZufahrtErgebnis {
 
   const leer = (grund: ZufahrtErgebnis['grund'], text: string, status: Status | null): ZufahrtErgebnis => ({
     status, schmalsteM: null, schmalsteStelle: null, pfad: [], laengeM: null, entfernungStrasseM: entfernung,
-    erforderlichM: req.m, erforderlichGrund: req.grund, grund, text, rows: reihen(e, null, req, entfernung, null), ms: performance.now() - t0,
+    erforderlichM: req.m, erforderlichGrund: req.grund, anforderung: req.art, gerade: null, wegBreiteM: null, grund, text, rows: reihen(e, null, req, entfernung, null, null), ms: performance.now() - t0,
   });
 
   // Straße am Grundstück? (Abstand der Grenze zu einer Verkehrsfläche höchstens 3 m)
@@ -398,45 +466,74 @@ export function berechneZufahrt(e: ZufahrtEingabe): ZufahrtErgebnis {
   const schritt = Math.max(1, Math.round(1 / res));
   zellen.forEach((i, k) => { if (k % schritt === 0 || k === zellen.length - 1) pfad.push(mitte(i)); });
 
+  // GERADE Strecke (Art. 5 Abs. 1 Satz 1: „geradliniger Zu- oder Durchgang“): breiteste gerade Verbindung von der
+  // Verkehrsfläche zum Haus. Sie ist nur nötig, wenn ein Zugang gefordert ist, wird aber immer mitgeteilt.
+  const gerade = besteGerade(r, frei, breite, strasse, imGrundstueck, abZiel, istZiel);
+
   // Status
   let status: Status = 'ok';
   const teile: string[] = [];
-  if (schmal < req.m - 1e-6) {
+  let zeigeSchmal = schmal;
+  let zeigeStelle = stelle;
+  let zeigePfad = pfad;
+  if (req.art === 'zugang') {
+    if (gerade && gerade.breiteM >= req.m - 1e-6) {
+      zeigeSchmal = gerade.breiteM;
+      zeigeStelle = gerade.stelle;
+      zeigePfad = [gerade.von, gerade.nach];
+      teile.push(`Es gibt einen geraden Weg von der Verkehrsfläche zum Haus; die schmalste Stelle ist ${fm(gerade.breiteM)} m breit (gefordert mindestens ${fm(req.m)} m, geradlinig).`);
+    } else if (gerade) {
+      status = 'bad';
+      zeigeSchmal = gerade.breiteM;
+      zeigeStelle = gerade.stelle;
+      zeigePfad = [gerade.von, gerade.nach];
+      teile.push(`Der breiteste GERADE Weg zum Haus ist nur ${fm(gerade.breiteM)} m breit, gefordert sind mindestens ${fm(req.m)} m. ${schmal >= req.m - 1e-6 ? `Ein gewundener Weg mit ${fm(schmal)} m wäre vorhanden, genügt aber nicht: Der Zugang muss geradlinig sein (Art. 5 Abs. 1 Satz 1).` : ''}`.trim());
+    } else {
+      status = 'bad';
+      teile.push(`Es gibt keinen geraden Weg von der Verkehrsfläche zum Haus (Art. 5 Abs. 1 Satz 1 verlangt einen geradlinigen Zugang). ${schmal >= req.m - 1e-6 ? `Es gibt nur einen Umweg mit ${fm(schmal)} m Breite.` : `Auch der breiteste Weg ist nur ${fm(schmal)} m breit.`}`);
+    }
+  } else if (schmal < req.m - 1e-6) {
     status = 'bad';
     teile.push(`Die schmalste Stelle des Weges ist ${fm(schmal)} m breit, gefordert sind mindestens ${fm(req.m)} m.`);
   } else {
     teile.push(`Die schmalste Stelle des Weges ist ${fm(schmal)} m breit (gefordert mindestens ${fm(req.m)} m).`);
   }
-  if (status === 'ok' && req.fernOffen && schmal < ZUFAHRT) {
+  if (req.art === 'zufahrt') teile.push(`Die lichte Höhe von mindestens ${fm(ZUFAHRT_HOEHE)} m ist nicht gemessen (offen).`);
+  if (status === 'ok' && req.fernOffen && zeigeSchmal < ZUFAHRT) {
     status = 'warn';
     teile.push(`Das Haus liegt mehr als ${ENTFERNUNG} m von der Straße. Dann sind Zufahrten nötig, wenn die Feuerwehr es für den Einsatz verlangt (Art. 5 Abs. 1 Satz 4, offen) – bei weniger als ${fm(ZUFAHRT)} m Breite wäre das nicht erfüllt.`);
   }
-  if (status === 'ok' && req.m >= ZUFAHRT && schmal < ZUFAHRT_BEGRENZT && laengste > BEGRENZT_LAENGE) {
+  if (status === 'ok' && req.art === 'zufahrt' && schmal < ZUFAHRT_BEGRENZT && laengste > BEGRENZT_LAENGE) {
     status = 'warn';
     teile.push(`Über ${fm(laengste)} m liegt der Weg unter ${fm(ZUFAHRT_BEGRENZT)} m Breite zwischen Gebäuden. Wird er auf mehr als ${BEGRENZT_LAENGE} m beidseitig durch Bauteile begrenzt, verlangt die Richtlinie ${fm(ZUFAHRT_BEGRENZT)} m (Nr. 2). Ob beidseitig, klärt die Feuerwehr (offen).`);
   }
   const text = teile.join(' ');
   return {
-    status, schmalsteM: schmal, schmalsteStelle: stelle, pfad, laengeM: laenge, entfernungStrasseM: entfernung,
-    erforderlichM: req.m, erforderlichGrund: req.grund, grund: 'ok', text,
-    rows: reihen(e, schmal, req, entfernung, laengste), ms: performance.now() - t0,
+    status, schmalsteM: zeigeSchmal, schmalsteStelle: zeigeStelle, pfad: zeigePfad, laengeM: laenge, entfernungStrasseM: entfernung,
+    erforderlichM: req.m, erforderlichGrund: req.grund, anforderung: req.art, gerade, wegBreiteM: schmal, grund: 'ok', text,
+    rows: reihen(e, schmal, req, entfernung, laengste, gerade), ms: performance.now() - t0,
   };
 }
 
-function reihen(e: ZufahrtEingabe, schmal: number | null, req: { m: number; grund: string; fernOffen: boolean }, entfernung: number | null, begrenzt: number | null): Row[] {
+function reihen(e: ZufahrtEingabe, schmal: number | null, req: { art: 'zugang' | 'zufahrt'; m: number; grund: string; fernOffen: boolean }, entfernung: number | null, begrenzt: number | null, gerade: ZufahrtErgebnis['gerade']): Row[] {
   const rows: Row[] = [
     { text: req.grund, tag: G.feuerwehrBruestungGrenzeM.quelle, kind: 'rule' },
     { text: `Brüstungshöhe des obersten Anleiterfensters etwa ${e.bruestung.toFixed(1).replace('.', ',')} m über Gelände: Geschosse × Geschosshöhe + ${String(G.bruestungshoeheAnnahmeM.wert).replace('.', ',')} m, Dachgeschossfenster nicht berücksichtigt.`, tag: 'Annahme', kind: 'Annahme' },
-    { text: 'Welche Fassung der Richtlinie über Flächen für die Feuerwehr in Bayern gilt (Muster 02/2007 hier verwendet), ist offen.', tag: 'offen', kind: 'offen' },
+    { text: 'Art. 5 Abs. 1 Satz 1 BayBO: „Von öffentlichen Verkehrsflächen ist insbesondere für die Feuerwehr ein geradliniger Zu- oder Durchgang zu rückwärtigen Gebäuden zu schaffen; zu anderen Gebäuden ist er zu schaffen, wenn der zweite Rettungsweg dieser Gebäude über Rettungsgeräte der Feuerwehr führt.“ Passt. nimmt an, dass das für das Vorhaben zutrifft (Annahme).', tag: G.art5Abs1.quelle, kind: 'rule' },
+    { text: 'Die Maße stammen aus der Richtlinie über Flächen für die Feuerwehr, die in Bayern als Technische Baubestimmung (BayTB) eingeführt ist (Angabe des Auftraggebers). Der Wortlaut der bayerischen Fassung liegt Passt. nicht vor; die Zahlen entsprechen dem Muster 02/2007 (nicht abgeglichen).', tag: 'offen', kind: 'offen' },
     { text: 'Wie breit die Erschließung „angemessen“ sein muss (BayBO Art. 4 Abs. 1 Nr. 2), nennt das Gesetz nicht (offen). Passt. zeigt die Breite des freien Korridors auf deinem Grundstück.', tag: 'offen', kind: 'offen' },
   ];
+  if (req.art === 'zufahrt') rows.push({ text: `Lichte Höhe der Zufahrt mindestens ${String(ZUFAHRT_HOEHE).replace('.', ',')} m, senkrecht zur Fahrbahn gemessen (Richtlinie Nr. 2): Passt. hat keine Daten zu Durchfahrten, Ästen oder Leitungen und misst sie nicht.`, tag: 'offen', kind: 'offen' });
+  if (req.art === 'zufahrt') rows.push({ text: 'Ob die Zufahrt gerade sein muss und welche Kurvenradien gelten, prüft Passt. nicht; gesucht wird der breiteste Weg.', tag: 'offen', kind: 'offen' });
+  if (gerade) rows.push({ text: `Breiteste GERADE Strecke von der Verkehrsfläche zum Haus: ${gerade.breiteM.toFixed(2).replace('.', ',')} m (Mittellinie, Kreis um jeden Punkt der Strecke frei von Hindernissen).`, tag: 'berechnet', kind: 'berechnet' });
+  if (req.art === 'zugang') rows.push({ text: 'Für Türöffnungen und andere geringfügige Einengungen genügt nach der Richtlinie 1 m; Passt. wendet das nicht an.', tag: G.zugangBreiteM.quelle, kind: 'rule' });
   if (e.bruestung > BRUESTUNG_GRENZE) rows.push({ text: 'Bei Brüstung über 8 m kommen Aufstellflächen für Hubrettungsfahrzeuge hinzu, wenn die Feuerwehr sie für die Personenrettung braucht (Art. 5 Abs. 1 Satz 3; Richtlinie Nr. 8: mindestens 3,50 m breit). Passt. prüft sie nicht.', tag: 'offen', kind: 'offen' });
-  if (entfernung != null) rows.push({ text: `Der weiteste Punkt des Hauses ist ${entfernung.toFixed(0)} m Luftlinie von der öffentlichen Verkehrsfläche entfernt${entfernung > ENTFERNUNG ? ` (über ${ENTFERNUNG} m: Art. 5 Abs. 1 Satz 4, ob Zufahrten nötig sind, entscheidet die Feuerwehr – offen)` : ''}.`, tag: G.feuerwehrEntfernungM.quelle, kind: entfernung > ENTFERNUNG ? 'offen' : 'rule' });
+  if (entfernung != null) rows.push({ text: `Der weiteste Punkt des Hauses ist ${entfernung.toFixed(0)} m Luftlinie von der öffentlichen Verkehrsfläche entfernt${entfernung > ENTFERNUNG ? ` – mehr als ${ENTFERNUNG} m: „… sind Zufahrten oder Durchfahrten nach Satz 2 zu den vor und hinter den Gebäuden gelegenen Grundstücksteilen und Bewegungsflächen herzustellen, wenn sie aus Gründen des Feuerwehreinsatzes erforderlich sind“ (Art. 5 Abs. 1 Satz 4). Ob das erforderlich ist, entscheidet die Feuerwehr (offen)` : ''}.`, tag: G.feuerwehrEntfernungM.quelle, kind: entfernung > ENTFERNUNG ? 'offen' : 'rule' });
   if (schmal != null) rows.push({ text: `Hindernisse: Gebäude (LoD2, Hausumringe), von dir bestätigter Bestand, Baumstämme. Gemessen auf einem Raster von etwa 10 cm, Mittellinie des breitesten Weges.`, tag: 'berechnet', kind: 'berechnet' });
   if (begrenzt != null && begrenzt > BEGRENZT_LAENGE) rows.push({ text: `Strecke unter ${ZUFAHRT_BEGRENZT} m zwischen Gebäuden: ${begrenzt.toFixed(1)} m.`, tag: G.zufahrtBreiteBegrenztM.quelle, kind: 'rule' });
   return rows;
 }
 
 export function zufahrtPunkt(z: ZufahrtErgebnis): Pruefpunkt {
-  return { id: 'zufahrt', name: 'Zufahrt', status: z.status, text: z.text };
+  return { id: 'zufahrt', name: z.anforderung === 'zugang' ? 'Zugang für die Feuerwehr' : 'Zufahrt für die Feuerwehr', status: z.status, text: z.text };
 }

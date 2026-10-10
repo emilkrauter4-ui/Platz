@@ -315,6 +315,13 @@
       "text": "Oberkante der Brüstung des obersten zum Anleitern bestimmten Fensters über dem Fußboden seines Geschosses. Damit liegt sie bei n Geschossen auf (n − 1) × Geschosshöhe + 1,0 m über dem Gelände (Dachgeschossfenster nicht berücksichtigt).",
       "geprueft": false
     },
+    "art5Abs1": {
+      "wert": "wortlaut",
+      "quelle": "BayBO Art. 5 Abs. 1 Sätze 1 bis 4",
+      "text": "Art. 5 Abs. 1 BayBO: „(1) 1 Von öffentlichen Verkehrsflächen ist insbesondere für die Feuerwehr ein geradliniger Zu- oder Durchgang zu rückwärtigen Gebäuden zu schaffen; zu anderen Gebäuden ist er zu schaffen, wenn der zweite Rettungsweg dieser Gebäude über Rettungsgeräte der Feuerwehr führt. 2 Zu Gebäuden, bei denen die Oberkante der Brüstung von zum Anleitern bestimmten Fenstern oder Stellen mehr als 8 m über dem Gelände liegt, ist in den Fällen des Satzes 1 an Stelle eines Zu- oder Durchgangs eine Zu- oder Durchfahrt zu schaffen. 3 Ist für die Personenrettung der Einsatz von Hubrettungsfahrzeugen erforderlich, sind die dafür erforderlichen Aufstell- und Bewegungsflächen vorzusehen. 4 Bei Gebäuden, die ganz oder mit Teilen mehr als 50 m von einer öffentlichen Verkehrsfläche entfernt sind, sind Zufahrten oder Durchfahrten nach Satz 2 zu den vor und hinter den Gebäuden gelegenen Grundstücksteilen und Bewegungsflächen herzustellen, wenn sie aus Gründen des Feuerwehreinsatzes erforderlich sind.“ Passt. setzt Satz 1 (geradliniger Zugang), Satz 2 (Zufahrt ab 8 m Brüstung) und die Maße der Richtlinie um; Satz 3 (Aufstellflächen) und Satz 4 (über 50 m: Zufahrten, „wenn erforderlich“) sind offen und nur als Hinweis enthalten.",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 5 Abs. 1)",
+      "geprueft": false
+    },
     "feuerwehrBruestungGrenzeM": {
       "wert": 8,
       "quelle": "BayBO Art. 5 Abs. 1 Satz 2",
@@ -331,29 +338,43 @@
     },
     "zugangBreiteM": {
       "wert": 1.25,
-      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 14 (Muster, Fassung 02/2007)",
-      "text": "„Zu- oder Durchgänge für die Feuerwehr sind geradlinig und mindestens 1,25 m breit auszubilden. Für Türöffnungen und andere geringfügige Einengungen … genügt eine lichte Breite von 1 m.“ Art. 5 Abs. 1 Satz 1 BayBO verlangt den geradlinigen Zu- oder Durchgang zu rückwärtigen Gebäuden. Welche Fassung der Richtlinie in Bayern gilt, ist offen.",
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 14 (BayTB; Wortlaut hier nach Muster 02/2007)",
+      "text": "„Zu- oder Durchgänge für die Feuerwehr sind geradlinig und mindestens 1,25 m breit auszubilden. Für Türöffnungen und andere geringfügige Einengungen … genügt eine lichte Breite von 1 m.“ Art. 5 Abs. 1 Satz 1 BayBO verlangt den geradlinigen Zu- oder Durchgang zu rückwärtigen Gebäuden. Die Richtlinie ist in Bayern als Technische Baubestimmung (BayTB) eingeführt (Angabe des Auftraggebers, 10.10.2026); die Zahlen entsprechen dem Muster 02/2007, der Wortlaut der bayerischen Fassung liegt Passt. nicht vor.",
       "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 14)",
       "geprueft": false
     },
     "zufahrtBreiteM": {
       "wert": 3,
-      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (Muster, Fassung 02/2007)",
-      "text": "„Die lichte Breite der Zu- oder Durchfahrten muß mindestens 3 m … betragen.“",
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (BayTB; Wortlaut hier nach Muster 02/2007)",
+      "text": "„Die lichte Breite der Zu- oder Durchfahrten muß mindestens 3 m, die lichte Höhe mindestens 3,50 m betragen.“ (Höhe: siehe zufahrtHoeheM, offen)",
       "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
       "geprueft": false
     },
     "zufahrtBreiteBegrenztM": {
       "wert": 3.5,
-      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (Muster, Fassung 02/2007)",
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (BayTB; Wortlaut hier nach Muster 02/2007)",
       "text": "„Wird eine Zu- oder Durchfahrt auf eine Länge von mehr als 12 m beidseitig durch Bauteile, wie Wände oder Pfeiler, begrenzt, so muß die lichte Breite mindestens 3,50 m betragen.“ Passt. prüft das an Gebäuden beidseits des Korridors.",
       "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
       "geprueft": false
     },
     "zufahrtBegrenztLaengeM": {
       "wert": 12,
-      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (Muster, Fassung 02/2007)",
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (BayTB; Wortlaut hier nach Muster 02/2007)",
       "text": "Länge, ab der die beidseitige Begrenzung durch Bauteile die Breite von 3,50 m verlangt.",
+      "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
+      "geprueft": false
+    },
+    "zugangGeradlinig": {
+      "wert": true,
+      "quelle": "BayBO Art. 5 Abs. 1 Satz 1; Richtlinie über Flächen für die Feuerwehr Nr. 14 (BayTB)",
+      "text": "„… ein geradliniger Zu- oder Durchgang zu rückwärtigen Gebäuden …“ und „Zu- oder Durchgänge für die Feuerwehr sind geradlinig und mindestens 1,25 m breit auszubilden.“ Passt. prüft deshalb, ob es eine GERADE Strecke von der öffentlichen Verkehrsfläche bis zum Haus gibt, auf der überall mindestens 1,25 m frei sind (kein Umweg um Hindernisse). Ein gewundener Weg genügt nicht und wird rot angezeigt, auch wenn er breit genug wäre. Für die Zufahrt (Brüstung über 8 m) sucht Passt. den breitesten Weg; ob sie gerade sein muss und welche Kurvenradien gelten, prüft Passt. nicht (offen).",
+      "wortlaut": "docs/recht/BayBO_Art4_5_71.txt (Art. 5 Abs. 1 Satz 1); docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 14)",
+      "geprueft": false
+    },
+    "zufahrtHoeheM": {
+      "wert": 3.5,
+      "quelle": "Richtlinie über Flächen für die Feuerwehr Nr. 2 (BayTB)",
+      "text": "„Die lichte Höhe der Zu- oder Durchfahrten ist senkrecht zur Fahrbahn zu messen“ und beträgt mindestens 3,50 m. Passt. hat keine Daten zur lichten Höhe (Torbögen, Durchfahrten, Äste, Leitungen) und misst sie nicht: In jedem Ergebnis mit Zufahrt steht sie als `offen`.",
       "wortlaut": "docs/recht/Feuerwehr_Flaechen_Richtlinie.txt (Nr. 2)",
       "geprueft": false
     },

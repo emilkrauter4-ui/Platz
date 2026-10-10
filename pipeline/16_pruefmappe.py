@@ -373,6 +373,18 @@ R: dict[str, dict] = {
     "grossesVorhaben.bruestungshoeheAnnahmeM": dict(
         text=lambda: KEIN, link=None, umsetzung="Oberkante der Brüstung des obersten Anleiterfensters = (Geschosse − 1) × Geschosshöhe + 1,0 m; Dachgeschossfenster nicht berücksichtigt. Entscheidet, ob Zugang (≤ 8 m) oder Zufahrt (> 8 m) gefordert wird.",
         beispiel="3 Geschosse: 2 × 2,80 + 1,0 = 6,6 m → Zugang genügt; 4 Geschosse: 3 × 2,80 + 1,0 = 9,4 m → Zufahrt nötig."),
+    "grossesVorhaben.art5Abs1": dict(
+        text=lambda: baybo_art(5, "(1) 1", "(2)"), link="BayBO-5",
+        umsetzung="Wortlaut von Art. 5 Abs. 1 (Sätze 1 bis 4) wie in den Zeilen „So haben wir geprüft“ zitiert. Umgesetzt: Satz 1 (GERADLINIGER Zugang), Satz 2 (Zufahrt über 8 m Brüstung); als Hinweis (offen): Satz 3 (Aufstellflächen), Satz 4 (über 50 m von der Verkehrsfläche). Der Text stammt von lxgesetze.de, nicht vom amtlichen Portal.",
+        beispiel="Hinterliegerhaus 25 m hinter dem Vorderhaus: Passt. sucht eine gerade Strecke von der Straße zum Haus."),
+    "grossesVorhaben.zugangGeradlinig": dict(
+        text=lambda: baybo_art(5, "(1) 1", "2 Zu Gebäuden") + "<br>" + feuerwehr(14), link="BayBO-5",
+        umsetzung="Gerader Korridor: Strecken von Punkten der Verkehrsfläche zu Punkten am Haus (alle 25 cm), Breite = kleinster Abstand zum Hindernis entlang der Linie ×2; die breiteste gerade Strecke zählt. Ein gewundener Weg genügt nicht (rot), auch wenn er breit genug wäre. Für die Zufahrt (Brüstung über 8 m) wird der breiteste Weg gesucht, Geradlinigkeit dort nicht geprüft (offen).",
+        beispiel="Zwei versetzte Garagenriegel: Umweg 3 m breit vorhanden, aber keine gerade Strecke → Zugang rot; gerader Gang 1,3 m zwischen Garage und Zaun → grün."),
+    "grossesVorhaben.zufahrtHoeheM": dict(
+        text=lambda: feuerwehr(2), link="Feuerwehr",
+        umsetzung="Lichte Höhe 3,50 m (senkrecht zur Fahrbahn): Passt. hat keine Daten zu Durchfahrten, Ästen oder Leitungen, misst sie nicht und führt sie in jedem Ergebnis mit Zufahrt als „offen“.",
+        beispiel="Zufahrt unter einem Carport mit 2,5 m Durchfahrtshöhe: Passt. erkennt das nicht."),
     "grossesVorhaben.feuerwehrBruestungGrenzeM": dict(
         text=lambda: baybo_art(5, "(1) 1", "3 Ist für"), link="BayBO-5", umsetzung="Brüstung über 8 m → Zufahrt (3 m) statt Zugang (1,25 m); Ergebnis nur für die Breite des freien Korridors auf dem eigenen Grundstück. Aufstellflächen für Hubrettungsfahrzeuge (Satz 3) prüft Passt. nicht (offen, steht in den Zeilen).",
         beispiel="Aufstockung auf 3 Geschosse bei 2,80 m Geschosshöhe: Brüstung 6,6 m → 1,25 m Zugang; 4. Geschoss → 9,4 m → 3 m Zufahrt, bei 2,6 m schmalster Stelle rot."),
@@ -380,7 +392,7 @@ R: dict[str, dict] = {
         text=lambda: baybo_art(5, "4 Bei Gebäuden", "(2)"), link="BayBO-5", umsetzung="Weitester Gebäudepunkt über 50 m Luftlinie von der öffentlichen Verkehrsfläche: Zufahrt „wenn aus Gründen des Feuerwehreinsatzes erforderlich“ – das entscheidet die Feuerwehr; Passt. zeigt gelb, wenn die schmalste Stelle unter 3 m liegt (offen).",
         beispiel="Haus im Hinterland, 62 m von der Straße, Weg 2,2 m breit: Zugang erfüllt, aber gelb mit Hinweis auf Satz 4."),
     "grossesVorhaben.zugangBreiteM": dict(
-        text=lambda: feuerwehr(14), link="Feuerwehr", umsetzung="Breite des freien Korridors (Rasterberechnung, schmalste Stelle) gegen 1,25 m. Gilt für den Zugang bei Brüstung bis 8 m. Welche Fassung der Richtlinie in Bayern gilt, ist offen.",
+        text=lambda: feuerwehr(14), link="Feuerwehr", umsetzung="Breite der breitesten GERADEN Strecke zum Haus (Rasterberechnung, schmalste Stelle) gegen 1,25 m. Gilt für den Zugang bei Brüstung bis 8 m. Die Richtlinie ist in Bayern als Technische Baubestimmung (BayTB) eingeführt (Angabe des Auftraggebers); der Wortlaut der bayerischen Fassung liegt nicht vor.",
         beispiel="Gasse zwischen Garage und Grenze 1,0 m breit: rot; 1,3 m: grün."),
     "grossesVorhaben.zufahrtBreiteM": dict(
         text=lambda: feuerwehr(2), link="Feuerwehr", umsetzung="Zufahrt bei Brüstung über 8 m: schmalste Stelle des Korridors mindestens 3 m. Höhe (3,50 m), Kurven, Tragfähigkeit prüft Passt. nicht.",
@@ -448,7 +460,7 @@ FRAGEN = [
     ("Art. 57 Abs. 1 Nr. 1 a – aktueller Wortlaut", "Nach dem aktuellen Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur für Gebäude im Außenbereich (bis 20 m³). Passt. behandelt ein Gartenhaus mit Aufenthaltsraum oder Ofen im Innenbereich deshalb als verfahrensfrei (gelb), aber ohne Privileg nach Art. 6 Abs. 7. Richtig? Gibt es weitere Anforderungen, die wir nennen sollten (Feuerstätte, Abgasanlage, Bezirkskaminkehrer)?"),
     ("Außenbereich", "Passt. gibt im Außenbereich nichts frei und verweist ans Bauamt, auch bei Gebäuden unter 20 m³. Ist dieser Hinweis ausreichend und korrekt formuliert?"),
     ("Was zählt „an der Grenze“?", "Art. 6 Abs. 7 gilt „auch wenn sie nicht an der Grundstücksgrenze errichtet werden“. Passt. zählt ein Nebengebäude zur 9-m- und 15-m-Länge, wenn es näher an der Grenze steht als seine erforderliche Abstandsflächentiefe (meist 3 m). Ist das die richtige Abgrenzung?"),
-    ("Bestand automatisch mitzählen", "Aus Luftbild und Laser erkannte Nebengebäude zählen ab Konfidenz 0,8 automatisch zur Grenzlänge, darunter muss der Nutzer bestätigen. Ist das als Orientierung vertretbar?"),
+    ("Bestand: nur Bestätigtes zählt", "Aus Luftbild und Laser automatisch erkannte Nebengebäude sind nur ein Hinweis und zählen nie bei der Grenzbebauung (9 m / 15 m); erst was der Nutzer per Tipp erfasst, bestätigt oder einzeichnet, zählt mit Maßen und Spanne. Ist das als Orientierung vertretbar, oder soll ein erkannter Bau ab einer Mindestgröße immer als Warnung erscheinen?"),
     ("Fläche eines Carports", "Passt. nimmt für die 50-m²-Grenze Breite × Tiefe des Carports. Zählt der Dachüberstand mit, oder nur die von Stützen umschlossene Fläche?"),
     ("Wärmepumpe", "Passt. ordnet die Wärmepumpe Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige TGA) zu. Und: Zählt bei „Höhe bis zu 2 m über der Geländeoberfläche“ (Art. 6 Abs. 1) ein Sockel oder eine Wandkonsole mit?"),
     ("Klimagerät: Art. 57", "Passt. ordnet die Außeneinheit eines Klimageräts (Split) Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige Anlagen der technischen Gebäudeausrüstung) zu, weil der Wortlaut Klimageräte nicht nennt. Ist das richtig, und gilt es auch bei Geräten über 2 m Höhe oder mit Einhausung?"),
@@ -467,7 +479,7 @@ FRAGEN = [
     ("Überdeckung der Abstandsflächen (Art. 6 Abs. 3)", "Passt. lässt Überdeckungen nur bei Wänden über 75° zueinander zu (Nr. 1). Die Ausnahme „fremder Sicht entzogener Gartenhof“ bei Gebäudeklassen 1 und 2 (Nr. 2) erkennt Passt. nicht, ebenso wenig die Gebäude „in den Abstandsflächen zulässig“ außer Kleinbauten bis 3 m. Reicht das als Orientierung?"),
     ("Anbau: Abstandsfläche der angebauten Wand", "Beim Anbau lässt Passt. die Abstandsfläche der angebauten Hauswand auf der Länge des Anbaus weg und rechnet Reststücke weiter. Anbau und Haus gelten als ein Gebäude. Passt das – auch bei abweichender Höhe des Anbaus?"),
     ("Abstandsflächen auf öffentlichen Verkehrsflächen", "Art. 6 Abs. 2 Satz 2: „nur bis zu deren Mitte“. Passt. kennt die Mitte der Straße nicht und zeigt Abstandsflächen auf Straßen (ALKIS Tatsächliche Nutzung) gelb mit „offen“. Gibt es eine praktikable Regel (halbe Breite der Fläche)?"),
-    ("Zufahrt: Breite und Fassung der Richtlinie", "Passt. nimmt die Muster-Richtlinie über Flächen für die Feuerwehr (Fassung 02/2007): Zugang 1,25 m (Nr. 14), Zufahrt 3 m, 3,50 m bei beidseitiger Begrenzung über 12 m (Nr. 2), Aufstellflächen 3,50 m (Nr. 8, nicht geprüft). Welche Fassung gilt in Bayern, und gilt sie für Wohnhäuser der Gebäudeklasse 1–2 mit Brüstung unter 8 m überhaupt?"),
+    ("Zugang geradlinig, Zufahrt: Maße", "Passt. prüft für Brüstungen bis 8 m einen GERADLINIGEN Zugang von der öffentlichen Verkehrsfläche zum Haus (Art. 5 Abs. 1 Satz 1), mindestens 1,25 m breit (Richtlinie über Flächen für die Feuerwehr Nr. 14, BayTB); ein breiter, aber gewundener Weg wird rot. Darüber verlangt Passt. eine Zufahrt mit 3 m lichter Breite (Nr. 2); die lichte Höhe von 3,50 m misst Passt. nicht (offen). Aufstellflächen (Satz 3, Nr. 8) werden nicht geprüft. Stimmen Auslegung und Maße der bayerischen Fassung? Muss auch die Zufahrt gerade sein?"),
     ("Zufahrt: Brüstungshöhe und 50-m-Regel", "Passt. nimmt für das oberste Anleiterfenster (Geschosse − 1) × Geschosshöhe + 1,0 m an und prüft den Zugang immer (Annahme: zweiter Rettungsweg über die Feuerwehr). Bei mehr als 50 m Entfernung zur Straße (Art. 5 Abs. 1 Satz 4) zeigt Passt. gelb, wenn weniger als 3 m frei sind. Vertretbar?"),
     ("Erschließung: angemessene Breite", "Art. 4 Abs. 1 Nr. 2 nennt keine Mindestbreite. Passt. zeigt die Breite des freien Korridors auf dem eigenen Grundstück und bewertet nur gegen die Feuerwehr-Maße. Gibt es eine übliche Mindestbreite für die Zufahrt eines Hinterliegerhauses (Wohnweg nach Art. 4 Abs. 2)?"),
     ("Straßen aus ALKIS Tatsächliche Nutzung", "Für die Zufahrt gelten Flächen der Nutzungsarten Straßenverkehr, Weg und Platz als öffentliche Verkehrsfläche; ein Spielraum von 1,5 m gleicht Abweichungen zur selbst gesetzten Grenze aus. Eine Zufahrt über Nachbargrundstücke (Baulast) rechnet Passt. nicht. Genügt das?"),
@@ -480,11 +492,27 @@ FRAGEN = [
 ]
 
 
+# Kurzfassung: nur Regeln und Fragen, die in den drei Demo-Abläufen (Gartenhaus an der Grenze, Hanglage, Wärmepumpe nah am
+# Nachbarn) vorkommen – geprüft an den Zeilen „So haben wir geprüft“ aller drei Demos (Gartenhaus, Carport, Wärmepumpe) –,
+# höchstens 20, nach Wichtigkeit für die Demo geordnet. Das Gartenhaus der Demos hat ein Flachdach: Dachregeln fehlen deshalb.
+KURZ_REGELN = [
+    "gartenhaus.maxBruttoRauminhaltM3", "grenzbebauung.maxMittlereWandhoeheM", "grenzbebauung.maxLaengeJeSeiteM",
+    "grenzbebauung.maxLaengeGesamtM", "grenzbebauung.ohneEigeneAbstandsflaeche", "abstand.minM", "abstand.faktorH",
+    "gartenhaus.aufenthaltsraumNurArt6", "carport.maxFlaecheM2", "bestand.automatikNurHinweis", "waermepumpe.verfahrensfrei",
+    "abstand.waermepumpeOhneAbstandsflaecheBisM", "waermepumpe.richtwerteNachtDbA", "waermepumpe.formel", "waermepumpe.richtwirkungQ",
+    "waermepumpe.abschirmungDb", "waermepumpe.knappMargeDb", "waermepumpe.fensterhoeheAnnahmeM", "verfahren.abweichung",
+    "waermepumpe.wandabstandM",
+]
+KURZ_FRAGEN = ["Brutto-Rauminhalt", "Art. 57 Abs. 1 Nr. 1 a – aktueller Wortlaut", "Was zählt „an der Grenze“?", "Bestand: nur Bestätigtes zählt",
+               "Fläche eines Carports", "Wärmepumpe", "Lärm: Immissionsort und Zuschläge", "Hang (BGH V ZR 230/16)", "Örtliche Satzungen",
+               "Formulierung der Antworten"]
+
+
 def e(s: str) -> str:
     return html.escape(s, quote=False)
 
 
-def seite() -> str:
+def seite(kurz: bool = False) -> str:
     L = json.loads(LIMITS.read_text(encoding="utf-8"))
     h = hashlib.sha256(LIMITS.read_bytes()).hexdigest()[:12]
     regeln = []
@@ -497,12 +525,21 @@ def seite() -> str:
     fehlt = [rid for rid, *_ in regeln if rid not in R]
     if fehlt:
         raise SystemExit(f"Regeln ohne Eintrag in der Prüfmappe: {fehlt}")
+    fragen_liste = FRAGEN
+    if kurz:
+        ids = [r[0] for r in regeln]
+        unbekannt = [k for k in KURZ_REGELN if k not in ids]
+        assert not unbekannt and len(KURZ_REGELN) <= 20, unbekannt
+        regeln = sorted((r for r in regeln if r[0] in KURZ_REGELN), key=lambda r: KURZ_REGELN.index(r[0]))
+        titel_fragen = {t for t, _ in FRAGEN}
+        assert all(t in titel_fragen for t in KURZ_FRAGEN), [t for t in KURZ_FRAGEN if t not in titel_fragen]
+        fragen_liste = [f for t in KURZ_FRAGEN for f in FRAGEN if f[0] == t]
     titel = {"gartenhaus": "Gartenhaus", "carport": "Carport", "abstand": "Abstandsflächen", "grenzbebauung": "Bebauung an der Grenze",
              "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
              "verfahren": "Verfahren und Antrag"}
     karten, akt, nr = [], None, 0
     for rid, sek, r in regeln:
-        if sek != akt:
+        if sek != akt and not kurz:
             akt = sek
             karten.append(f'<h2 class="sek">{e(titel.get(sek, sek))}</h2>')
         nr += 1
@@ -531,9 +568,9 @@ def seite() -> str:
 </section>""")
     fragen = "".join(f"""
 <section class="frage"><div class="kopf"><span class="nr">F{i}</span><b>{e(t)}</b></div><p>{e(q)}</p>
-<div class="antwort">Antwort:</div></section>""" for i, (t, q) in enumerate(FRAGEN, 1))
+<div class="antwort">Antwort:</div></section>""" for i, (t, q) in enumerate(fragen_liste, 1))
     heute = date.today().strftime("%d.%m.%Y")
-    return f"""<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Passt. – Prüfmappe Regelwerk</title>
+    return f"""<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Passt. – Prüfmappe Regelwerk{" (Kurzfassung)" if kurz else ""}</title>
 <style>
 @page {{ size: A4; margin: 16mm 14mm 18mm; }}
 body {{ font: 9.6pt/1.4 "Helvetica Neue", Arial, sans-serif; color: #1a1a1a; }}
@@ -562,7 +599,8 @@ sup {{ font-size: 6.5pt; }}
 </style></head><body>
 <div class="titel">
  <div>
-  <h1>Passt<span>.</span> – Prüfmappe Regelwerk</h1>
+  <h1>Passt<span>.</span> – Prüfmappe Regelwerk{" – Kurzfassung für die Demo" if kurz else ""}</h1>
+  {"<p><b>Kurzfassung:</b> nur die " + str(len(regeln)) + " Regeln und " + str(len(fragen_liste)) + " Fragen, die in den drei Demo-Abläufen vorkommen (Gartenhaus an der Grenze, Hanglage, Wärmepumpe nah am Nachbarn), nach Wichtigkeit für die Demo geordnet. Die vollständige Prüfmappe (alle Regeln und Fragen, auch Außengeräte, Hecken, großes Vorhaben) ist <code>pruefmappe.html</code>.</p>" if kurz else ""}
   <p style="font-size:12pt">Bitte prüfen Sie jede Regel, mit der Passt. Hausbesitzern eine erste Orientierung gibt:
   „Darf ich das hier hinstellen?“ (Gartenhaus, Carport, Außengeräte wie Wärmepumpe, Klimagerät und Pool-Wärmepumpe, Hecken und Bäume, dazu das „große Vorhaben“: zweites Wohnhaus, Anbau, Aufstockung – in Sulzbach-Rosenberg).</p>
   <div class="hinweis"><b>Wichtig:</b> Passt. gibt Orientierung, keine Genehmigung. Jede Regel steht in
@@ -573,11 +611,11 @@ sup {{ font-size: 6.5pt; }}
   <h3>So geht's</h3>
   <ol><li>Je Regel: Gesetzestext, unsere Auslegung, wie Passt. rechnet, ein Beispiel.</li>
   <li>Bitte ankreuzen: <b>korrekt</b>, <b>falsch</b> oder <b>unklar</b>, und bei Bedarf eine Anmerkung.</li>
-  <li>Am Ende: {len(FRAGEN)} gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
+  <li>Am Ende: {len(fragen_liste)} gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
  </div>
  <table class="meta">
   <tr><td>Stand</td><td>{heute}</td></tr>
-  <tr><td>Regeln</td><td>{len(regeln)} (aus <code>app/src/rules/limits.json</code>, SHA-256 {h}…)</td></tr>
+  <tr><td>Regeln</td><td>{len(regeln)}{' von ' + str(len(R)) + ' (Kurzfassung)' if kurz else ''} (aus <code>app/src/rules/limits.json</code>, SHA-256 {h}…)</td></tr>
   <tr><td>Geprüft von</td><td>______________________________ (Name, Funktion)</td></tr>
   <tr><td>Datum, Unterschrift</td><td>______________________________</td></tr>
   <tr><td>Rückfragen</td><td>Emil (Passt.) – ______________________________</td></tr>
@@ -594,6 +632,8 @@ def main() -> int:
     AUS.mkdir(parents=True, exist_ok=True)
     (AUS / "pruefmappe.html").write_text(seite(), encoding="utf-8")
     print(f"→ {AUS / 'pruefmappe.html'} ({len(R)} Regeln, {len(FRAGEN)} Fragen)")
+    (AUS / "pruefmappe_kurz.html").write_text(seite(kurz=True), encoding="utf-8")
+    print(f"→ {AUS / 'pruefmappe_kurz.html'} ({len(KURZ_REGELN)} Regeln, {len(KURZ_FRAGEN)} Fragen)")
     return 0
 
 

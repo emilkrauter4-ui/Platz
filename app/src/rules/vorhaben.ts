@@ -517,7 +517,7 @@ export function bewerteVorhaben(site: Site, v: Vorhaben, zufahrt: Pruefpunkt | n
   }
 
   // --- Zufahrt (aus zufahrt.ts)
-  punkte.push(zufahrt ?? { id: 'zufahrt', name: 'Zufahrt', status: null, text: 'Die Zufahrt ist noch nicht berechnet.' });
+  punkte.push(zufahrt ?? { id: 'zufahrt', name: 'Zufahrt für die Feuerwehr', status: null, text: 'Die Zufahrt ist noch nicht berechnet.' });
 
   const status = punkte.reduce<Status | null>((s, p) => schlechter(s, p.status), null);
   const lage = site.bereich.value === 'aussen';

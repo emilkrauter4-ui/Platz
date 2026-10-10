@@ -547,6 +547,19 @@ Ausführlich: `docs/messungen/scharhof_daten.md`. Fertig, bis auf die Maßband-W
 
 ## AUFTRAG_V3 Phase A – Außengeräte (10. Oktober 2026)
 
+**Stand, klargestellt (10. Oktober 2026, nach Phase B nachgeprüft):** Phase A ist **umgesetzt, mit einer Lücke bei den Gerätedaten.**
+Im Browser mit der Demo „Wärmepumpe nah am Nachbarn“ durchgespielt: Klasse umschalten (Luft-Wasser-Wärmepumpe, Klimagerät, Pool-Wärmepumpe)
+ändert Zeilen, Platzhalter-Schallleistung (58/60/55 dB(A)) und Pegel (48/50/45 dB(A) am nächsten Fenster), die Gerätesuche ist da.
+
+| Punkt | Stand |
+|---|---|
+| A1 Geräteklassen | **umgesetzt** (Luft-Wasser, Klimagerät, Pool-Wärmepumpe; Reiter „Außengerät“) |
+| A2 Gerätedaten Klimageräte | **nicht umsetzbar ohne EPREL-API-Schlüssel** (HTTP 403 am 10.10.2026 erneut geprüft); KEYMARK hat keine Luft-Luft-Geräte. Stattdessen: Nutzer gibt die Schallleistung aus dem Datenblatt ein (`nutzerbestätigt`), bis dahin Platzhalter 60/55 dB(A) (`Annahme`, nicht belegt). **Neu:** `pipeline/10b_klimageraete_eprel.py` zieht die Liste, sobald ein Schlüssel da ist (`EPREL_API_KEY=… python3 10b_klimageraete_eprel.py`) – **ungetestet**, die Feldnamen der Antwort sind unbekannt; das Skript sucht das Feld über den Namen und bricht mit der Feldliste ab, wenn es keines findet. Pool-Wärmepumpen haben kein Energielabel, also keine EPREL-Daten. |
+| A3 Regeln aus dem Wortlaut | **umgesetzt**, Zuordnungen als `offen` gekennzeichnet (siehe unten) |
+| A4 Oberfläche | **umgesetzt**: eine Gerätesuche über alle Klassen; für Klimageräte und Pool-Wärmepumpen ist die Liste leer, weil es keine Datei gibt |
+| A5 Tests | **umgesetzt** (11 Tests); BWP-Vergleich nur für Luft-Wasser-Wärmepumpen möglich |
+
+
 Das Wärmepumpen-Modul ist das Modul „Außengeräte“. Alle neuen Regeln stehen in `limits.json → aussengeraete` mit
 `geprueft: false`; Wortlaut aus Art. 57 und Art. 6 BayBO (lxgesetze.de, gesetze-bayern.de ist per CAPTCHA gesperrt) und
 TA Lärm Nr. 6.1/6.4 (verwaltungsvorschriften-im-internet.de), Abruf 10.10.2026. Tipp-Erfassung und Messauswertung unverändert.
@@ -581,7 +594,7 @@ TA Lärm Nr. 6.1/6.4 (verwaltungsvorschriften-im-internet.de), Abruf 10.10.2026.
   um Nr. 10 Buchst. a ergänzt (nicht auf gesetze-bayern.de bestätigt).
 - **Offen für Emil/Fachperson:** EPREL-API-Schlüssel beantragen und prüfen, ob die Außen-Schallleistung enthalten ist;
   die vier neuen Auslegungsfragen; Platzhalterwerte 60/55 dB(A) belegen oder ersetzen.
-- Phase B siehe unten.
+- Offen: EPREL-Schlüssel (Emil), die vier Auslegungsfragen, Platzhalterwerte. Phase B siehe unten.
 
 ## AUFTRAG_V3 Phase B – Stockwerk 3 „Großes Vorhaben“ (10. Oktober 2026)
 
@@ -599,14 +612,23 @@ Tipp-Erfassung und Messauswertung unverändert.
     Straßenflächen nur „offen“ (Mitte unbekannt), Kleinbauten ≤ 3 m in der Abstandsfläche zulässig (Abs. 7).
   - **Zonen „Wo darf es hin?“** für den ganzen Grundriss (`zonenVorhaben`, Worker). **Gemessen** (Node, 30 × 40 m, 0,25-m-Raster):
     **125 ms**; im Chromium des Containers (Software-Rendering) 319 ms inkl. Übertragung. Auf iPhone nicht gemessen.
-  - **Zufahrt** (`rules/zufahrt.ts`): Widest-Path auf einem Raster von etwa 10 cm (bei großen Grundstücken gröber, max. 300 000
-    Zellen), Hindernisse Gebäude, bestätigter Bestand, Baumstämme; Straße aus **ALKIS Tatsächliche Nutzung** (neue Datei
-    `strassen.json`, `04_export_app.py`). Rechenzeit **203 ms** (Node, 30 × 40 m), im Chromium des Containers (Software-Rendering,
-    Demo-Grundstück) **1,4 bis 2,3 s** – zu langsam für iPhone-Erwartungen nicht belegt, aber nicht gemessen; läuft deshalb erst 350 ms
-    nach dem Ziehen und blockiert den Hauptthread (Verschieben in den Worker wäre der nächste Schritt).
-    Geforderte Breite: Brüstung ≤ 8 m → Zugang **1,25 m** (Richtlinie Nr. 14), darüber → Zufahrt **3 m** (Art. 5 Abs. 1 Satz 2,
-    Richtlinie Nr. 2); > 50 m von der Straße: gelb „offen“ (Art. 5 Abs. 1 Satz 4); 3,50 m bei beidseitiger Begrenzung > 12 m nur als
-    `offen`-Hinweis. Art. 4 „angemessene Breite“ nennt keine Zahl → `offen`. Aufstellflächen für Hubrettungsfahrzeuge werden nicht geprüft.
+  - **Zugang und Zufahrt für die Feuerwehr** (`rules/zufahrt.ts`, überarbeitet am 10.10.2026): Wortlaut **BayBO Art. 5 Abs. 1** (Sätze 1–4)
+    steht in `limits.json → art5Abs1` und in den Ergebniszeilen. Maße aus der Richtlinie über Flächen für die Feuerwehr (in Bayern als
+    BayTB eingeführt – Angabe des Auftraggebers; der Wortlaut der bayerischen Fassung liegt nicht vor, die Zahlen stimmen mit dem Muster
+    02/2007 überein).
+    - **Brüstung bis 8 m → Zugang:** muss **GERADLINIG** sein (Satz 1) und mindestens **1,25 m** breit. Geprüft wird eine **gerade Strecke**
+      von der Verkehrsfläche zum Haus (Linien zwischen Punkten der Verkehrsfläche und des Hauses, Breite = kleinster Hindernisabstand ×2,
+      breiteste Strecke zählt). Ein gewundener Weg genügt **nicht** (rot, auch wenn er breit genug ist); die Wegsuche bleibt als
+      Vergleichswert (`wegBreiteM`) und für die Zufahrt.
+    - **Brüstung über 8 m → Zufahrt** (Satz 2): breitester Weg, mindestens **3 m** lichte Breite; **lichte Höhe 3,50 m = `offen`** (nicht
+      gemessen, steht in Ergebnis und Zeilen); ob die Zufahrt gerade sein muss und welche Kurvenradien gelten: `offen`.
+    - **Über 50 m von der Verkehrsfläche** (Satz 4): Wortlaut in der Zeile, „entscheidet die Feuerwehr“ (`offen`), gelb bei weniger als 3 m.
+    - Weiter nicht geprüft: Aufstellflächen (Satz 3), 3,50 m bei beidseitiger Begrenzung über 12 m nur als Hinweis.
+    - Neue Einträge in `limits.json`: `art5Abs1`, `zugangGeradlinig`, `zufahrtHoeheM` (alle `geprueft: false`).
+    - **Läuft im Hintergrund-Worker** (`rules/rechner.worker.ts`, Client `scene/rechner.ts`): Zufahrt und Schatten blockieren die Oberfläche
+      nicht mehr. Gemessen im Container-Chromium: längste Lücke zwischen zwei 10-ms-Zeitgebern **43–50 ms** während der Rechnung (Ruhe: 21–35 ms),
+      vorher blockierte die Zufahrt 1,4–2,3 s. Der Worker braucht dort für Zufahrt etwa 2,8–3,2 s und für Schatten etwa 0,9–1,2 s (Demo-Grundstück,
+      Software-Rendering, geteilte CPU); veraltete Aufträge werden verworfen. Zonen liefen schon vorher im Worker. iPhone nicht gemessen.
   - **Schatten auf Nachbarn** (`rules/verschattung.ts`): zusätzliche Sonnenstunden am **21. März und 21. Dezember** für Nachbarfenster
     und Gartenpunkte (2/5/8 m hinter der Grenze, `Annahme`), als Zahl (größter Wert, Mittel). **87 ms** für 152 Punkte (Node).
     Keine gesetzliche Grenze, keine Ampel; ebenes Gelände angenommen.
@@ -626,8 +648,8 @@ Tipp-Erfassung und Messauswertung unverändert.
 - **B5 Tests:** `vorhaben.test.ts` (33: Abstandsflächen-Überdeckung inkl. 75°-Ausnahme, Zufahrtsbreite an Lücken von 0,9/2,6/3,2 m,
   zwei Lücken, Baumstamm, Schattenstunden, Aufstockung, Anbau, Pultdach, Zonen, Planungsrecht), `voranfrage.test.ts` (4),
   `services.test.ts` (+2); App insgesamt grün.
-- **Prüfmappe:** 19 neue Regeln, 14 neue Fragen (jetzt 86 Regeln, 36 Fragen), PDF neu erzeugt.
-- **Offen für Emil/Fachperson:** die 14 neuen Fragen; **Fassung der Feuerwehrrichtlinie in Bayern**; **Lizenz des Bauleitplanung-WMS**;
+- **Prüfmappe:** 22 neue Regeln, 14 neue Fragen (jetzt 89 Regeln, 36 Fragen), PDF neu erzeugt. **Kurzfassung** (`docs/pruefmappe/pruefmappe_kurz.html/.pdf`): 20 Regeln und 10 Fragen, nur was in den drei Demo-Abläufen vorkommt, nach Wichtigkeit geordnet (`16_pruefmappe.py` erzeugt beide, `pruefmappe_pdf.mjs --kurz`). Eine veraltete Frage (Bestand „ab Konfidenz 0,8 automatisch“) ist korrigiert: Vollautomatik zählt nie.
+- **Offen für Emil/Fachperson:** die 14 neuen Fragen; **Abgleich der Feuerwehrrichtlinie mit dem Wortlaut der bayerischen BayTB-Fassung** (Zahlen stimmen mit dem Muster überein); **Lizenz des Bauleitplanung-WMS**;
   „Mitte der Verkehrsfläche“ (Art. 6 Abs. 2 Satz 2); Pultdach-Auslegung; Zufahrtsmaße für Wohnhäuser; ob die Ampel für das große
   Vorhaben so zurückhaltend sein soll.
 - **Nicht gemacht (bewusst):** Aufstellflächen, Höhe der Zufahrt, Stellplätze, GRZ/GFZ-Berechnung, Inhalt des Bebauungsplans.

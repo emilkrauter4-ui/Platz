@@ -1,0 +1,336 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Passt. – Prüfmappe Regelwerk (Kurzfassung)</title>
+<style>
+@page { size: A4; margin: 16mm 14mm 18mm; }
+body { font: 9.6pt/1.4 "Helvetica Neue", Arial, sans-serif; color: #1a1a1a; }
+h1 { font-size: 22pt; margin: 0 0 4mm; } h1 span { color: #2e7d4f; }
+h2.sek { font-size: 13pt; margin: 6mm 0 2mm; border-bottom: 1.5px solid #1a1a1a; padding-bottom: 1mm; break-after: avoid; }
+.titel { height: 245mm; display: flex; flex-direction: column; justify-content: space-between; break-after: page; }
+.titel p { max-width: 150mm; }
+.meta td { padding: 1mm 4mm 1mm 0; vertical-align: top; }
+.regel, .frage { border: 1px solid #bbb; border-radius: 2mm; padding: 2.5mm 3mm; margin: 0 0 3mm; break-inside: avoid; }
+.kopf { display: flex; gap: 3mm; align-items: baseline; flex-wrap: wrap; margin-bottom: 1.5mm; }
+.nr { background: #1a1a1a; color: #fff; border-radius: 1mm; padding: 0 1.5mm; font-weight: 700; font-size: 8.5pt; }
+code { font-size: 9pt; font-weight: 700; }
+.wert { margin-left: auto; } .art { font-size: 8pt; color: #555; border: 1px solid #999; border-radius: 1mm; padding: 0 1.2mm; }
+dl { display: grid; grid-template-columns: 30mm 1fr; gap: 0.8mm 3mm; margin: 0; }
+dt { color: #555; font-size: 8.5pt; } dd { margin: 0; }
+dd.gesetz { font-family: Georgia, serif; font-size: 9pt; background: #f4f4f1; padding: 1mm 1.5mm; }
+dd.link { font-size: 8pt; word-break: break-all; color: #1d4f91; }
+sup { font-size: 6.5pt; }
+.pruef { margin-top: 2mm; font-size: 9pt; }
+.box { display: inline-block; width: 3.2mm; height: 3.2mm; border: 1px solid #1a1a1a; vertical-align: -0.6mm; margin: 0 1mm 0 3mm; }
+.box:first-child { margin-left: 0; }
+.anm, .antwort { margin-top: 1.5mm; height: 11mm; border-bottom: 1px dotted #888; color: #555; font-size: 8.5pt; }
+.antwort { height: 18mm; }
+.hinweis { background: #fff6dd; border: 1px solid #e0c060; padding: 2mm 3mm; border-radius: 2mm; }
+.umbruch { break-before: page; }
+</style></head><body>
+<div class="titel">
+ <div>
+  <h1>Passt<span>.</span> – Prüfmappe Regelwerk – Kurzfassung für die Demo</h1>
+  <p><b>Kurzfassung:</b> nur die 20 Regeln und 10 Fragen, die in den drei Demo-Abläufen vorkommen (Gartenhaus an der Grenze, Hanglage, Wärmepumpe nah am Nachbarn), nach Wichtigkeit für die Demo geordnet. Die vollständige Prüfmappe (alle Regeln und Fragen, auch Außengeräte, Hecken, großes Vorhaben) ist <code>pruefmappe.html</code>.</p>
+  <p style="font-size:12pt">Bitte prüfen Sie jede Regel, mit der Passt. Hausbesitzern eine erste Orientierung gibt:
+  „Darf ich das hier hinstellen?“ (Gartenhaus, Carport, Außengeräte wie Wärmepumpe, Klimagerät und Pool-Wärmepumpe, Hecken und Bäume, dazu das „große Vorhaben“: zweites Wohnhaus, Anbau, Aufstockung – in Sulzbach-Rosenberg).</p>
+  <div class="hinweis"><b>Wichtig:</b> Passt. gibt Orientierung, keine Genehmigung. Jede Regel steht in
+  <code>limits.json</code> mit <code>geprueft: false</code> und wird erst nach Ihrer Prüfung freigegeben.
+  Gesetzestexte wurden am 04.10.2026 aus zwei unabhängigen Wiedergaben übernommen und Wort für Wort verglichen;
+  das amtliche Portal gesetze-bayern.de war für automatischen Abruf gesperrt. Bitte lesen Sie die Regel im
+  Zweifel am angegebenen amtlichen Text nach.</div>
+  <h3>So geht's</h3>
+  <ol><li>Je Regel: Gesetzestext, unsere Auslegung, wie Passt. rechnet, ein Beispiel.</li>
+  <li>Bitte ankreuzen: <b>korrekt</b>, <b>falsch</b> oder <b>unklar</b>, und bei Bedarf eine Anmerkung.</li>
+  <li>Am Ende: 10 gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
+ </div>
+ <table class="meta">
+  <tr><td>Stand</td><td>10.10.2026</td></tr>
+  <tr><td>Regeln</td><td>20 von 89 (Kurzfassung) (aus <code>app/src/rules/limits.json</code>, SHA-256 d255fad5d3f7…)</td></tr>
+  <tr><td>Geprüft von</td><td>______________________________ (Name, Funktion)</td></tr>
+  <tr><td>Datum, Unterschrift</td><td>______________________________</td></tr>
+  <tr><td>Rückfragen</td><td>Emil (Passt.) – ______________________________</td></tr>
+ </table>
+</div>
+
+<section class="regel">
+  <div class="kopf"><span class="nr">1</span><code>gartenhaus.maxBruttoRauminhaltM3</code><span class="wert">Wert: <b>75</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 57 Abs. 1 Nr. 1 Buchst. a: Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sowie Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten, wenn die Gebäude weder Verkaufs- noch Ausstellungszwecken dienen, im Außenbereich bis 20 m³ Brutto-Rauminhalt</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-57</dd>
+    <dt>Unsere Auslegung</dt><dd>Verfahrensfrei sind Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich. Die Bedingung „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ gilt laut aktuellem Wortlaut nur für Gebäude im Außenbereich (bis 20 m³).</dd>
+    <dt>So rechnet Passt.</dt><dd>Gartenhaus im Innenbereich bis 75,0 m³ (einschließlich) → verfahrensfrei. Rauminhalt = Breite × Tiefe × Wandhöhe + Dachraum (Satteldach als halbes Prisma). Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut: mit Aufenthaltsraum → Genehmigung.</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus 4 × 3 m, Wandhöhe 2,3 m, Satteldach 25° (First entlang 4 m): Dachhöhe 1,5 × tan 25° = 0,70 m → 27,6 + 4,2 = 31,8 m³ → verfahrensfrei. 5 × 6 m, 2,5 m Wandhöhe, Flachdach: 75,0 m³ → gerade noch verfahrensfrei; 76 m³ → rot.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">2</span><code>grenzbebauung.maxMittlereWandhoeheM</code><span class="wert">Wert: <b>3</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 7 Satz 1 Nr. 1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 7: <sup>1</sup>In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig 1. Garagen einschließlich ihrer Nebenräume, überdachte Tiefgaragenzufahrten, Aufzüge zu Tiefgaragen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt, 2. gebäudeunabhängige Solaranlagen mit einer Höhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, 3. Stützmauern und geschlossene Einfriedungen in Gewerbe- und Industriegebieten, außerhalb dieser Baugebiete mit einer Höhe bis zu 2 m.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>In den Abstandsflächen zulässig: Garagen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m.</dd>
+    <dt>So rechnet Passt.</dt><dd>Mittlere Wandhöhe über Gelände aus DGM1 (nicht über Nullniveau), bis einschließlich 3,00 m.</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus Flachdach, an der Grenze, Gelände fällt 0,4 m: Wand 2,8 m bergseitig, 3,2 m talseitig → Mittel 3,0 m → erlaubt. Mittel 3,1 m → rot.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">3</span><code>grenzbebauung.maxLaengeJeSeiteM</code><span class="wert">Wert: <b>9</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 7 Satz 1 Nr. 1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 7: <sup>1</sup>In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig 1. Garagen einschließlich ihrer Nebenräume, überdachte Tiefgaragenzufahrten, Aufzüge zu Tiefgaragen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt, 2. gebäudeunabhängige Solaranlagen mit einer Höhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, 3. Stützmauern und geschlossene Einfriedungen in Gewerbe- und Industriegebieten, außerhalb dieser Baugebiete mit einer Höhe bis zu 2 m.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>Gesamtlänge je Grundstücksgrenze bis 9 m.</dd>
+    <dt>So rechnet Passt.</dt><dd>Summe der Längen an einer Grundstücksseite (neue Objekte + Bestand), bis einschließlich 9,00 m. Als „an der Grenze“ zählt, was näher steht als seine erforderliche Abstandsflächentiefe.</dd>
+    <dt>Beispiel</dt><dd>Bestehende Garage 6 m an der Ostgrenze + neues Gartenhaus 3 m → 9,0 m → erlaubt. Gartenhaus 4 m → 10 m → rot.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">4</span><code>grenzbebauung.maxLaengeGesamtM</code><span class="wert">Wert: <b>15</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 7 Satz 2</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 7: <sup>2</sup>Die Länge der die Abstandsflächentiefe gegenüber den Grundstücksgrenzen nicht einhaltenden Bebauung nach den Nrn. 1 und 2 darf auf einem Grundstück insgesamt 15 m nicht überschreiten.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>Die Länge der die Abstandsflächentiefe gegenüber den Grundstücksgrenzen nicht einhaltenden Bebauung nach den Nrn. 1 und 2 darf auf einem Grundstück insgesamt 15 m nicht überschreiten.</dd>
+    <dt>So rechnet Passt.</dt><dd>Summe an allen Grenzen bis einschließlich 15,00 m.</dd>
+    <dt>Beispiel</dt><dd>9 m an der Ostgrenze + 7 m an der hinteren Grenze = 16 m → rot.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">5</span><code>grenzbebauung.ohneEigeneAbstandsflaeche</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 7 Satz 1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 7: <sup>1</sup>In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig 1. Garagen einschließlich ihrer Nebenräume, überdachte Tiefgaragenzufahrten, Aufzüge zu Tiefgaragen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt, 2. gebäudeunabhängige Solaranlagen mit einer Höhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, 3. Stützmauern und geschlossene Einfriedungen in Gewerbe- und Industriegebieten, außerhalb dieser Baugebiete mit einer Höhe bis zu 2 m.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig: Garagen … und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m.</dd>
+    <dt>So rechnet Passt.</dt><dd>Privilegierte Nebengebäude (ohne Aufenthaltsraum/Feuerstätte, mittlere Wandhöhe ≤ 3 m) brauchen keine eigene Abstandsfläche und dürfen in Abstandsflächen des Hauses stehen.</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus 2,5 m Wandhöhe, 1,5 m vor der Hauswand → erlaubt (grau dargestellte Abstandsfläche).</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">6</span><code>abstand.minM</code><span class="wert">Wert: <b>3</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 5 Satz 1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 5: <sup>1</sup>Die Tiefe der Abstandsflächen beträgt 0,4 H, in Gewerbe- und Industriegebieten 0,2 H, jeweils aber mindestens 3 m.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>–</dd>
+    <dt>So rechnet Passt.</dt><dd>Mindesttiefe 3,00 m; genau 3,00 m Abstand gilt als eingehalten.</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus mit 3,2 m Wandhöhe, Wand genau 3,00 m von der Grenze → eingehalten.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">7</span><code>abstand.faktorH</code><span class="wert">Wert: <b>0.4</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 5 Satz 1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 5: <sup>1</sup>Die Tiefe der Abstandsflächen beträgt 0,4 H, in Gewerbe- und Industriegebieten 0,2 H, jeweils aber mindestens 3 m.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>Die Tiefe der Abstandsflächen beträgt 0,4 H, mindestens 3 m. Gemeinden können durch Satzung abweichen.</dd>
+    <dt>So rechnet Passt.</dt><dd>Tiefe = max(0,4 · H, 3 m) je Wand. Gemeindliche Satzungen werden nicht berücksichtigt (Hinweis in der App).</dd>
+    <dt>Beispiel</dt><dd>Wand H = 10 m → 4,0 m. Wand H = 6 m → 2,4 m → es gilt das Minimum 3 m.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">8</span><code>gartenhaus.aufenthaltsraumNurArt6</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 57 Abs. 1 Nr. 1 Buchst. a, Art. 6 Abs. 7 Satz 1 Nr. 1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 57 Abs. 1 Nr. 1 Buchst. a: Gebäude mit einem Brutto-Rauminhalt bis zu 75 m³, außer im Außenbereich, sowie Gebäude ohne Aufenthaltsräume, Toiletten oder Feuerstätten, wenn die Gebäude weder Verkaufs- noch Ausstellungszwecken dienen, im Außenbereich bis 20 m³ Brutto-Rauminhalt<br>Art. 6 Abs. 7: <sup>1</sup>In den Abstandsflächen sowie ohne eigene Abstandsflächen sind, auch wenn sie nicht an der Grundstücksgrenze errichtet werden, zulässig 1. Garagen einschließlich ihrer Nebenräume, überdachte Tiefgaragenzufahrten, Aufzüge zu Tiefgaragen und Gebäude ohne Aufenthaltsräume und Feuerstätten mit einer mittleren Wandhöhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, wobei die Höhe von Dächern mit einer Neigung von mehr als 45 Grad zu einem Drittel, mit einer Neigung von mehr als 70 Grad voll der Wandhöhe hinzugerechnet wird; Giebelflächen bleiben bei einer Dachneigung bis zu 45 Grad unberücksichtigt, 2. gebäudeunabhängige Solaranlagen mit einer Höhe bis zu 3 m und einer Gesamtlänge je Grundstücksgrenze von 9 m, 3. Stützmauern und geschlossene Einfriedungen in Gewerbe- und Industriegebieten, außerhalb dieser Baugebiete mit einer Höhe bis zu 2 m.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-57</dd>
+    <dt>Unsere Auslegung</dt><dd>Im Innenbereich macht ein Aufenthaltsraum oder eine Feuerstätte ein Gebäude bis 75 m³ nicht genehmigungspflichtig, nimmt ihm aber das Privileg nach Art. 6 Abs. 7: Es braucht eigene Abstandsflächen und darf nicht an die Grenze. Ergebnis gelb: „Verfahrensfrei. Brandschutz und Feuerstätte prüft die App nicht.“ Bis 04.10.2026 rechnete Passt. nach älterem Wortlaut (Aufenthaltsraum → Genehmigung).</dd>
+    <dt>So rechnet Passt.</dt><dd>Innenbereich, Aufenthaltsraum oder Feuerstätte: nicht mehr „Genehmigung nötig“, sondern gelb (Feuerstätte, Abgasanlage, Brandschutz nicht geprüft). Kein Privileg nach Art. 6 Abs. 7: eigene Abstandsflächen, nicht an der Grenze (rot).</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus 3 × 3 m mit Holzofen, 6 m von allen Grenzen: gelb, „verfahrensfrei“. Dasselbe 0,3 m an der Grenze: rot „Mit Aufenthaltsraum oder Feuerstätte nicht so nah an die Grenze“.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">9</span><code>carport.maxFlaecheM2</code><span class="wert">Wert: <b>50</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 57 Abs. 1 Nr. 1 Buchst. b</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 57 Abs. 1 Nr. 1 Buchst. b: Garagen einschließlich überdachter Stellplätze im Sinn des Art. 6 Abs. 7 Satz 1 Nr. 1 mit einer Fläche bis zu 50 m², außer im Außenbereich</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-57</dd>
+    <dt>Unsere Auslegung</dt><dd>Garagen einschließlich überdachter Stellplätze im Sinn des Art. 6 Abs. 7 Satz 1 Nr. 1 mit einer Fläche bis zu 50 m², außer im Außenbereich, sind verfahrensfrei.</dd>
+    <dt>So rechnet Passt.</dt><dd>Carport bis 50,0 m² Grundfläche (Breite × Tiefe des Objekts) → verfahrensfrei, außer im Außenbereich.</dd>
+    <dt>Beispiel</dt><dd>Doppelcarport 6 × 8 m = 48 m² → verfahrensfrei; 6 × 9 m = 54 m² → rot, Bauantrag (Kleingarage).</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">10</span><code>bestand.automatikNurHinweis</code><span class="wert">Wert: <b>ja</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Produktentscheidung Passt. (Emil, 05.10.2026; keine Rechtsregel)</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Automatisch erkannte Objekte sind nur ein Hinweis („Hier scheint noch etwas zu stehen“), klar gekennzeichnet und nie Grundlage einer Prüfung: Sie zählen nicht zur Grenzbebauung und lösen keine Kollision aus. Mit Gewicht gehen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte ein. Bis 05.10.2026 zählten erkannte ab Konfidenz 0,8 automatisch (Test-Set nach Objekten: Präzision zu gering, docs/messungen/testset_objekte.md).</dd>
+    <dt>So rechnet Passt.</dt><dd>Automatisch erkannte Objekte erscheinen nur als Hinweis „Hier scheint noch etwas zu stehen“ (blass, Label „Hinweis, nicht geprüft“). Sie zählen nicht zur 9-m-/15-m-Länge und lösen keine Kollision aus. Es zählen nur bestätigte, eingezeichnete oder per Tipp erfasste Objekte.</dd>
+    <dt>Beispiel</dt><dd>Automatik meldet ein Gartenhaus 4 m an der Ostgrenze (Konfidenz 95 %) → zählt nicht. Nutzer tippt darauf, prüft Art und Kanten → zählt.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">11</span><code>waermepumpe.verfahrensfrei</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 57 Abs. 1 Nr. 2 Buchst. b</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 57 Abs. 1 Nr. 2: folgende Anlagen der technischen Gebäudeausrüstung: … b) sonstige Anlagen der technischen Gebäudeausrüstung</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-57</dd>
+    <dt>Unsere Auslegung</dt><dd>Sonstige Anlagen der technischen Gebäudeausrüstung sind verfahrensfrei; Passt. ordnet die Wärmepumpe dort ein (Auslegung, Annahme: am Ein- oder Zweifamilienhaus).</dd>
+    <dt>So rechnet Passt.</dt><dd>Wärmepumpe immer verfahrensfrei (Annahme: am Ein- oder Zweifamilienhaus). Geprüft werden Lärm und, über 2 m Höhe, der Hinweis auf Abstandsflächen.</dd>
+    <dt>Beispiel</dt><dd>Luft-Wasser-Wärmepumpe am Einfamilienhaus → kein Bauantrag; Ergebnis hängt am Lärm.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">12</span><code>abstand.waermepumpeOhneAbstandsflaecheBisM</code><span class="wert">Wert: <b>2</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 6 Abs. 1 Satz 3 Nr. 4</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Art. 6 Abs. 1: <sup>2</sup>Satz 1 gilt entsprechend für andere Anlagen, von denen Wirkungen wie von Gebäuden ausgehen, gegenüber Gebäuden und Grundstücksgrenzen. Satz 2 gilt insbesondere nicht für 1. Antennen und Antennen tragende Masten für den Mobilfunk und den Digitalfunk der Behörden und Organisationen mit Sicherheitsaufgaben (BOS) im Außenbereich, 2. Windenergieanlagen im Außenbereich, 3. ebenerdige Terrassen und 4. Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m über der Geländeoberfläche.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-6</dd>
+    <dt>Unsere Auslegung</dt><dd>Satz 2 (Abstandsflächen für andere Anlagen) gilt insbesondere nicht für Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m über der Geländeoberfläche.</dd>
+    <dt>So rechnet Passt.</dt><dd>Wärmepumpe bis 2,00 m Höhe: keine Abstandsfläche. Darüber: Hinweis „Abstandsfläche nötig – nicht geprüft“ (offen).</dd>
+    <dt>Beispiel</dt><dd>Außengerät 1,3 m hoch, 0,5 m von der Grenze → keine Abstandsfläche nötig (Lärm wird getrennt geprüft).</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">13</span><code>waermepumpe.richtwerteNachtDbA</code><span class="wert">Wert: <b>{"rein": 35, "allgemein": 40, "misch": 45}</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>TA Lärm Nr. 6.1</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">TA Lärm Nr. 6.1 Immissionsrichtwerte für Immissionsorte außerhalb von Gebäuden Die Immissionsrichtwerte für den Beurteilungspegel betragen für Immissionsorte außerhalb von Gebäuden a) in Industriegebieten 70 dB(A) b) in Gewerbegebieten tags 65 dB(A) nachts 50 dB(A) c) in urbanen Gebieten tags 63 dB (A) nachts 45 dB (A) d) in Kerngebieten, Dorfgebieten und Mischgebieten tags 60 dB(A) nachts 45 dB(A) e) in allgemeinen Wohngebieten und Kleinsiedlungsgebieten tags 55 dB(A) nachts 40 dB(A) f) in reinen Wohngebieten tags 50 dB(A) nachts 35 dB(A) g) in Kurgebieten, für Krankenhäuser und Pflegeanstalten tags 45 dB(A) nachts 35 dB(A) Einzelne kurzzeitige Geräuschspitzen dürfen die Immissionsrichtwerte am Tage um nicht mehr als 30 dB(A) und in der Nacht um nicht mehr als 20 dB(A) überschreiten.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.verwaltungsvorschriften-im-internet.de/bsvwvbund_26081998_IG19980826.htm</dd>
+    <dt>Unsere Auslegung</dt><dd>Immissionsrichtwerte nachts: reines Wohngebiet 35, allgemeines Wohngebiet 40, Mischgebiet 45 dB(A).</dd>
+    <dt>So rechnet Passt.</dt><dd>Nachtwerte: reines WA 35, allgemeines WA 40, Mischgebiet 45 dB(A). Gebietsart ist eine Annahme (Standard: allgemeines Wohngebiet), vom Nutzer änderbar. Urbanes Gebiet, Dorfgebiet nicht wählbar (Dorf = Mischgebiet-Wert).</dd>
+    <dt>Beispiel</dt><dd>Am Nachbarfenster 38 dB(A), allgemeines Wohngebiet (40) → gelb (weniger als 3 dB Reserve); 36 dB(A) → grün.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">14</span><code>waermepumpe.formel</code><span class="wert">Wert: <b>Lp = Lw + 10·log10(Q) − 11 − 20·log10(r)</b></span><span class="art">Fachliche Quelle</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung).</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.lai-immissionsschutz.de/Veroeffentlichungen-67.html</dd>
+    <dt>Unsere Auslegung</dt><dd>–</dd>
+    <dt>So rechnet Passt.</dt><dd>Lp = Lw + 10·log10(Q) − 11 − 20·log10(r); r als 3D-Abstand Gerät (0,5 m) → Fenster (1,6 m bzw. 4,4 m); Abschirmung abgezogen.</dd>
+    <dt>Beispiel</dt><dd>Lw = 55 dB(A), Q = 4, r = 8 m: 55 + 6,0 − 11 − 18,1 = 32,0 dB(A). Q = 8, r = 5 m: 55 + 9,0 − 11 − 14,0 = 39,1 dB(A).</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">15</span><code>waermepumpe.richtwirkungQ</code><span class="wert">Wert: <b>{"frei": 2, "wand": 4, "ecke": 8}</b></span><span class="art">Fachliche Quelle</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>LAI-Leitfaden Luftwärmepumpen (vereinfachte Ausbreitung)</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden Luftwärmepumpen (Richtwirkungsmaß).</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.lai-immissionsschutz.de/Veroeffentlichungen-67.html</dd>
+    <dt>Unsere Auslegung</dt><dd>–</dd>
+    <dt>So rechnet Passt.</dt><dd>Q = 2 frei, 4 an einer Wand (bis 3 m), 8 in der Ecke (zwei Wände bis 3 m).</dd>
+    <dt>Beispiel</dt><dd>Gerät 1 m vor der Hauswand, keine zweite Wand näher als 3 m → Q = 4 (+6 dB gegenüber Q = 1).</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">16</span><code>waermepumpe.abschirmungDb</code><span class="wert">Wert: <b>{"sichtfrei": 0, "verdeckt": 5, "abgewandt": 15}</b></span><span class="art">Fachliche Quelle</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>LAI-Leitfaden Luftwärmepumpen, Abschirmmaß (Stufen wie im BWP-Schallrechner: Sichtkontakt 0 dB, kein Sichtkontakt 5 dB, auf abgewandter Seite 15 dB; abgerufen 04.10.2026)</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden, Stufen des BWP-Schallrechners.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.lai-immissionsschutz.de/Veroeffentlichungen-67.html</dd>
+    <dt>Unsere Auslegung</dt><dd>Passt. prüft die Sichtlinie Gerät–Fenster gegen die Grundrisse aus LoD2 (Gebäude ab 2 m Traufhöhe). Verdeckt das Gebäude, an dem die Wärmepumpe steht: abgewandte Seite (15 dB); verdeckt ein anderes Gebäude: 5 dB. Vereinfacht, keine Beugungsberechnung.</dd>
+    <dt>So rechnet Passt.</dt><dd>Sichtlinie Gerät–Fenster gegen LoD2-Grundrisse: frei 0 dB, durch ein anderes Gebäude verdeckt 5 dB, Gerät auf der abgewandten Seite des eigenen Hauses 15 dB. Keine Beugungsberechnung.</dd>
+    <dt>Beispiel</dt><dd>Gerät auf der Gartenseite, Nachbarfenster auf der Straßenseite hinter dem eigenen Haus → −15 dB.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">17</span><code>waermepumpe.knappMargeDb</code><span class="wert">Wert: <b>3</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Produktentscheidung Passt. (Ampel gelb, wenn weniger als 3 dB unter dem Richtwert)</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>–</dd>
+    <dt>So rechnet Passt.</dt><dd>Gelb, wenn der berechnete Pegel weniger als 3 dB unter dem Richtwert liegt.</dd>
+    <dt>Beispiel</dt><dd>39,1 dB(A) bei Richtwert 40 → gelb.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">18</span><code>waermepumpe.fensterhoeheAnnahmeM</code><span class="wert">Wert: <b>1.6</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>CLAUDE.md: ohne Eingabe Fassadenmitte auf 1,6 m Höhe</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Vorgabe aus der Projektbeschreibung.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>–</dd>
+    <dt>So rechnet Passt.</dt><dd>Ohne Eingabe des Nutzers: Fenster auf 1,6 m Höhe, Label „Annahme“; Nutzer kann auf die Fassade tippen.</dd>
+    <dt>Beispiel</dt><dd>Nachbarhaus ohne angetipptes Fenster → Fassadenpunkte auf 1,6 m.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">19</span><code>verfahren.abweichung</code><span class="wert">Wert: <b>ja</b></span><span class="art">Regel aus Gesetz/Norm</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>BayBO Art. 63 Abs. 1 und 2</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">BayBO Art. 63 Abs. 1 bis 3 (Abweichungen): (1) 1 Die Bauaufsichtsbehörde soll Abweichungen von Anforderungen dieses Gesetzes und auf Grund dieses Gesetzes erlassener Vorschriften zulassen, wenn sie unter Berücksichtigung des Zwecks der jeweiligen Anforderung und bei Würdigung sowohl gesetzlich definierter überragender öffentlicher wie auch öffentlich-rechtlich geschützter nachbarlicher Interessen mit den öffentlichen Belangen, insbesondere den Anforderungen des Art. 3 Satz 1 vereinbar sind. 2 Dies gilt insbesondere für 1. Vorhaben, die der Weiternutzung bestehender Gebäude dienen, 2. Abweichungen von den Anforderungen des Art. 6, wenn ein rechtmäßig errichtetes Gebäude durch ein Gebäude höchstens gleicher Abmessung und Gestalt ersetzt wird, 3. Vorhaben zur Energieeinsparung und Nutzung erneuerbarer Energien, 4. Vorhaben zur Erprobung neuer Bau- und Wohnformen. 3 Der Zulassung einer Abweichung bedarf es nicht, wenn bautechnische Nachweise durch einen Prüfsachverständigen bescheinigt werden oder in den Fällen des Abs. 2 Satz 2 Halbsatz 1 das Vorliegen der Voraussetzung für eine Abweichung durch ihn bescheinigt wird. 4 Art. 81a Abs. 1 Satz 2 bleibt unberührt. (2) 1 Die Zulassung von Abweichungen nach Abs. 1 Satz 1, von Ausnahmen und Befreiungen von den Festsetzungen eines Bebauungsplans, einer sonstigen städtebaulichen Satzung oder von Regelungen der Baunutzungsverordnung ist gesondert schriftlich zu beantragen; der Antrag ist zu begründen. 2 Für Anlagen, die keiner Genehmigung bedürfen, sowie für Abweichungen von Vorschriften, die im Genehmigungsverfahren nicht geprüft werden, gilt Satz 1 entsprechend; bei Bauvorhaben, die einer Genehmigung bedürfen, ist der Abweichungsantrag mit dem Bauantrag zu stellen. (3) 1 Über Abweichungen nach Abs. 1 Satz 1 von örtlichen Bauvorschriften sowie über Ausnahmen und Befreiungen nach Abs. 2 Satz 1 entscheidet bei verfahrensfreien Bauvorhaben die Gemeinde nach Maßgabe der Abs. 1 und 2. 2 Im Übrigen lässt die Bauaufsichtsbehörde Abweichungen von örtlichen Bauvorschriften im Einvernehmen mit der Gemeinde zu; § 36 Abs. 2 Satz 2 BauGB gilt entsprechend.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.gesetze-bayern.de/Content/Document/BayBO-63</dd>
+    <dt>Unsere Auslegung</dt><dd>Abweichungen (z. B. von Art. 6) sind gesondert schriftlich zu beantragen und zu begründen – auch für Anlagen, die keiner Genehmigung bedürfen; bei genehmigungspflichtigen Vorhaben zusammen mit dem Bauantrag.</dd>
+    <dt>So rechnet Passt.</dt><dd>Bei verfahrensfreien Vorhaben mit Abstandsflächen-Befund: „Abweichung beantragen“ (gesondert, schriftlich, begründet).</dd>
+    <dt>Beispiel</dt><dd>Gartenhaus 3,5 m hoch direkt an der Grenze → Weg „verfahrensfrei mit Abweichung“.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">20</span><code>waermepumpe.wandabstandM</code><span class="wert">Wert: <b>3</b></span><span class="art">Fachliche Quelle</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>LAI-Leitfaden für die Verbesserung des Schutzes gegen Lärm bei stationären Geräten (Luftwärmepumpen …), Richtwirkungsmaß; Wortlaut der Stufen aus dem BWP-Schallrechner (abgerufen 04.10.2026): „keine Wand näher als 3 m“ / „an einer Wand, Abstand zum Gerät bis zu 3 m“</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt. Quelle: LAI-Leitfaden / Stufen des BWP-Schallrechners.</dd>
+    <dt>Amtlicher Text</dt><dd class="link">https://www.lai-immissionsschutz.de/Veroeffentlichungen-67.html</dd>
+    <dt>Unsere Auslegung</dt><dd>Bis 3 m Abstand zu einer Wand gilt die Wärmepumpe als an der Wand (Q = 4), zu zwei Wänden als in der Ecke (Q = 8). Vorher 0,6 m (Produktentscheidung), angeglichen am 04.10.2026.</dd>
+    <dt>So rechnet Passt.</dt><dd>Wände (alle Gebäude aus LoD2) bis 3 m Abstand gelten als reflektierend.</dd>
+    <dt>Beispiel</dt><dd>Gerät 2,5 m vor der Hauswand → „an der Wand“, Q = 4.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<h2 class="sek umbruch">Gezielte Fragen</h2>
+<p>Hier ist das Gesetz nicht eindeutig oder Passt. musste vereinfachen. Ihre Antwort fließt direkt in das Regelwerk ein.</p>
+
+<section class="frage"><div class="kopf"><span class="nr">F1</span><b>Brutto-Rauminhalt</b></div><p>Passt. rechnet Außenmaße × Wandhöhe ab Oberkante Fußboden + Dachraum (Satteldach als halbes Prisma), ohne Bodenplatte und Dachüberstand. Wie messen Bauämter den Brutto-Rauminhalt für Art. 57 (DIN 277: ab Unterseite Bodenplatte)?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F2</span><b>Art. 57 Abs. 1 Nr. 1 a – aktueller Wortlaut</b></div><p>Nach dem aktuellen Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur für Gebäude im Außenbereich (bis 20 m³). Passt. behandelt ein Gartenhaus mit Aufenthaltsraum oder Ofen im Innenbereich deshalb als verfahrensfrei (gelb), aber ohne Privileg nach Art. 6 Abs. 7. Richtig? Gibt es weitere Anforderungen, die wir nennen sollten (Feuerstätte, Abgasanlage, Bezirkskaminkehrer)?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F3</span><b>Was zählt „an der Grenze“?</b></div><p>Art. 6 Abs. 7 gilt „auch wenn sie nicht an der Grundstücksgrenze errichtet werden“. Passt. zählt ein Nebengebäude zur 9-m- und 15-m-Länge, wenn es näher an der Grenze steht als seine erforderliche Abstandsflächentiefe (meist 3 m). Ist das die richtige Abgrenzung?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F4</span><b>Bestand: nur Bestätigtes zählt</b></div><p>Aus Luftbild und Laser automatisch erkannte Nebengebäude sind nur ein Hinweis und zählen nie bei der Grenzbebauung (9 m / 15 m); erst was der Nutzer per Tipp erfasst, bestätigt oder einzeichnet, zählt mit Maßen und Spanne. Ist das als Orientierung vertretbar, oder soll ein erkannter Bau ab einer Mindestgröße immer als Warnung erscheinen?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F5</span><b>Fläche eines Carports</b></div><p>Passt. nimmt für die 50-m²-Grenze Breite × Tiefe des Carports. Zählt der Dachüberstand mit, oder nur die von Stützen umschlossene Fläche?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F6</span><b>Wärmepumpe</b></div><p>Passt. ordnet die Wärmepumpe Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige TGA) zu. Und: Zählt bei „Höhe bis zu 2 m über der Geländeoberfläche“ (Art. 6 Abs. 1) ein Sockel oder eine Wandkonsole mit?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F7</span><b>Lärm: Immissionsort und Zuschläge</b></div><p>Passt. rechnet den Pegel auf Fenstermitte an der Fassade (1,6 m / 4,4 m), ohne Messpunkt 0,5 m vor dem geöffneten Fenster (TA Lärm Anhang A.1.3), ohne Ton- und Impulszuschlag, nur Nachtwert. Gebietsarten: rein/allgemein/Misch. Reicht das als Orientierung, oder wo liegen wir systematisch zu niedrig?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F8</span><b>Hang (BGH V ZR 230/16)</b></div><p>Liegt das Nachbargrundstück höher, wird die zulässige Höhe vom höheren Gelände aus gemessen. An welchem Punkt (direkt an der Grenze?) – damit Passt. das rechnen könnte.</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F9</span><b>Örtliche Satzungen</b></div><p>Hat Sulzbach-Rosenberg eine Abstandsflächensatzung (Art. 6 Abs. 5 Satz 2) oder eine Gestaltungssatzung, die Nebengebäude betrifft? Passt. berücksichtigt keine.</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F10</span><b>Formulierung der Antworten</b></div><p>Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?</p>
+<div class="antwort">Antwort:</div></section>
+</body></html>

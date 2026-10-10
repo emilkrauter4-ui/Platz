@@ -246,11 +246,60 @@ describe('Zufahrt: schmalste Stelle', () => {
     expect(gross.text).toMatch(/gefordert sind mindestens 3,00 m/);
   });
 
-  it('zwei Lücken: der breitere Weg gewinnt', () => {
+  it('zwei Lücken: der breitere Weg gewinnt (gerade Strecke durch die 6-m-Lücke, Zufahrt: breitester Weg)', () => {
     const s = sperre([[3, 4.5], [20, 26]]);
     const z = berechneZufahrt({ site: s, ziel, bruestung: 4.6, strassen: STRASSE });
-    expect(z.schmalsteM!).toBeGreaterThan(5.7);
-    expect(z.pfad.some((p) => p[0] > 20 && p[0] < 26)).toBe(true);
+    expect(z.anforderung).toBe('zugang');
+    expect(z.gerade).not.toBeNull();
+    expect(z.schmalsteM!).toBeGreaterThan(4.5);
+    expect(z.gerade!.stelle[0]).toBeGreaterThan(20);
+    expect(z.gerade!.stelle[0]).toBeLessThan(26);
+    const zf = berechneZufahrt({ site: s, ziel, bruestung: 9, strassen: STRASSE });
+    expect(zf.anforderung).toBe('zufahrt');
+    expect(zf.schmalsteM!).toBeGreaterThan(5.7);
+    expect(zf.pfad.some((p) => p[0] > 20 && p[0] < 26)).toBe(true);
+  });
+
+  describe('Zugang muss GERADLINIG sein (BayBO Art. 5 Abs. 1 Satz 1)', () => {
+    /** zwei versetzte Riegel: der Weg schlängelt sich (Lücke im Osten, dann im Westen), eine gerade Strecke gibt es nicht */
+    const schlange = (): Site => ({
+      ...standort(rect(0, 0, 0.001, 0.001)),
+      buildings: [
+        { id: 'A', footprint: rect(0, 4, 20, 8), provenance: 'amtlich' },
+        { id: 'B', footprint: rect(10, 14, 30, 18), provenance: 'amtlich' },
+      ],
+    });
+    it('gewundener Weg von 3+ m, aber keine gerade Strecke: Zugang rot, Zufahrt (Brüstung > 8 m) grün mit offener lichter Höhe', () => {
+      const zug = berechneZufahrt({ site: schlange(), ziel, bruestung: 4.6, strassen: STRASSE });
+      expect(zug.anforderung).toBe('zugang');
+      expect(zug.gerade).toBeNull();
+      expect(zug.wegBreiteM!).toBeGreaterThan(2.9);
+      expect(zug.status).toBe('bad');
+      expect(zug.text).toMatch(/keinen geraden Weg/);
+      expect(zug.text).toMatch(/geradlinigen Zugang/);
+      const fahr = berechneZufahrt({ site: schlange(), ziel, bruestung: 9, strassen: STRASSE });
+      expect(fahr.anforderung).toBe('zufahrt');
+      expect(fahr.status).toBe('ok');
+      expect(fahr.text).toMatch(/lichte Höhe von mindestens 3,50 m ist nicht gemessen \(offen\)/);
+      expect(fahr.rows.some((r) => r.kind === 'offen' && /Lichte Höhe/.test(r.text))).toBe(true);
+    });
+    it('gerader Weg vorhanden: Linie von der Straße zum Haus, schmalste Stelle in Metern, Hinweis auf Satz 1 im Wortlaut', () => {
+      const z = berechneZufahrt({ site: sperre([[12.4, 15.6]]), ziel, bruestung: 4.6, strassen: STRASSE });
+      expect(z.gerade).not.toBeNull();
+      expect(z.pfad).toHaveLength(2);
+      expect(z.pfad[0][1]).toBeLessThan(1);
+      expect(z.pfad[1][1]).toBeGreaterThan(28);
+      expect(z.status).toBe('ok');
+      expect(z.rows.some((r) => /geradliniger Zu- oder Durchgang zu rückwärtigen Gebäuden/.test(r.text))).toBe(true);
+    });
+    it('über 50 m von der Straße: Hinweis auf Abs. 1 Satz 4 im Wortlaut, entscheidet die Feuerwehr (offen)', () => {
+      const s = sperre([[10, 16]]);
+      const fern = rect(10, 55, 20, 62);
+      s.plot = { ...s.plot, boundary: rect(0, 0, 30, 70) };
+      const z = berechneZufahrt({ site: s, ziel: fern, bruestung: 4.6, strassen: STRASSE });
+      expect(z.entfernungStrasseM!).toBeGreaterThan(50);
+      expect(z.rows.some((r) => r.kind === 'offen' && /mehr als 50 m/.test(r.text) && /Satz 4/.test(r.text))).toBe(true);
+    });
   });
 
   it('Lücke von 0,9 m: für den Zugang (1,25 m) zu schmal → rot', () => {
@@ -424,5 +473,28 @@ describe('Startstelle des Wohnhauses', () => {
     const s = standort();
     const v = vorhabenStart(s, haus(s, { center: [15, 20] }));
     expect(vorhabenPruefer(s, v)(v.center, v.angle)).toBe('ok');
+  });
+});
+
+describe('Rechen-Worker (Zufahrt, Schatten)', () => {
+  it('bearbeite() liefert dieselben Zahlen wie die direkten Aufrufe, ohne Geländefunktion', async () => {
+    const { bearbeite } = await import('../src/rules');
+    const s = standort();
+    const { ground: _g, ...ohne } = s;
+    void _g;
+    const e = { site: ohne, ziel: rect(10, 24, 20, 32), bruestung: 4.6, strassen: STRASSE };
+    const a = bearbeite({ art: 'zufahrt', id: 7, e });
+    expect(a.art).toBe('zufahrt');
+    expect(a.id).toBe(7);
+    if (a.art !== 'zufahrt') return;
+    const direkt = berechneZufahrt({ ...e, site: s });
+    expect(a.zufahrt.schmalsteM).toBeCloseTo(direkt.schmalsteM!, 6);
+    expect(a.zufahrt.status).toBe(direkt.status);
+    // übertragbar (Structured Clone): keine Funktionen im Auftrag
+    expect(() => structuredClone({ art: 'zufahrt', id: 1, e })).not.toThrow();
+    const v = haus(s, { center: [15, 28] });
+    const b = bearbeite({ art: 'schatten', id: 8, site: ohne, v, lage: { lat: 49.5, lon: 11.74, konv: 0 } });
+    expect(b.art === 'schatten' && b.schatten !== null).toBe(true);
+    expect(() => structuredClone({ art: 'schatten', id: 2, site: ohne, v, lage: { lat: 49.5, lon: 11.74, konv: 0 } })).not.toThrow();
   });
 });
