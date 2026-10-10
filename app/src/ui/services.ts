@@ -1,6 +1,6 @@
 /** Externe Abfragen: Adresssuche (Nominatim) und Warnhinweise (Wasserschutzgebiete, LfU). */
 import { localToLonLat, getOrigin } from '../scene/coords';
-import type { Vec2 } from '../rules';
+import type { BPlanTreffer, Vec2 } from '../rules';
 
 export interface Place {
   label: string;
@@ -123,6 +123,58 @@ export async function denkmaeler(points: Vec2[]): Promise<Denkmal[] | null> {
     }
   }
   return ok ? [...found.values()] : null;
+}
+
+const BPLAN_WMS = 'https://gdiserv.bayern.de/bauleitplanung/wms';
+const BPLAN_LAYER = ['bplan_rechtskraft', 'bplan_im_verfahren'];
+
+/**
+ * Bebauungspläne am Grundstück (Bauleitplanung Bayern, WMS des Landesportals): nur Abfrage und Verweis, der Inhalt des Plans
+ * wird nicht ausgelesen. Abfragepunkte: Schwerpunkt und Ecken. Der Dienst erlaubt CORS. Null, wenn nicht erreichbar.
+ * Das Portal ist nicht flächendeckend: ein leeres Ergebnis heißt „kein Plan im Portal“, nicht „kein Plan“.
+ */
+export async function bebauungsplaene(points: Vec2[]): Promise<BPlanTreffer[] | null> {
+  const o = getOrigin();
+  const layers = BPLAN_LAYER.join(',');
+  const found = new Map<string, BPlanTreffer>();
+  let ok = 0;
+  for (const p of points) {
+    try {
+      const e = p[0] + o[0];
+      const n = p[1] + o[1];
+      const u = new URL(BPLAN_WMS);
+      u.search = new URLSearchParams({
+        SERVICE: 'WMS', VERSION: '1.3.0', REQUEST: 'GetFeatureInfo', LAYERS: layers, QUERY_LAYERS: layers, STYLES: '',
+        CRS: 'EPSG:25832', BBOX: `${e - 5},${n - 5},${e + 5},${n + 5}`, WIDTH: '101', HEIGHT: '101', I: '50', J: '50',
+        INFO_FORMAT: 'application/vnd.ogc.gml', FEATURE_COUNT: '10',
+      }).toString();
+      const r = await fetchRetry(u);
+      if (!r.ok) continue;
+      ok++;
+      for (const t of parseBplan(await r.text())) found.set(`${t.art}|${t.name}|${t.nummer ?? ''}`, t);
+    } catch {
+      /* einzelner Punkt nicht abfragbar */
+    }
+  }
+  return ok ? [...found.values()] : null;
+}
+
+/** GML-Antwort des Bauleitplanung-WMS (GeoServer): ein featureMember je Plan, Felder als <bplan:feld>. Ohne DOM, damit testbar. */
+export function parseBplan(text: string): BPlanTreffer[] {
+  const dekod = (v: string) => v.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&').trim();
+  const out: BPlanTreffer[] = [];
+  for (const m of text.matchAll(/<gml:featureMember>\s*<bplan:(\w+)[^>]*>([\s\S]*?)<\/bplan:\1>/g)) {
+    const art: BPlanTreffer['art'] = /verfahren/.test(m[1]) ? 'im_verfahren' : /fplan|flaeche/.test(m[1]) ? 'fplan' : 'rechtskraft';
+    if (art === 'fplan') continue;
+    const feld = (k: string) => {
+      const x = m[2].match(new RegExp(`<bplan:${k}>([^<]*)</bplan:${k}>`));
+      return x ? dekod(x[1]) : '';
+    };
+    const name = feld('planname');
+    if (!name) continue;
+    out.push({ art, name, nummer: feld('nummer') || undefined, gemeinde: feld('stadt') || undefined, inkraft: feld('inkrafttre') || undefined, planUrl: feld('scanurl') || undefined, textUrl: feld('texturl') || undefined });
+  }
+  return out;
 }
 
 /** Eine Wiederholung bei Netzfehlern (Mobilfunk, Proxys). */

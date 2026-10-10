@@ -55,6 +55,8 @@ export interface Data {
   bestand: BestandRec[];
   /** Version des Erkennungsmodells, aus dem bestand.json stammt (für die Lernschleife) */
   modell?: number | null;
+  /** öffentliche Verkehrsflächen (ALKIS TN), lokale Meter; für Zufahrt und Zweite-Reihe-Zählung */
+  strassen?: Vec2[][];
 }
 
 /** Mess-Gebiet aus ?gebiet=<id> (nur Kleinbuchstaben, Ziffern, _ und -); ohne Angabe das Demo-Gebiet. */
@@ -77,9 +79,10 @@ const json = (f: string) => fetch(`${DATA_URL}/${f}`).then((r) => {
 export const loadSite = (): Promise<SiteMeta> => json('site.json');
 
 /** Grundrisse und Bestand (≈ 300 kB komprimiert) – erst nötig, wenn ein Grundstück gewählt wird. */
-export async function loadDetails(): Promise<Pick<Data, 'buildings' | 'bestand' | 'modell'>> {
-  const [b, best] = await Promise.all([json('buildings.json'), json('bestand.json')]);
+export async function loadDetails(): Promise<Pick<Data, 'buildings' | 'bestand' | 'modell' | 'strassen'>> {
+  const [b, best, str] = await Promise.all([json('buildings.json'), json('bestand.json'), json('strassen.json').catch(() => ({ strassen: [] }))]);
   return {
+    strassen: str.strassen as Vec2[][],
     buildings: (b.buildings as Omit<BuildingRec, 'c'>[]).map((x) => ({ ...x, c: centroid(x.fp) })),
     bestand: (best.bestand as (Omit<BestandRec, 'conf'> & { c: number })[]).map(({ c, ...x }) => ({ ...x, conf: c })),
     modell: typeof best.modell === 'number' ? best.modell : null,
