@@ -19,7 +19,9 @@ export type Provenance =
   | 'Demo'
   | 'zertifiziert'
   | 'erfasst per Tipp'
-  | 'geschätzt';
+  | 'geschätzt'
+  /** Zahlen aus amtlichen Daten zur Einordnung, ohne Urteil und ohne Ampel (Planungsrecht, § 34 BauGB) */
+  | 'Orientierung';
 
 export type Status = 'ok' | 'warn' | 'bad';
 
@@ -165,6 +167,8 @@ export interface BPlan {
   status: 'unbekannt' | 'keiner' | 'vorhanden';
   name?: string;
   url?: string;
+  /** alle Treffer des Landesportals (Verweise, Inhalt wird nicht ausgelesen) */
+  plaene?: import('./planungsrecht').BPlanTreffer[];
   provenance: Provenance;
 }
 

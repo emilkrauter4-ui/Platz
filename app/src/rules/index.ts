@@ -6,3 +6,7 @@ export * from './zonen';
 export * from './pflanzen';
 export * from './sonne';
 export * from './verfahren';
+export * from './vorhaben';
+export * from './zufahrt';
+export * from './verschattung';
+export * from './planungsrecht';

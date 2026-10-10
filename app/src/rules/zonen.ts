@@ -11,6 +11,7 @@
  */
 import { zonenPruefer, type Objects } from './evaluate';
 import { pointInPolygon } from './geometry';
+import { vorhabenPruefer, type Vorhaben } from './vorhaben';
 import type { Site, Status, Vec2 } from './types';
 
 export const FREI = 0;
@@ -89,9 +90,17 @@ export function ausrichtungen(boundary: Vec2[], aktuell: number): number[] {
 }
 
 export function zonen(site: Site, objs: Objects, k: 'gartenhaus' | 'carport', g: RasterGeometrie): ZonenErgebnis {
+  return zonenMit(site, zonenPruefer(site, objs, k), objs[k].center, objs[k].angle, g);
+}
+
+/** „Wo darf es hin?“ für das große Vorhaben: der ganze Hausgrundriss, geprüft mit vorhabenPruefer (ohne Zufahrt). */
+export function zonenVorhaben(site: Site, v: Vorhaben, g: RasterGeometrie): ZonenErgebnis {
+  return zonenMit(site, vorhabenPruefer(site, v), v.center, v.angle, g);
+}
+
+export function zonenMit(site: Site, pruef: (center: Vec2, angle: number) => Status, aktuell: Vec2, aktuellWinkel: number, g: RasterGeometrie): ZonenErgebnis {
   const t0 = performance.now();
-  const pruef = zonenPruefer(site, objs, k);
-  const winkel = ausrichtungen(site.plot.boundary, objs[k].angle);
+  const winkel = ausrichtungen(site.plot.boundary, aktuellWinkel);
   const plot = site.plot.boundary;
   let pruefungen = 0;
   const ok = (p: Vec2, w: number): boolean => {
@@ -156,7 +165,7 @@ export function zonen(site: Site, objs: Objects, k: 'gartenhaus' | 'carport', g:
     }
   }
   // beste Stelle: grün vor gelb, am nächsten zur aktuellen Position
-  const jetzt = objs[k].center;
+  const jetzt = aktuell;
   let beste: ZonenErgebnis['beste'] = null;
   let bd = Infinity;
   for (const want of [GRUEN, GELB]) {

@@ -65,6 +65,8 @@ export interface Koerper {
   z0: number;
   z1: number;
   first?: { a: Vec2; b: Vec2; z: number; halbeTiefe: number };
+  /** Pultdach: Dachhaut steigt von der niedrigen Traufe a–b (Höhe z1) senkrecht dazu in Richtung n (Einheitsvektor ins Gebäude) auf z in `tiefe` Metern */
+  pult?: { a: Vec2; b: Vec2; n: Vec2; z: number; tiefe: number };
 }
 
 /** Körper eines platzierten Objekts. Carport: nur das Dach (darunter offen). */
@@ -134,11 +136,21 @@ export function schattenAmBoden(k: Koerper, s: Sonnenstand, konvergenz = 0): Vec
     add(k.first.a, k.first.z);
     add(k.first.b, k.first.z);
   }
+  if (k.pult) {
+    const { a, b, n, tiefe, z } = k.pult;
+    add([a[0] + n[0] * tiefe, a[1] + n[1] * tiefe], z);
+    add([b[0] + n[0] * tiefe, b[1] + n[1] * tiefe], z);
+  }
   return huelle(pts);
 }
 
 /** Oberkante eines Körpers an einem Punkt im Grundriss. */
 function oben(k: Koerper, p: Vec2): number {
+  if (k.pult) {
+    const { a, n, z, tiefe } = k.pult;
+    const t = Math.min(1, Math.max(0, ((p[0] - a[0]) * n[0] + (p[1] - a[1]) * n[1]) / tiefe));
+    return k.z1 + (z - k.z1) * t;
+  }
   if (!k.first) return k.z1;
   const { a, b, z, halbeTiefe } = k.first;
   const dx = b[0] - a[0];
@@ -154,7 +166,7 @@ export function imSchatten(p: Vec2, zp: number, koerper: Koerper[], s: Sonnensta
   const d = sonnenRichtung(s, konvergenz);
   const steig = Math.tan(s.hoehe * RAD);
   for (const k of koerper) {
-    const zmax = Math.max(k.z1, k.first?.z ?? 0);
+    const zmax = Math.max(k.z1, k.first?.z ?? 0, k.pult?.z ?? 0);
     if (zmax <= zp) continue;
     const weit = (zmax - zp) / steig;
     // Vorfilter: Körper in Reichweite des Strahls?

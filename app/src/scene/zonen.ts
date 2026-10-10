@@ -4,7 +4,7 @@
  */
 import { ClassificationType, ImageMaterialProperty, type Entity, type CesiumWidget as Viewer } from '@cesium/engine';
 import { Color, Rectangle, Math as CMath } from '@cesium/core';
-import type { Objects, RasterGeometrie, Site, Vec2, ZonenErgebnis } from '../rules';
+import type { Objects, RasterGeometrie, Site, Vec2, Vorhaben, ZonenErgebnis } from '../rules';
 import type { ZonenAnfrage } from '../rules/zonen.worker';
 import { lonLatToLocal, localToLonLat } from './coords';
 
@@ -69,12 +69,12 @@ function gelaende(boundary: Vec2[], height: (p: Vec2) => number) {
   return { x0, y0, step, nx, ny, z };
 }
 
-export function berechneZonen(site: Site, objs: Objects, k: 'gartenhaus' | 'carport'): Promise<ZonenAnzeige & { rect: [number, number, number, number]; geo: RasterGeometrie }> {
+export function berechneZonen(site: Site, objs: Objects, k: 'gartenhaus' | 'carport' | 'vorhaben', vorhaben?: Vorhaben): Promise<ZonenAnzeige & { rect: [number, number, number, number]; geo: RasterGeometrie }> {
   const t0 = performance.now();
   const { geo, rect } = geometrieFuer(site.plot.boundary);
   const { ground, ...rest } = site;
   const id = ++naechste;
-  const anfrage: ZonenAnfrage = { id, site: rest, gelaende: gelaende(site.plot.boundary, ground ?? (() => 0)), objs, k, geo };
+  const anfrage: ZonenAnfrage = { id, site: rest, gelaende: gelaende(site.plot.boundary, ground ?? (() => 0)), objs, k, vorhaben, geo };
   return new Promise((res) => {
     warten.set(id, (r) => res({ ...r, msGesamt: performance.now() - t0, rect, geo }));
     holeWorker().postMessage(anfrage);

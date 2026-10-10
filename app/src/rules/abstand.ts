@@ -56,17 +56,17 @@ export function rauminhalt(o: Pick<Placed, 'w' | 'd' | 'h' | 'neigung'>): number
   return o.w * o.d * o.h + (o.w * o.d * dachHoehe(o)) / 2;
 }
 
-const tiefe = (h: number) => Math.max(MIN_T, FAKTOR * h);
-const dachAnteil4 = (neigung: number) => (neigung > STEIL ? 1 : 1 / 3);
+export const tiefe = (h: number) => Math.max(MIN_T, FAKTOR * h);
+export const dachAnteil4 = (neigung: number) => (neigung > STEIL ? 1 : 1 / 3);
 
-function aussenNormale(a: Vec2, b: Vec2, ccw: boolean): Vec2 {
+export function aussenNormale(a: Vec2, b: Vec2, ccw: boolean): Vec2 {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   const l = Math.hypot(dx, dy) || 1;
   return ccw ? [dy / l, -dx / l] : [-dy / l, dx / l];
 }
 
-function flaeche(a: Vec2, b: Vec2, ta: number, tb: number, n: Vec2): Vec2[] {
+export function flaeche(a: Vec2, b: Vec2, ta: number, tb: number, n: Vec2): Vec2[] {
   return [a, b, [b[0] + n[0] * tb, b[1] + n[1] * tb], [a[0] + n[0] * ta, a[1] + n[1] * ta]];
 }
 
