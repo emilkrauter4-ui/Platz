@@ -48,9 +48,34 @@ async function lfuProxy(req, res) {
   }
 }
 
+/**
+ * Proxy für die LfU-Hinweiskarte Oberflächenabfluss und Sturzflut (WMS, CC BY 4.0, Datenquelle: Bayerisches Landesamt für Umwelt).
+ * Der Dienst antwortet auf Anfragen mit http-Origin mit 403 „SSL Required“; der Proxy reicht nur GetMap der zwei Ebenen weiter und speichert nichts.
+ */
+const LFU_ABFLUSS = 'https://www.lfu.bayern.de/gdi/wms/wasser/oberflaechenabfluss';
+const ABFLUSS_PARAMS = ['SERVICE', 'VERSION', 'REQUEST', 'LAYERS', 'STYLES', 'CRS', 'SRS', 'BBOX', 'WIDTH', 'HEIGHT', 'FORMAT', 'TRANSPARENT'];
+async function abflussProxy(req, res) {
+  const inUrl = new URL(req.url, 'http://x');
+  const out = new URL(LFU_ABFLUSS);
+  for (const k of ABFLUSS_PARAMS) if (inUrl.searchParams.has(k)) out.searchParams.set(k, inUrl.searchParams.get(k));
+  const ebenen = (out.searchParams.get('LAYERS') || '').split(',');
+  if (out.searchParams.get('REQUEST') !== 'GetMap' || !ebenen.every((l) => ['fliesswege', 'senken_aufstau'].includes(l))) {
+    res.writeHead(400).end('nur GetMap der Ebenen fliesswege und senken_aufstau');
+    return;
+  }
+  try {
+    const r = await fetch(out, { signal: AbortSignal.timeout(20000) });
+    res.writeHead(r.status, { 'Content-Type': r.headers.get('content-type') || 'image/png', 'Cache-Control': 'public, max-age=86400' });
+    res.end(Buffer.from(await r.arrayBuffer()));
+  } catch (e) {
+    res.writeHead(502).end(String(e));
+  }
+}
+
 createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   if (path.endsWith('/proxy/lfu-wsg')) return void lfuProxy(req, res);
+  if (path.endsWith('/proxy/lfu-abfluss')) return void abflussProxy(req, res);
   if (path.includes('/api/nachbar/')) return void nachbarApi(req, res);
   if (path.includes('/api/ar/')) return void arApi(req, res);
   if (path.includes('/api/lernen')) return void lernApi(req, res);

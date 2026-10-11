@@ -737,6 +737,40 @@ Neue Regeln in `limits.json → raumsonne` (`geprueft: false`). Screenshots: `do
   und Dachüberstand nicht gerechnet, kahle Äste im Laser nur teilweise sichtbar (Winter-Schatten eher zu klein), nur Umkreis 120 m, Nachbardächer als
   Prisma bis Traufe + halbe Dachhöhe. „Wo darf es hin?“ (Zonen) gibt es nur für das zweite Wohnhaus, nicht für ein Haus aus dem Plan. Auf dem iPhone nicht gemessen.
 
+## AUFTRAG_V4 C3 – Starkregen über dem Grundstück (11. Oktober 2026)
+
+Reiter **„Starkregen“**: Eine Animation zeigt, wie Wasser bei Starkregen über das Grundstück fließt und wo es sich sammelt. Alles trägt das Label `Simulation`
+(Menge und Flächenarten `amtlich`, Parameter `Annahme`) und ist **nie Grundlage einer Ampel**. Screenshots: `docs/screenshots/C3-*.png`.
+Neue Annahmen in `limits.json → starkregen` (`geprueft: false`).
+
+- **Daten** (`pipeline/27_regen_daten.py`, auch für Scharhof): DGM1 (Gelände), LoD2-Gebäude als Hindernisse (Zellen gesperrt, Dachregen an den Gebäuderand),
+  **Flächenarten** aus ALKIS Tatsächliche Nutzung (Verkehr, Weg, Platz → versiegelt; Gewässer; Unland → offen) und in Siedlungsflächen NDVI aus dem DOP20-CIR
+  (16.09.2023, Schwelle 0,25): niedrig = versiegelt (Anteil Demo-Gebiet 53 % versiegelt, Scharhof 12 %). Acker nach der Ernte bleibt durchlässig.
+- **Regenmenge:** **KOSTRA-DWD-2020** (DWD) ist offen nutzbar, **CC BY 4.0** (eingetragen in `docs/attributions.md`). Aus der 5-km-Zelle des Gebiets werden Hn und
+  Unsicherheit je Dauer (5 min … 3 Tage) und Wiederkehr (1 … 100 Jahre) gelesen (Fröschau/Hirschau: 46,6 mm in 60 min bei 100 Jahren, ±28 %). In der App wählbar:
+  Wiederkehr, Dauer oder eigene Menge (mm). Blockregen (Annahme).
+- **Modell** (`rules/regen.ts`, eigene Umsetzung): **Stufe 1** Senken und Fließwege nur aus dem Gelände (Priority-Flood, D8, Zuflussfläche; Schalter, lila/blau).
+  **Stufe 2** zeitabhängiges Flächenmodell auf 2-m-Zellen im Umkreis von 120 m: Wassertiefe je Zelle, Austausch nach Manning (diffusive wave) mit Begrenzung auf den
+  Ausgleich der Wasserspiegel (stabil, **massenerhaltend**, Test `Bilanz`), Versickerung und Anfangsverlust je Flächenart, Normalabfluss am Rand. Drei Läufe
+  (Annahmen, günstig, ungünstig) rechnen **parallel in eigenen Workern**, die Oberfläche bleibt bedienbar.
+- **Gefährdete Stellen:** Tipp auf Kellertreppe, Lichtschacht oder Garageneinfahrt und dann ins Bild. Ergebnis: „Wasser erreicht die Kellertreppe nach etwa X Minuten
+  (Spanne a–b), Tiefe etwa Y cm (Spanne c–d)“ bzw. „erreicht die Stelle nicht“ (mit dem ungünstigen Fall). Schwellen (5/10/3 cm) sind Annahmen.
+- **Ehrliche Grenzen, immer sichtbar im Reiter:** Kanalnetz nicht berücksichtigt; das 1-m-Gelände sieht Bordsteine, Mauern, Schwellen oft nicht (2-m-Zellen, schmale Lücken
+  zwischen Gebäuden schließen sich: Wasser kann dort eingesperrt und zu tief erscheinen); Umkreis 120 m (Zufluss von weiter oben fehlt); Blockregen; Boden unbekannt.
+- **Plausibilität** (`docs/starkregen_vergleich.md`, `pipeline/29_regen_vergleich.py`): Die LfU-**Hinweiskarte Oberflächenabfluss und Sturzflut** gibt es als WMS (**CC BY 4.0**).
+  In der App schaltbar daneben; für vier Orte (3 Demo-Adressen, Scharhof) verglichen: **71–84 %** der LfU-Fließwegzellen liegen ≤ 6 m neben den Gelände-Fließwegen von Passt.;
+  65–77 % haben in der Simulation ≥ 1 cm Wasser daneben; die Simulation ist flächiger (nur 26–39 % der nassen Zellen liegen ≤ 6 m an LfU-Fließwegen). **Senken stimmen
+  schlecht überein (0–32 %)** – Senken-Aussagen sind nur ein Hinweis. Gründe und Folgerung stehen im Dokument.
+- **Rechenzeit** (Container-Chromium): Datenaufbau und Senken < 1 s; die drei Läufe zusammen ≈ 17 s (parallel, einzeln 12–17 s); ein Lauf 120 × 120 Zellen,
+  90 min Simulationszeit: 6,6 s in Node. Auf dem iPhone nicht gemessen.
+- **Tests** (`test/regen.test.ts`, 17): Bilanz (Regen = Versickerung + Mulden + Abfluss + Stand, Fehler < 10⁻⁴), Gleichgewicht am Hang, Mulde (Wasserspiegel
+  gleichmäßig, kein Schwingen), Gebäude als Hindernis, Versickerung, Messpunkte, Spanne (günstig < mittel < ungünstig), Rechenzeit, Senken und Fließwege, KOSTRA-Interpolation,
+  Gitter, Texte. Beim Bau fiel ein Schwingen zwischen Nachbarzellen auf (Austausch auf 1/5 des Ausgleichs je Fläche begrenzt) und eine Abhängigkeit vom Zeitschritt
+  (Courant 0,5 statt 0,8: Abweichung der Maximaltiefen zur feinen Rechnung ≈ 16 % statt 25 %).
+- **Prüfmappe:** 12 neue Einträge (Annahmen, kein Gesetzestext), 1 neue Frage (jetzt 113 Regeln, 42 Fragen); Kurzfassung unverändert.
+- **Offen:** Die Simulation ist **nicht gegen echte Ereignisse oder eine Fachplanung kalibriert**; Boden, Kanal, Bordsteine fehlen; Ergebnisse sind Größenordnungen.
+  Offline-Demo: Die Regen-Daten (4 MB je Gebiet) liegen unter `data/` und kommen mit; die LfU-Karte braucht Netz und den Server-Proxy.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.

@@ -60,7 +60,7 @@ export interface RenderState {
   /** Abstandsflächen am Boden zeigen */
   showAF: boolean;
   /** Reiter „Hecke, Baum“: geplante Pflanze und Ergebnis nach AGBGB */
-  modus: 'objekt' | 'pflanzen' | 'gross';
+  modus: 'objekt' | 'pflanzen' | 'gross' | 'regen';
   pflanze: Pflanze | null;
   pflanzRes: PflanzenErgebnis | null;
   /** 'nachbar' = Ansicht über einen Nachbar-Link: nur lesen, nur die geteilten Objekte */

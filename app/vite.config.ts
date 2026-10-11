@@ -100,6 +100,7 @@ export default defineConfig({
   // Dev-Server: dieselbe LfU-Abfrage wie scripts/serve.mjs (der LfU-Dienst sendet keinen CORS-Header)
   server: {
     proxy: {
+      '/proxy/lfu-abfluss': { target: 'https://www.lfu.bayern.de', changeOrigin: true, headers: { origin: 'https://www.lfu.bayern.de' }, rewrite: (p) => p.replace('/proxy/lfu-abfluss', '/gdi/wms/wasser/oberflaechenabfluss') },
       '/proxy/lfu-wsg': { target: 'https://www.lfu.bayern.de', changeOrigin: true, rewrite: (p) => p.replace('/proxy/lfu-wsg', '/gdi/wms/wasser/wsg') },
     },
   },

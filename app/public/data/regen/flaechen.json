@@ -1,0 +1,30 @@
+{
+ "res": 1.0,
+ "chunk": 250,
+ "cols": 8,
+ "rows": 8,
+ "first": [
+  -1000.0,
+  -1000.0
+ ],
+ "klassen": {
+  "0": "durchlässig (Grün, offener Boden)",
+  "1": "versiegelt (Verkehr, Weg, Platz; NDVI niedrig)",
+  "2": "Gewässer"
+ },
+ "ndvi_nur_in": [
+  "Wohnbaufläche",
+  "Fläche gemischter Nutzung",
+  "Industrie- und Gewerbefläche",
+  "Fläche besonderer funktionaler Prägung",
+  "Sport-, Freizeit- und Erholungsfläche"
+ ],
+ "quelle": "ALKIS Tatsächliche Nutzung, DOP20 CIR (NDVI), Bayerische Vermessungsverwaltung (CC BY 4.0), selbst berechnet",
+ "ndvi_schwelle": 0.25,
+ "bildflug": "2023-09-16",
+ "anteil": {
+  "durchlaessig": 0.461,
+  "versiegelt": 0.533,
+  "gewaesser": 0.006
+ }
+}

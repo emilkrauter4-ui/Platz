@@ -738,5 +738,108 @@
       "text": "Augenhöhe der Fensteransicht über dem Fußboden des jeweiligen Geschosses.",
       "geprueft": false
     }
+  },
+  "starkregen": {
+    "_hinweis": "Parameter der Starkregen-Simulation: Annahmen für ein vereinfachtes Modell, keine Rechtsnorm. Das Ergebnis ist eine Simulation (Label), nie Grundlage einer Ampel.",
+    "manning": {
+      "wert": {
+        "versiegelt": 0.025,
+        "durchlaessig": 0.06,
+        "gewaesser": 0.03
+      },
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Rauheit nach Manning (s/m^(1/3)) für flachen Oberflächenabfluss: glatte Flächen 0,025, Rasen und Boden 0,06. Typische Literaturwerte für Sheet Flow, ohne Hindernisse wie Zäune, Hecken, Bordsteine.",
+      "geprueft": false
+    },
+    "versickerungMmH": {
+      "wert": {
+        "versiegelt": 0,
+        "durchlaessig": 15,
+        "gewaesser": 0
+      },
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Konstante Versickerungskapazität in mm/h. Durchlässige Flächen 15 mm/h (mittelschwerer Boden, bei Starkregen bereits nass). Der Boden ist nicht bekannt (keine Bodenkarte eingebunden), 15 mm/h ist eine Annahme.",
+      "geprueft": false
+    },
+    "muldenspeicherMm": {
+      "wert": {
+        "versiegelt": 1,
+        "durchlaessig": 4,
+        "gewaesser": 0
+      },
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Anfangsverlust (Pfützen, Unebenheiten) in mm, der vor dem Abfluss gefüllt wird.",
+      "geprueft": false
+    },
+    "dachwasser": {
+      "wert": "Regen auf Dächern (LoD2-Grundrisse) wird gleichmäßig auf die Randzellen rund ums Gebäude gegeben",
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Dachentwässerung vereinfacht: Das Regenwasser vom Dach landet am Gebäuderand, nicht im Kanal. Dachrinnen und Fallrohre sind nicht bekannt.",
+      "geprueft": false
+    },
+    "kanalnetz": {
+      "wert": "nicht berücksichtigt",
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Das Kanalnetz ist nicht berücksichtigt: Weder Straßeneinläufe noch Rückstau. Bei echtem Starkregen nimmt der Kanal Wasser auf, bis er voll ist; die Simulation zeigt deshalb eher mehr Wasser als in Wirklichkeit.",
+      "geprueft": false
+    },
+    "gelaendeAufloesung": {
+      "wert": "1-m-Gelände (DGM1), gerechnet auf 2-m-Zellen",
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Das DGM1 sieht Bordsteine, Mauern, Schwellen, Treppenstufen und Durchlässe oft nicht oder verfälscht. Die Zellen sind 2 m groß; Wasser, das in Wirklichkeit durch einen Hof oder an einem Bordstein entlang läuft, kann in der Simulation anders verlaufen. Schmale Lücken zwischen Gebäuden (unter etwa 2 m) sind im Raster geschlossen: Wasser kann dort eingesperrt und zu tief erscheinen.",
+      "geprueft": false
+    },
+    "umkreisM": {
+      "wert": 120,
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Gerechnet wird im Umkreis von 120 m um das Grundstück. Wasser, das von weiter oben zufließt, fehlt (Unterschätzung am Hang). Am Rand fließt Wasser ungehindert ab.",
+      "geprueft": false
+    },
+    "zellenM": {
+      "wert": 2,
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Zellengröße der Simulation in Metern.",
+      "geprueft": false
+    },
+    "regenform": {
+      "wert": "Blockregen (gleichbleibende Intensität = Niederschlagshöhe / Dauer)",
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Die Niederschlagshöhe aus KOSTRA-DWD fällt gleichmäßig über die gewählte Dauer. Ein echter Regen hat Intensitätsspitzen (Euler Typ II u. a.); ein Block zeigt sie nicht.",
+      "geprueft": false
+    },
+    "nachlaufMin": {
+      "wert": 30,
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Nach Regenende wird 30 Minuten weitergerechnet, damit abfließendes und sich sammelndes Wasser sichtbar wird.",
+      "geprueft": false
+    },
+    "spanne": {
+      "wert": {
+        "guenstig": {
+          "versickerung": 2,
+          "mulde": 1.5,
+          "rauheit": 1.3
+        },
+        "ungunstig": {
+          "versickerung": 0.35,
+          "mulde": 0.5,
+          "rauheit": 0.7
+        }
+      },
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Spanne der Ergebnisse: Günstig = mehr Versickerung und Anfangsverlust, rauere Oberfläche. Ungünstig = weniger Versickerung und Anfangsverlust, glattere Oberfläche. Das ist keine statistische Unsicherheit, sondern ein Gedankenspiel mit den Annahmen.",
+      "geprueft": false
+    },
+    "schwellenM": {
+      "wert": {
+        "kellertreppe": 0.05,
+        "lichtschacht": 0.1,
+        "garageneinfahrt": 0.03,
+        "sonstige": 0.05
+      },
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C3), keine Rechtsnorm",
+      "text": "Wasserstand am angetippten Punkt, ab dem Passt. „Wasser erreicht die Stelle“ sagt: Kellertreppe 5 cm (Türschwelle), Lichtschacht 10 cm (Aufkantung), Garageneinfahrt 3 cm. Der Nutzer kann den Wert ändern. Echte Schwellen sind im 1-m-Gelände nicht erfasst.",
+      "geprueft": false
+    }
   }
 }

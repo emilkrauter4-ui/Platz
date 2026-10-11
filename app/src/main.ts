@@ -1,5 +1,7 @@
 import {
   Cesium3DTileset,
+  ImageryLayer,
+  WebMapServiceImageryProvider,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
 } from '@cesium/engine';
@@ -10,6 +12,7 @@ import {
   Math as CMath,
   Matrix4,
   BoundingSphere,
+  Rectangle,
 } from '@cesium/core';
 import {
   area,
@@ -115,10 +118,13 @@ import { VorhabenLayer, KEY_VORHABEN } from './scene/vorhaben';
 import { HausPlanLayer } from './scene/hausplan';
 import { mountImport } from './ui/hausplanPanel';
 import type { HausPlan } from './hausplan/typen';
-import { rechne } from './scene/rechner';
+import { rechne, rechneNeu } from './scene/rechner';
 import { HuelleLayer, type HuelleAnzeige, type RotesPaneel } from './scene/huelle';
 import { gemeindeHtml, kennzahlenHtml, punkteHtml, raumsonneHtml, rowsHtml, schattenHtml } from './ui/vorhabenSheet';
 import { Oberflaeche } from './scene/oberflaeche';
+import { RegenDaten, RegenLayer } from './scene/regen';
+import { baueGitter, gitterGeometrie, kostraHn, parameterVariante, KOSTRA_WIEDERKEHR, type FliessSenken, type Gitter, type SimErgebnis, type Variante } from './rules/regen';
+import { MESS_ARTEN, bilanzText, grenzenHtml, messText, szenarioText, type MessAnzeige } from './ui/regenSheet';
 import type { FensterWelt, RaumSonne } from './rules/raumsonne';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
@@ -729,6 +735,7 @@ function valText(k: string) {
 
 function select(k: ObjectKind) {
   grAus();
+  rgAus();
   st.selected = k;
   if (st.modus === 'pflanzen') {
     st.modus = 'objekt';
@@ -759,6 +766,7 @@ function renderSheet() {
   if (st.kante || st.zeichnen || tippSt) return renderEditSheet();
   if (st.modus === 'pflanzen') return renderPflanzenSheet();
   if (st.modus === 'gross') return renderGrossSheet();
+  if (st.modus === 'regen') return renderRegenSheet();
   const bestHtml = bestandHtml();
   const wins = st.windows;
   $('stepBody').innerHTML = `
@@ -887,6 +895,278 @@ function renderSheet() {
   });
   $('newBtn').addEventListener('click', () => showStart());
   update();
+}
+
+/* ---------- Starkregen (AUFTRAG_V4 C3) ---------- */
+const RG_DAUERN = [15, 30, 60, 120, 180, 360, 720, 1440];
+const RG_WIEDERKEHR = KOSTRA_WIEDERKEHR.filter((t) => t >= 2);
+const rgSt: {
+  daten: RegenDaten | null | undefined;
+  T: number;
+  dauer: number;
+  mmEigen: number | null;
+  gitter: Gitter | null;
+  senken: FliessSenken | null;
+  senkenAn: boolean;
+  erg: Record<Variante, SimErgebnis | null>;
+  laeuft: string | null;
+  frame: number;
+  spielt: boolean;
+  mess: { id: string; art: string; name: string; pos: Vec2; schwelle: number }[];
+  tippen: string | null;
+  lfuAn: boolean;
+  benutzt: boolean;
+  ms: Record<string, number>;
+} = { daten: undefined, T: 100, dauer: 60, mmEigen: null, gitter: null, senken: null, senkenAn: false, erg: { mittel: null, guenstig: null, ungunstig: null }, laeuft: null, frame: 0, spielt: false, mess: [], tippen: null, lfuAn: false, benutzt: false, ms: {} };
+let rgLayer: RegenLayer | null = null;
+let rgTimer: ReturnType<typeof setInterval> | null = null;
+let rgSeq = 0;
+let lfuLayer: ImageryLayer | null = null;
+
+function rgStart() {
+  if (!site) return;
+  grAus();
+  st.modus = 'regen';
+  rgSt.benutzt = true;
+  zonenAus();
+  pflanzLayer?.weg();
+  renderSheet();
+  if (rgSt.daten === undefined) {
+    void RegenDaten.load(`${DATA_URL}/regen`).then((d) => { rgSt.daten = d; if (st.modus === 'regen') renderSheet(); });
+  }
+  hint(null);
+  if (st.plot) frame(centroid(st.plot), 70, '3d');
+}
+
+function rgAus() {
+  if (st.modus !== 'regen') return;
+  st.modus = 'objekt';
+  rgStop();
+  rgSt.tippen = null;
+  rgLayer?.weg();
+  rgLfu(false);
+  rgSt.lfuAn = false;
+  rgSt.senkenAn = false;
+}
+
+const rgMm = (): { mm: number; uc: number | null; kostra: boolean } => {
+  const k = rgSt.daten ? kostraHn(rgSt.daten.kostra, rgSt.dauer, rgSt.T) : null;
+  if (rgSt.mmEigen != null && rgSt.mmEigen > 0) return { mm: rgSt.mmEigen, uc: null, kostra: false };
+  return k ? { mm: k.hn, uc: k.uc, kostra: true } : { mm: 40, uc: null, kostra: false };
+};
+
+function rgStop() {
+  if (rgTimer) clearInterval(rgTimer);
+  rgTimer = null;
+  rgSt.spielt = false;
+}
+
+function rgBild(k: number) {
+  const e = rgSt.erg.mittel;
+  if (!e || !rgLayer) return;
+  rgSt.frame = Math.max(0, Math.min(e.frames.length - 1, k));
+  rgLayer.zeigeBild(e.frames[rgSt.frame]);
+  const z = document.getElementById('rgZeit');
+  if (z) z.textContent = rgZeitText();
+  const sl = document.getElementById('rgSlider') as HTMLInputElement | null;
+  if (sl) sl.value = String(rgSt.frame);
+  render();
+}
+const rgZeitText = () => `Minute ${rgSt.frame} von ${rgSt.erg.mittel ? rgSt.erg.mittel.frames.length - 1 : 0} · ${rgSt.frame < rgSt.dauer ? 'Regen fällt' : 'Regen vorbei'}`;
+
+function rgSpielen(an: boolean) {
+  rgStop();
+  const e = rgSt.erg.mittel;
+  if (!an || !e) { const b = document.getElementById('rgPlay'); if (b) b.textContent = '▶ Abspielen'; return; }
+  if (rgSt.frame >= e.frames.length - 1) rgSt.frame = 0;
+  rgSt.spielt = true;
+  const b = document.getElementById('rgPlay');
+  if (b) b.textContent = '❚❚ Pause';
+  rgTimer = setInterval(() => {
+    if (rgSt.frame >= e.frames.length - 1) { rgSpielen(false); return; }
+    rgBild(rgSt.frame + 1);
+  }, 140);
+}
+
+/** Ergebnis je Variante an einem Punkt: Ankunft in Minuten (Bilder alle 60 s, linear dazwischen) und höchste Tiefe in cm. */
+function rgAnPunkt(e: SimErgebnis | null, g: Gitter, pos: Vec2, schwelle: number): { min: number | null; cm: number } | null {
+  if (!e) return null;
+  const i = Math.floor((pos[0] - g.x0) / g.res);
+  const j = Math.floor((pos[1] - g.y0) / g.res);
+  if (i < 0 || j < 0 || i >= g.nx || j >= g.ny) return null;
+  const c = j * g.nx + i;
+  let min: number | null = null;
+  let vor = 0;
+  for (let k = 0; k < e.frames.length; k++) {
+    const d = e.frames[k][c] / 1000;
+    if (d >= schwelle) {
+      min = k === 0 ? 0 : k - 1 + (schwelle - vor) / Math.max(d - vor, 1e-9);
+      break;
+    }
+    vor = d;
+  }
+  return { min, cm: e.maxMm[c] / 10 };
+}
+
+function rgMessListe(): MessAnzeige[] {
+  const g = rgSt.gitter;
+  return rgSt.mess.map((m) => ({
+    id: m.id, art: m.art, name: m.name, schwelle: m.schwelle,
+    mittel: g ? rgAnPunkt(rgSt.erg.mittel, g, m.pos, m.schwelle) : null,
+    guenstig: g ? rgAnPunkt(rgSt.erg.guenstig, g, m.pos, m.schwelle) : null,
+    ungunstig: g ? rgAnPunkt(rgSt.erg.ungunstig, g, m.pos, m.schwelle) : null,
+  }));
+}
+
+function rgMarken() {
+  if (!rgLayer) return;
+  rgLayer.zeigeMesspunkte(rgMessListe().map((m, i) => ({
+    id: m.id, pos: rgSt.mess[i].pos, status: !m.mittel ? 'offen' : m.mittel.min != null ? 'nass' : 'trocken',
+    text: m.mittel ? (m.mittel.min != null ? `${m.name}: nach ${Math.round(m.mittel.min)} min, ${Math.round(m.mittel.cm)} cm` : `${m.name}: trocken`) : m.name,
+  })), st.dark);
+}
+
+async function rgRechnen() {
+  if (!site || !st.plot || rgSt.laeuft) return;
+  const id = ++rgSeq;
+  const R = LIMITS.starkregen;
+  rgSt.erg = { mittel: null, guenstig: null, ungunstig: null };
+  rgSt.laeuft = 'Gelände, Flächenarten und Gebäude werden zusammengestellt …';
+  rgStop();
+  rgInfo();
+  const c = centroid(st.plot);
+  const geo = gitterGeometrie(c, R.umkreisM.wert, R.zellenM.wert);
+  await terrain.ensure([geo.x0, geo.y0], [geo.x0 + geo.n * geo.res, geo.y0 + geo.n * geo.res]);
+  const klassen = rgSt.daten ? await rgSt.daten.klassen(geo.x0, geo.y0, geo.n, geo.n, geo.res) : null;
+  const gitter = baueGitter(geo, (p) => terrain.heightOrCoarse(p), klassen, st.buildings);
+  if (id !== rgSeq || st.modus !== 'regen') { rgSt.laeuft = null; return; }
+  rgSt.gitter = gitter;
+  rgLayer ??= new RegenLayer(scene.viewer, (p) => terrain.heightOrCoarse(p));
+  rgLayer.setzeGitter(gitter);
+  rgSt.laeuft = 'Senken und Fließwege …';
+  rgInfo();
+  const fl = await rechne({ art: 'fliess', e: gitter });
+  if (id !== rgSeq || st.modus !== 'regen') { rgSt.laeuft = null; return; }
+  if (fl?.art === 'fliess') { rgSt.senken = fl.erg; rgSt.ms.fliess = fl.ms; if (rgSt.senkenAn) rgLayer.zeigeSenken(fl.erg.senke, fl.erg.zufluss); }
+  const { mm } = rgMm();
+  // Die drei Läufe (Annahmen, günstig, ungünstig) rechnen gleichzeitig in eigenen Workern, wenn das Gerät mehrere Kerne hat
+  const parallel = (navigator.hardwareConcurrency ?? 2) >= 4;
+  let fertig = 0;
+  const lauf = async (v: Variante) => {
+    const job = { art: 'regen' as const, variante: v, e: { gitter, regenMm: mm, regenMin: rgSt.dauer, nachlaufMin: R.nachlaufMin.wert, param: parameterVariante(v), messpunkte: [], frameSek: 60 } };
+    const a = await (parallel ? rechneNeu(job) : rechne(job));
+    if (id !== rgSeq || st.modus !== 'regen') return;
+    fertig++;
+    rgSt.laeuft = fertig < 3 ? `Simulation: ${fertig} von 3 Läufen fertig (Annahmen, günstig, ungünstig) …` : null;
+    if (a?.art === 'regen') {
+      rgSt.erg[v] = a.erg;
+      rgSt.ms[v] = a.ms;
+      if (v === 'mittel') { rgBild(0); rgSpielen(true); }
+      rgMarken();
+    }
+    rgInfo();
+  };
+  rgSt.laeuft = 'Simulation läuft (3 Läufe: Annahmen, günstig, ungünstig) …';
+  rgInfo();
+  if (parallel) await Promise.all((['mittel', 'guenstig', 'ungunstig'] as Variante[]).map(lauf));
+  else for (const v of ['mittel', 'guenstig', 'ungunstig'] as Variante[]) await lauf(v);
+  if (id === rgSeq) { rgSt.laeuft = null; rgInfo(); }
+}
+
+function rgPunkt(g: Vec2) {
+  const art = MESS_ARTEN.find((a) => a.id === rgSt.tippen);
+  rgSt.tippen = null;
+  if (!art) return;
+  rgSt.mess.push({ id: `${art.id}-${rgSt.mess.length + 1}`, art: art.id, name: art.name, pos: g, schwelle: art.schwelle });
+  hint(null);
+  rgMarken();
+  rgInfo();
+  render();
+}
+
+function rgLfu(an: boolean) {
+  if (lfuLayer) { scene.viewer.imageryLayers.remove(lfuLayer, true); lfuLayer = null; }
+  if (an) {
+    const sw = localToLonLat([data.site.bbox[0], data.site.bbox[1]]);
+    const ne = localToLonLat([data.site.bbox[2], data.site.bbox[3]]);
+    lfuLayer = new ImageryLayer(new WebMapServiceImageryProvider({
+      url: new URL('proxy/lfu-abfluss', location.href).toString(),
+      layers: 'senken_aufstau,fliesswege',
+      parameters: { format: 'image/png', transparent: true },
+      rectangle: Rectangle.fromDegrees(sw[0], sw[1], ne[0], ne[1]),
+      credit: 'Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de (CC BY 4.0)',
+    }), { alpha: 0.75 });
+    scene.viewer.imageryLayers.add(lfuLayer);
+  }
+  render();
+}
+
+function renderRegenSheet() {
+  const mm = rgMm();
+  const opt = (v: number, cur: number, f: (v: number) => string) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${f(v)}</option>`;
+  const e = rgSt.erg.mittel;
+  $('stepBody').innerHTML = `
+    <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">${tabsHtml()}</div>
+    <h3 style="margin:10px 0 4px;font-size:16px">Starkregen über deinem Grundstück ${tag('Simulation', 'Simulation')}</h3>
+    ${grenzenHtml(tag)}
+    ${rgSt.daten === null ? '<p class="warnbox">Für dieses Gebiet liegen noch keine Starkregen-Daten vor (KOSTRA, Flächenarten). Die Simulation rechnet mit einer eigenen Regenmenge und nimmt alle Flächen als durchlässig an (offen).</p>' : ''}
+    <div class="field"><span>Wiederkehr</span><select id="rgT">${RG_WIEDERKEHR.map((t) => opt(t, rgSt.T, (v) => `alle ${v} Jahre`)).join('')}</select></div>
+    <div class="field"><span>Dauer</span><select id="rgD">${RG_DAUERN.map((d) => opt(d, rgSt.dauer, (v) => (v < 60 ? `${v} min` : `${v / 60} h`))).join('')}</select></div>
+    <div class="field"><span>Eigene Menge (mm)</span><input id="rgMm" type="number" inputmode="decimal" min="1" max="300" step="1" placeholder="aus KOSTRA" value="${rgSt.mmEigen ?? ''}" style="width:90px;font:inherit;padding:6px 8px;border-radius:9px;border:0;box-shadow:inset 0 0 0 1px var(--line);background:var(--bg);color:var(--ink)"></div>
+    ${szenarioText(mm.mm, mm.uc, mm.kostra, rgSt.T, rgSt.dauer, tag)}
+    <div class="btnrow"><button class="primary" id="rgStart" type="button" ${rgSt.laeuft ? 'disabled' : ''}>${e ? 'Neu rechnen' : 'Simulation starten'}</button></div>
+    <div id="rgInfo"></div>`;
+  bindTabs();
+  document.getElementById('rgT')!.addEventListener('change', (ev) => { rgSt.T = Number((ev.target as HTMLSelectElement).value); renderRegenSheet(); });
+  document.getElementById('rgD')!.addEventListener('change', (ev) => { rgSt.dauer = Number((ev.target as HTMLSelectElement).value); renderRegenSheet(); });
+  document.getElementById('rgMm')!.addEventListener('change', (ev) => { const v = parseFloat((ev.target as HTMLInputElement).value.replace(',', '.')); rgSt.mmEigen = v > 0 ? v : null; renderRegenSheet(); });
+  document.getElementById('rgStart')!.addEventListener('click', () => void rgRechnen());
+  rgInfo();
+}
+
+function rgInfo() {
+  const el = document.getElementById('rgInfo');
+  const btn = document.getElementById('rgStart') as HTMLButtonElement | null;
+  if (btn) { btn.disabled = !!rgSt.laeuft; btn.textContent = rgSt.erg.mittel ? 'Neu rechnen' : 'Simulation starten'; }
+  if (!el) return;
+  const e = rgSt.erg.mittel;
+  const mess = rgMessListe();
+  const R = LIMITS.starkregen;
+  el.innerHTML = `
+    ${rgSt.laeuft ? `<p class="fine" style="text-align:left">${esc(rgSt.laeuft)} Die Oberfläche bleibt bedienbar.</p>` : ''}
+    ${e ? `<div class="field" style="display:block">
+        <div class="btnrow" style="margin-top:0"><button class="sec" id="rgPlay" type="button">${rgSt.spielt ? '❚❚ Pause' : '▶ Abspielen'}</button><span id="rgZeit" class="fine" style="align-self:center">${rgZeitText()}</span></div>
+        <input id="rgSlider" type="range" min="0" max="${e.frames.length - 1}" step="1" value="${rgSt.frame}" style="width:100%;accent-color:var(--ink);height:30px" aria-label="Zeitpunkt der Simulation">
+        <p class="fine" style="text-align:left;margin:2px 0">Wassertiefe: <span style="color:#5aa0eb">■</span> ab 0,5 cm · <span style="color:#2869d7">■</span> 5–15 cm · <span style="color:#14379f">■</span> 15–40 cm · <span style="color:#46147a">■</span> über 40 cm ${tag('Simulation', 'Simulation')}</p>
+      </div>
+      ${bilanzText(e, tag)}` : ''}
+    <h3 style="margin:14px 0 4px;font-size:15px">Gefährdete Stellen</h3>
+    <p class="fine" style="text-align:left;margin:0 0 6px">Tipp auf „Kellertreppe“, „Lichtschacht“ oder „Garageneinfahrt“ und dann auf die Stelle im Bild. Passt. sagt, wann Wasser sie erreicht.</p>
+    <div class="objects" role="group" aria-label="Stelle setzen">${MESS_ARTEN.map((a) => `<button class="obj" type="button" data-rgmess="${a.id}" aria-selected="${rgSt.tippen === a.id}">${a.name}</button>`).join('')}</div>
+    ${rgSt.tippen ? `<p class="fine" style="text-align:left">Tipp jetzt auf die Stelle (${esc(MESS_ARTEN.find((a) => a.id === rgSt.tippen)!.name)}) im 3D-Bild.</p>` : ''}
+    ${mess.length ? `<ul class="rows">${mess.map((m, i) => `<li><span>${messText(m)} ${e ? tag('Simulation', 'Simulation') : ''}<br><small class="fine">Schwelle ${fmt(m.schwelle * 100, 0)} cm Wasserstand ${tag('Annahme', 'Annahme')} <button class="link" type="button" data-rgweg="${i}">entfernen</button></small></span></li>`).join('')}</ul>` : ''}
+    <p class="fine" style="text-align:left">${esc(R.schwellenM.text)}</p>
+    <h3 style="margin:14px 0 4px;font-size:15px">Zum Vergleich</h3>
+    <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:4px 0"><input type="checkbox" id="rgSenken" ${rgSt.senkenAn ? 'checked' : ''} ${rgSt.senken ? '' : 'disabled'}> Senken (lila) und Fließwege (blau) nur aus dem Gelände ${tag('berechnet', 'berechnet')}</label>
+    <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:4px 0"><input type="checkbox" id="rgLfu" ${rgSt.lfuAn ? 'checked' : ''}> Hinweiskarte Oberflächenabfluss des Landesamts für Umwelt danebenlegen ${tag('Orientierung', 'Orientierung')}</label>
+    <p class="fine" style="text-align:left">Die LfU-Karte (CC BY 4.0, Datenquelle: Bayerisches Landesamt für Umwelt) ist eine rein topografische Hinweiskarte (Fließwege und Senken, ohne bestimmtes Regenereignis) und erscheint erst ab Maßstab etwa 1:25 000. Die Abweichungen zur Simulation sind in <code>docs/starkregen_vergleich.md</code> dokumentiert.</p>
+    <details><summary>Annahmen der Simulation</summary><ul class="fine" style="text-align:left">
+      <li>${esc(R.manning.text)}</li><li>${esc(R.versickerungMmH.text)}</li><li>${esc(R.muldenspeicherMm.text)}</li><li>${esc(R.dachwasser.text)}</li><li>${esc(R.nachlaufMin.text)}</li><li>${esc(R.spanne.text)}</li>
+      <li>Flächenarten: ${tag('amtlich', 'amtlich')} ALKIS Tatsächliche Nutzung (Verkehr, Wege, Plätze, Gewässer), in Siedlungsflächen NDVI aus dem Luftbild (DOP20 CIR, 16.09.2023): niedrig = versiegelt. Gebäude aus LoD2 ${tag('amtlich', 'amtlich')}.</li></ul></details>
+    <p class="fine" style="text-align:left">Orientierung, keine Genehmigung und keine Gefahrenkarte. Datenquellen: Deutscher Wetterdienst (KOSTRA-DWD-2020, CC BY 4.0, Werte der Zelle ausgelesen), Bayerische Vermessungsverwaltung (CC BY 4.0).</p>`;
+  document.getElementById('rgPlay')?.addEventListener('click', () => rgSpielen(!rgSt.spielt));
+  document.getElementById('rgSlider')?.addEventListener('input', (ev) => { rgSpielen(false); rgBild(Number((ev.target as HTMLInputElement).value)); });
+  document.querySelectorAll<HTMLButtonElement>('[data-rgmess]').forEach((b) => b.addEventListener('click', () => {
+    rgSt.tippen = rgSt.tippen === b.dataset.rgmess ? null : b.dataset.rgmess!;
+    hint(rgSt.tippen ? 'Tipp auf die Stelle im Bild.' : null);
+    rgInfo();
+  }));
+  document.querySelectorAll<HTMLButtonElement>('[data-rgweg]').forEach((b) => b.addEventListener('click', () => { rgSt.mess.splice(Number(b.dataset.rgweg), 1); rgMarken(); rgInfo(); }));
+  document.getElementById('rgSenken')?.addEventListener('change', (ev) => {
+    rgSt.senkenAn = (ev.target as HTMLInputElement).checked;
+    rgLayer?.zeigeSenken(rgSt.senkenAn ? rgSt.senken?.senke ?? null : null, rgSt.senkenAn ? rgSt.senken?.zufluss ?? null : null);
+  });
+  document.getElementById('rgLfu')?.addEventListener('change', (ev) => { rgSt.lfuAn = (ev.target as HTMLInputElement).checked; rgLfu(rgSt.lfuAn); });
 }
 
 /* ---------- Großes Vorhaben (AUFTRAG_V3 Phase B): zweites Wohnhaus, Anbau, Aufstockung ---------- */
@@ -1668,7 +1948,8 @@ function tabName(k: ObjectKind): string {
 function tabsHtml(): string {
   return `${ORDER.map((k) => `<button class="obj" role="tab" type="button" data-obj="${k}"><span class="d"></span>${tabName(k)}</button>`).join('')}
     <button class="obj" role="tab" type="button" data-modus="pflanzen"><span class="d"></span>Hecke, Baum</button>
-    <button class="obj" role="tab" type="button" data-modus="gross" aria-selected="${st.modus === 'gross'}"><span class="d"></span>Großes Vorhaben</button>`;
+    <button class="obj" role="tab" type="button" data-modus="gross" aria-selected="${st.modus === 'gross'}"><span class="d"></span>Großes Vorhaben</button>
+    <button class="obj" role="tab" type="button" data-modus="regen" aria-selected="${st.modus === 'regen'}"><span class="d"></span>Starkregen</button>`;
 }
 
 function bindTabs() {
@@ -1676,11 +1957,17 @@ function bindTabs() {
   document.querySelectorAll<HTMLButtonElement>('[data-obj]').forEach((b) => b.addEventListener('click', () => select(b.dataset.obj as ObjectKind)));
   document.querySelector<HTMLButtonElement>('[data-modus="gross"]')?.addEventListener('click', () => {
     if (st.modus === 'gross') return;
+    rgAus();
     grStart();
+  });
+  document.querySelector<HTMLButtonElement>('[data-modus="regen"]')?.addEventListener('click', () => {
+    if (st.modus === 'regen') return;
+    rgStart();
   });
   document.querySelector<HTMLButtonElement>('[data-modus="pflanzen"]')?.addEventListener('click', () => {
     if (st.modus === 'pflanzen') return;
     grAus();
+    rgAus();
     st.modus = 'pflanzen';
     pflSt.benutzt = true;
     zonenAus();
@@ -2815,6 +3102,9 @@ function setupInput() {
       }
     } else if (st.step === 'pruefen' && st.ansicht === 'nachbar') {
       if (nbSt.tippen) setBlick(e.position);
+    } else if (st.step === 'pruefen' && st.modus === 'regen' && rgSt.tippen) {
+      const g = pickGround(e.position);
+      if (g) rgPunkt(g);
     } else if (st.step === 'pruefen' && st.modus === 'pflanzen' && pflSt.stammTippen) {
       const g = pickGround(e.position);
       if (g) setStamm(g);
@@ -3135,6 +3425,9 @@ async function main() {
         nbSt,
         gr: grSt,
         hl: hlSt,
+        rg: rgSt,
+        rgInfo,
+        rgMarken,
         hp: hpSt,
         hpUebernehmen,
         hpFenster: () => hpLayer?.fensterAnzahl() ?? -1,

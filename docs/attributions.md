@@ -62,6 +62,16 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 
 Datenschutz: Hausplan-Dateien (IFC, PDF, Foto) werden nur im Arbeitsspeicher der Sitzung verarbeitet, nicht hochgeladen und nicht gespeichert. Nur wenn der Nutzer ausdrücklich „Plan merken“ wählt, wird das Ergebnis (Umriss, Fenster, Höhen – nicht die Datei) lokal im Browser abgelegt.
 
+## Starkregen-Simulation (AUFTRAG_V4 C3)
+
+| Datensatz | Herkunft | Lizenz | Nutzung in Passt. | Bearbeitet? |
+|---|---|---|---|---|
+| KOSTRA-DWD-2020, Rasterwerte der Niederschlagshöhen (Hn) und Unsicherheiten (UC), 5-km-Raster | Deutscher Wetterdienst, `opendata.dwd.de/climate_environment/CDC/grids_germany/return_periods/precipitation/KOSTRA/KOSTRA_DWD_2020/asc` | **CC BY 4.0** (DWD: „Alle frei zugänglichen Geodaten … unter CC BY 4.0 unter Beigabe eines Quellenvermerks“, Stand Abruf 11.10.2026, `dwd.de/DE/service/rechtliche_hinweise`) | typische Regenmengen je Dauer und Wiederkehr für den Ort (`pipeline/27_regen_daten.py`) | ja: Wert der Zelle des Gebietsmittelpunkts ausgelesen (Hinweis „verändert“ in `regen/kostra.json`). Quellenvermerk: „Deutscher Wetterdienst, KOSTRA-DWD-2020“ |
+| Flächenarten (durchlässig/versiegelt/Gewässer) | ALKIS Tatsächliche Nutzung und DOP20 CIR (NDVI), Bayerische Vermessungsverwaltung | CC BY 4.0 | Versickerung und Rauheit der Zellen | ja: selbst berechnet (1-m-Raster) |
+| Hinweiskarte Oberflächenabfluss und Sturzflut (WMS `www.lfu.bayern.de/gdi/wms/wasser/oberflaechenabfluss`, Ebenen `fliesswege`, `senken_aufstau`) | Bayerisches Landesamt für Umwelt | **CC BY 4.0** („Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de“, AccessConstraints des Dienstes) | nur **Anzeige daneben** (Schalter in der App, über einen Proxy, der nur GetMap dieser zwei Ebenen weiterreicht) und Plausibilitätsvergleich (`docs/starkregen_vergleich.md`); nichts übernommen oder umgewandelt | nein (Bilder des Dienstes) |
+
+Das Simulationsmodell (diffusive wave, Priority-Flood für Senken) ist **eigene Umsetzung** (`app/src/rules/regen.ts`) nach bekannten Prinzipien; es wird kein Code aus Fremdprojekten verwendet (daher keine Lizenz zu übernehmen). Geprüfte Verfahren als Vorbild: Priority-Flood (Barnes, Lehman & Mulla 2014), zellbasierte Diffusive-Wave-Modelle (z. B. LISFLOOD-FP, GPL – nicht verwendet).
+
 ## Nachbar-Link (Phase 3.2)
 
 | Werkzeug | Lizenz | Wofür | Hinweis |

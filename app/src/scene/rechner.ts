@@ -37,7 +37,7 @@ function holeWorker(): Worker {
 
 function weiter() {
   if (laeuft) return;
-  const art = (['huelle', 'raumsonne', 'zufahrt', 'schatten'] as const).find((k) => warten.has(k));
+  const art = (['huelle', 'raumsonne', 'fliess', 'regen', 'zufahrt', 'schatten'] as const).find((k) => warten.has(k));
   if (!art) return;
   const n = warten.get(art)!;
   warten.delete(art);
@@ -53,5 +53,20 @@ export function rechne(a: Auftrag): Promise<Antwort | null> {
     alt?.res(null);
     warten.set(a.art, { a: { ...a, id: ++naechste } as Anfrage, res });
     weiter();
+  });
+}
+
+
+/**
+ * Einzelauftrag in einem eigenen, kurzlebigen Worker (für parallele Rechnungen, z. B. die drei Starkregen-Läufe).
+ * Ergebnis null bei Worker-Fehler.
+ */
+export function rechneNeu(a: Auftrag): Promise<Antwort | null> {
+  return new Promise((res) => {
+    const w = new Worker(new URL('../rules/rechner.worker.ts', import.meta.url), { type: 'module' });
+    const fertig = (r: Antwort | null) => { w.terminate(); res(r); };
+    w.onmessage = (e: MessageEvent<Antwort>) => fertig(e.data);
+    w.onerror = () => fertig(null);
+    w.postMessage({ ...a, id: ++naechste } as Anfrage);
   });
 }

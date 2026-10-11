@@ -6,6 +6,7 @@
 import { berechneZufahrt, type ZufahrtEingabe, type ZufahrtErgebnis } from './zufahrt';
 import { berechneVerschattung, type Lage, type SchattenErgebnis } from './verschattung';
 import { berechneRaumsonne, type FensterWelt, type RasterAusschnitt, type RaumSonne } from './raumsonne';
+import { fliessSenken, simuliere, type FliessSenken, type SimEingabe, type SimErgebnis } from './regen';
 import { huelleRaster, type HuelleModell, type HuelleRaster } from './huelle';
 import type { Vorhaben } from './vorhaben';
 import type { Site } from './types';
@@ -16,12 +17,16 @@ export type Anfrage =
   | { art: 'zufahrt'; id: number; e: Omit<ZufahrtEingabe, 'site'> & { site: SiteOhneGelaende } }
   | { art: 'schatten'; id: number; site: SiteOhneGelaende; v: Vorhaben; lage: Lage }
   | { art: 'huelle'; id: number; modell: HuelleModell; step?: number }
+  | { art: 'regen'; id: number; e: SimEingabe; variante: string }
+  | { art: 'fliess'; id: number; e: SimEingabe['gitter'] }
   | { art: 'raumsonne'; id: number; site: SiteOhneGelaende; v: Vorhaben; fenster: FensterWelt[]; raeume: { name: string; geschoss: number }[]; lage: Lage; raster: { winter?: RasterAusschnitt; sommer?: RasterAusschnitt } };
 
 export type Antwort =
   | { art: 'zufahrt'; id: number; zufahrt: ZufahrtErgebnis; ms: number }
   | { art: 'schatten'; id: number; schatten: SchattenErgebnis | null; ms: number }
   | { art: 'huelle'; id: number; raster: HuelleRaster; ms: number }
+  | { art: 'regen'; id: number; erg: SimErgebnis; variante: string; ms: number }
+  | { art: 'fliess'; id: number; erg: FliessSenken; ms: number }
   | { art: 'raumsonne'; id: number; sonne: RaumSonne | null; ms: number };
 
 export function bearbeite(a: Anfrage): Antwort {
@@ -33,6 +38,13 @@ export function bearbeite(a: Anfrage): Antwort {
   if (a.art === 'huelle') {
     const raster = huelleRaster(a.modell, a.step);
     return { art: 'huelle', id: a.id, raster, ms: performance.now() - t0 };
+  }
+  if (a.art === 'regen') {
+    const erg = simuliere(a.e);
+    return { art: 'regen', id: a.id, erg, variante: a.variante, ms: performance.now() - t0 };
+  }
+  if (a.art === 'fliess') {
+    return { art: 'fliess', id: a.id, erg: fliessSenken(a.e), ms: performance.now() - t0 };
   }
   if (a.art === 'raumsonne') {
     const sonne = berechneRaumsonne(a.site as Site, a.v, a.fenster, a.raeume, a.lage, a.raster);

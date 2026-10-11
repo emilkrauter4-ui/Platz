@@ -352,6 +352,54 @@ R: dict[str, dict] = {
         text=lambda: KEIN, link=None,
         umsetzung="Fensteransicht (Kamera) in 1,6 m Augenhöhe über dem Fußboden des Geschosses, 15 cm vor der Fassade, Blickrichtung senkrecht zur Fassade. Gekennzeichnet „Visualisierung, nicht fotorealistisch“.",
         beispiel="Fenster im Obergeschoss: Kamera 2,80 m + 1,6 m über dem Fußboden EG."),
+    "starkregen.manning": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Rauheit nach Manning für flachen Oberflächenabfluss: versiegelt 0,025, durchlässig (Rasen, Boden) 0,06, Gewässer 0,03 s/m^(1/3). Die Simulation fließt Wasser nach q = h^(5/3) · S / (n · √S) zwischen Nachbarzellen (diffusive wave).',
+        beispiel='Straße mit 4 % Gefälle, 1 cm Wasser: Fließgeschwindigkeit etwa 0,5 m/s.'),
+    "starkregen.versickerungMmH": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Konstante Versickerung: durchlässige Flächen 15 mm/h, versiegelte 0. Keine Bodenkarte eingebunden; der Boden ist nicht bekannt.',
+        beispiel='Rasen bei 47 mm/h Regen: 15 mm/h versickern, der Rest sammelt sich oder fließt ab.'),
+    "starkregen.muldenspeicherMm": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Anfangsverlust (Pfützen, Unebenheiten): versiegelt 1 mm, durchlässig 4 mm, bevor Wasser abfließt.',
+        beispiel='Die ersten 1 mm Regen auf einer Straße fließen nicht ab.'),
+    "starkregen.dachwasser": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Regen auf Dächern (LoD2-Grundrisse) wird gleichmäßig auf die Randzellen rund ums Gebäude gegeben. Dachrinnen, Fallrohre und Regenwasserkanäle sind nicht bekannt.',
+        beispiel='Haus mit 100 m² Dach, 46,6 mm: 4,7 m³ gehen an den Gebäuderand.'),
+    "starkregen.kanalnetz": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Das Kanalnetz ist nicht berücksichtigt (keine Einläufe, kein Rückstau). Die Simulation zeigt deshalb eher mehr Wasser an der Oberfläche als in Wirklichkeit; Rückstau aus dem Kanal in Keller ist nicht erfasst.',
+        beispiel='Straße mit Einlauf: in der Simulation fließt das Wasser weiter, in Wirklichkeit verschwindet ein Teil im Kanal.'),
+    "starkregen.gelaendeAufloesung": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='1-m-Gelände (DGM1), gerechnet auf 2-m-Zellen. Bordsteine, Mauern, Schwellen, Treppenstufen und Durchlässe sind nicht oder verfälscht im Gelände; Wasser kann in der Simulation anders laufen als vor Ort.',
+        beispiel='Ein 15 cm hoher Bordstein hält Wasser in Wirklichkeit auf der Straße, die Simulation sieht ihn nicht.'),
+    "starkregen.umkreisM": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Gerechnet wird im Umkreis von 120 m um das Grundstück; von außen fließt nichts zu, am Rand fließt Wasser ab (Normalabfluss, Gefälle 2 %).',
+        beispiel='Grundstück am Hangfuß: Wasser vom Hang oberhalb der 120 m fehlt, die Simulation unterschätzt.'),
+    "starkregen.zellenM": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Zellengröße 2 m.',
+        beispiel='Ein 1 m breiter Lichtschacht liegt in einer 2-m-Zelle.'),
+    "starkregen.regenform": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Blockregen: Niederschlagshöhe aus KOSTRA-DWD-2020 (Hn, Dauer, Wiederkehr, Zelle 5 km) gleichmäßig über die Dauer. Die Menge ist amtlich, die zeitliche Verteilung eine Annahme.',
+        beispiel='46,6 mm in 60 min = 46,6 mm/h gleichmäßig.'),
+    "starkregen.nachlaufMin": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Nach Regenende wird 30 Minuten weitergerechnet.',
+        beispiel='Regen 60 min, Simulation 90 min.'),
+    "starkregen.spanne": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Drei Läufe: Annahmen, günstig (Versickerung ×2, Anfangsverlust ×1,5, Rauheit ×1,3), ungünstig (Versickerung ×0,35, Anfangsverlust ×0,5, Rauheit ×0,7). Die Spanne ist ein Gedankenspiel mit den Annahmen, keine statistische Unsicherheit.',
+        beispiel='Kellertreppe: „nach etwa 24 Minuten (Spanne 19–31)“.'),
+    "starkregen.schwellenM": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung='Wasserstand, ab dem „Wasser erreicht die Stelle“ gilt: Kellertreppe 5 cm, Lichtschacht 10 cm, Garageneinfahrt 3 cm. Echte Schwellen und Aufkantungen sind im Gelände nicht erfasst.',
+        beispiel='Lichtschacht mit 15 cm Aufkantung: Wasser erreicht ihn erst ab 15 cm.'),
     "pflanzen.abstandKleinM": dict(
         text=lambda: agbgb(47, 1), link="AGBGB-47", umsetzung="Pflanzen bis 2,00 m Höhe: mindestens 0,50 m Abstand.",
         beispiel="Hecke 1,8 m hoch, Triebe 0,6 m von der Grenze → eingehalten."),
@@ -507,6 +555,7 @@ FRAGEN = [
     ("Art. 57 Abs. 1 Nr. 1 a – aktueller Wortlaut", "Nach dem aktuellen Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur für Gebäude im Außenbereich (bis 20 m³). Passt. behandelt ein Gartenhaus mit Aufenthaltsraum oder Ofen im Innenbereich deshalb als verfahrensfrei (gelb), aber ohne Privileg nach Art. 6 Abs. 7. Richtig? Gibt es weitere Anforderungen, die wir nennen sollten (Feuerstätte, Abgasanlage, Bezirkskaminkehrer)?"),
     ("Haus aus Plan: Wand- und Dachhöhen", "Bei einem Haus aus einem hochgeladenen Plan (IFC, PDF, Foto) rechnet Passt. die Abstandsfläche an jeder Wand mit der Wandhöhe über dem Gelände an beiden Wandenden bis zur Traufe plus einem Drittel der Dachhöhe (bis 70° Neigung) – an allen Wänden, auch an Giebelwänden (sicher nach oben). Für unregelmäßige Grundrisse (L-Form, Vor- und Rücksprünge) wird jede Außenwand einzeln gerechnet, Wände unter 0,3 m werden übergangen. Ist das vertretbar, und wie behandelt das Bauamt Ecken, Erker und Vorbauten?"),
     ("Sonne in den Räumen", "Passt. zeigt Sonnenstunden je Raum an drei Stichtagen als Simulation, ohne Bewertung. Gibt es im Bauordnungs- oder Planungsrecht eine Mindestbesonnung (Wohnräume), die Passt. nennen müsste? Passt. kennt keine und bewertet nicht."),
+    ("Starkregen: Darstellung für Bürger", "Passt. zeigt Starkregen als Simulation mit ausdrücklichen Grenzen (kein Kanalnetz, 1-m-Gelände, Blockregen) und nennt Zeit und Tiefe an angetippten Stellen („Wasser erreicht die Kellertreppe nach etwa X Minuten, Tiefe etwa Y cm“) mit Spanne. Ist diese Darstellung für Laien verantwortbar, oder soll die Aussage zur Tiefe und Zeit entfallen und nur die Fließrichtung gezeigt werden? Welche Hinweise zur Gefährdungsbeurteilung (Starkregen-Gefahrenkarte der Gemeinde, Rückstausicherung nach DIN 1986-100) muss Passt. nennen?"),
     ("Außenbereich", "Passt. gibt im Außenbereich nichts frei und verweist ans Bauamt, auch bei Gebäuden unter 20 m³. Ist dieser Hinweis ausreichend und korrekt formuliert?"),
     ("Was zählt „an der Grenze“?", "Art. 6 Abs. 7 gilt „auch wenn sie nicht an der Grundstücksgrenze errichtet werden“. Passt. zählt ein Nebengebäude zur 9-m- und 15-m-Länge, wenn es näher an der Grenze steht als seine erforderliche Abstandsflächentiefe (meist 3 m). Ist das die richtige Abgrenzung?"),
     ("Bestand: nur Bestätigtes zählt", "Aus Luftbild und Laser automatisch erkannte Nebengebäude sind nur ein Hinweis und zählen nie bei der Grenzbebauung (9 m / 15 m); erst was der Nutzer per Tipp erfasst, bestätigt oder einzeichnet, zählt mit Maßen und Spanne. Ist das als Orientierung vertretbar, oder soll ein erkannter Bau ab einer Mindestgröße immer als Warnung erscheinen?"),
@@ -587,7 +636,7 @@ def seite(kurz: bool = False) -> str:
         assert all(t in titel_fragen for t in KURZ_FRAGEN), [t for t in KURZ_FRAGEN if t not in titel_fragen]
         fragen_liste = [f for t in KURZ_FRAGEN for f in FRAGEN if f[0] == t]
     titel = {"gartenhaus": "Gartenhaus", "carport": "Carport", "abstand": "Abstandsflächen", "grenzbebauung": "Bebauung an der Grenze",
-             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "huelle": "Hülle des Baurechts (größte zulässige Höhe aus den Abstandsflächen)", "pflanzen": "Hecken und Bäume (Nachbarrecht)", "raumsonne": "Sonne in den Räumen (Haus aus Plan)",
+             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "huelle": "Hülle des Baurechts (größte zulässige Höhe aus den Abstandsflächen)", "pflanzen": "Hecken und Bäume (Nachbarrecht)", "raumsonne": "Sonne in den Räumen (Haus aus Plan)", "starkregen": "Starkregen-Simulation (Annahmen, Simulation – keine Rechtsnorm)",
              "verfahren": "Verfahren und Antrag"}
     karten, akt, nr = [], None, 0
     for rid, sek, r in regeln:
