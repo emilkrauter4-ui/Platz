@@ -68,7 +68,7 @@ export function raumsonneHtml(r: RaumSonne | null, laeuft: boolean, quelle: { wi
     .map((x) => `<tr><td>${esc(x.id)}${x.raum ? ` <small>${esc(x.raum)}</small>` : ''} <button class="link" type="button" data-hpblick="${esc(x.id)}">Blick</button></td>${x.stunden.map((h) => `<td style="text-align:right;font-variant-numeric:tabular-nums">${f(h)}</td>`).join('')}</tr>`)
     .join('')}</tbody></table></details>`;
   const baeume = r.mitBaeumen.winter || r.mitBaeumen.sommer
-    ? `Bäume und andere Objekte: <b>21. Dezember und 21. März</b> mit dem laubfreien Modell (${esc(quelle?.winter ?? 'Laserdaten, Befliegung 08.03.2025')}), <b>21. Juni</b> mit dem belaubten (${esc(quelle?.sommer ?? 'DOM20 minus DGM1, Bildflug 16.09.2023')}) ${tag('amtlich', 'amtlich')}. Kahle Äste sieht der Laser nur teilweise, im Winter ist der Baumschatten deshalb eher zu klein.`
+    ? `Bäume und andere Objekte: <b>21. Dezember und 21. März</b> mit dem laubfreien Modell – ${esc(quelle?.winter ?? 'Laserdaten, Befliegung 08.03.2025')} –, <b>21. Juni</b> mit dem belaubten – ${esc(quelle?.sommer ?? 'DOM20 minus DGM1, Bildflug 16.09.2023')} – ${tag('amtlich', 'amtlich')}. Kahle Äste sieht der Laser nur teilweise, im Winter ist der Baumschatten deshalb eher zu klein.`
     : '<b>Bäume sind nicht berücksichtigt</b>: Für dieses Gebiet liegt kein Oberflächenmodell vor (offen). Berücksichtigt sind nur Gebäude.';
   const neu = laeuft ? '<p class="fine" style="text-align:left;color:var(--warn)">Das Haus wurde bewegt: Die Zahlen werden neu berechnet …</p>' : '';
   return `${neu}<p class="fine" style="text-align:left;margin:8px 0 4px"><b>Sonnenstunden an der Fenstermitte</b> – ${tag('Simulation', 'Simulation')} ${tag('berechnet', 'berechnet')}</p>

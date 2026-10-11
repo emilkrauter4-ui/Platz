@@ -417,6 +417,16 @@ describe('Sonne in den Räumen', () => {
     expect(nurSommer.fenster[0].stunden[2]).toBeLessThan(ohne.fenster[0].stunden[2]);
   });
 
+  it('Ein Baum im Grundriss des geplanten Hauses zählt nicht (er müsste weichen)', () => {
+    const s = site0();
+    const v = hausV(s); // Grundriss x 10–20, y 24–32
+    const r: RasterAusschnitt = { x0: -15, y0: -2, res: 1, nx: 60, ny: 60, stufe: 0.25, d: new Uint8Array(3600) };
+    for (let y = 25; y <= 31; y++) for (let x = 12; x <= 18; x++) r.d[(y + 2) * r.nx + (x + 15)] = 80; // 20 m hoch, mitten im Haus
+    const ohne = berechneRaumsonne(s, v, [fSued], [], lage, {})!.fenster[0].stunden;
+    const mit = berechneRaumsonne(s, v, [fSued], [], lage, { winter: r, sommer: r })!.fenster[0].stunden;
+    expect(mit).toEqual(ohne);
+  });
+
   it('Ostfenster: Sonne nur vormittags, im Dezember weniger als das Südfenster; eigener Hausflügel (L-Form) verschattet', () => {
     const s = site0();
     const v = hausV(s);

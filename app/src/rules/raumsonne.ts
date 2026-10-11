@@ -12,6 +12,7 @@
  */
 import L from './limits.json';
 import { MIN_HOEHE_GRAD, koerperGebaeude, sonnenRichtung, sonnenstand, imSchatten, type Koerper } from './sonne';
+import { pointInPolygon } from './geometry';
 import { vorhabenKoerper, type Lage } from './verschattung';
 import type { Vorhaben } from './vorhaben';
 import type { Site, Vec2 } from './types';
@@ -61,6 +62,22 @@ export interface RaumSonne {
   ms: number;
 }
 
+/** Das Haus soll dort stehen: Objekte des Oberflächenmodells innerhalb des Grundrisses fallen weg (Bäume würden gefällt, Altbauten sind Gebäude aus LoD2). */
+function ohneGrundriss(r: RasterAusschnitt | undefined, fp: Vec2[]): RasterAusschnitt | undefined {
+  if (!r) return r;
+  const d = r.d.slice();
+  const xs = fp.map((p) => p[0]);
+  const ys = fp.map((p) => p[1]);
+  const i0 = Math.max(0, Math.floor((Math.min(...xs) - r.x0) / r.res));
+  const i1 = Math.min(r.nx - 1, Math.floor((Math.max(...xs) - r.x0) / r.res));
+  const j0 = Math.max(0, Math.floor((Math.min(...ys) - r.y0) / r.res));
+  const j1 = Math.min(r.ny - 1, Math.floor((Math.max(...ys) - r.y0) / r.res));
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+    if (pointInPolygon([r.x0 + (i + 0.5) * r.res, r.y0 + (j + 0.5) * r.res], fp)) d[j * r.nx + i] = 0;
+  }
+  return { ...r, d };
+}
+
 /** Ist der Strahl vom Punkt zur Sonne durch ein Objekt des Oberflächenmodells verdeckt? */
 function baumVerdeckt(r: RasterAusschnitt, p: Vec2, zp: number, d: Vec2, steig: number): boolean {
   const reichweite = R.reichweiteM.wert as number;
@@ -88,7 +105,7 @@ export function berechneRaumsonne(
   fenster: FensterWelt[],
   raeume: { name: string; geschoss: number }[],
   lage: Lage,
-  raster: { winter?: RasterAusschnitt; sommer?: RasterAusschnitt },
+  rasterIn: { winter?: RasterAusschnitt; sommer?: RasterAusschnitt },
   jahr = 2026,
   schritt = R.schrittMin.wert as number,
 ): RaumSonne | null {
@@ -102,6 +119,7 @@ export function berechneRaumsonne(
     .map(koerperGebaeude)
     .filter((k): k is Koerper => !!k);
   const koerper = [...nachbarn, eigen];
+  const raster = { winter: ohneGrundriss(rasterIn.winter, eigen.fp), sommer: ohneGrundriss(rasterIn.sommer, eigen.fp) };
   const fb = v.fbOffset ?? 0;
   const abstand = R.fensterAbstandM.wert as number;
 

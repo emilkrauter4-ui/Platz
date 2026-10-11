@@ -1105,7 +1105,7 @@ function grBewerten() {
 
 /** Nach jeder Änderung: sofort prüfen und zeichnen; Zufahrt, Schatten und Planungsrecht verzögert (nach dem Ziehen). */
 function grNeu() {
-  if (!site || !grSt.v || st.modus !== 'gross' || st.ansicht === 'nachbar') return;
+  if (!site || !grSt.v || st.modus !== 'gross' || st.ansicht === 'nachbar' || hpSt.dialog) return;
   grSt.offen = true;
   if (grSt.v.art === 'hausplan' && hpSt.sonne) hpSt.sonneLaeuft = true;
   grBewerten();
@@ -1140,7 +1140,7 @@ async function grRechnen() {
     rechne({ art: 'zufahrt', e: { site: ohne, ziel: res.grundriss.fp, ausgenommen: v.art === 'aufstockung' && v.zielId ? [v.zielId] : [], bruestung: res.kennzahlen.bruestung, strassen: grStrassenNah() } }),
     rechne({ art: 'schatten', site: ohne, v, lage: geoLage() }),
   ]);
-  if (id !== grSeq || st.modus !== 'gross' || !grSt.v || !site) return; // inzwischen neu verschoben oder Reiter gewechselt
+  if (id !== grSeq || st.modus !== 'gross' || !grSt.v || !site || hpSt.dialog) return; // inzwischen neu verschoben oder Reiter gewechselt
   if (z?.art === 'zufahrt') { grSt.zufahrt = z.zufahrt; grSt.ms.zufahrt = z.ms; }
   if (sch?.art === 'schatten') { grSt.schatten = sch.schatten; grSt.ms.schatten = sch.ms; }
   const umfeld = umfeldStatistik(site, grMitte(), grStrassen());
@@ -1155,7 +1155,7 @@ async function grRechnen() {
 }
 
 function grZeichnen() {
-  if (!site || !grSt.v || !grSt.res) return;
+  if (!site || !grSt.v || !grSt.res || hpSt.dialog) return;
   grLayer ??= new VorhabenLayer(scene.viewer);
   const v = grSt.v;
   const g = grSt.res.grundriss;

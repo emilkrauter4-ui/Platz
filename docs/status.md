@@ -691,6 +691,51 @@ Alles ist **Annäherung** (neues Label `Annäherung`); die Hülle ist nie Grundl
 - **Grenzen, offen:** Raster 0,5 m (Höhenfehler bis ≈ 0,6 m zwischen den Punkten); die Glasdarstellung zeigt feine senkrechte Streifen an den
   Schürzen (Darstellung, keine Rechnung); auf iPhone nicht gemessen; Fachprüfung der Auslegung (3 neue Fragen) steht aus.
 
+## AUFTRAG_V4 C2 – Dein Grundriss steht in deinem Garten (11. Oktober 2026)
+
+Ein Haus aus einem Plan (IFC, PDF oder Foto) lässt sich auf das Grundstück stellen, ziehen, drehen und mit allen Prüfungen aus Stockwerk 3 prüfen;
+dazu Sonnenstunden je Fenster und Raum. Neue Labels `aus Plan erfasst` (alles aus dem Plan) und `Simulation` (Sonnenlauf, Blick aus dem Fenster).
+Neue Regeln in `limits.json → raumsonne` (`geprueft: false`). Screenshots: `docs/screenshots/C2-*.png`.
+
+- **Weg A, IFC** (`hausplan/ifc.ts`, Bibliothek **web-ifc 0.0.78, MPL-2.0**, WASM im Browser; Datei verlässt das Gerät nicht): Außenkontur aus den
+  Wänden des Erdgeschosses (Raster, Schließen, Rand verfolgen), Geschosse aus IfcBuildingStorey, Traufe/First/Dachform/Neigung aus den
+  Dachflächen, Fenster (Position auf der Fassade, Breite, Höhe, Geschoss, Raum), Räume (IfcSpace). Zwei **eigene Beispieldateien**
+  (`docs/beispiele/ifc/`, CC0, mit `pipeline/26_beispiel_ifc.py` erzeugt): Satteldachhaus 10 × 8 m, 2 Geschosse, 12 Fenster, 8 Räume;
+  L-Haus mit Flachdach, 7 Fenster, 4 Räume. Keine Herstellerpläne. web-ifc und pdfjs werden erst beim Import nachgeladen
+  (web-ifc 3,5 MB JS + 1,6 MB WASM, pdf.js 0,3 MB + 1,4 MB Worker).
+- **Weg B, PDF/Foto** (`hausplan/bild.ts`, `ui/hausplanPanel.ts`; PDF über pdfjs-dist 4.10.38, Apache-2.0): **klassische Bildverarbeitung, keine KI.**
+  Graustufen → Schwellwert nach Otsu → dünne Linien (Maßketten, Schrift) entfernen → Lücken (Türen, Fenster) schließen → größte Fläche →
+  Umriss. **Der Maßstab kommt immer über eine vom Nutzer bestätigte Länge** („Diese Wand ist 12,00 m lang“), jede Ecke ist ziehbar
+  (Ecke dazu/weg), Fenster tippt der Nutzer selbst. Geschosse, Geschosshöhe, Dach und Neigung sind Eingaben (Annahmen). Findet Passt. nichts,
+  steht ein Rechteck zum Zurechtziehen da (kein erfundener Umriss). **Nicht gelesen werden:** Fenster, Türen, Maßketten, Räume.
+- **Platzieren und prüfen** (`rules/vorhaben.ts`, neue Art `hausplan`): Polygon-Grundriss, ziehen und drehen, Fußboden-EG einstellbar (−2 … +2 m über
+  dem höchsten Geländepunkt unter dem Haus, Gelände DGM1). Abstandsflächen je Wand: H = Wandhöhe über dem Gelände **an jedem Wandende** bis
+  Traufe + 1/3 Dachhöhe (an allen Wänden, auch Giebel – sicher nach oben, wie beim Pultdach, offen). Kollision, Grenze, Zufahrt und
+  geradliniger Zugang (Feuerwehr), Planungsrecht und Bauvoranfrage laufen unverändert; die **Hülle** (C1) zeigt rot, wo das Haus durchstößt.
+  Anzeige: IFC-Netz mit festem Licht (bis 120 000 Eckpunkte, größere Modelle: extrudierter Umriss), Bild-Pläne als extrudierter Umriss mit
+  Satteldach bei rechteckigem Grundriss.
+- **Sonne in den Räumen** (`rules/raumsonne.ts`, im Rechen-Worker): Von der Mitte jedes Fensters alle 10 Minuten ein Strahl zur Sonne (≥ 5° Höhe) am
+  21. Dezember, 21. März, 21. Juni; verdeckt durch das Haus selbst (auch Eck- und Flügelverschattung), Nachbargebäude (LoD2) und Bäume. Raum = Sonne
+  durch mindestens ein Fenster. **Oberflächenmodell** (`pipeline/25_oberflaeche.py`, Bäume u. a. über Gelände, 1 m, 250-m-Kacheln, 8,1 MB Demo-Gebiet,
+  4,1 MB Scharhof): **Dezember und März mit den Laserdaten (Befliegung 08.03.2025, laubfrei), Juni mit DOM20 minus DGM1 (Bildflug 16.09.2023, belaubt)** –
+  das steht im Ergebnis. Gebäude (Puffer 1 m) sind herausmaskiert (stehen als LoD2-Körper in der Rechnung), unter 1,5 m wird nichts gezählt. Objekte im Grundriss
+  des geplanten Hauses fallen weg (Bäume würden weichen). Gebiet ohne Oberflächenmodell: Ergebnis sagt „Bäume nicht berücksichtigt (offen)“.
+  Gerechnet 43–80 ms im Worker (Container-Chromium, 12 Fenster).
+- **Blick aus dem Fenster** (Button „Blick“ je Fenster): Kamera 1,6 m über dem Fußboden des Geschosses, 15 cm vor der Fassade, Blick nach außen; Banner
+  „Visualisierung, nicht fotorealistisch“, Label `Simulation`, „Zurück“ stellt die Kamera wieder her.
+- **Datenschutz:** Pläne werden nur im Speicher der Sitzung gelesen, nicht hochgeladen und **nicht gespeichert** (kein „Plan merken“ gebaut; „Plan vergessen“ löscht
+  ihn). Wer einen Nachbar-Link erzeugt, gibt damit den Umriss des Hauses weiter (liegt im Link, nicht auf dem Server).
+- **Tests:** `test/hausplan.test.ts`, 25 Tests: Kontur aus Dreiecken (Lücke in der Wand, L-Form), beide IFC-Dateien (Umriss, Geschosse, Dachform und -neigung,
+  Fenster, Räume, leere Datei), Bildpläne (Türlücken, Innenwand, Maßkette, Papierkörnung, L-Form, leere Seite), Maßstab, Plan aus Bild, Hausplan als Vorhaben
+  (Abstandsflächen flach/Sattel, Hang, Grenze, Kollision, Modell, Verschattungskörper), Sonne (freies Gelände, Nachbarhaus, Baum nur in „seiner“ Jahreszeit,
+  Baum im Grundriss, Ostfenster, L-Form), Oberflächen-Lader. Gesamt 248 Tests grün.
+- **Prüfmappe:** 6 neue Regeln, 2 neue Fragen (jetzt 101 Regeln, 41 Fragen); Kurzfassung unverändert.
+- **Grenzen, offen:** Nur **eigene** IFC-Beispiele getestet – IFC aus echter CAD-Software (andere Einheiten, Georeferenzierung, gekrümmte Wände, Dächer als
+  Platten, sehr große Dateien) ist nicht erprobt; Passt. liest immer das Erdgeschoss als Fußabdruck. Bildpläne: nur synthetische Pläne getestet (Rechteck, L-Form);
+  echte Scans mit Schraffuren, Möblierung oder schrägem Foto können den Umriss verfehlen (dann ziehen). Sonne: Fenstermitte statt Fläche, Gelände eben, Glas, Rahmen
+  und Dachüberstand nicht gerechnet, kahle Äste im Laser nur teilweise sichtbar (Winter-Schatten eher zu klein), nur Umkreis 120 m, Nachbardächer als
+  Prisma bis Traufe + halbe Dachhöhe. „Wo darf es hin?“ (Zonen) gibt es nur für das zweite Wohnhaus, nicht für ein Haus aus dem Plan. Auf dem iPhone nicht gemessen.
+
 ## AUFTRAG_V2 Phase 5 – „Gartenblick“ (experimentell)
 
 Stand 4. Oktober 2026.
