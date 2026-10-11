@@ -52,6 +52,16 @@ Geprüft am 3. Oktober 2026 in den LICENSE-Dateien der Repositories bzw. auf PyP
 | Heat Pump KEYMARK, Datenblätter (keymark.eu) | **keine offene Lizenz angegeben**, Seite nennt „© KEYMARK 2025“ | Ursprung der Werte in hplib; Anzeige „Heat Pump KEYMARK / EN 12102“, Label `zertifiziert` | **Status (04.10.2026): Nutzung angefragt, nur Demo.** Bis zur Antwort nur in der Demo verwenden, nicht kommerziell. Hintergrund: Einzelne Messwerte sind Fakten; für die Übernahme einer ganzen Liste kann das Datenbankherstellerrecht (§ 87b UrhG) greifen. |
 | BWP-Schallrechner (waermepumpe.de/werkzeuge/schallrechner) | Website des Bundesverbands Wärmepumpe | nur Vergleich: 10 Abfragen am 04.10.2026 (`docs/messungen/schall_bwp.md`); Stufen der Richtwirkung/Abschirmung als Quellenangabe in `limits.json` | keine Daten übernommen |
 
+## Hausplan-Import (AUFTRAG_V4 C2)
+
+| Werkzeug / Datei | Lizenz | Wofür | Hinweis |
+|---|---|---|---|
+| web-ifc 0.0.78 (ThatOpen) | **MPL-2.0** | IFC-Dateien im Browser lesen (WASM), Wände, Geschosse, Dach, Fenster, Räume | läuft vollständig im Browser, die Datei wird nicht hochgeladen. MPL-2.0 gilt dateiweise: Änderungen an web-ifc selbst müssten offengelegt werden, wir ändern nichts. Wird erst beim Import nachgeladen |
+| pdfjs-dist 4.10.38 (Mozilla) | **Apache 2.0** | PDF-Seite als Bild darstellen (Weg B) | läuft im Browser, wird erst beim Import eines PDFs nachgeladen |
+| `docs/beispiele/ifc/*.ifc` | CC0 1.0 (eigene Arbeit) | Beispiel- und Testdaten | keine Herstellerpläne |
+
+Datenschutz: Hausplan-Dateien (IFC, PDF, Foto) werden nur im Arbeitsspeicher der Sitzung verarbeitet, nicht hochgeladen und nicht gespeichert. Nur wenn der Nutzer ausdrücklich „Plan merken“ wählt, wird das Ergebnis (Umriss, Fenster, Höhen – nicht die Datei) lokal im Browser abgelegt.
+
 ## Nachbar-Link (Phase 3.2)
 
 | Werkzeug | Lizenz | Wofür | Hinweis |

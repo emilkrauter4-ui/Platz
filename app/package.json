@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@cesium/core": "^0.1.0",
-    "@cesium/engine": "^26.4.0"
+    "@cesium/engine": "^26.4.0",
+    "pdfjs-dist": "^4.10.38",
+    "web-ifc": "^0.0.78"
   }
 }
