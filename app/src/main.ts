@@ -1149,7 +1149,7 @@ function rgInfo() {
     <h3 style="margin:14px 0 4px;font-size:15px">Zum Vergleich</h3>
     <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:4px 0"><input type="checkbox" id="rgSenken" ${rgSt.senkenAn ? 'checked' : ''} ${rgSt.senken ? '' : 'disabled'}> Senken (lila) und Fließwege (blau) nur aus dem Gelände ${tag('berechnet', 'berechnet')}</label>
     <label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:4px 0"><input type="checkbox" id="rgLfu" ${rgSt.lfuAn ? 'checked' : ''}> Hinweiskarte Oberflächenabfluss des Landesamts für Umwelt danebenlegen ${tag('Orientierung', 'Orientierung')}</label>
-    <p class="fine" style="text-align:left">Die LfU-Karte (CC BY 4.0, Datenquelle: Bayerisches Landesamt für Umwelt) ist eine rein topografische Hinweiskarte (Fließwege und Senken, ohne bestimmtes Regenereignis) und erscheint erst ab Maßstab etwa 1:25 000. Die Abweichungen zur Simulation sind in <code>docs/starkregen_vergleich.md</code> dokumentiert.</p>
+    <p class="fine" style="text-align:left">Die LfU-Karte (CC BY 4.0, Datenquelle: Bayerisches Landesamt für Umwelt) ist eine rein topografische Hinweiskarte (Fließwege und Senken, ohne bestimmtes Regenereignis) und erscheint nur in einem mittleren Maßstab (etwa 1:8 500 bis 1:23 600; Passt. zoomt beim Einschalten heraus – bei zu starkem Heranzoomen verschwindet sie). Die Abweichungen zur Simulation sind in <code>docs/starkregen_vergleich.md</code> dokumentiert.</p>
     <details><summary>Annahmen der Simulation</summary><ul class="fine" style="text-align:left">
       <li>${esc(R.manning.text)}</li><li>${esc(R.versickerungMmH.text)}</li><li>${esc(R.muldenspeicherMm.text)}</li><li>${esc(R.dachwasser.text)}</li><li>${esc(R.nachlaufMin.text)}</li><li>${esc(R.spanne.text)}</li>
       <li>Flächenarten: ${tag('amtlich', 'amtlich')} ALKIS Tatsächliche Nutzung (Verkehr, Wege, Plätze, Gewässer), in Siedlungsflächen NDVI aus dem Luftbild (DOP20 CIR, 16.09.2023): niedrig = versiegelt. Gebäude aus LoD2 ${tag('amtlich', 'amtlich')}.</li></ul></details>
@@ -1166,7 +1166,12 @@ function rgInfo() {
     rgSt.senkenAn = (ev.target as HTMLInputElement).checked;
     rgLayer?.zeigeSenken(rgSt.senkenAn ? rgSt.senken?.senke ?? null : null, rgSt.senkenAn ? rgSt.senken?.zufluss ?? null : null);
   });
-  document.getElementById('rgLfu')?.addEventListener('change', (ev) => { rgSt.lfuAn = (ev.target as HTMLInputElement).checked; rgLfu(rgSt.lfuAn); });
+  document.getElementById('rgLfu')?.addEventListener('change', (ev) => {
+    rgSt.lfuAn = (ev.target as HTMLInputElement).checked;
+    rgLfu(rgSt.lfuAn);
+    // Der Dienst zeichnet nur zwischen etwa 1:8 500 und 1:23 600: dafür weit herauszoomen
+    if (rgSt.lfuAn && st.plot) frame(centroid(st.plot), 700, 'plan');
+  });
 }
 
 /* ---------- Großes Vorhaben (AUFTRAG_V3 Phase B): zweites Wohnhaus, Anbau, Aufstockung ---------- */

@@ -57,7 +57,9 @@ const ABFLUSS_PARAMS = ['SERVICE', 'VERSION', 'REQUEST', 'LAYERS', 'STYLES', 'CR
 async function abflussProxy(req, res) {
   const inUrl = new URL(req.url, 'http://x');
   const out = new URL(LFU_ABFLUSS);
-  for (const k of ABFLUSS_PARAMS) if (inUrl.searchParams.has(k)) out.searchParams.set(k, inUrl.searchParams.get(k));
+  // Parameternamen ohne Rücksicht auf Groß-/Kleinschreibung (Cesium sendet klein, WMS-Clients oft groß)
+  const klein = new Map([...inUrl.searchParams].map(([k, v]) => [k.toUpperCase(), v]));
+  for (const k of ABFLUSS_PARAMS) if (klein.has(k)) out.searchParams.set(k, klein.get(k));
   const ebenen = (out.searchParams.get('LAYERS') || '').split(',');
   if (out.searchParams.get('REQUEST') !== 'GetMap' || !ebenen.every((l) => ['fliesswege', 'senken_aufstau'].includes(l))) {
     res.writeHead(400).end('nur GetMap der Ebenen fliesswege und senken_aufstau');
