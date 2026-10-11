@@ -124,11 +124,13 @@ export function spannenText(s: Spanne | null, einheit: string, d = 1): string {
 
 export function gemeindeAbschnitt(
   site: Site,
-  art: 'wohnhaus' | 'anbau' | 'aufstockung',
+  artIn: 'wohnhaus' | 'anbau' | 'aufstockung' | 'hausplan',
   umfeld: UmfeldStatistik | null,
   plaene: BPlanTreffer[] | null | undefined,
   gemeindeName: string | null,
 ): GemeindeAbschnitt {
+  // Ein Haus aus dem Plan ist planungsrechtlich ein zusätzliches Wohnhaus
+  const art = artIn === 'hausplan' ? 'wohnhaus' : artIn;
   const hinweise: Hinweis[] = [];
   const rechtskraft = (plaene ?? []).filter((p) => p.art === 'rechtskraft');
   const imVerfahren = (plaene ?? []).filter((p) => p.art === 'im_verfahren');
@@ -222,12 +224,13 @@ export function gemeindeAbschnitt(
 
 /** Fragen an die Gemeinde für die Bauvoranfrage (Vorbescheid), abhängig vom Befund. */
 export function fragenAnGemeinde(
-  art: 'wohnhaus' | 'anbau' | 'aufstockung',
+  artIn: 'wohnhaus' | 'anbau' | 'aufstockung' | 'hausplan',
   site: Site,
   plaene: BPlanTreffer[] | null | undefined,
   umfeld: UmfeldStatistik | null,
   afAusserhalb: boolean,
 ): string[] {
+  const art = artIn === 'hausplan' ? 'wohnhaus' : artIn;
   const q: string[] = [];
   const bplan = (plaene ?? []).some((p) => p.art === 'rechtskraft');
   const name = { wohnhaus: 'ein zweites Wohnhaus', anbau: 'ein Anbau', aufstockung: 'eine Aufstockung' }[art];

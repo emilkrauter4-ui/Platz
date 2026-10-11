@@ -32,14 +32,26 @@ const WINKEL_UEBERDECKUNG = L.abstand.ueberdeckungWinkelGrad.wert;
 /** Gebäude in den Abstandsflächen bis zu dieser mittleren Wandhöhe (Art. 6 Abs. 7 Satz 1 Nr. 1) */
 const KLEINBAU_HOEHE = L.grenzbebauung.maxMittlereWandhoeheM.wert;
 
-export type VorhabenArt = 'wohnhaus' | 'anbau' | 'aufstockung';
+export type VorhabenArt = 'wohnhaus' | 'anbau' | 'aufstockung' | 'hausplan';
 export type Dachform = 'sattel' | 'pult' | 'flach';
 
 export const VORHABEN_NAME: Record<VorhabenArt, { name: string; art: string }> = {
   wohnhaus: { name: 'Zweites Wohnhaus', art: 'das zweite Wohnhaus' },
   anbau: { name: 'Anbau', art: 'den Anbau' },
   aufstockung: { name: 'Aufstockung', art: 'die Aufstockung' },
+  hausplan: { name: 'Haus aus deinem Plan', art: 'das Haus aus deinem Plan' },
 };
+
+/** Ein Haus aus einem Plan (IFC, PDF, Foto), lokal: Ursprung = Mitte des Umrissrechtecks. Höhen über dem Fußboden des Erdgeschosses. */
+export interface PlanKern {
+  name: string;
+  quelle: 'IFC' | 'Bild';
+  /** Außenkontur im Erdgeschoss, gegen den Uhrzeigersinn, Meter */
+  fp: Vec2[];
+  /** Wandoberkante an der Traufe und höchster Punkt über Fußboden EG */
+  traufe: number;
+  first: number;
+}
 
 export interface Vorhaben {
   art: VorhabenArt;
@@ -68,6 +80,35 @@ export interface Vorhaben {
   zielId?: string;
   /** Fußbodenhöhe; fehlt: höchster Geländepunkt unter dem Grundriss (Annahme) */
   baseElevation?: number;
+  /** Hausplan: Höhe des Erdgeschoss-Fußbodens über dem höchsten Geländepunkt unter dem Haus (m, Nutzereingabe, sonst 0) */
+  fbOffset?: number;
+  /** Hausplan: das Haus aus dem Plan */
+  plan?: PlanKern;
+}
+
+/** Fußbodenhöhe (m ü. NHN bzw. Gelände-Bezug des ground) des Vorhabens. */
+export function fussbodenHoehe(v: Pick<Vorhaben, 'art' | 'baseElevation' | 'fbOffset'>, fp: Vec2[], ground: (p: Vec2) => number): number {
+  if (v.art === 'aufstockung') return Math.min(...fp.map(ground));
+  return v.baseElevation ?? Math.max(...fp.map(ground)) + (v.art === 'hausplan' ? v.fbOffset ?? 0 : 0);
+}
+
+/** Vorhaben aus einem Plan: Mitte auf dem Grundstück, Geschosse und Dach aus dem Plan. */
+export function vorhabenAusPlan(site: Site, plan: PlanKern & { geschosse: number; dachform: Dachform; neigung: number }): Vorhaben {
+  const xs = plan.fp.map((p) => p[0]);
+  const ys = plan.fp.map((p) => p[1]);
+  return {
+    art: 'hausplan',
+    center: centroid(site.plot.boundary),
+    angle: 0,
+    w: Math.max(...xs) - Math.min(...xs),
+    d: Math.max(...ys) - Math.min(...ys),
+    geschosse: plan.geschosse,
+    geschosshoehe: plan.traufe / Math.max(1, plan.geschosse),
+    dachform: plan.dachform,
+    neigung: plan.neigung,
+    fbOffset: 0,
+    plan: { name: plan.name, quelle: plan.quelle, fp: plan.fp, traufe: plan.traufe, first: plan.first },
+  };
 }
 
 /** Ein Wandstück mit Abstandsfläche (gemeinsame Form für neue und bestehende Gebäude). */
@@ -124,6 +165,13 @@ const hostVon = (site: Site, id?: string) => site.buildings.find((b) => b.id ===
 
 /** Grundriss und Hilfsobjekte. null, wenn das gewählte Gebäude fehlt. */
 export function grundriss(site: Site, v: Vorhaben): Grundriss | null {
+  if (v.art === 'hausplan') {
+    if (!v.plan) return null;
+    const c = Math.cos(v.angle);
+    const sn = Math.sin(v.angle);
+    const fp = v.plan.fp.map(([x, y]): Vec2 => [v.center[0] + x * c - y * sn, v.center[1] + x * sn + y * c]);
+    return { fp, proxy: null, niedrigKante: null, host: null, dock: null };
+  }
   const wand = v.geschosse * v.geschosshoehe;
   const neig = v.dachform === 'flach' ? 0 : v.neigung;
   const basis = { kind: 'gartenhaus' as const, h: wand, baseElevation: v.baseElevation };
@@ -162,6 +210,7 @@ export function grundriss(site: Site, v: Vorhaben): Grundriss | null {
 
 /** Dachhöhe (First bzw. hohe Traufe über der niedrigen Traufe) des Vorhabens. */
 export function vorhabenDachHoehe(v: Vorhaben, g: Grundriss): number {
+  if (v.art === 'hausplan') return v.plan ? Math.max(0, v.plan.first - v.plan.traufe) : 0;
   if (v.art === 'aufstockung') return Math.max(0, (g.host?.first ?? g.host?.trauf ?? 0) - (g.host?.trauf ?? 0));
   if (v.dachform === 'flach' || !g.proxy) return 0;
   if (v.dachform === 'sattel') return dachHoehe(g.proxy);
@@ -199,6 +248,27 @@ function waendePult(site: Site, v: Vorhaben, g: Grundriss): Wand[] {
   });
 }
 
+/**
+ * Wände eines Hauses aus dem Plan: Wandhöhe an jedem Wandende vom Gelände (DGM1) bis zur Traufe, Dach zu 1/3 (bis 70°, darüber ganz) aufgeschlagen
+ * (Art. 6 Abs. 4). Das Dach wird an allen Wänden angerechnet (sicher nach oben, wie beim Pultdach). Wände unter 0,3 m werden übergangen.
+ */
+function waendePlan(site: Site, v: Vorhaben, g: Grundriss): AFWand[] {
+  const plan = v.plan!;
+  const ground = (p: Vec2) => (site.ground ? site.ground(p) : 0);
+  const base = fussbodenHoehe(v, g.fp, ground);
+  const dh = Math.max(0, plan.first - plan.traufe);
+  const zu = v.dachform === 'flach' ? 0 : dh * dachAnteil4(v.neigung);
+  const ccw = signedArea(g.fp) > 0;
+  const out: AFWand[] = [];
+  for (const [a, b] of edges(g.fp)) {
+    if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 0.3) continue;
+    const ha = base + plan.traufe - ground(a) + zu;
+    const hb = base + plan.traufe - ground(b) + zu;
+    out.push({ a, b, h: Math.max(ha, hb), flaeche: flaeche(a, b, tiefe(ha), tiefe(hb), aussenNormale(a, b, ccw)) });
+  }
+  return out;
+}
+
 /** Das aufgestockte Gebäude: gleiche Grundfläche, Trauf- und Firsthöhe um `geschosse × Geschosshöhe` höher. */
 export function aufgestockt(host: Building, v: Pick<Vorhaben, 'geschosse' | 'geschosshoehe'>): Building {
   const plus = v.geschosse * v.geschosshoehe;
@@ -210,6 +280,7 @@ export function vorhabenAFWaende(site: Site, v: Vorhaben, g: Grundriss): AFWand[
   if (v.art === 'aufstockung') {
     return g.host && g.host.trauf != null ? gebaeudeFlaechen(aufgestockt(g.host, v)) : [];
   }
+  if (v.art === 'hausplan') return waendePlan(site, v, g);
   const ws = v.dachform === 'pult' ? waendePult(site, v, g) : waende(site, g.proxy!);
   const alle = ws.map((w) => ({ a: w.a, b: w.b, flaeche: w.flaeche, h: Math.max(w.ha, w.hb) }));
   // Anbau: die angebaute Wand (Kante 0 des Grundrisses) ist keine Außenwand
@@ -387,6 +458,18 @@ export function kennzahlen(v: Vorhaben, g: Grundriss): Kennzahlen {
       bruestung: (gesamtGeschosse - 1) * v.geschosshoehe + G.bruestungshoeheAnnahmeM.wert,
     };
   }
+  if (v.art === 'hausplan' && v.plan) {
+    const fl = area(g.fp);
+    const dachRaum = v.dachform === 'flach' ? 0 : (fl * dh) / 2;
+    return {
+      grundflaeche: fl,
+      bgf: fl * v.geschosse,
+      wandhoehe: v.plan.traufe,
+      firsthoehe: v.plan.first,
+      rauminhalt: fl * v.plan.traufe + dachRaum,
+      bruestung: (v.geschosse - 1) * v.geschosshoehe + G.bruestungshoeheAnnahmeM.wert,
+    };
+  }
   const fl = v.w * v.d;
   const wand = v.geschosse * v.geschosshoehe;
   return {
@@ -491,7 +574,9 @@ export function bewerteVorhaben(site: Site, v: Vorhaben, zufahrt: Pruefpunkt | n
     rows.push({ text: `Abstandsfläche ${fmt(tiefe(hMax), 1)} m (H = ${fmt(hMax, 1)} m): ${text}`, tag: L.abstand.faktorH.quelle, kind: 'rule' });
     rows.push({ text: 'Keine Überdeckung der Abstandsflächen (Art. 6 Abs. 3); Ausnahmen bei Wänden über 75° zueinander berücksichtigt.', tag: L.abstand.ueberdeckungWinkelGrad.quelle, kind: 'rule' });
     rows.push({ text: 'Ausnahme „fremder Sicht entzogener Gartenhof“ (Abs. 3 Nr. 2) kann Passt. nicht erkennen; Gemeindesatzungen können die Abstandsflächen anders regeln.', tag: 'offen', kind: 'offen' });
-    if (v.dachform === 'pult' && v.art !== 'aufstockung') {
+    if (v.art === 'hausplan') {
+      rows.push({ text: `Grundriss, Traufe (${fmt(v.plan?.traufe ?? 0, 2)} m) und First (${fmt(v.plan?.first ?? 0, 2)} m) stammen aus deinem Plan (${v.plan?.quelle === 'IFC' ? 'IFC-Modell' : 'PDF/Foto, Maßstab von dir bestätigt'}). Passt. rechnet 1/3 der Dachhöhe an allen Wänden an (sicher nach oben); die Wandhöhe wird an jedem Wandende über dem Gelände (DGM1) gemessen.`, tag: 'aus Plan erfasst', kind: 'aus Plan erfasst' });
+    } else if (v.dachform === 'pult' && v.art !== 'aufstockung') {
       rows.push({ text: 'Pultdach: Passt. rechnet 1/3 der Dachhöhe an allen Wänden an, auch an der hohen Wand (sicher nach oben). Der Wortlaut regelt das nicht ausdrücklich.', tag: 'offen', kind: 'offen' });
     }
     if (v.art === 'aufstockung') {
@@ -587,6 +672,7 @@ export function vorhabenModell(v: Vorhaben, g: Grundriss, base: number): Flaeche
     out.push({ art: 'aufsatz', pts: g.fp, z: g.fp.map(() => oben) });
     return out;
   }
+  if (v.art === 'hausplan' && v.plan) return modellPlan(v, g, base);
   const o = g.proxy!;
   const W = base + o.h;
   const dh = vorhabenDachHoehe(v, g);
@@ -602,6 +688,66 @@ export function vorhabenModell(v: Vorhaben, g: Grundriss, base: number): Flaeche
   if (v.dachform === 'sattel' && dh > 0) {
     const r0 = mitte(p[0], p[3]);
     const r1 = mitte(p[1], p[2]);
+    out.push({ art: 'wand', pts: [p[0], p[1]], z: [W, W], zUnten: [base, base] });
+    out.push({ art: 'wand', pts: [p[2], p[3]], z: [W, W], zUnten: [base, base] });
+    out.push({ art: 'wand', pts: [p[1], r1, p[2]], z: [W, W + dh, W], zUnten: [base, base, base] });
+    out.push({ art: 'wand', pts: [p[3], r0, p[0]], z: [W, W + dh, W], zUnten: [base, base, base] });
+    out.push({ art: 'dach', pts: [p[0], p[1], r1, r0], z: [W, W, W + dh, W + dh] });
+    out.push({ art: 'dach', pts: [p[2], p[3], r0, r1], z: [W, W, W + dh, W + dh] });
+    return out;
+  }
+  edges(g.fp).forEach(([a, b]) => out.push({ art: 'wand', pts: [a, b], z: [W, W], zUnten: [base, base] }));
+  out.push({ art: 'dach', pts: g.fp, z: g.fp.map(() => W) });
+  return out;
+}
+
+/**
+ * Dachfirst eines Plan-Hauses mit Satteldach: längste Achse des kleinsten umschließenden Rechtecks. `rechteckig`: der Umriss füllt
+ * das Rechteck zu mindestens 90 % (sonst stellt Passt. kein Dach dar). Nur Annahme für Darstellung und Verschattung; die
+ * Abstandsflächen brauchen den First nicht.
+ */
+export function planFirst(fp: Vec2[]): { ecken: Vec2[]; a: Vec2; b: Vec2; halbeTiefe: number; rechteckig: boolean } | null {
+  let best: { fl: number; o: Vec2; u: Vec2; x0: number; x1: number; y0: number; y1: number } | null = null;
+  for (const [a, b] of edges(fp)) {
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (l < 0.3) continue;
+    const u: Vec2 = [(b[0] - a[0]) / l, (b[1] - a[1]) / l];
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const p of fp) {
+      const x = (p[0] - a[0]) * u[0] + (p[1] - a[1]) * u[1];
+      const y = -(p[0] - a[0]) * u[1] + (p[1] - a[1]) * u[0];
+      x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    }
+    const fl = (x1 - x0) * (y1 - y0);
+    if (!best || fl < best.fl - 1e-9) best = { fl, o: a, u, x0, x1, y0, y1 };
+  }
+  if (!best) return null;
+  const { o, u, x0, x1, y0, y1 } = best;
+  const n: Vec2 = [-u[1], u[0]];
+  const w = (x: number, y: number): Vec2 => [o[0] + u[0] * x + n[0] * y, o[1] + u[1] * x + n[1] * y];
+  const lang = x1 - x0 >= y1 - y0;
+  // Ecken so ordnen, dass der First von Mitte(p0,p3) nach Mitte(p1,p2) läuft (wie beim Wohnhaus)
+  const ecken: Vec2[] = lang ? [w(x0, y0), w(x1, y0), w(x1, y1), w(x0, y1)] : [w(x0, y0), w(x0, y1), w(x1, y1), w(x1, y0)];
+  return {
+    ecken,
+    a: mitte(ecken[0], ecken[3]),
+    b: mitte(ecken[1], ecken[2]),
+    halbeTiefe: Math.min(x1 - x0, y1 - y0) / 2,
+    rechteckig: Math.abs(area(fp)) >= 0.9 * best.fl,
+  };
+}
+
+/** Anzeigemodell eines Hauses aus dem Plan (Wände bis zur Traufe; Satteldach nur bei rechteckigem Umriss, sonst flach an der Traufe). */
+function modellPlan(v: Vorhaben, g: Grundriss, base: number): Flaeche3D[] {
+  const plan = v.plan!;
+  const W = base + plan.traufe;
+  const dh = Math.max(0, plan.first - plan.traufe);
+  const out: Flaeche3D[] = [];
+  const pf = v.dachform === 'sattel' && dh > 0 ? planFirst(g.fp) : null;
+  if (pf?.rechteckig) {
+    const p = pf.ecken;
+    const r0 = pf.a;
+    const r1 = pf.b;
     out.push({ art: 'wand', pts: [p[0], p[1]], z: [W, W], zUnten: [base, base] });
     out.push({ art: 'wand', pts: [p[2], p[3]], z: [W, W], zUnten: [base, base] });
     out.push({ art: 'wand', pts: [p[1], r1, p[2]], z: [W, W + dh, W], zUnten: [base, base, base] });

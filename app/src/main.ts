@@ -89,6 +89,7 @@ import {
   STICHTAGE,
   STICHTAG_NAME,
   VORHABEN_NAME,
+  fussbodenHoehe,
   type BPlanTreffer,
   type GemeindeAbschnitt,
   type Pruefpunkt,
@@ -120,7 +121,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ORDER: ObjectKind[] = ['gartenhaus', 'carport', 'waermepumpe'];
 const WORD = { ok: 'passt', warn: 'knapp', bad: 'passt nicht' };
 const TAG_CLASS: Record<string, string> = {
-  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off', Orientierung: 'orient', Annäherung: 'assume',
+  rule: 'rule', berechnet: 'calc', Annahme: 'assume', offen: 'open', Demo: 'demo', amtlich: 'off', erkannt: 'det', nutzerbestätigt: 'user', 'erfasst per Tipp': 'user', geschätzt: 'assume', zertifiziert: 'off', Orientierung: 'orient', Annäherung: 'assume', 'aus Plan erfasst': 'plan', Simulation: 'sim',
 };
 
 /* ---------- Zustand ---------- */
@@ -1017,7 +1018,7 @@ function grZeichnen() {
   const v = grSt.v;
   const g = grSt.res.grundriss;
   const ground = (p: Vec2) => terrain.heightOrCoarse(p);
-  const base = v.art === 'aufstockung' ? Math.min(...g.fp.map(ground)) : v.baseElevation ?? Math.max(...g.fp.map(ground));
+  const base = fussbodenHoehe(v, g.fp, ground);
   const r = grSt.res;
   grLayer.zeige({
     flaechen: vorhabenModell(v, g, base),
@@ -1445,7 +1446,7 @@ function hlRotNeu() {
   if (!hlSt.an || !hlLayer || !grSt.v || !grSt.res || st.modus !== 'gross' || st.ansicht === 'nachbar') return;
   const g = grSt.res.grundriss;
   const ground = (p: Vec2) => terrain.heightOrCoarse(p);
-  const base = grSt.v.art === 'aufstockung' ? Math.min(...g.fp.map(ground)) : grSt.v.baseElevation ?? Math.max(...g.fp.map(ground));
+  const base = fussbodenHoehe(grSt.v, g.fp, ground);
   const r = hlRot(vorhabenModell(grSt.v, g, base));
   hlSt.durchstoss = r.laenge;
   hlLayer.zeigeRot(r.paneele);

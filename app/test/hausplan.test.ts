@@ -194,3 +194,126 @@ describe('Plan aus Bild (Weg B, klassische Bildverarbeitung)', () => {
     expect(massstab([0, 0], [100, 0], 9.5)).toBeCloseTo(0.095, 9);
   });
 });
+
+/* ---------- Hausplan als Vorhaben (C2-c) ---------- */
+import { bewerteVorhaben, fussbodenHoehe, grundriss, kennzahlen, planFirst, vorhabenAFWaende, vorhabenAusPlan, vorhabenModell, type Site } from '../src/rules';
+import { vorhabenKoerper } from '../src/rules/verschattung';
+
+const rechteck = (x0: number, y0: number, x1: number, y1: number): Vec2[] => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+
+function standortPlan(ground: (p: Vec2) => number = () => 400): Site {
+  return {
+    plot: { boundary: rechteck(0, 0, 30, 40), sides: [{ name: 'S', grenze: 'S' }], provenance: 'Demo' },
+    buildings: [{ id: 'haus', footprint: rechteck(5, 4, 15, 12), provenance: 'Demo', own: true, trauf: 6, first: 9 }],
+    bestand: [],
+    windows: [],
+    ground,
+    gebiet: { value: 'allgemein', provenance: 'Annahme' },
+    bereich: { value: 'innen', provenance: 'Annahme' },
+    bplan: { status: 'unbekannt', provenance: 'offen' },
+    aufenthaltsraum: { value: false, provenance: 'Annahme' },
+    feuerstaette: { value: false, provenance: 'Annahme' },
+    demo: true,
+  };
+}
+const planHaus = (fp: Vec2[], traufe: number, first: number, dachform: 'flach' | 'sattel' | 'pult' = 'flach', neigung = 0) =>
+  ({ name: 'Test', quelle: 'Bild' as const, fp, traufe, first, geschosse: 2, dachform, neigung });
+const mittig = (fp: Vec2[]): Vec2[] => {
+  const xs = fp.map((p) => p[0]);
+  const ys = fp.map((p) => p[1]);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  return fp.map((p): Vec2 => [p[0] - cx, p[1] - cy]);
+};
+
+describe('Hausplan als Vorhaben', () => {
+  it('Flachdach 10 × 8, Traufe 5,6 m: H = 5,6 m an allen Wänden, Grundriss gedreht und verschoben', () => {
+    const s = standortPlan();
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6));
+    v.center = [15, 28];
+    const g = grundriss(s, v)!;
+    expect(area(g.fp)).toBeCloseTo(80, 6);
+    expect(Math.min(...g.fp.map((p) => p[0]))).toBeCloseTo(10, 9);
+    const af = vorhabenAFWaende(s, v, g);
+    expect(af).toHaveLength(4);
+    for (const w of af) expect(w.h).toBeCloseTo(5.6, 9);
+    v.angle = Math.PI / 2;
+    const g2 = grundriss(s, v)!;
+    expect(Math.max(...g2.fp.map((p) => p[0])) - Math.min(...g2.fp.map((p) => p[0]))).toBeCloseTo(8, 9);
+  });
+
+  it('Satteldach 35°: 1/3 der Dachhöhe kommt zu H; Rauminhalt mit halbem Dachraum', () => {
+    const s = standortPlan();
+    const dh = 4 * Math.tan((35 * Math.PI) / 180);
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6 + dh, 'sattel', 35));
+    v.center = [15, 28];
+    const g = grundriss(s, v)!;
+    expect(vorhabenAFWaende(s, v, g)[0].h).toBeCloseTo(5.6 + dh / 3, 6);
+    const k = kennzahlen(v, g);
+    expect(k.firsthoehe).toBeCloseTo(5.6 + dh, 9);
+    expect(k.rauminhalt).toBeCloseTo(80 * 5.6 + (80 * dh) / 2, 6);
+  });
+
+  it('Hanglage: Wandhöhe wird an jedem Wandende über dem Gelände gemessen, Fußboden-Offset hebt das Haus', () => {
+    // Gelände fällt nach Süden: 1 m je 10 m
+    const s = standortPlan((p) => 400 + p[1] / 10);
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6));
+    v.center = [15, 28];
+    const g = grundriss(s, v)!;
+    const base = fussbodenHoehe(v, g.fp, s.ground!);
+    expect(base).toBeCloseTo(400 + 32 / 10, 9); // höchster Geländepunkt unter dem Haus (Nordkante y = 32)
+    const sued = vorhabenAFWaende(s, v, g).find((w) => w.a[1] === 24 && w.b[1] === 24)!;
+    expect(sued.h).toBeCloseTo(5.6 + 0.8, 6); // Südkante liegt 0,8 m tiefer
+    v.fbOffset = 1;
+    expect(fussbodenHoehe(v, g.fp, s.ground!)).toBeCloseTo(base + 1, 9);
+    expect(vorhabenAFWaende(s, v, g)[0].h).toBeGreaterThan(sued.h - 0.01);
+  });
+
+  it('zu nah an der Grenze: Abstandsfläche reicht auf das Nachbargrundstück (bad); mit Abstand: ok', () => {
+    const s = standortPlan();
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6));
+    v.center = [5.5, 28]; // 0,5 m von der Westgrenze
+    const nah = bewerteVorhaben(s, v, null, [])!;
+    expect(nah.punkte.find((p) => p.id === 'grenze')!.status).toBe('bad');
+    v.center = [15, 28];
+    const weit = bewerteVorhaben(s, v, null, [])!;
+    expect(weit.punkte.find((p) => p.id === 'grenze')!.status).toBe('ok');
+    expect(weit.rows.some((r) => r.tag === 'aus Plan erfasst')).toBe(true);
+  });
+
+  it('Kollision mit dem eigenen Haus wird erkannt', () => {
+    const s = standortPlan();
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6));
+    v.center = [12, 10];
+    expect(bewerteVorhaben(s, v, null, [])!.punkte.find((p) => p.id === 'kollision')!.status).toBe('bad');
+  });
+
+  it('Anzeigemodell: rechteckig mit Satteldach hat zwei Dachflächen und zwei Giebel; L-Form bleibt flach an der Traufe', () => {
+    const s = standortPlan();
+    const dh = 3;
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6 + dh, 'sattel', 35));
+    v.center = [15, 28];
+    const m = vorhabenModell(v, grundriss(s, v)!, 400);
+    expect(m.filter((f) => f.art === 'dach')).toHaveLength(2);
+    expect(Math.max(...m.flatMap((f) => f.z))).toBeCloseTo(400 + 5.6 + dh, 9);
+    const l = vorhabenAusPlan(s, planHaus(mittig([[0, 0], [12, 0], [12, 4], [6, 4], [6, 10], [0, 10]]), 5.6, 8.6, 'sattel', 35));
+    l.center = [15, 28];
+    const ml = vorhabenModell(l, grundriss(s, l)!, 400);
+    expect(Math.max(...ml.flatMap((f) => f.z))).toBeCloseTo(405.6, 9);
+    expect(planFirst(grundriss(s, l)!.fp)!.rechteckig).toBe(false);
+  });
+
+  it('Verschattungskörper: Sattel hat einen First, L-Form ist ein Block bis zum höchsten Punkt', () => {
+    const s = standortPlan();
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 8.6, 'sattel', 35));
+    v.center = [15, 28];
+    const k = vorhabenKoerper(s, v)!;
+    expect(k.first?.z).toBeCloseTo(8.6, 9);
+    expect(k.z1).toBeCloseTo(5.6, 9);
+    const l = vorhabenAusPlan(s, planHaus(mittig([[0, 0], [12, 0], [12, 4], [6, 4], [6, 10], [0, 10]]), 5.6, 8.6, 'sattel', 35));
+    l.center = [15, 28];
+    const kl = vorhabenKoerper(s, l)!;
+    expect(kl.first).toBeUndefined();
+    expect(kl.z1).toBeCloseTo(8.6, 9);
+  });
+});

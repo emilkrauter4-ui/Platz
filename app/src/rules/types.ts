@@ -23,7 +23,11 @@ export type Provenance =
   /** Zahlen aus amtlichen Daten zur Einordnung, ohne Urteil und ohne Ampel (Planungsrecht, § 34 BauGB) */
   | 'Orientierung'
   /** Vereinfachung des Gesetzestextes, im Ergebnis so gekennzeichnet (z. B. die Baurechts-Hülle) */
-  | 'Annäherung';
+  | 'Annäherung'
+  /** Umriss, Höhen, Fenster aus einem vom Nutzer hochgeladenen Plan (IFC, PDF, Foto) */
+  | 'aus Plan erfasst'
+  /** Berechnete Darstellung eines Zustands, der so nicht gemessen wurde (z. B. Sonnenlauf in Räumen) */
+  | 'Simulation';
 
 export type Status = 'ok' | 'warn' | 'bad';
 

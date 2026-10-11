@@ -11,7 +11,7 @@
 import L from './limits.json';
 import { koerperAus, koerperGebaeude, sonnenstunden, type Koerper } from './sonne';
 import { edges, pointInPolygon } from './geometry';
-import { aufgestockt, grundriss, type Vorhaben } from './vorhaben';
+import { aufgestockt, grundriss, planFirst, type Vorhaben } from './vorhaben';
 import { vorhabenDachHoehe } from './vorhaben';
 import type { Site, Vec2 } from './types';
 
@@ -53,6 +53,16 @@ export function vorhabenKoerper(site: Site, v: Vorhaben): Koerper | null {
   const g = grundriss(site, v);
   if (!g) return null;
   if (v.art === 'aufstockung') return g.host ? koerperGebaeude(aufgestockt(g.host, v)) : null;
+  if (v.art === 'hausplan' && v.plan) {
+    // Gelände eben angenommen (wie sonst in sonne.ts); angehobener Fußboden hebt den Körper
+    const z0 = Math.max(0, v.fbOffset ?? 0);
+    const z1 = (v.fbOffset ?? 0) + v.plan.traufe;
+    const dh = Math.max(0, v.plan.first - v.plan.traufe);
+    const pf = v.dachform === 'sattel' && dh > 0 ? planFirst(g.fp) : null;
+    if (pf?.rechteckig) return { id: 'vorhaben', fp: g.fp, z0, z1, first: { a: pf.a, b: pf.b, z: z1 + dh, halbeTiefe: pf.halbeTiefe } };
+    // sonst Block bis zum höchsten Punkt: die Verschattung wird eher überschätzt (Annahme)
+    return { id: 'vorhaben', fp: g.fp, z0, z1: z1 + dh };
+  }
   const proxy = g.proxy!;
   if (v.dachform !== 'pult') return { ...koerperAus(proxy), id: 'vorhaben' };
   const dh = vorhabenDachHoehe(v, g);

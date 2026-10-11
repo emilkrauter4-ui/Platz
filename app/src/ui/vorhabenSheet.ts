@@ -19,9 +19,9 @@ export function punkteHtml(punkte: Pruefpunkt[], tag: TagFn): string {
     .join('')}</ul>`;
 }
 
-export function kennzahlenHtml(k: Kennzahlen, art: 'wohnhaus' | 'anbau' | 'aufstockung', tag: TagFn): string {
+export function kennzahlenHtml(k: Kennzahlen, art: 'wohnhaus' | 'anbau' | 'aufstockung' | 'hausplan', tag: TagFn): string {
   const aufst = art === 'aufstockung';
-  return `<p class="fine" style="text-align:left;margin:8px 0">${aufst ? `Neue Traufhöhe ${fmt(k.wandhoehe, 1)} m, höchster Punkt ${fmt(k.firsthoehe, 1)} m über Grund; zusätzlicher Raum ${fmt(k.rauminhalt, 0)} m³ (${fmt(k.bgf, 0)} m² Geschossfläche).` : `Grundfläche ${fmt(k.grundflaeche, 0)} m², Geschossfläche ${fmt(k.bgf, 0)} m², Wandhöhe ${fmt(k.wandhoehe, 1)} m, höchster Punkt ${fmt(k.firsthoehe, 1)} m, Brutto-Rauminhalt ${fmt(k.rauminhalt, 0)} m³.`} ${tag('berechnet', 'berechnet')}</p>`;
+  return `<p class="fine" style="text-align:left;margin:8px 0">${aufst ? `Neue Traufhöhe ${fmt(k.wandhoehe, 1)} m, höchster Punkt ${fmt(k.firsthoehe, 1)} m über Grund; zusätzlicher Raum ${fmt(k.rauminhalt, 0)} m³ (${fmt(k.bgf, 0)} m² Geschossfläche).` : `Grundfläche ${fmt(k.grundflaeche, 0)} m², Geschossfläche ${fmt(k.bgf, 0)} m², Wandhöhe ${fmt(k.wandhoehe, 1)} m, höchster Punkt ${fmt(k.firsthoehe, 1)} m, Brutto-Rauminhalt ${fmt(k.rauminhalt, 0)} m³.`} ${art === 'hausplan' ? `${tag('aus Plan erfasst', 'aus Plan erfasst')} ${tag('berechnet', 'berechnet')}` : tag('berechnet', 'berechnet')}</p>`;
 }
 
 export function rowsHtml(rows: Row[], tag: TagFn): string {
