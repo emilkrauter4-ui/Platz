@@ -90,6 +90,7 @@ import {
   STICHTAG_NAME,
   VORHABEN_NAME,
   fussbodenHoehe,
+  vorhabenAusPlan,
   type BPlanTreffer,
   type GemeindeAbschnitt,
   type Pruefpunkt,
@@ -111,9 +112,14 @@ import { Renderer, type RenderState } from './scene/render';
 import { assumedWindows, awayFromBoundary, ccw, classifyBuildings, initialObjects, isSimple, sidesFromBoundary, snap } from './site/plot';
 import { bebauungsplaene, denkmaeler, searchAddress, wasserschutz, type Denkmal, type Place } from './ui/services';
 import { VorhabenLayer, KEY_VORHABEN } from './scene/vorhaben';
+import { HausPlanLayer } from './scene/hausplan';
+import { mountImport } from './ui/hausplanPanel';
+import type { HausPlan } from './hausplan/typen';
 import { rechne } from './scene/rechner';
 import { HuelleLayer, type HuelleAnzeige, type RotesPaneel } from './scene/huelle';
-import { gemeindeHtml, kennzahlenHtml, punkteHtml, rowsHtml, schattenHtml } from './ui/vorhabenSheet';
+import { gemeindeHtml, kennzahlenHtml, punkteHtml, raumsonneHtml, rowsHtml, schattenHtml } from './ui/vorhabenSheet';
+import { Oberflaeche } from './scene/oberflaeche';
+import type { FensterWelt, RaumSonne } from './rules/raumsonne';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -884,7 +890,7 @@ function renderSheet() {
 }
 
 /* ---------- Großes Vorhaben (AUFTRAG_V3 Phase B): zweites Wohnhaus, Anbau, Aufstockung ---------- */
-const GR_ART: [VorhabenArt, string][] = [['wohnhaus', 'Zweites Wohnhaus'], ['anbau', 'Anbau'], ['aufstockung', 'Aufstockung']];
+const GR_ART: [VorhabenArt, string][] = [['wohnhaus', 'Zweites Wohnhaus'], ['anbau', 'Anbau'], ['aufstockung', 'Aufstockung'], ['hausplan', 'Haus aus Plan']];
 const grSt: {
   v: GVorhaben | null;
   res: VorhabenErgebnis | null;
@@ -902,6 +908,130 @@ const grSt: {
   ms: { zufahrt: number; schatten: number };
 } = { v: null, res: null, zufahrt: null, offen: false, schatten: null, gemeinde: null, fragen: [], plaene: undefined, zonen: false, zonenErg: null, benutzt: false, ms: { zufahrt: 0, schatten: 0 } };
 let grLayer: VorhabenLayer | null = null;
+/* ----- Haus aus Plan (AUFTRAG_V4 C2) ----- */
+const hpSt: { plan: HausPlan | null; dialog: boolean; sonne: RaumSonne | null; sonneLaeuft: boolean; quelle: { winter: string; sommer: string } | null; blick: { pos: Cartesian3; dir: Cartesian3; up: Cartesian3; fov: number } | null } = { plan: null, dialog: false, sonne: null, sonneLaeuft: false, quelle: null, blick: null };
+let oberflaecheP: Promise<Oberflaeche | null> | null = null;
+let hpSeq = 0;
+let hpLayer: HausPlanLayer | null = null;
+const HP_BEISPIELE = [
+  { name: 'Haus mit Satteldach (10 × 8 m, 2 Geschosse)', url: './beispiele/haus_satteldach.ifc' },
+  { name: 'L-Haus mit Flachdach', url: './beispiele/haus_l_flachdach.ifc' },
+];
+
+/** Plan übernehmen: als Vorhaben auf das Grundstück stellen. Der Plan bleibt nur im Speicher dieser Sitzung. */
+function hpUebernehmen(plan: HausPlan) {
+  if (!site) return;
+  hpSt.plan = plan;
+  hpSt.dialog = false;
+  hpSt.sonne = null;
+  hpSt.sonneLaeuft = false;
+  const form = plan.dach.form === 'andere' ? 'pult' : plan.dach.form;
+  const neigung = plan.dach.form === 'flach' ? 0 : plan.dach.neigung > 0 ? plan.dach.neigung : 30;
+  const alt = grSt.v;
+  grSt.v = vorhabenAusPlan(site, { name: plan.name, quelle: plan.quelle, fp: plan.fussabdruck, traufe: plan.traufe, first: plan.first, geschosse: Math.max(1, plan.geschosse.length), dachform: form, neigung });
+  void alt;
+  grSt.zufahrt = null;
+  grSt.schatten = null;
+  grSt.res = null;
+  renderSheet();
+  hint(st.hasDragged ? null : 'Zieh das Haus an eine andere Stelle.');
+}
+
+/** Fenster und Räume des Plans in Weltkoordinaten (gedreht und verschoben wie das Haus). */
+function hpWelt(): { fenster: FensterWelt[]; raeume: { name: string; geschoss: number }[] } | null {
+  const v = grSt.v;
+  const plan = hpSt.plan;
+  if (!v || v.art !== 'hausplan' || !plan) return null;
+  const c = Math.cos(v.angle);
+  const s = Math.sin(v.angle);
+  const dreh = (p: Vec2): Vec2 => [v.center[0] + p[0] * c - p[1] * s, v.center[1] + p[0] * s + p[1] * c];
+  return {
+    fenster: plan.fenster.map((f) => ({ id: f.id, pos: dreh(f.pos), normal: [f.normal[0] * c - f.normal[1] * s, f.normal[0] * s + f.normal[1] * c] as Vec2, z: (f.z0 + f.z1) / 2, geschoss: f.geschoss, raum: f.raum })),
+    raeume: plan.raeume.map((r) => ({ name: r.name, geschoss: r.geschoss })),
+  };
+}
+
+/** Sonne in den Räumen: Oberflächenmodell (Bäume) für Winter und Sommer laden, im Worker rechnen. */
+async function hpSonneRechnen() {
+  const w = hpWelt();
+  if (!site || !grSt.v || !w || !w.fenster.length || st.modus !== 'gross') { hpSt.sonne = null; hpSt.sonneLaeuft = false; return; }
+  const id = ++hpSeq;
+  const v = { ...grSt.v };
+  hpSt.sonneLaeuft = true;
+  hpInfo();
+  oberflaecheP ??= Oberflaeche.load(`${DATA_URL}/oberflaeche`);
+  const ob = await oberflaecheP;
+  const raster = ob ? { winter: await ob.ausschnitt('winter', v.center, 120), sommer: await ob.ausschnitt('sommer', v.center, 120) } : {};
+  if (id !== hpSeq) return;
+  hpSt.quelle = ob?.quelle ?? null;
+  const { ground: _g, ...ohne } = site;
+  void _g;
+  const a = await rechne({ art: 'raumsonne', site: ohne, v, fenster: w.fenster, raeume: w.raeume, lage: geoLage(), raster });
+  if (id !== hpSeq || !grSt.v || st.modus !== 'gross') return;
+  hpSt.sonneLaeuft = false;
+  if (a?.art === 'raumsonne') hpSt.sonne = a.sonne;
+  hpInfo();
+}
+
+function hpInfo() {
+  const el = document.getElementById('hpSonne');
+  if (!el) return;
+  el.innerHTML = raumsonneHtml(hpSt.sonne, hpSt.sonneLaeuft, hpSt.quelle, tag);
+  el.querySelectorAll<HTMLButtonElement>('[data-hpblick]').forEach((b) => b.addEventListener('click', () => hpBlick(b.dataset.hpblick!)));
+}
+
+/** Blick aus einem Fenster: Kamera auf Augenhöhe an der Fassade, nach außen. Rein als Visualisierung gekennzeichnet. */
+function hpBlick(id: string) {
+  const w = hpWelt();
+  const v = grSt.v;
+  const f = w?.fenster.find((x) => x.id === id);
+  if (!w || !f || !v || !grSt.res) return;
+  const cam = scene.viewer.camera;
+  hpSt.blick ??= { pos: cam.positionWC.clone(), dir: cam.directionWC.clone(), up: cam.upWC.clone(), fov: (cam.frustum as unknown as { fov: number }).fov };
+  const ground = (p: Vec2) => terrain.heightOrCoarse(p);
+  const fb = fussbodenHoehe(v, grSt.res.grundriss.fp, ground);
+  const gz = hpSt.plan!.geschosse[f.geschoss]?.z0 ?? 0;
+  const p: Vec2 = [f.pos[0] + f.normal[0] * 0.15, f.pos[1] + f.normal[1] * 0.15];
+  const heading = Math.atan2(f.normal[0], f.normal[1]) + CMath.toRadians(geoLage().konv);
+  scene.viewer.scene.screenSpaceCameraController.minimumZoomDistance = 0.5;
+  (cam.frustum as unknown as { fov: number }).fov = CMath.toRadians(80);
+  cam.setView({ destination: localToCartesian(p, fb + gz + (LIMITS.raumsonne.blickHoeheM.wert as number)), orientation: { heading, pitch: CMath.toRadians(-2), roll: 0 } });
+  let bar = document.getElementById('hpBlickBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'hpBlickBar';
+    bar.style.cssText = 'position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:30;background:var(--bg);color:var(--ink);border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.25);padding:8px 12px;font-size:14px;display:flex;gap:10px;align-items:center;max-width:90vw';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = `<span><b>Visualisierung, nicht fotorealistisch</b> · Blick aus Fenster ${esc(id)}${f.raum ? ` (${esc(f.raum)})` : ''} ${tag('Simulation', 'Simulation')}</span><button class="sec" type="button" id="hpBlickZu">Zurück</button>`;
+  document.getElementById('hpBlickZu')!.addEventListener('click', hpBlickEnde);
+  render();
+}
+
+function hpBlickEnde() {
+  document.getElementById('hpBlickBar')?.remove();
+  const b = hpSt.blick;
+  hpSt.blick = null;
+  if (!b) return;
+  const cam = scene.viewer.camera;
+  (cam.frustum as unknown as { fov: number }).fov = b.fov;
+  cam.setView({ destination: b.pos, orientation: { direction: b.dir, up: b.up } });
+  render();
+}
+
+/** Haus aus Plan zeichnen: IFC-Modell als Netz, sonst extrudierter Umriss; Fenster dazu. */
+function hpZeichnen(base: number) {
+  const v = grSt.v;
+  if (!v || v.art !== 'hausplan' || !hpSt.plan) { hpLayer?.weg(); return false; }
+  hpLayer ??= new HausPlanLayer(scene.viewer);
+  const plan = hpSt.plan;
+  const netz = HausPlanLayer.darstellbar(plan.netz) ? plan.netz : null;
+  if (netz) hpLayer.zeige(netz, v.center, v.angle, base, grSt.res?.status === 'bad' && !hlSt.an ? [224, 161, 157] : hlSt.an ? [214, 220, 226] : undefined);
+  else hpLayer.weg();
+  hpLayer.fenster(plan.fenster, v.center, v.angle, base);
+  return !!netz;
+}
+
 let grTimer: ReturnType<typeof setTimeout> | null = null;
 let grZonenTimer: ReturnType<typeof setTimeout> | null = null;
 const grStrassen = (): Vec2[][] => data.strassen ?? [];
@@ -927,6 +1057,8 @@ function grStart() {
 function grAus() {
   if (st.modus !== 'gross') return;
   st.modus = 'objekt';
+  hpLayer?.weg();
+  hpBlickEnde();
   if (hlSt.dach === 'planung') hlSt.dach = 'flach';
   hlLayer?.zeigeRot([]);
   hlSt.durchstoss = 0;
@@ -940,8 +1072,16 @@ function grAus() {
 function grArt(art: VorhabenArt) {
   if (!site) return;
   const alt = grSt.v;
+  if (art === 'hausplan') {
+    // Ohne Plan zuerst der Import; mit Plan sofort wieder aufs Grundstück
+    if (hpSt.plan) hpUebernehmen(hpSt.plan);
+    else { hpSt.dialog = true; grLayer?.weg(); hlLayer?.zeigeRot([]); grSt.res = null; renderSheet(); }
+    return;
+  }
+  hpSt.dialog = false;
+  hpLayer?.weg();
   grSt.v = art === 'wohnhaus' ? vorhabenStart(site, neuesVorhaben(art, site)) : neuesVorhaben(art, site);
-  if (alt) grSt.v.geschosshoehe = alt.geschosshoehe;
+  if (alt && alt.art !== 'hausplan') grSt.v.geschosshoehe = alt.geschosshoehe;
   grSt.zufahrt = null;
   grSt.schatten = null;
   grSt.zonen = false;
@@ -967,6 +1107,7 @@ function grBewerten() {
 function grNeu() {
   if (!site || !grSt.v || st.modus !== 'gross' || st.ansicht === 'nachbar') return;
   grSt.offen = true;
+  if (grSt.v.art === 'hausplan' && hpSt.sonne) hpSt.sonneLaeuft = true;
   grBewerten();
   grZeichnen();
   grVerdict();
@@ -1010,6 +1151,7 @@ async function grRechnen() {
   grZeichnen();
   grVerdict();
   grInfo();
+  void hpSonneRechnen();
 }
 
 function grZeichnen() {
@@ -1020,8 +1162,10 @@ function grZeichnen() {
   const ground = (p: Vec2) => terrain.heightOrCoarse(p);
   const base = fussbodenHoehe(v, g.fp, ground);
   const r = grSt.res;
+  const netzGezeichnet = hpZeichnen(base);
+  if (v.art !== 'hausplan') hpLayer?.weg();
   grLayer.zeige({
-    flaechen: vorhabenModell(v, g, base),
+    flaechen: netzGezeichnet ? [] : vorhabenModell(v, g, base),
     af: r.af.waende.map((w) => w.flaeche),
     afSchlecht: r.punkte.some((p) => (p.id === 'grenze' || p.id === 'abstandsflaechen') && p.status === 'bad'),
     status: st.ansicht === 'nachbar' ? null : r.status,
@@ -1061,6 +1205,10 @@ function grWandOptionen(v: GVorhaben): [string, string][] {
 interface GrCtl { k: string; l: string; min: number; max: number; step: number }
 function grRegler(v: GVorhaben): GrCtl[] {
   const dach: GrCtl[] = v.dachform === 'flach' ? [] : [{ k: 'neigung', l: 'Dachneigung', min: 5, max: 60, step: 1 }];
+  if (v.art === 'hausplan') return [
+    { k: 'fbOffset', l: 'Fußboden EG über dem höchsten Geländepunkt', min: -2, max: 2, step: 0.05 },
+    { k: 'deg', l: 'Drehung', min: -180, max: 180, step: 1 },
+  ];
   if (v.art === 'aufstockung') return [
     { k: 'geschosse', l: 'Zusätzliche Geschosse', min: 1, max: 2, step: 1 },
     { k: 'geschosshoehe', l: 'Geschosshöhe', min: 2.4, max: 3.4, step: 0.05 },
@@ -1091,8 +1239,20 @@ function grText(v: GVorhaben, k: string): string {
   const x = grWert(v, k);
   if (k === 'deg') return `${x}°`;
   if (k === 'neigung') return `${Math.round(x)}°`;
+  if (k === 'fbOffset') return `${x > 0 ? '+' : ''}${fmt(x, 2)} m`;
   if (k === 'geschosse') return `${x}`;
   return `${fmt(x, k === 'geschosshoehe' ? 2 : 1)} m`;
+}
+
+/** Kurzbeschreibung des Plans im Reiter (Herkunft, Maße, Warnungen) und Schalter zum Wechseln. */
+function hpPlanHtml(plan: HausPlan, v: GVorhaben): string {
+  const ws = plan.warnungen.map((w) => `<li>${esc(w)}</li>`).join('');
+  const dach = plan.dach.form === 'flach' ? 'Flachdach' : plan.dach.form === 'sattel' ? `Satteldach ${fmt(plan.dach.neigung, 0)}°` : plan.dach.form === 'pult' ? `Pultdach ${fmt(plan.dach.neigung, 0)}°` : 'Dachform nicht eindeutig';
+  return `<div class="field" style="display:block"><b>${esc(plan.name)}</b> ${tag('aus Plan erfasst', 'aus Plan erfasst')}
+    <p class="fine" style="text-align:left;margin:4px 0">${plan.quelle === 'IFC' ? 'IFC-Modell' : 'PDF/Foto, Maßstab von dir bestätigt'} · ${plan.geschosse.length} Geschoss${plan.geschosse.length === 1 ? '' : 'e'} · ${dach} · Traufe ${fmt(plan.traufe, 2)} m, First ${fmt(plan.first, 2)} m über Fußboden · ${plan.fenster.length} Fenster${plan.raeume.length ? ` · ${plan.raeume.length} Räume` : ''}</p>
+    ${ws ? `<details><summary>Hinweise zum Plan (${plan.warnungen.length})</summary><ul class="fine" style="text-align:left">${ws}</ul></details>` : ''}
+    <div class="btnrow"><button class="sec" id="hpAnders" type="button">Anderen Plan laden</button><button class="sec" id="hpVergessen" type="button">Plan vergessen</button></div>
+    <p class="fine" style="text-align:left;margin-top:6px">Der Plan liegt nur im Speicher dieser Sitzung und wird nicht hochgeladen. ${v.plan?.quelle === 'IFC' && !HausPlanLayer.darstellbar(plan.netz) ? 'Das Modell ist für die Anzeige zu groß; gezeigt wird der Umriss mit Höhen.' : ''}</p></div>`;
 }
 
 function renderGrossSheet() {
@@ -1106,8 +1266,21 @@ function renderGrossSheet() {
       ? `<div class="field"><span>${v.art === 'anbau' ? 'Woran bauen?' : 'Welches Haus?'} ${tag('amtlich', 'amtlich')}</span>${sel('gHost', (v.art === 'anbau' ? v.hostId : v.zielId) ?? eigene[0].id, eigene.map((b) => [b.id, gebTxt(b)] as [string, string]))}</div>`
       : '<p class="warnbox">Auf deinem Grundstück ist kein Haus in den Daten. Anbau und Aufstockung brauchen eines.</p>'
     : '';
+  if (hpSt.dialog) {
+    $('stepBody').innerHTML = `
+      <div class="objects" role="tablist" aria-label="Was willst du hinstellen?">${tabsHtml()}</div>
+      <div class="objects" role="group" aria-label="Was baust du?">${GR_ART.map(([a, n]) => `<button class="obj" type="button" data-gart="${a}" aria-selected="${a === 'hausplan'}">${n}</button>`).join('')}</div>
+      <h3 style="margin:14px 0 4px;font-size:16px">Dein Haus aus dem Plan ${tag('aus Plan erfasst', 'aus Plan erfasst')}</h3>
+      <div id="hpPanel"></div>`;
+    bindTabs();
+    document.querySelectorAll<HTMLButtonElement>('[data-gart]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.gart !== 'hausplan') { hpSt.dialog = false; grArt(b.dataset.gart as VorhabenArt); } }));
+    mountImport($('hpPanel'), { tag, onPlan: hpUebernehmen, beispiele: HP_BEISPIELE });
+    verdict('Lade den Plan deines Hauses.', 'Dann prüft Passt. ihn auf deinem Grundstück.');
+    return;
+  }
   const wandSel = v.art === 'anbau' ? `<div class="field"><span>An welcher Wand?</span>${sel('gWand', String(v.hostKante ?? 0), grWandOptionen(v))}</div>` : '';
-  const dachSel = v.art !== 'aufstockung'
+  const planInfo = v.art === 'hausplan' && hpSt.plan ? hpPlanHtml(hpSt.plan, v) : '';
+  const dachSel = v.art === 'hausplan' ? planInfo : v.art !== 'aufstockung'
     ? `<div class="field"><span>Dach ${tag('Annahme', 'Annahme')}</span>${sel('gDach', v.dachform, [['sattel', 'Satteldach'], ['pult', 'Pultdach'], ['flach', 'Flachdach']])}</div>
        ${v.art === 'anbau' && v.dachform === 'sattel' ? `<label class="fine" style="display:flex;gap:8px;align-items:center;text-align:left;margin:4px 0"><input type="checkbox" id="gQuer" ${v.firstQuer ? 'checked' : ''}> First quer zur Hauswand</label>` : ''}`
     : '<p class="fine" style="text-align:left">Das Dach wird nicht verändert. Passt. kennt von deinem Haus nur Trauf- und Firsthöhe (LoD2) und rechnet mit einer Neigung bis 70°.</p>';
@@ -1132,6 +1305,12 @@ function renderGrossSheet() {
       grNeu();
     }),
   );
+  document.getElementById('hpAnders')?.addEventListener('click', () => { hpSt.dialog = true; grLayer?.weg(); hpLayer?.weg(); renderSheet(); });
+  document.getElementById('hpVergessen')?.addEventListener('click', () => {
+    hpSt.plan = null;
+    hpLayer?.weg();
+    grArt('wohnhaus');
+  });
   document.getElementById('gHost')?.addEventListener('change', (e) => {
     const id = (e.target as HTMLSelectElement).value;
     if (v.art === 'anbau') { v.hostId = id; v.hostKante = 0; v.versatz = 0; const n = grWandOptionen(v); if (n.length) v.hostKante = Number(n[0][0]); }
@@ -1160,6 +1339,7 @@ function grInfo() {
     ${kennzahlenHtml(r.kennzahlen, v.art, tag)}
     <details open><summary>So haben wir geprüft</summary><ul class="rows">${rowsHtml([...r.rows, ...(grSt.zufahrt && !grSt.offen ? grSt.zufahrt.rows : [])], tag)}</ul></details>
     <details open><summary>Schatten auf die Nachbarn</summary>${schattenHtml(grSt.schatten, grSt.offen, tag)}</details>
+    ${v.art === 'hausplan' && hpSt.plan?.fenster.length ? '<details open><summary>Sonne in den Räumen</summary><div id="hpSonne"></div></details>' : ''}
     ${grSt.gemeinde ? gemeindeHtml(grSt.gemeinde, tag) : '<p class="fine" style="text-align:left">Planungsrecht wird zusammengestellt …</p>'}
     <p class="fine" style="text-align:left">Orientierung, keine Genehmigung. Verbindlich entscheidet die Gemeinde bzw. das Bauamt. ${LIMITS.geprueft ? '' : 'Die Grenzwerte sind noch nicht von einer Fachperson geprüft.'}</p>
     <div class="btnrow">
@@ -1167,6 +1347,7 @@ function grInfo() {
       <button class="sec" id="grTeilen" type="button" aria-haspopup="dialog">Nachbarn fragen</button>
       <button class="sec" id="grReport" type="button" aria-haspopup="dialog">Prüfbericht ansehen</button>
     </div>`;
+  hpInfo();
   document.getElementById('grVoranfrage')?.addEventListener('click', () => void openVoranfrage());
   document.getElementById('grTeilen')?.addEventListener('click', openTeilen);
   document.getElementById('grReport')?.addEventListener('click', openReport);
@@ -1214,7 +1395,7 @@ function grZonenInfo() {
 function grZiehen(g: Vec2, off: Vec2) {
   const v = grSt.v;
   if (!v || !site) return;
-  if (v.art === 'wohnhaus') {
+  if (v.art === 'wohnhaus' || v.art === 'hausplan') {
     v.center = [Math.round((g[0] + off[0]) * 20) / 20, Math.round((g[1] + off[1]) * 20) / 20];
   } else if (v.art === 'anbau') {
     const host = st.buildings.find((b) => b.id === v.hostId);
@@ -2548,7 +2729,7 @@ function setupInput() {
     if (key === KEY_VORHABEN && st.modus === 'gross' && grSt.v && grSt.v.art !== 'aufstockung') {
       const g = pickGround(e.position);
       if (!g) return;
-      gDrag = grSt.v.art === 'wohnhaus' ? [grSt.v.center[0] - g[0], grSt.v.center[1] - g[1]] : [0, 0];
+      gDrag = grSt.v.art === 'wohnhaus' || grSt.v.art === 'hausplan' ? [grSt.v.center[0] - g[0], grSt.v.center[1] - g[1]] : [0, 0];
       v.scene.screenSpaceCameraController.enableInputs = false;
       st.hasDragged = true;
       hint(null);
@@ -2953,6 +3134,9 @@ async function main() {
         nbSt,
         gr: grSt,
         hl: hlSt,
+        hp: hpSt,
+        hpUebernehmen,
+        hpFenster: () => hpLayer?.fensterAnzahl() ?? -1,
         hlRechnen: () => hlRechnen(),
         hlPlanen,
         grStart,

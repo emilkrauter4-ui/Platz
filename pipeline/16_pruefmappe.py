@@ -328,6 +328,30 @@ R: dict[str, dict] = {
         text=lambda: baugb(34, "(1)", "(2)"), link="BauGB-34",
         umsetzung="Gestrichelte Ebene auf der mittleren Traufhöhe der Hauptgebäude im Umkreis von 100 m (LoD2). Label „Orientierung“: Höhengrenzen aus Bebauungsplan oder § 34 zeigt die Hülle nicht, und Passt. beurteilt das Einfügen nicht.",
         beispiel="Umgebung mit 5,0 m mittlerer Traufe: Ebene bei 5,0 m über dem Gelände; ein 8-m-Haus überragt sie, was § 34 nicht automatisch ausschließt."),
+    "raumsonne.stichtage": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Sonnenstunden je Fenster und Raum eines Hauses aus einem hochgeladenen Plan am 21. Dezember, 21. März und 21. Juni. Dezember und März mit dem laubfreien Oberflächenmodell (Laser, Befliegung 08.03.2025), Juni mit dem belaubten (DOM20 minus DGM1, Bildflug 16.09.2023). Label „Simulation“, keine Ampel, keine Bewertung.",
+        beispiel="Südfenster, freies Gelände, Breite 49,5° N: im Dezember rund 6–7 Stunden, ein Nordfenster 0 Stunden."),
+    "raumsonne.schrittMin": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Alle 10 Minuten wird geprüft, ob die Sonne mindestens 5° über dem Horizont steht und der Strahl von der Fenstermitte zur Sonne frei ist (Haus selbst, Nachbargebäude aus LoD2, Bäume aus dem Oberflächenmodell). Ein Raum hat Sonne, wenn mindestens eines seiner Fenster Sonne hat.",
+        beispiel="Raum mit Süd- und Nordfenster im Juni: Stunden = Vereinigung beider Fenster, nicht die Summe."),
+    "raumsonne.fensterAbstandM": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Der Strahl beginnt 5 cm vor der Fassade; Sonne von hinten durch die Wand ist ausgeschlossen (Sonne hinter der Fassadenebene zählt nie).",
+        beispiel="Ein Nordfenster hat im Dezember und im März 0 Stunden."),
+    "raumsonne.reichweiteM": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Nachbargebäude und Bäume werden bis 120 m um das Haus berücksichtigt. Bei flacher Wintersonne (nahe 5°) können weiter entfernte Gebäude oder Hügel Schatten werfen, die fehlen.",
+        beispiel="Gebäude in 150 m Entfernung wird nicht berücksichtigt."),
+    "raumsonne.bodenEbenAnnahme": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Für den Schattenwurf gilt das Gelände als eben (wie bei der Verschattung der Nachbarn); die Fensterhöhe zählt ab dem Fußboden des Erdgeschosses. Am Hang kann das die Sonnenzeit verschieben.",
+        beispiel="Haus am Südhang: Nachbarhaus bergseitig wirft kürzere Schatten, als gerechnet."),
+    "raumsonne.blickHoeheM": dict(
+        text=lambda: KEIN, link=None,
+        umsetzung="Fensteransicht (Kamera) in 1,6 m Augenhöhe über dem Fußboden des Geschosses, 15 cm vor der Fassade, Blickrichtung senkrecht zur Fassade. Gekennzeichnet „Visualisierung, nicht fotorealistisch“.",
+        beispiel="Fenster im Obergeschoss: Kamera 2,80 m + 1,6 m über dem Fußboden EG."),
     "pflanzen.abstandKleinM": dict(
         text=lambda: agbgb(47, 1), link="AGBGB-47", umsetzung="Pflanzen bis 2,00 m Höhe: mindestens 0,50 m Abstand.",
         beispiel="Hecke 1,8 m hoch, Triebe 0,6 m von der Grenze → eingehalten."),
@@ -481,6 +505,8 @@ FRAGEN = [
     ("Dachneigung der Häuser aus LoD2", "Für die Abstandsflächen des Wohnhauses nimmt Passt. bis 70° Dachneigung an (Dach zu einem Drittel), weil LoD2 die Neigung nur näherungsweise liefert. Vertretbar?"),
     ("Brutto-Rauminhalt", "Passt. rechnet Außenmaße × Wandhöhe ab Oberkante Fußboden + Dachraum (Satteldach als halbes Prisma), ohne Bodenplatte und Dachüberstand. Wie messen Bauämter den Brutto-Rauminhalt für Art. 57 (DIN 277: ab Unterseite Bodenplatte)?"),
     ("Art. 57 Abs. 1 Nr. 1 a – aktueller Wortlaut", "Nach dem aktuellen Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur für Gebäude im Außenbereich (bis 20 m³). Passt. behandelt ein Gartenhaus mit Aufenthaltsraum oder Ofen im Innenbereich deshalb als verfahrensfrei (gelb), aber ohne Privileg nach Art. 6 Abs. 7. Richtig? Gibt es weitere Anforderungen, die wir nennen sollten (Feuerstätte, Abgasanlage, Bezirkskaminkehrer)?"),
+    ("Haus aus Plan: Wand- und Dachhöhen", "Bei einem Haus aus einem hochgeladenen Plan (IFC, PDF, Foto) rechnet Passt. die Abstandsfläche an jeder Wand mit der Wandhöhe über dem Gelände an beiden Wandenden bis zur Traufe plus einem Drittel der Dachhöhe (bis 70° Neigung) – an allen Wänden, auch an Giebelwänden (sicher nach oben). Für unregelmäßige Grundrisse (L-Form, Vor- und Rücksprünge) wird jede Außenwand einzeln gerechnet, Wände unter 0,3 m werden übergangen. Ist das vertretbar, und wie behandelt das Bauamt Ecken, Erker und Vorbauten?"),
+    ("Sonne in den Räumen", "Passt. zeigt Sonnenstunden je Raum an drei Stichtagen als Simulation, ohne Bewertung. Gibt es im Bauordnungs- oder Planungsrecht eine Mindestbesonnung (Wohnräume), die Passt. nennen müsste? Passt. kennt keine und bewertet nicht."),
     ("Außenbereich", "Passt. gibt im Außenbereich nichts frei und verweist ans Bauamt, auch bei Gebäuden unter 20 m³. Ist dieser Hinweis ausreichend und korrekt formuliert?"),
     ("Was zählt „an der Grenze“?", "Art. 6 Abs. 7 gilt „auch wenn sie nicht an der Grundstücksgrenze errichtet werden“. Passt. zählt ein Nebengebäude zur 9-m- und 15-m-Länge, wenn es näher an der Grenze steht als seine erforderliche Abstandsflächentiefe (meist 3 m). Ist das die richtige Abgrenzung?"),
     ("Bestand: nur Bestätigtes zählt", "Aus Luftbild und Laser automatisch erkannte Nebengebäude sind nur ein Hinweis und zählen nie bei der Grenzbebauung (9 m / 15 m); erst was der Nutzer per Tipp erfasst, bestätigt oder einzeichnet, zählt mit Maßen und Spanne. Ist das als Orientierung vertretbar, oder soll ein erkannter Bau ab einer Mindestgröße immer als Warnung erscheinen?"),
@@ -561,7 +587,7 @@ def seite(kurz: bool = False) -> str:
         assert all(t in titel_fragen for t in KURZ_FRAGEN), [t for t in KURZ_FRAGEN if t not in titel_fragen]
         fragen_liste = [f for t in KURZ_FRAGEN for f in FRAGEN if f[0] == t]
     titel = {"gartenhaus": "Gartenhaus", "carport": "Carport", "abstand": "Abstandsflächen", "grenzbebauung": "Bebauung an der Grenze",
-             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "huelle": "Hülle des Baurechts (größte zulässige Höhe aus den Abstandsflächen)", "pflanzen": "Hecken und Bäume (Nachbarrecht)",
+             "bestand": "Bestehende Kleinbauten", "waermepumpe": "Wärmepumpe", "aussengeraete": "Außengeräte (Klimagerät, Pool-Wärmepumpe)", "grossesVorhaben": "Großes Vorhaben (zweites Wohnhaus, Anbau, Aufstockung)", "huelle": "Hülle des Baurechts (größte zulässige Höhe aus den Abstandsflächen)", "pflanzen": "Hecken und Bäume (Nachbarrecht)", "raumsonne": "Sonne in den Räumen (Haus aus Plan)",
              "verfahren": "Verfahren und Antrag"}
     karten, akt, nr = [], None, 0
     for rid, sek, r in regeln:

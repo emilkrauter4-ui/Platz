@@ -10,6 +10,7 @@
 import { fuelleLoecher, groessteFlaeche, maskeZuPolygon, oeffne, schliesse, type Maske } from './kontur';
 import { signedArea } from '../rules/geometry';
 import type { Vec2 } from '../rules/types';
+import type { HausFenster, HausPlan } from './typen';
 
 export interface Bild {
   width: number;
@@ -115,4 +116,76 @@ export function pxZuMeter(px: Vec2[], mProPx: number): Vec2[] {
   let out = m.map((p): Vec2 => [Math.round((p[0] - cx) * 1000) / 1000, Math.round((p[1] - cy) * 1000) / 1000]);
   if (signedArea(out) < 0) out = out.reverse();
   return out;
+}
+
+export interface BildAngaben {
+  name: string;
+  /** Außenkontur in Bildpixeln (vom Nutzer nachgezogen) */
+  px: Vec2[];
+  /** Meter je Pixel aus der bestätigten Länge */
+  mProPx: number;
+  geschosse: number;
+  /** Geschosshöhe Fußboden zu Fußboden (m, Annahme oder Eingabe) */
+  geschosshoehe: number;
+  /** Traufhöhe über Fußboden EG; fehlt: Geschosse × Geschosshöhe */
+  traufe?: number;
+  dach: 'flach' | 'sattel' | 'pult';
+  neigung: number;
+  /** vom Nutzer getippte Fenster (Bildpixel) mit Geschoss (0 = EG) */
+  fenster: { px: Vec2; geschoss: number; breite?: number }[];
+}
+
+const FENSTER_BRUESTUNG = 0.9;
+const FENSTER_HOEHE = 1.2;
+const FENSTER_BREITE = 1.2;
+
+/**
+ * Hausplan aus den bestätigten Angaben zu einem Bildplan. Alles trägt `aus Plan erfasst`; die Höhen (Geschosshöhe, Traufe, Dach) sind
+ * Eingaben des Nutzers, nicht aus dem Bild gelesen. First: Satteldach über die kürzere Seite, Pultdach über die kürzere Seite.
+ */
+export function planAusBild(a: BildAngaben): HausPlan {
+  const fp = pxZuMeter(a.px, a.mProPx);
+  const xs = fp.map((p) => p[0]);
+  const ys = fp.map((p) => p[1]);
+  const kurz = Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  const traufe = a.traufe ?? a.geschosse * a.geschosshoehe;
+  const dh = a.dach === 'flach' ? 0 : a.dach === 'sattel' ? (kurz / 2) * Math.tan((a.neigung * Math.PI) / 180) : kurz * Math.tan((a.neigung * Math.PI) / 180);
+  // Pixel → Plan-Meter mit demselben Ursprung wie der Umriss
+  const m = a.px.map((p): Vec2 => [p[0] * a.mProPx, -p[1] * a.mProPx]);
+  const mx = m.map((p) => p[0]);
+  const my = m.map((p) => p[1]);
+  const cx = (Math.min(...mx) + Math.max(...mx)) / 2;
+  const cy = (Math.min(...my) + Math.max(...my)) / 2;
+  const nachPlan = (p: Vec2): Vec2 => [p[0] * a.mProPx - cx, -p[1] * a.mProPx - cy];
+  const fenster: HausFenster[] = a.fenster.map((f, i) => {
+    const q = nachPlan(f.px);
+    let best = { d: Infinity, pos: q, n: [0, -1] as Vec2 };
+    fp.forEach((v, k) => {
+      const w = fp[(k + 1) % fp.length];
+      const l = Math.hypot(w[0] - v[0], w[1] - v[1]) || 1;
+      const u: Vec2 = [(w[0] - v[0]) / l, (w[1] - v[1]) / l];
+      const t = Math.max(0, Math.min(l, (q[0] - v[0]) * u[0] + (q[1] - v[1]) * u[1]));
+      const pos: Vec2 = [v[0] + u[0] * t, v[1] + u[1] * t];
+      const d = Math.hypot(q[0] - pos[0], q[1] - pos[1]);
+      // CCW-Umriss: Außennormale zeigt nach rechts der Laufrichtung
+      if (d < best.d) best = { d, pos, n: [u[1], -u[0]] };
+    });
+    const z0 = f.geschoss * a.geschosshoehe + FENSTER_BRUESTUNG;
+    return { id: `F${i + 1}-G${f.geschoss}`, pos: best.pos, z0, z1: z0 + FENSTER_HOEHE, breite: f.breite ?? FENSTER_BREITE, normal: best.n, geschoss: f.geschoss };
+  });
+  return {
+    quelle: 'Bild',
+    name: a.name,
+    fussabdruck: fp,
+    geschosse: Array.from({ length: a.geschosse }, (_, i) => ({ name: i === 0 ? 'Erdgeschoss' : `${i}. Obergeschoss`, z0: i * a.geschosshoehe })),
+    traufe,
+    first: traufe + dh,
+    dach: { form: a.dach, neigung: a.dach === 'flach' ? 0 : a.neigung },
+    fenster,
+    raeume: [],
+    warnungen: [
+      'Umriss aus dem Bild gelesen; Maßstab von dir bestätigt. Höhen, Dach und Fenster sind deine Angaben.',
+      ...(fenster.length ? ['Fenster: Position von dir getippt, Größe 1,20 × 1,20 m und Brüstung 0,90 m angenommen.'] : []),
+    ],
+  };
 }

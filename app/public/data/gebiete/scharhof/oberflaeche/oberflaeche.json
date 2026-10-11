@@ -1,0 +1,33 @@
+{
+ "crs": "EPSG:25832",
+ "res": 1.0,
+ "chunk": 250,
+ "cols": 4,
+ "rows": 8,
+ "stufe": 0.25,
+ "minHoehe": 1.5,
+ "first": [
+  -500.0,
+  -1000.0
+ ],
+ "winter": {
+  "quelle": "Laserdaten, nDSM (Befliegung 08.03.2025, laubfrei)",
+  "befliegung": "2025-03-08"
+ },
+ "sommer": {
+  "quelle": "DOM20 minus DGM1 (Bildflug 16.09.2023, belaubt)",
+  "befliegung": "2023-09-16"
+ },
+ "lizenz": "Bayerische Vermessungsverwaltung, CC BY 4.0, selbst berechnet",
+ "gebaeude_maske_m": 1.0,
+ "statistik": {
+  "winter": {
+   "anteil_objekt": 0.2387,
+   "max_m": 47.0
+  },
+  "sommer": {
+   "anteil_objekt": 0.2892,
+   "max_m": 40.25
+  }
+ }
+}

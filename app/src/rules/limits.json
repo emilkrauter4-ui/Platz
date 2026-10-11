@@ -684,5 +684,59 @@
       "quelle": "Staatsministerium für Wohnen, Bau und Verkehr, Seiten abgerufen am 04.10.2026",
       "geprueft": false
     }
+  },
+  "raumsonne": {
+    "stichtage": {
+      "wert": [
+        {
+          "tag": "12-21",
+          "name": "21. Dezember",
+          "saison": "winter"
+        },
+        {
+          "tag": "03-21",
+          "name": "21. März",
+          "saison": "winter"
+        },
+        {
+          "tag": "06-21",
+          "name": "21. Juni",
+          "saison": "sommer"
+        }
+      ],
+      "quelle": "Passt.-Festlegung (AUFTRAG_V4 C2), keine Rechtsnorm",
+      "text": "Sonnenstunden je Fenster und Raum an drei Stichtagen: kürzester Tag, Tag-und-Nacht-Gleiche, längster Tag. 21. Dezember und 21. März werden mit dem laubfreien Oberflächenmodell gerechnet (Laserdaten, Befliegung 08.03.2025), 21. Juni mit dem belaubten (DOM20 minus DGM1, Bildflug 16.09.2023). Eine gesetzliche Mindestsonnenstundenzahl für Räume kennt die BayBO nicht (offen); Passt. bewertet die Zahlen nicht.",
+      "geprueft": false
+    },
+    "schrittMin": {
+      "wert": 10,
+      "quelle": "Passt.-Festlegung",
+      "text": "Zeitschritt der Sonnenstandsrechnung in Minuten. Gezählt wird, wenn die Sonne mindestens 5° über dem Horizont steht und der Strahl von der Fenstermitte frei ist.",
+      "geprueft": false
+    },
+    "fensterAbstandM": {
+      "wert": 0.05,
+      "quelle": "Passt.-Festlegung",
+      "text": "Der Strahl beginnt 5 cm vor der Fassade; die eigene Wand verdeckt Sonne von hinten.",
+      "geprueft": false
+    },
+    "reichweiteM": {
+      "wert": 120,
+      "quelle": "Passt.-Festlegung",
+      "text": "Oberflächenmodell (Bäume) und Nachbargebäude werden im Umkreis von 120 m um das Haus berücksichtigt; weiter entfernte Schatten fehlen (bei flacher Wintersonne bis 5° können sie vorkommen).",
+      "geprueft": false
+    },
+    "bodenEbenAnnahme": {
+      "wert": true,
+      "quelle": "Annahme Passt.",
+      "text": "Das Gelände wird für den Schattenwurf eben angenommen (wie bei der Verschattung der Nachbarn). Am Hang kann sich die Sonnenzeit um Minuten bis Stunden ändern.",
+      "geprueft": false
+    },
+    "blickHoeheM": {
+      "wert": 1.6,
+      "quelle": "Annahme Passt.",
+      "text": "Augenhöhe der Fensteransicht über dem Fußboden des jeweiligen Geschosses.",
+      "geprueft": false
+    }
   }
 }

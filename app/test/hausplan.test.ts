@@ -317,3 +317,157 @@ describe('Hausplan als Vorhaben', () => {
     expect(kl.z1).toBeCloseTo(8.6, 9);
   });
 });
+
+import { planAusBild } from '../src/hausplan/bild';
+describe('Plan aus Bild: bestätigte Angaben', () => {
+  const px: Vec2[] = [[100, 100], [600, 100], [600, 500], [100, 500]]; // 500 × 400 px, y nach unten
+  it('Maßstab 0,02 m/px: 10 × 8 m, Satteldach 35° über der kürzeren Seite, Fenster an der Südwand', () => {
+    const plan = planAusBild({
+      name: 'Test', px, mProPx: 0.02, geschosse: 2, geschosshoehe: 2.8, dach: 'sattel', neigung: 35,
+      fenster: [{ px: [300, 497], geschoss: 0 }, { px: [300, 503], geschoss: 1, breite: 1.5 }],
+    });
+    const xs = plan.fussabdruck.map((p) => p[0]);
+    const ys = plan.fussabdruck.map((p) => p[1]);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(10, 6);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(8, 6);
+    expect(area(plan.fussabdruck)).toBeCloseTo(80, 6);
+    expect(plan.traufe).toBeCloseTo(5.6, 9);
+    expect(plan.first).toBeCloseTo(5.6 + 4 * Math.tan((35 * Math.PI) / 180), 9);
+    expect(plan.quelle).toBe('Bild');
+    const [f0, f1] = plan.fenster;
+    // unten im Bild = Süden = −y im Plan; Außennormale zeigt nach Süden
+    expect(f0.pos[1]).toBeCloseTo(-4, 6);
+    expect(f0.normal[1]).toBeCloseTo(-1, 9);
+    expect(f0.z0).toBeCloseTo(0.9, 9);
+    expect(f1.geschoss).toBe(1);
+    expect(f1.z0).toBeCloseTo(2.8 + 0.9, 9);
+    expect(f1.breite).toBe(1.5);
+  });
+});
+
+/* ---------- Sonne in den Räumen (C2-d) ---------- */
+import { berechneRaumsonne, rasterHoehe, type FensterWelt, type RasterAusschnitt } from '../src/rules/raumsonne';
+
+describe('Sonne in den Räumen', () => {
+  const lage = { lat: 49.5, lon: 11.74, konv: 0 };
+  const site0 = (): Site => {
+    const s = standortPlan();
+    s.buildings = []; // freies Gelände
+    return s;
+  };
+  const hausV = (s: Site) => {
+    const v = vorhabenAusPlan(s, planHaus(mittig(rechteck(0, 0, 10, 8)), 5.6, 5.6));
+    v.center = [15, 28];
+    return v;
+  };
+  // Fenster in Weltkoordinaten: Süd- und Nordfassade (y = 24 bzw. 32), EG, Mitte 1,5 m
+  const fSued: FensterWelt = { id: 'S', pos: [15, 24], normal: [0, -1], z: 1.5, geschoss: 0, raum: 'Wohnen' };
+  const fNord: FensterWelt = { id: 'N', pos: [15, 32], normal: [0, 1], z: 1.5, geschoss: 0, raum: 'Wohnen' };
+  const fOst: FensterWelt = { id: 'O', pos: [20, 28], normal: [1, 0], z: 1.5, geschoss: 0, raum: 'Küche' };
+
+  it('freies Gelände: Südfenster bekommt im Dezember mehrere Stunden Sonne, Nordfenster nie; im Juni hat das Nordfenster Sonne', () => {
+    const s = site0();
+    const r = berechneRaumsonne(s, hausV(s), [fSued, fNord], [{ name: 'Wohnen', geschoss: 0 }], lage, {})!;
+    const [dez, mar, jun] = r.fenster[0].stunden;
+    expect(dez).toBeGreaterThan(5.5);
+    expect(dez).toBeLessThan(8.5);
+    expect(mar).toBeGreaterThan(8);
+    expect(r.fenster[1].stunden[0]).toBe(0);
+    expect(r.fenster[1].stunden[1]).toBe(0); // Tag-und-Nacht-Gleiche: Sonne nie hinter der Nordfassade
+    expect(r.fenster[1].stunden[2]).toBeGreaterThan(0.5);
+    expect(jun).toBeGreaterThan(4);
+    // Raum = Vereinigung seiner Fenster
+    expect(r.raeume[0].stunden[0]).toBeCloseTo(dez, 6);
+    expect(r.raeume[0].stunden[2]).toBeGreaterThanOrEqual(Math.max(r.fenster[0].stunden[2], r.fenster[1].stunden[2]) - 1e-9);
+    expect(r.raeume[0].fenster).toBe(2);
+    expect(r.mitBaeumen).toEqual({ winter: false, sommer: false });
+  });
+
+  it('Nachbarhaus im Süden (8 m hoch, 6 m Abstand) nimmt dem Südfenster im Dezember fast alle Sonne', () => {
+    const s = site0();
+    s.buildings = [{ id: 'nachbar', footprint: rechteck(5, 12, 25, 18), provenance: 'amtlich', trauf: 8, first: 8 }];
+    const frei = berechneRaumsonne(site0(), hausV(site0()), [fSued], [], lage, {})!.fenster[0].stunden;
+    const verb = berechneRaumsonne(s, hausV(s), [fSued], [], lage, {})!.fenster[0].stunden;
+    expect(verb[0]).toBeLessThan(frei[0] * 0.2);
+    expect(verb[2]).toBeGreaterThan(0); // Juni: hohe Sonne über das Dach
+  });
+
+  it('Baum im Süden: wirkt nur in der Jahreszeit, für die das Oberflächenmodell ihn enthält (Winter ↔ laubfrei, Sommer ↔ belaubt)', () => {
+    const s = site0();
+    const v = hausV(s);
+    // Raster 60 × 60 m um (15, 28), 1 m, darin ein 12 m hoher, 9 m breiter Baum 3–6 m südlich der Fassade
+    const leer = (): RasterAusschnitt => ({ x0: -15, y0: -2, res: 1, nx: 60, ny: 60, stufe: 0.25, d: new Uint8Array(3600) });
+    const mitBaum = (): RasterAusschnitt => {
+      const r = leer();
+      for (let y = 18; y <= 21; y++) for (let x = 11; x <= 19; x++) r.d[(y + 2) * r.nx + (x + 15)] = 48; // 12 m, 3–6 m vor der Fassade
+      return r;
+    };
+    expect(rasterHoehe(mitBaum(), 15.2, 19.2)).toBeCloseTo(12, 9);
+    expect(rasterHoehe(mitBaum(), 100, 100)).toBe(0);
+    const ohne = berechneRaumsonne(s, v, [fSued], [], lage, { winter: leer(), sommer: leer() })!;
+    const nurSommer = berechneRaumsonne(s, v, [fSued], [], lage, { winter: leer(), sommer: mitBaum() })!;
+    const nurWinter = berechneRaumsonne(s, v, [fSued], [], lage, { winter: mitBaum(), sommer: leer() })!;
+    expect(ohne.mitBaeumen).toEqual({ winter: true, sommer: true });
+    // Dezember (Winter-Raster): unverändert, wenn nur das Sommer-Raster den Baum kennt
+    expect(nurSommer.fenster[0].stunden[0]).toBeCloseTo(ohne.fenster[0].stunden[0], 9);
+    expect(nurSommer.fenster[0].stunden[1]).toBeCloseTo(ohne.fenster[0].stunden[1], 9);
+    // Juni (Sommer-Raster): der Baum nimmt keine Sonne, wenn nur das Winter-Raster ihn kennt
+    expect(nurWinter.fenster[0].stunden[2]).toBeCloseTo(ohne.fenster[0].stunden[2], 9);
+    expect(nurWinter.fenster[0].stunden[0]).toBeLessThan(ohne.fenster[0].stunden[0] - 1);
+    expect(nurSommer.fenster[0].stunden[2]).toBeLessThan(ohne.fenster[0].stunden[2]);
+  });
+
+  it('Ostfenster: Sonne nur vormittags, im Dezember weniger als das Südfenster; eigener Hausflügel (L-Form) verschattet', () => {
+    const s = site0();
+    const v = hausV(s);
+    const r = berechneRaumsonne(s, v, [fSued, fOst], [{ name: 'Küche', geschoss: 0 }], lage, {})!;
+    expect(r.fenster[1].stunden[0]).toBeGreaterThan(0);
+    expect(r.fenster[1].stunden[0]).toBeLessThan(r.fenster[0].stunden[0]);
+    // Fenster in der Innenecke einer L-Form: Südflügel verdeckt die Sonne aus Süden
+    const l = vorhabenAusPlan(s, planHaus(mittig([[0, 0], [12, 0], [12, 4], [6, 4], [6, 10], [0, 10]]), 5.6, 5.6));
+    l.center = [15, 28];
+    // Nordfassade des Südflügels (innerhalb der Einbuchtung) schaut nach Norden und liegt nie in der Sonne vom Süden
+    const nordIn: FensterWelt = { id: 'I', pos: [15 + 3, 28 - 5 + 4], normal: [0, 1], z: 1.5, geschoss: 0 };
+    const rl = berechneRaumsonne(s, l, [nordIn], [], lage, {})!;
+    expect(rl.fenster[0].stunden[0]).toBe(0);
+  });
+});
+
+/* ---------- Oberflächen-Lader ---------- */
+import { Oberflaeche } from '../src/scene/oberflaeche';
+describe('Oberflächenmodell: Ausschnitt aus Kacheln', () => {
+  it('schneidet über Kachelgrenzen und füllt außerhalb mit 0', async () => {
+    // 2 × 1 Kacheln à 4 m, 1 m Zellen, Südwestecke (−4, −2); Winterkachel 0 hat überall 8, Kachel 1 überall 16 (4 m)
+    const meta = { res: 1, chunk: 4, cols: 2, rows: 1, stufe: 0.25, first: [-4, -2], winter: { quelle: 'W', befliegung: '2025-03-08' }, sommer: { quelle: 'S', befliegung: '2023-09-16' } };
+    const kachel = (v: number) => new Uint8Array(16).fill(v);
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async (u: string) => {
+      const s = String(u);
+      if (s.endsWith('oberflaeche.json')) return new Response(JSON.stringify(meta));
+      if (s.endsWith('winter/0_0.bin')) return new Response(kachel(8));
+      if (s.endsWith('winter/1_0.bin')) return new Response(kachel(16));
+      return new Response('', { status: 404 });
+    }) as typeof fetch;
+    try {
+      const o = (await Oberflaeche.load('x'))!;
+      expect(o.quelle.winter).toBe('W');
+      const a = await o.ausschnitt('winter', [0, 0], 2);
+      // Ausschnitt von x = −2 … +3 (6 Zellen), y = −2 … +3
+      expect(a.nx).toBe(5);
+      expect(a.x0).toBe(-2);
+      expect(a.y0).toBe(-2);
+      expect(rasterHoehe(a, -1.5, -1.5)).toBeCloseTo(2, 9); // Kachel 0, 8 × 0,25 m
+      expect(rasterHoehe(a, 0.5, -1.5)).toBeCloseTo(4, 9); // Kachel 1
+      expect(rasterHoehe(a, 0.5, 2.5)).toBe(0); // nördlich der Kacheln (rows = 1 → y bis +2)
+      const s = await o.ausschnitt('sommer', [0, 0], 2); // Sommerkacheln fehlen (404) → alles 0
+      expect(Math.max(...s.d)).toBe(0);
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+  it('liefert null, wenn es für das Gebiet kein Oberflächenmodell gibt', async () => {
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async () => new Response('', { status: 404 })) as typeof fetch;
+    try { expect(await Oberflaeche.load('x')).toBeNull(); } finally { globalThis.fetch = orig; }
+  });
+});

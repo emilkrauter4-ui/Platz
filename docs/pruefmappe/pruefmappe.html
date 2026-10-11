@@ -39,11 +39,11 @@ sup { font-size: 6.5pt; }
   <h3>So geht's</h3>
   <ol><li>Je Regel: Gesetzestext, unsere Auslegung, wie Passt. rechnet, ein Beispiel.</li>
   <li>Bitte ankreuzen: <b>korrekt</b>, <b>falsch</b> oder <b>unklar</b>, und bei Bedarf eine Anmerkung.</li>
-  <li>Am Ende: 39 gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
+  <li>Am Ende: 41 gezielte Fragen zu Auslegungen, die das Gesetz offenlässt.</li></ol>
  </div>
  <table class="meta">
-  <tr><td>Stand</td><td>10.10.2026</td></tr>
-  <tr><td>Regeln</td><td>95 (aus <code>app/src/rules/limits.json</code>, SHA-256 8e4a6eb4c16e…)</td></tr>
+  <tr><td>Stand</td><td>11.10.2026</td></tr>
+  <tr><td>Regeln</td><td>101 (aus <code>app/src/rules/limits.json</code>, SHA-256 8a18b19b6f30…)</td></tr>
   <tr><td>Geprüft von</td><td>______________________________ (Name, Funktion)</td></tr>
   <tr><td>Datum, Unterschrift</td><td>______________________________</td></tr>
   <tr><td>Rückfragen</td><td>Emil (Passt.) – ______________________________</td></tr>
@@ -1284,6 +1284,84 @@ sup { font-size: 6.5pt; }
   </dl>
   <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
     <div class="anm">Anmerkung:</div></div>
+</section><h2 class="sek">Sonne in den Räumen (Haus aus Plan)</h2>
+<section class="regel">
+  <div class="kopf"><span class="nr">96</span><code>raumsonne.stichtage</code><span class="wert">Wert: <b>[{"tag": "12-21", "name": "21. Dezember", "saison": "winter"}, {"tag": "03-21", "name": "21. März", "saison": "winter"}, {"tag": "06-21", "name": "21. Juni", "saison": "sommer"}]</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Passt.-Festlegung (AUFTRAG_V4 C2), keine Rechtsnorm</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Sonnenstunden je Fenster und Raum an drei Stichtagen: kürzester Tag, Tag-und-Nacht-Gleiche, längster Tag. 21. Dezember und 21. März werden mit dem laubfreien Oberflächenmodell gerechnet (Laserdaten, Befliegung 08.03.2025), 21. Juni mit dem belaubten (DOM20 minus DGM1, Bildflug 16.09.2023). Eine gesetzliche Mindestsonnenstundenzahl für Räume kennt die BayBO nicht (offen); Passt. bewertet die Zahlen nicht.</dd>
+    <dt>So rechnet Passt.</dt><dd>Sonnenstunden je Fenster und Raum eines Hauses aus einem hochgeladenen Plan am 21. Dezember, 21. März und 21. Juni. Dezember und März mit dem laubfreien Oberflächenmodell (Laser, Befliegung 08.03.2025), Juni mit dem belaubten (DOM20 minus DGM1, Bildflug 16.09.2023). Label „Simulation“, keine Ampel, keine Bewertung.</dd>
+    <dt>Beispiel</dt><dd>Südfenster, freies Gelände, Breite 49,5° N: im Dezember rund 6–7 Stunden, ein Nordfenster 0 Stunden.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">97</span><code>raumsonne.schrittMin</code><span class="wert">Wert: <b>10</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Passt.-Festlegung</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Zeitschritt der Sonnenstandsrechnung in Minuten. Gezählt wird, wenn die Sonne mindestens 5° über dem Horizont steht und der Strahl von der Fenstermitte frei ist.</dd>
+    <dt>So rechnet Passt.</dt><dd>Alle 10 Minuten wird geprüft, ob die Sonne mindestens 5° über dem Horizont steht und der Strahl von der Fenstermitte zur Sonne frei ist (Haus selbst, Nachbargebäude aus LoD2, Bäume aus dem Oberflächenmodell). Ein Raum hat Sonne, wenn mindestens eines seiner Fenster Sonne hat.</dd>
+    <dt>Beispiel</dt><dd>Raum mit Süd- und Nordfenster im Juni: Stunden = Vereinigung beider Fenster, nicht die Summe.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">98</span><code>raumsonne.fensterAbstandM</code><span class="wert">Wert: <b>0.05</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Passt.-Festlegung</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Der Strahl beginnt 5 cm vor der Fassade; die eigene Wand verdeckt Sonne von hinten.</dd>
+    <dt>So rechnet Passt.</dt><dd>Der Strahl beginnt 5 cm vor der Fassade; Sonne von hinten durch die Wand ist ausgeschlossen (Sonne hinter der Fassadenebene zählt nie).</dd>
+    <dt>Beispiel</dt><dd>Ein Nordfenster hat im Dezember und im März 0 Stunden.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">99</span><code>raumsonne.reichweiteM</code><span class="wert">Wert: <b>120</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Passt.-Festlegung</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Oberflächenmodell (Bäume) und Nachbargebäude werden im Umkreis von 120 m um das Haus berücksichtigt; weiter entfernte Schatten fehlen (bei flacher Wintersonne bis 5° können sie vorkommen).</dd>
+    <dt>So rechnet Passt.</dt><dd>Nachbargebäude und Bäume werden bis 120 m um das Haus berücksichtigt. Bei flacher Wintersonne (nahe 5°) können weiter entfernte Gebäude oder Hügel Schatten werfen, die fehlen.</dd>
+    <dt>Beispiel</dt><dd>Gebäude in 150 m Entfernung wird nicht berücksichtigt.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">100</span><code>raumsonne.bodenEbenAnnahme</code><span class="wert">Wert: <b>ja</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Annahme Passt.</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Das Gelände wird für den Schattenwurf eben angenommen (wie bei der Verschattung der Nachbarn). Am Hang kann sich die Sonnenzeit um Minuten bis Stunden ändern.</dd>
+    <dt>So rechnet Passt.</dt><dd>Für den Schattenwurf gilt das Gelände als eben (wie bei der Verschattung der Nachbarn); die Fensterhöhe zählt ab dem Fußboden des Erdgeschosses. Am Hang kann das die Sonnenzeit verschieben.</dd>
+    <dt>Beispiel</dt><dd>Haus am Südhang: Nachbarhaus bergseitig wirft kürzere Schatten, als gerechnet.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
+</section>
+<section class="regel">
+  <div class="kopf"><span class="nr">101</span><code>raumsonne.blickHoeheM</code><span class="wert">Wert: <b>1.6</b></span><span class="art">Festlegung/Annahme Passt.</span></div>
+  <dl>
+    <dt>Quelle</dt><dd>Annahme Passt.</dd>
+    <dt>Gesetzestext</dt><dd class="gesetz">Kein Gesetzestext – Festlegung oder Annahme von Passt.</dd>
+    
+    <dt>Unsere Auslegung</dt><dd>Augenhöhe der Fensteransicht über dem Fußboden des jeweiligen Geschosses.</dd>
+    <dt>So rechnet Passt.</dt><dd>Fensteransicht (Kamera) in 1,6 m Augenhöhe über dem Fußboden des Geschosses, 15 cm vor der Fassade, Blickrichtung senkrecht zur Fassade. Gekennzeichnet „Visualisierung, nicht fotorealistisch“.</dd>
+    <dt>Beispiel</dt><dd>Fenster im Obergeschoss: Kamera 2,80 m + 1,6 m über dem Fußboden EG.</dd>
+  </dl>
+  <div class="pruef"><span class="box"></span> korrekt <span class="box"></span> falsch <span class="box"></span> unklar
+    <div class="anm">Anmerkung:</div></div>
 </section>
 <h2 class="sek umbruch">Gezielte Fragen</h2>
 <p>Hier ist das Gesetz nicht eindeutig oder Passt. musste vereinfachen. Ihre Antwort fließt direkt in das Regelwerk ein.</p>
@@ -1298,72 +1376,76 @@ sup { font-size: 6.5pt; }
 <div class="antwort">Antwort:</div></section>
 <section class="frage"><div class="kopf"><span class="nr">F5</span><b>Art. 57 Abs. 1 Nr. 1 a – aktueller Wortlaut</b></div><p>Nach dem aktuellen Wortlaut gilt „ohne Aufenthaltsräume, Toiletten oder Feuerstätten“ nur für Gebäude im Außenbereich (bis 20 m³). Passt. behandelt ein Gartenhaus mit Aufenthaltsraum oder Ofen im Innenbereich deshalb als verfahrensfrei (gelb), aber ohne Privileg nach Art. 6 Abs. 7. Richtig? Gibt es weitere Anforderungen, die wir nennen sollten (Feuerstätte, Abgasanlage, Bezirkskaminkehrer)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F6</span><b>Außenbereich</b></div><p>Passt. gibt im Außenbereich nichts frei und verweist ans Bauamt, auch bei Gebäuden unter 20 m³. Ist dieser Hinweis ausreichend und korrekt formuliert?</p>
+<section class="frage"><div class="kopf"><span class="nr">F6</span><b>Haus aus Plan: Wand- und Dachhöhen</b></div><p>Bei einem Haus aus einem hochgeladenen Plan (IFC, PDF, Foto) rechnet Passt. die Abstandsfläche an jeder Wand mit der Wandhöhe über dem Gelände an beiden Wandenden bis zur Traufe plus einem Drittel der Dachhöhe (bis 70° Neigung) – an allen Wänden, auch an Giebelwänden (sicher nach oben). Für unregelmäßige Grundrisse (L-Form, Vor- und Rücksprünge) wird jede Außenwand einzeln gerechnet, Wände unter 0,3 m werden übergangen. Ist das vertretbar, und wie behandelt das Bauamt Ecken, Erker und Vorbauten?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F7</span><b>Was zählt „an der Grenze“?</b></div><p>Art. 6 Abs. 7 gilt „auch wenn sie nicht an der Grundstücksgrenze errichtet werden“. Passt. zählt ein Nebengebäude zur 9-m- und 15-m-Länge, wenn es näher an der Grenze steht als seine erforderliche Abstandsflächentiefe (meist 3 m). Ist das die richtige Abgrenzung?</p>
+<section class="frage"><div class="kopf"><span class="nr">F7</span><b>Sonne in den Räumen</b></div><p>Passt. zeigt Sonnenstunden je Raum an drei Stichtagen als Simulation, ohne Bewertung. Gibt es im Bauordnungs- oder Planungsrecht eine Mindestbesonnung (Wohnräume), die Passt. nennen müsste? Passt. kennt keine und bewertet nicht.</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F8</span><b>Bestand: nur Bestätigtes zählt</b></div><p>Aus Luftbild und Laser automatisch erkannte Nebengebäude sind nur ein Hinweis und zählen nie bei der Grenzbebauung (9 m / 15 m); erst was der Nutzer per Tipp erfasst, bestätigt oder einzeichnet, zählt mit Maßen und Spanne. Ist das als Orientierung vertretbar, oder soll ein erkannter Bau ab einer Mindestgröße immer als Warnung erscheinen?</p>
+<section class="frage"><div class="kopf"><span class="nr">F8</span><b>Außenbereich</b></div><p>Passt. gibt im Außenbereich nichts frei und verweist ans Bauamt, auch bei Gebäuden unter 20 m³. Ist dieser Hinweis ausreichend und korrekt formuliert?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F9</span><b>Fläche eines Carports</b></div><p>Passt. nimmt für die 50-m²-Grenze Breite × Tiefe des Carports. Zählt der Dachüberstand mit, oder nur die von Stützen umschlossene Fläche?</p>
+<section class="frage"><div class="kopf"><span class="nr">F9</span><b>Was zählt „an der Grenze“?</b></div><p>Art. 6 Abs. 7 gilt „auch wenn sie nicht an der Grundstücksgrenze errichtet werden“. Passt. zählt ein Nebengebäude zur 9-m- und 15-m-Länge, wenn es näher an der Grenze steht als seine erforderliche Abstandsflächentiefe (meist 3 m). Ist das die richtige Abgrenzung?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F10</span><b>Wärmepumpe</b></div><p>Passt. ordnet die Wärmepumpe Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige TGA) zu. Und: Zählt bei „Höhe bis zu 2 m über der Geländeoberfläche“ (Art. 6 Abs. 1) ein Sockel oder eine Wandkonsole mit?</p>
+<section class="frage"><div class="kopf"><span class="nr">F10</span><b>Bestand: nur Bestätigtes zählt</b></div><p>Aus Luftbild und Laser automatisch erkannte Nebengebäude sind nur ein Hinweis und zählen nie bei der Grenzbebauung (9 m / 15 m); erst was der Nutzer per Tipp erfasst, bestätigt oder einzeichnet, zählt mit Maßen und Spanne. Ist das als Orientierung vertretbar, oder soll ein erkannter Bau ab einer Mindestgröße immer als Warnung erscheinen?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F11</span><b>Klimagerät: Art. 57</b></div><p>Passt. ordnet die Außeneinheit eines Klimageräts (Split) Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige Anlagen der technischen Gebäudeausrüstung) zu, weil der Wortlaut Klimageräte nicht nennt. Ist das richtig, und gilt es auch bei Geräten über 2 m Höhe oder mit Einhausung?</p>
+<section class="frage"><div class="kopf"><span class="nr">F11</span><b>Fläche eines Carports</b></div><p>Passt. nimmt für die 50-m²-Grenze Breite × Tiefe des Carports. Zählt der Dachüberstand mit, oder nur die von Stützen umschlossene Fläche?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F12</span><b>Klimagerät und Pool-Wärmepumpe: Art. 6 Abs. 1 Satz 3 Nr. 4</b></div><p>Dort sind „Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m“ von der Abstandsfläche ausgenommen. Zählen reversible Split-Klimageräte und Wärmepumpen zur Beheizung eines Schwimmbeckens dazu? Passt. wendet die 2 m bei beiden an (Klimagerät als Annahme, Pool als offen).</p>
+<section class="frage"><div class="kopf"><span class="nr">F12</span><b>Wärmepumpe</b></div><p>Passt. ordnet die Wärmepumpe Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige TGA) zu. Und: Zählt bei „Höhe bis zu 2 m über der Geländeoberfläche“ (Art. 6 Abs. 1) ein Sockel oder eine Wandkonsole mit?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F13</span><b>Pool-Wärmepumpe und Schwimmbecken</b></div><p>Art. 57 Abs. 1 Nr. 10 Buchst. a stellt Schwimmbecken frei, „außer im Außenbereich“. Passt. prüft das Becken nicht, nennt im Außenbereich nur den Hinweis. Genügt das, und gibt es für das Gerät eigene Anforderungen (z. B. Schalldämmung, Aufstellort)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F13</span><b>Klimagerät: Art. 57</b></div><p>Passt. ordnet die Außeneinheit eines Klimageräts (Split) Art. 57 Abs. 1 Nr. 2 Buchst. b (sonstige Anlagen der technischen Gebäudeausrüstung) zu, weil der Wortlaut Klimageräte nicht nennt. Ist das richtig, und gilt es auch bei Geräten über 2 m Höhe oder mit Einhausung?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F14</span><b>Tages- und Nachtwerte bei Außengeräten</b></div><p>Passt. rechnet alle Außengeräte nachts (Nr. 6.1, strengerer Wert) und lässt nur die Pool-Wärmepumpe auf „nur tagsüber“ stellen. Klimageräte laufen oft nachts, Pool-Wärmepumpen oft nur tagsüber. Ist das als Orientierung vertretbar? Gilt für ein Klimagerät im Ruhezeitenfenster (Nr. 6.5, 6 dB Zuschlag) eine andere Praxis?</p>
+<section class="frage"><div class="kopf"><span class="nr">F14</span><b>Klimagerät und Pool-Wärmepumpe: Art. 6 Abs. 1 Satz 3 Nr. 4</b></div><p>Dort sind „Wärmepumpen und zugehörige Einhausungen mit einer Höhe bis zu 2 m“ von der Abstandsfläche ausgenommen. Zählen reversible Split-Klimageräte und Wärmepumpen zur Beheizung eines Schwimmbeckens dazu? Passt. wendet die 2 m bei beiden an (Klimagerät als Annahme, Pool als offen).</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F15</span><b>Lärm: Immissionsort und Zuschläge</b></div><p>Passt. rechnet den Pegel auf Fenstermitte an der Fassade (1,6 m / 4,4 m), ohne Messpunkt 0,5 m vor dem geöffneten Fenster (TA Lärm Anhang A.1.3), ohne Ton- und Impulszuschlag, nur Nachtwert. Gebietsarten: rein/allgemein/Misch. Reicht das als Orientierung, oder wo liegen wir systematisch zu niedrig?</p>
+<section class="frage"><div class="kopf"><span class="nr">F15</span><b>Pool-Wärmepumpe und Schwimmbecken</b></div><p>Art. 57 Abs. 1 Nr. 10 Buchst. a stellt Schwimmbecken frei, „außer im Außenbereich“. Passt. prüft das Becken nicht, nennt im Außenbereich nur den Hinweis. Genügt das, und gibt es für das Gerät eigene Anforderungen (z. B. Schalldämmung, Aufstellort)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F16</span><b>Pflanzen hinter Mauern</b></div><p>Art. 50 Abs. 1: „nicht oder nicht erheblich überragen“. Passt. nimmt die Ausnahme nur an, wenn die Pflanze die Einfriedung nicht überragt; alles darüber ist „offen“. Gibt es eine übliche Grenze (z. B. 0,5 m)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F16</span><b>Tages- und Nachtwerte bei Außengeräten</b></div><p>Passt. rechnet alle Außengeräte nachts (Nr. 6.1, strengerer Wert) und lässt nur die Pool-Wärmepumpe auf „nur tagsüber“ stellen. Klimageräte laufen oft nachts, Pool-Wärmepumpen oft nur tagsüber. Ist das als Orientierung vertretbar? Gilt für ein Klimagerät im Ruhezeitenfenster (Nr. 6.5, 6 dB Zuschlag) eine andere Praxis?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F17</span><b>Messpunkt bei Hecken</b></div><p>Art. 49: „Mitte der zunächst an der Grenze befindlichen Triebe“. Passt. nähert das aus Luftbild/Laser als Heckenrand + halbe Breite an. Vertretbar?</p>
+<section class="frage"><div class="kopf"><span class="nr">F17</span><b>Lärm: Immissionsort und Zuschläge</b></div><p>Passt. rechnet den Pegel auf Fenstermitte an der Fassade (1,6 m / 4,4 m), ohne Messpunkt 0,5 m vor dem geöffneten Fenster (TA Lärm Anhang A.1.3), ohne Ton- und Impulszuschlag, nur Nachtwert. Gebietsarten: rein/allgemein/Misch. Reicht das als Orientierung, oder wo liegen wir systematisch zu niedrig?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F18</span><b>Hang (BGH V ZR 230/16)</b></div><p>Liegt das Nachbargrundstück höher, wird die zulässige Höhe vom höheren Gelände aus gemessen. An welchem Punkt (direkt an der Grenze?) – damit Passt. das rechnen könnte.</p>
+<section class="frage"><div class="kopf"><span class="nr">F18</span><b>Pflanzen hinter Mauern</b></div><p>Art. 50 Abs. 1: „nicht oder nicht erheblich überragen“. Passt. nimmt die Ausnahme nur an, wenn die Pflanze die Einfriedung nicht überragt; alles darüber ist „offen“. Gibt es eine übliche Grenze (z. B. 0,5 m)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F19</span><b>Entwurfsverfasser für Gartenhäuser</b></div><p>Bei genehmigungspflichtigen Gartenhäusern (über 75 m³) nennt Passt. Architekt oder eingetragene Ingenieure. Reichen hier auch die Personen nach Art. 61 Abs. 3 (z. B. Meister, Techniker)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F19</span><b>Messpunkt bei Hecken</b></div><p>Art. 49: „Mitte der zunächst an der Grenze befindlichen Triebe“. Passt. nähert das aus Luftbild/Laser als Heckenrand + halbe Breite an. Vertretbar?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F20</span><b>Örtliche Satzungen</b></div><p>Hat Sulzbach-Rosenberg eine Abstandsflächensatzung (Art. 6 Abs. 5 Satz 2) oder eine Gestaltungssatzung, die Nebengebäude betrifft? Passt. berücksichtigt keine.</p>
+<section class="frage"><div class="kopf"><span class="nr">F20</span><b>Hang (BGH V ZR 230/16)</b></div><p>Liegt das Nachbargrundstück höher, wird die zulässige Höhe vom höheren Gelände aus gemessen. An welchem Punkt (direkt an der Grenze?) – damit Passt. das rechnen könnte.</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F21</span><b>Dachüberstand</b></div><p>Art. 6 Abs. 6 Nr. 1 lässt Dachüberstände bei der Bemessung der Abstandsflächen außer Betracht – ohne Grenze im Wortlaut. Ab welchem Überstand zählt er in der Praxis doch mit (z. B. über 0,5 m oder 1,5 m wie bei Vorbauten in Nr. 2)? Zählt bei der Grenzbebauung (9 m je Seite, 15 m gesamt) die Wandlänge oder die Dachlänge? Und darf der Überstand eines Grenzgebäudes über die Grenze ragen? Passt. rechnet mit der Wand und zeigt das Dach getrennt.</p>
+<section class="frage"><div class="kopf"><span class="nr">F21</span><b>Entwurfsverfasser für Gartenhäuser</b></div><p>Bei genehmigungspflichtigen Gartenhäusern (über 75 m³) nennt Passt. Architekt oder eingetragene Ingenieure. Reichen hier auch die Personen nach Art. 61 Abs. 3 (z. B. Meister, Techniker)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F22</span><b>Großes Vorhaben: Pultdach</b></div><p>Art. 6 Abs. 4 Satz 3 rechnet die Höhe von Dächern zu einem Drittel zur Wandhöhe. Beim Pultdach rechnet Passt. 1/3 der Dachhöhe an allen Wänden an, auch an der hohen Wand, an der die Dachhaut endet (sicher nach oben). Richtig, oder zählt die hohe Wand nur bis zum oberen Abschluss?</p>
+<section class="frage"><div class="kopf"><span class="nr">F22</span><b>Örtliche Satzungen</b></div><p>Hat Sulzbach-Rosenberg eine Abstandsflächensatzung (Art. 6 Abs. 5 Satz 2) oder eine Gestaltungssatzung, die Nebengebäude betrifft? Passt. berücksichtigt keine.</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F23</span><b>Großes Vorhaben: Dach der bestehenden Häuser</b></div><p>Für Aufstockung und Abstandsflächen des Hauses kennt Passt. nur Trauf- und Firsthöhe (LoD2) und rechnet mit Dachneigung bis 70° (1/3). Eine Aufstockung verschiebt die Traufe um Geschosse × Geschosshöhe (Annahme 2,80 m). Vertretbar?</p>
+<section class="frage"><div class="kopf"><span class="nr">F23</span><b>Dachüberstand</b></div><p>Art. 6 Abs. 6 Nr. 1 lässt Dachüberstände bei der Bemessung der Abstandsflächen außer Betracht – ohne Grenze im Wortlaut. Ab welchem Überstand zählt er in der Praxis doch mit (z. B. über 0,5 m oder 1,5 m wie bei Vorbauten in Nr. 2)? Zählt bei der Grenzbebauung (9 m je Seite, 15 m gesamt) die Wandlänge oder die Dachlänge? Und darf der Überstand eines Grenzgebäudes über die Grenze ragen? Passt. rechnet mit der Wand und zeigt das Dach getrennt.</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F24</span><b>Überdeckung der Abstandsflächen (Art. 6 Abs. 3)</b></div><p>Passt. lässt Überdeckungen nur bei Wänden über 75° zueinander zu (Nr. 1). Die Ausnahme „fremder Sicht entzogener Gartenhof“ bei Gebäudeklassen 1 und 2 (Nr. 2) erkennt Passt. nicht, ebenso wenig die Gebäude „in den Abstandsflächen zulässig“ außer Kleinbauten bis 3 m. Reicht das als Orientierung?</p>
+<section class="frage"><div class="kopf"><span class="nr">F24</span><b>Großes Vorhaben: Pultdach</b></div><p>Art. 6 Abs. 4 Satz 3 rechnet die Höhe von Dächern zu einem Drittel zur Wandhöhe. Beim Pultdach rechnet Passt. 1/3 der Dachhöhe an allen Wänden an, auch an der hohen Wand, an der die Dachhaut endet (sicher nach oben). Richtig, oder zählt die hohe Wand nur bis zum oberen Abschluss?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F25</span><b>Anbau: Abstandsfläche der angebauten Wand</b></div><p>Beim Anbau lässt Passt. die Abstandsfläche der angebauten Hauswand auf der Länge des Anbaus weg und rechnet Reststücke weiter. Anbau und Haus gelten als ein Gebäude. Passt das – auch bei abweichender Höhe des Anbaus?</p>
+<section class="frage"><div class="kopf"><span class="nr">F25</span><b>Großes Vorhaben: Dach der bestehenden Häuser</b></div><p>Für Aufstockung und Abstandsflächen des Hauses kennt Passt. nur Trauf- und Firsthöhe (LoD2) und rechnet mit Dachneigung bis 70° (1/3). Eine Aufstockung verschiebt die Traufe um Geschosse × Geschosshöhe (Annahme 2,80 m). Vertretbar?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F26</span><b>Abstandsflächen auf öffentlichen Verkehrsflächen</b></div><p>Art. 6 Abs. 2 Satz 2: „nur bis zu deren Mitte“. Passt. kennt die Mitte der Straße nicht und zeigt Abstandsflächen auf Straßen (ALKIS Tatsächliche Nutzung) gelb mit „offen“. Gibt es eine praktikable Regel (halbe Breite der Fläche)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F26</span><b>Überdeckung der Abstandsflächen (Art. 6 Abs. 3)</b></div><p>Passt. lässt Überdeckungen nur bei Wänden über 75° zueinander zu (Nr. 1). Die Ausnahme „fremder Sicht entzogener Gartenhof“ bei Gebäudeklassen 1 und 2 (Nr. 2) erkennt Passt. nicht, ebenso wenig die Gebäude „in den Abstandsflächen zulässig“ außer Kleinbauten bis 3 m. Reicht das als Orientierung?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F27</span><b>Zugang geradlinig, Zufahrt: Maße</b></div><p>Passt. prüft für Brüstungen bis 8 m einen GERADLINIGEN Zugang von der öffentlichen Verkehrsfläche zum Haus (Art. 5 Abs. 1 Satz 1), mindestens 1,25 m breit (Richtlinie über Flächen für die Feuerwehr Nr. 14, BayTB); ein breiter, aber gewundener Weg wird rot. Darüber verlangt Passt. eine Zufahrt mit 3 m lichter Breite (Nr. 2); die lichte Höhe von 3,50 m misst Passt. nicht (offen). Aufstellflächen (Satz 3, Nr. 8) werden nicht geprüft. Stimmen Auslegung und Maße der bayerischen Fassung? Muss auch die Zufahrt gerade sein?</p>
+<section class="frage"><div class="kopf"><span class="nr">F27</span><b>Anbau: Abstandsfläche der angebauten Wand</b></div><p>Beim Anbau lässt Passt. die Abstandsfläche der angebauten Hauswand auf der Länge des Anbaus weg und rechnet Reststücke weiter. Anbau und Haus gelten als ein Gebäude. Passt das – auch bei abweichender Höhe des Anbaus?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F28</span><b>Zufahrt: Brüstungshöhe und 50-m-Regel</b></div><p>Passt. nimmt für das oberste Anleiterfenster (Geschosse − 1) × Geschosshöhe + 1,0 m an und prüft den Zugang immer (Annahme: zweiter Rettungsweg über die Feuerwehr). Bei mehr als 50 m Entfernung zur Straße (Art. 5 Abs. 1 Satz 4) zeigt Passt. gelb, wenn weniger als 3 m frei sind. Vertretbar?</p>
+<section class="frage"><div class="kopf"><span class="nr">F28</span><b>Abstandsflächen auf öffentlichen Verkehrsflächen</b></div><p>Art. 6 Abs. 2 Satz 2: „nur bis zu deren Mitte“. Passt. kennt die Mitte der Straße nicht und zeigt Abstandsflächen auf Straßen (ALKIS Tatsächliche Nutzung) gelb mit „offen“. Gibt es eine praktikable Regel (halbe Breite der Fläche)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F29</span><b>Erschließung: angemessene Breite</b></div><p>Art. 4 Abs. 1 Nr. 2 nennt keine Mindestbreite. Passt. zeigt die Breite des freien Korridors auf dem eigenen Grundstück und bewertet nur gegen die Feuerwehr-Maße. Gibt es eine übliche Mindestbreite für die Zufahrt eines Hinterliegerhauses (Wohnweg nach Art. 4 Abs. 2)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F29</span><b>Zugang geradlinig, Zufahrt: Maße</b></div><p>Passt. prüft für Brüstungen bis 8 m einen GERADLINIGEN Zugang von der öffentlichen Verkehrsfläche zum Haus (Art. 5 Abs. 1 Satz 1), mindestens 1,25 m breit (Richtlinie über Flächen für die Feuerwehr Nr. 14, BayTB); ein breiter, aber gewundener Weg wird rot. Darüber verlangt Passt. eine Zufahrt mit 3 m lichter Breite (Nr. 2); die lichte Höhe von 3,50 m misst Passt. nicht (offen). Aufstellflächen (Satz 3, Nr. 8) werden nicht geprüft. Stimmen Auslegung und Maße der bayerischen Fassung? Muss auch die Zufahrt gerade sein?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F30</span><b>Straßen aus ALKIS Tatsächliche Nutzung</b></div><p>Für die Zufahrt gelten Flächen der Nutzungsarten Straßenverkehr, Weg und Platz als öffentliche Verkehrsfläche; ein Spielraum von 1,5 m gleicht Abweichungen zur selbst gesetzten Grenze aus. Eine Zufahrt über Nachbargrundstücke (Baulast) rechnet Passt. nicht. Genügt das?</p>
+<section class="frage"><div class="kopf"><span class="nr">F30</span><b>Zufahrt: Brüstungshöhe und 50-m-Regel</b></div><p>Passt. nimmt für das oberste Anleiterfenster (Geschosse − 1) × Geschosshöhe + 1,0 m an und prüft den Zugang immer (Annahme: zweiter Rettungsweg über die Feuerwehr). Bei mehr als 50 m Entfernung zur Straße (Art. 5 Abs. 1 Satz 4) zeigt Passt. gelb, wenn weniger als 3 m frei sind. Vertretbar?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F31</span><b>§ 34 BauGB: Umgebung als Zahlen</b></div><p>Passt. zeigt für das Einfügen nur Zahlen aus LoD2 und Hausumringen im Umkreis von 100 m (Traufhöhen, Firsthöhen, Grundflächen, Zahl der Gebäude in zweiter Reihe), ohne Urteil. Ist die Abgrenzung der „näheren Umgebung“ mit 100 m als Orientierung vertretbar, und ist die Zählung der zweiten Reihe (anderes Hauptgebäude zwischen Straße und Haus) sinnvoll?</p>
+<section class="frage"><div class="kopf"><span class="nr">F31</span><b>Erschließung: angemessene Breite</b></div><p>Art. 4 Abs. 1 Nr. 2 nennt keine Mindestbreite. Passt. zeigt die Breite des freien Korridors auf dem eigenen Grundstück und bewertet nur gegen die Feuerwehr-Maße. Gibt es eine übliche Mindestbreite für die Zufahrt eines Hinterliegerhauses (Wohnweg nach Art. 4 Abs. 2)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F32</span><b>Bau-Turbo (§ 246e, § 34 Abs. 3b BauGB)</b></div><p>Passt. nennt den Bau-Turbo nur als Hinweis („Deine Gemeinde kann davon Gebrauch machen, das liegt in ihrem Ermessen“). Ist die Formulierung zutreffend und vollständig genug, insbesondere zu Zustimmung der Gemeinde, Befristung bis 31.12.2030 und Außenbereich (Abs. 3)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F32</span><b>Straßen aus ALKIS Tatsächliche Nutzung</b></div><p>Für die Zufahrt gelten Flächen der Nutzungsarten Straßenverkehr, Weg und Platz als öffentliche Verkehrsfläche; ein Spielraum von 1,5 m gleicht Abweichungen zur selbst gesetzten Grenze aus. Eine Zufahrt über Nachbargrundstücke (Baulast) rechnet Passt. nicht. Genügt das?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F33</span><b>Bebauungsplan-Abfrage</b></div><p>Passt. fragt den WMS des Landesportals (Bauleitplanung Bayern) ab und zeigt Plan und Textlink, ohne den Inhalt zu lesen. Ist das ein zulässiger und ausreichender Hinweis? Lizenz und Nutzungsbedingungen des Dienstes sind noch nicht geklärt.</p>
+<section class="frage"><div class="kopf"><span class="nr">F33</span><b>§ 34 BauGB: Umgebung als Zahlen</b></div><p>Passt. zeigt für das Einfügen nur Zahlen aus LoD2 und Hausumringen im Umkreis von 100 m (Traufhöhen, Firsthöhen, Grundflächen, Zahl der Gebäude in zweiter Reihe), ohne Urteil. Ist die Abgrenzung der „näheren Umgebung“ mit 100 m als Orientierung vertretbar, und ist die Zählung der zweiten Reihe (anderes Hauptgebäude zwischen Straße und Haus) sinnvoll?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F34</span><b>Bauvoranfrage statt Bauantrag</b></div><p>Passt. empfiehlt vor dem Bauantrag eine Bauvoranfrage (Vorbescheid, Art. 71) mit Lageplan-Skizze, Kubatur und Fragenliste. Welche Unterlagen verlangt die Bauaufsichtsbehörde dafür üblicherweise (BauVorlV), und fehlt in der Fragenliste etwas Wichtiges?</p>
+<section class="frage"><div class="kopf"><span class="nr">F34</span><b>Bau-Turbo (§ 246e, § 34 Abs. 3b BauGB)</b></div><p>Passt. nennt den Bau-Turbo nur als Hinweis („Deine Gemeinde kann davon Gebrauch machen, das liegt in ihrem Ermessen“). Ist die Formulierung zutreffend und vollständig genug, insbesondere zu Zustimmung der Gemeinde, Befristung bis 31.12.2030 und Außenbereich (Abs. 3)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F35</span><b>Schatten auf Nachbarn</b></div><p>Passt. nennt zusätzliche Sonnenstunden an zwei Stichtagen (21. März, 21. Dezember) für Nachbarfenster und Gartenpunkte, ohne Bewertung. Gibt es in Bayern eine übliche Messgröße oder Rechtsprechung (z. B. DIN 5034, Besonnungsdauer), die Passt. verwenden sollte?</p>
+<section class="frage"><div class="kopf"><span class="nr">F35</span><b>Bebauungsplan-Abfrage</b></div><p>Passt. fragt den WMS des Landesportals (Bauleitplanung Bayern) ab und zeigt Plan und Textlink, ohne den Inhalt zu lesen. Ist das ein zulässiger und ausreichender Hinweis? Lizenz und Nutzungsbedingungen des Dienstes sind noch nicht geklärt.</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F36</span><b>Hülle: Abstand in alle Richtungen</b></div><p>Die Hülle zeigt je Punkt die größte Höhe H = d / 0,4 (ab d = 3 m), wobei d der Abstand zum nächsten Hindernis in alle Richtungen ist – unabhängig von der Ausrichtung der Wand. Das ist die sichere Seite. Ist diese Vereinfachung für eine Orientierung vertretbar, und was würden Sie zusätzlich kennzeichnen (z. B. Wände, die der Grenze den Rücken kehren, Grenzbebauung nach Abs. 7)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F36</span><b>Bauvoranfrage statt Bauantrag</b></div><p>Passt. empfiehlt vor dem Bauantrag eine Bauvoranfrage (Vorbescheid, Art. 71) mit Lageplan-Skizze, Kubatur und Fragenliste. Welche Unterlagen verlangt die Bauaufsichtsbehörde dafür üblicherweise (BauVorlV), und fehlt in der Fragenliste etwas Wichtiges?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F37</span><b>Hülle: Straße bis zur Mitte</b></div><p>Art. 6 Abs. 2 Satz 2: Abstandsflächen dürfen auf öffentlichen Verkehrs-, Grün- und Wasserflächen „nur bis zu deren Mitte“ liegen. Passt. nimmt die halbe Breite der Verkehrsfläche aus den amtlichen Nutzungsdaten, quer zur Grenze gemessen. Ist das die richtige Auslegung der „Mitte“ (z. B. bei Kreuzungen, Plätzen, Gehwegen mit Grünstreifen)?</p>
+<section class="frage"><div class="kopf"><span class="nr">F37</span><b>Schatten auf Nachbarn</b></div><p>Passt. nennt zusätzliche Sonnenstunden an zwei Stichtagen (21. März, 21. Dezember) für Nachbarfenster und Gartenpunkte, ohne Bewertung. Gibt es in Bayern eine übliche Messgröße oder Rechtsprechung (z. B. DIN 5034, Besonnungsdauer), die Passt. verwenden sollte?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F38</span><b>Hülle: Überdeckung und eigene Gebäude</b></div><p>Passt. behandelt Abstandsflächen eigener Häuser in der Hülle als Hindernis in jeder Richtung und nutzt die Ausnahme „Wände über 75°“ (Art. 6 Abs. 3 Nr. 1) dort nicht. Die Einzelprüfung des geplanten Hauses nutzt sie. Ist die Darstellung so verständlich, oder verwirrt der Unterschied?</p>
+<section class="frage"><div class="kopf"><span class="nr">F38</span><b>Hülle: Abstand in alle Richtungen</b></div><p>Die Hülle zeigt je Punkt die größte Höhe H = d / 0,4 (ab d = 3 m), wobei d der Abstand zum nächsten Hindernis in alle Richtungen ist – unabhängig von der Ausrichtung der Wand. Das ist die sichere Seite. Ist diese Vereinfachung für eine Orientierung vertretbar, und was würden Sie zusätzlich kennzeichnen (z. B. Wände, die der Grenze den Rücken kehren, Grenzbebauung nach Abs. 7)?</p>
 <div class="antwort">Antwort:</div></section>
-<section class="frage"><div class="kopf"><span class="nr">F39</span><b>Formulierung der Antworten</b></div><p>Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?</p>
+<section class="frage"><div class="kopf"><span class="nr">F39</span><b>Hülle: Straße bis zur Mitte</b></div><p>Art. 6 Abs. 2 Satz 2: Abstandsflächen dürfen auf öffentlichen Verkehrs-, Grün- und Wasserflächen „nur bis zu deren Mitte“ liegen. Passt. nimmt die halbe Breite der Verkehrsfläche aus den amtlichen Nutzungsdaten, quer zur Grenze gemessen. Ist das die richtige Auslegung der „Mitte“ (z. B. bei Kreuzungen, Plätzen, Gehwegen mit Grünstreifen)?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F40</span><b>Hülle: Überdeckung und eigene Gebäude</b></div><p>Passt. behandelt Abstandsflächen eigener Häuser in der Hülle als Hindernis in jeder Richtung und nutzt die Ausnahme „Wände über 75°“ (Art. 6 Abs. 3 Nr. 1) dort nicht. Die Einzelprüfung des geplanten Hauses nutzt sie. Ist die Darstellung so verständlich, oder verwirrt der Unterschied?</p>
+<div class="antwort">Antwort:</div></section>
+<section class="frage"><div class="kopf"><span class="nr">F41</span><b>Formulierung der Antworten</b></div><p>Passt. formuliert „Keine Baugenehmigung nötig“ und „Laut Art. … gilt …“, immer mit dem Hinweis „Orientierung, keine Genehmigung“. Ist das so unbedenklich?</p>
 <div class="antwort">Antwort:</div></section>
 </body></html>

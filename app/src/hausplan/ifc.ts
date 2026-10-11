@@ -200,20 +200,20 @@ export async function leseIfc(api: IfcApi, T: IfcTypen, daten: Uint8Array, name:
     teile.filter((t) => t.typ === 'fenster').forEach((t, n) => {
       const b = bbox(t.pos);
       const c: Vec2 = lokal([(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]);
-      // nächste Wand-Kante → Außennormale
-      let best = { d: Infinity, normal: [0, -1] as Vec2 };
+      // nächste Außenkante → Außennormale; die Position wird auf die Fassade gelegt (Außenfläche der Wand), dort beginnt der Sonnenstrahl
+      let best = { d: Infinity, normal: [0, -1] as Vec2, q: c };
       for (const [a, e] of kanten) {
         const dx = e[0] - a[0];
         const dy = e[1] - a[1];
         const L2 = dx * dx + dy * dy || 1e-9;
         const tt = Math.max(0, Math.min(1, ((c[0] - a[0]) * dx + (c[1] - a[1]) * dy) / L2));
         const d = Math.hypot(c[0] - (a[0] + tt * dx), c[1] - (a[1] + tt * dy));
-        if (d < best.d) { const L = Math.sqrt(L2); best = { d, normal: [dy / L, -dx / L] }; }
+        if (d < best.d) { const L = Math.sqrt(L2); best = { d, normal: [dy / L, -dx / L], q: [a[0] + tt * dx, a[1] + tt * dy] }; }
       }
       const w = Math.max(b.x1 - b.x0, b.y1 - b.y0);
       const z0 = b.z0 - ffb;
       const gi = geschosse.reduce((g, s, i) => (z0 >= s.z0 - 0.2 ? i : g), 0);
-      fenster.push({ id: text(api.GetLine(id, t.id), 'Name') || `Fenster ${n + 1}`, pos: c, z0: Math.round(z0 * 1000) / 1000, z1: Math.round((b.z1 - ffb) * 1000) / 1000, breite: Math.round(w * 1000) / 1000, normal: best.normal, geschoss: gi });
+      fenster.push({ id: text(api.GetLine(id, t.id), 'Name') || `Fenster ${n + 1}`, pos: [Math.round(best.q[0] * 1000) / 1000, Math.round(best.q[1] * 1000) / 1000], z0: Math.round(z0 * 1000) / 1000, z1: Math.round((b.z1 - ffb) * 1000) / 1000, breite: Math.round(w * 1000) / 1000, normal: best.normal, geschoss: gi });
     });
     if (!fenster.length) warnungen.push('Die Datei enthält keine Fenster (IfcWindow): Die Sonne in den Räumen lässt sich nicht berechnen.');
 

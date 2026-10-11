@@ -37,7 +37,7 @@ function holeWorker(): Worker {
 
 function weiter() {
   if (laeuft) return;
-  const art = (['huelle', 'zufahrt', 'schatten'] as const).find((k) => warten.has(k));
+  const art = (['huelle', 'raumsonne', 'zufahrt', 'schatten'] as const).find((k) => warten.has(k));
   if (!art) return;
   const n = warten.get(art)!;
   warten.delete(art);
