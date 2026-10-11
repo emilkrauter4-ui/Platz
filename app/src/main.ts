@@ -916,6 +916,7 @@ let hpLayer: HausPlanLayer | null = null;
 const HP_BEISPIELE = [
   { name: 'Haus mit Satteldach (10 × 8 m, 2 Geschosse)', url: './beispiele/haus_satteldach.ifc' },
   { name: 'L-Haus mit Flachdach', url: './beispiele/haus_l_flachdach.ifc' },
+  { name: 'Hochkomplexe Villa (Keller, Turm, Erker, 3 Geschosse, 37 Fenster)', url: './beispiele/villa_hochkomplex.ifc' },
 ];
 
 /** Plan übernehmen: als Vorhaben auf das Grundstück stellen. Der Plan bleibt nur im Speicher dieser Sitzung. */

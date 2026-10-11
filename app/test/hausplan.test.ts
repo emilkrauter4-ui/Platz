@@ -481,3 +481,35 @@ describe('Oberflächenmodell: Ausschnitt aus Kacheln', () => {
     try { expect(await Oberflaeche.load('x')).toBeNull(); } finally { globalThis.fetch = orig; }
   });
 });
+
+describe('IFC: hochkomplexe Villa (Keller, Turm, Erker, Flügel, vier Dachformen)', () => {
+  it('Erdgeschoss ist nicht der Keller: Umriss mit 20 Ecken über dem Fußabdruck von EG, Keller wird gemeldet und nicht gerechnet', async () => {
+    const p = await lade('villa_hochkomplex.ifc');
+    expect(p.geschosse.map((g) => g.name)).toEqual(['Erdgeschoss', 'Obergeschoss', 'Dachgeschoss']);
+    expect(p.geschosse.map((g) => g.z0)).toEqual([0, 3, 5.9]);
+    expect(p.warnungen.some((w) => w.includes('Untergeschoss'))).toBe(true);
+    // Mittellinie 311 m², mit 0,3 m Wandstärke außen ca. 328 m²
+    expect(area(p.fussabdruck)).toBeGreaterThan(315);
+    expect(area(p.fussabdruck)).toBeLessThan(345);
+    expect(p.fussabdruck.length).toBeGreaterThanOrEqual(18);
+    const xs = p.fussabdruck.map((q) => q[0]);
+    const ys = p.fussabdruck.map((q) => q[1]);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(33.4, 0);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(14.3, 0);
+  });
+
+  it('Höhen, Dach, Fenster und Räume ohne Keller', async () => {
+    const p = await lade('villa_hochkomplex.ifc');
+    expect(p.traufe).toBeCloseTo(5.9, 1);
+    expect(p.first).toBeCloseTo(11.6, 1); // Turmspitze
+    expect(['sattel', 'andere']).toContain(p.dach.form);
+    expect(p.fenster).toHaveLength(37); // 3 Lichtschächte im Keller entfallen
+    expect(p.fenster.every((f) => f.z1 > 0)).toBe(true);
+    expect(p.raeume).toHaveLength(23); // 4 Kellerräume entfallen
+    expect(new Set(p.raeume.map((r) => r.geschoss))).toEqual(new Set([0, 1, 2]));
+    // Fenster sind Räumen zugeordnet (die meisten): Wohnen hat zwei Südfenster
+    expect(p.fenster.filter((f) => f.raum === 'Wohnen')).toHaveLength(2);
+    expect(p.fenster.filter((f) => f.raum).length).toBeGreaterThan(30);
+    expect(p.netz!.idx.length).toBeGreaterThan(3000);
+  });
+});

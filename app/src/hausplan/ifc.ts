@@ -160,12 +160,17 @@ export async function leseIfc(api: IfcApi, T: IfcTypen, daten: Uint8Array, name:
       storeys.push({ name: text(l, 'LongName') || text(l, 'Name') || `Geschoss ${i + 1}`, elev: e });
     }
     storeys.sort((a, b) => a.elev - b.elev);
-    const ffb = storeys.length ? storeys[0].elev : Math.min(...wand.flatMap((w) => [bbox(w.pos).z0]));
+    // Erdgeschoss: das Geschoss mit „Erdgeschoss“/„EG“/„Ground“ im Namen, sonst das tiefste Geschoss ab −0,3 m (Keller liegen darunter), sonst das tiefste
+    const egName = (n: string) => /erdgeschoss|ground|parterre|^\s*eg\b/i.test(n);
+    const egS = storeys.find((x) => egName(x.name)) ?? storeys.find((x) => x.elev >= -0.3) ?? storeys[0];
+    const ffb = egS ? egS.elev : Math.min(...wand.flatMap((w) => [bbox(w.pos).z0]));
     if (!storeys.length) warnungen.push('Die Datei nennt keine Geschosse; Passt. nimmt ein Geschoss an.');
-    const geschosse: HausGeschoss[] = (storeys.length ? storeys : [{ name: 'Erdgeschoss', elev: ffb }]).map((s) => ({ name: s.name, z0: Math.round((s.elev - ffb) * 1000) / 1000 }));
+    const unter = storeys.filter((x) => x.elev < ffb - 0.3);
+    if (unter.length) warnungen.push(`Die Datei hat ${unter.length === 1 ? 'ein Geschoss' : `${unter.length} Geschosse`} unter dem Erdgeschoss (${unter.map((x) => x.name).join(', ')}): Passt. zeigt sie, rechnet sie aber nicht (Abstandsflächen, Kennzahlen, Sonne). Das Erdgeschoss ist „${egS?.name ?? 'Erdgeschoss'}“.`);
+    const geschosse: HausGeschoss[] = (storeys.length ? storeys.filter((x) => x.elev >= ffb - 0.3) : [{ name: 'Erdgeschoss', elev: ffb }]).map((x) => ({ name: x.name, z0: Math.round((x.elev - ffb) * 1000) / 1000 }));
 
     // Umrisse und Ursprung: Außenkontur aus den Wänden des Erdgeschosses (alle Wände, die ab dem Fußboden stehen)
-    const eg = wand.filter((w) => bbox(w.pos).z0 < ffb + 0.5);
+    const eg = wand.filter((w) => { const b = bbox(w.pos); return b.z0 < ffb + 0.5 && b.z1 > ffb + 0.5; });
     const dreiecke: Vec2[][] = [];
     for (const w of eg.length ? eg : wand) {
       for (let k = 0; k < w.idx.length; k += 3) {
@@ -210,6 +215,7 @@ export async function leseIfc(api: IfcApi, T: IfcTypen, daten: Uint8Array, name:
         const d = Math.hypot(c[0] - (a[0] + tt * dx), c[1] - (a[1] + tt * dy));
         if (d < best.d) { const L = Math.sqrt(L2); best = { d, normal: [dy / L, -dx / L], q: [a[0] + tt * dx, a[1] + tt * dy] }; }
       }
+      if (b.z1 - ffb <= 0.05) return; // Kellerfenster: unter dem Erdgeschoss, nicht gerechnet
       const w = Math.max(b.x1 - b.x0, b.y1 - b.y0);
       const z0 = b.z0 - ffb;
       const gi = geschosse.reduce((g, s, i) => (z0 >= s.z0 - 0.2 ? i : g), 0);
@@ -226,6 +232,7 @@ export async function leseIfc(api: IfcApi, T: IfcTypen, daten: Uint8Array, name:
       let poly = kontur(tri, 0.05, 0.05, 0.05);
       if (poly.length < 3) continue;
       if (signedArea(poly) < 0) poly = [...poly].reverse();
+      if (b.z1 - ffb <= 0.05) continue; // Raum im Keller
       const l = api.GetLine(id, t.id);
       const z0 = b.z0 - ffb;
       raeume.push({ name: text(l, 'LongName') || text(l, 'Name') || `Raum ${raeume.length + 1}`, poly: poly.map(lokal), z0: Math.round(z0 * 1000) / 1000, z1: Math.round((b.z1 - ffb) * 1000) / 1000, geschoss: geschosse.reduce((g, s, i) => (z0 >= s.z0 - 0.2 ? i : g), 0) });
