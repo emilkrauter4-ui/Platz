@@ -3568,7 +3568,8 @@ async function main() {
   else showStart();
 
   // Test-Schnittstelle für automatisierte Durchläufe (nur mit ?debug)
-  if (new URLSearchParams(location.search).has('debug')) {
+  // Im ausgelieferten Händler-Build gibt es die Schnittstelle nicht (nur im Aufnahme-Build für das Video)
+  if (new URLSearchParams(location.search).has('debug') && (import.meta.env.MODE !== 'haendler' || import.meta.env.VITE_HAENDLER_DEBUG)) {
     Object.assign(window, {
       passt: {
         st,

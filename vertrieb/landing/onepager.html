@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>{{PRODUKTNAME}} – One-Pager</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+body{margin:0;width:210mm;height:297mm;font:9.5pt/1.4 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#16201B;background:#fff;padding:12mm 16mm 10mm}
+h1{font-size:22pt;line-height:1.1;margin:6mm 0 3mm;letter-spacing:-.02em}
+h2{font-size:12pt;margin:0 0 2mm}
+.brand{font-weight:700;font-size:13pt}
+.lead{font-size:11.5pt;color:#44514B;margin:0 0 5mm;max-width:150mm}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin:4mm 0}
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin:2mm 0 3mm}
+.shots img{width:100%;height:46mm;object-fit:cover;object-position:top;border:1px solid #d5dad7;border-radius:3mm;display:block}
+.cap{font-size:8.5pt;color:#5B6862;margin-top:1mm}
+.box{border:1px solid #d5dad7;border-radius:3mm;padding:3mm 4mm;background:#F6F8F5}
+.box p,.box ul{margin:0}
+ul{padding-left:4.5mm;margin:0}
+li{margin:.6mm 0}
+.cta{background:#16201B;color:#fff;border-radius:3mm;padding:4mm 5mm;margin-top:4mm;display:flex;justify-content:space-between;gap:6mm;align-items:center}
+.cta b{font-size:12pt}
+.foot{position:absolute;left:16mm;right:16mm;bottom:10mm;font-size:7.5pt;color:#5B6862;border-top:1px solid #d5dad7;padding-top:2mm}
+</style></head><body>
+<div class="brand">{{PRODUKTNAME}}</div>
+<h1>Darf ich das hier hinstellen?</h1>
+<p class="lead">Ihre Kunden sehen in Sekunden, ob das Gartenhaus, der Carport oder das Terrassendach auf ihr Grundstück darf – direkt in Ihrem Shop, mit Ihren Modellen.</p>
+<div class="shots">
+  <div><img src="assets/handy-rot.jpg" alt=""><div class="cap">Zu nah an der Grenze: rot, mit Abstand in Metern</div></div>
+  <div><img src="assets/handy-zonen.jpg" alt=""><div class="cap">Die Karte zeigt, wo das Modell stehen darf</div></div>
+  <div><img src="assets/handy-gruen.jpg" alt=""><div class="cap">An passender Stelle: grün, ein Satz</div></div>
+</div>
+<div class="row">
+  <div class="box"><h2>Für den Kunden</h2><ul><li>Antwort statt Unsicherheit vor dem Kauf</li><li>Modell ziehen, Ampel, ein Satz</li><li>Karte: Wo darf es hin?</li></ul></div>
+  <div class="box"><h2>Für Sie</h2><ul><li>Weniger Rückfragen zu Genehmigung und Abstand</li><li>Weniger falsch bestellte Modelle</li><li>Ihre Modelle, Ihr Design</li></ul></div>
+  <div class="box"><h2>Nachvollziehbar</h2><ul><li>Amtliche Daten, festes Regelwerk, keine KI-Schätzung</li><li>Jede Zeile mit Rechtsgrundlage und Herkunft</li></ul></div>
+</div>
+<div class="box"><h2>Pilot: 8 Wochen, ein Produktbereich</h2>
+<p>Einbindung für eine Produktgruppe (z. B. Gartenhäuser), bis zu 10 Modelle. Wir messen gemeinsam: Nutzungsrate, Warenkorb-Rate, Rückfragen. Sie liefern Maße und Sortimentsdaten; Einbindung und Betrieb übernehmen wir. Kosten und Ablauf besprechen wir im Gespräch.</p></div>
+<div class="box" style="margin-top:4mm"><h2>Offen gesagt</h2>
+<ul><li>Prototyp. Wir bauen ihn mit Ihnen weiter.</li><li>Derzeit gelten die Regeln der Bayerischen Bauordnung; weitere Länder folgen je Landesbauordnung.</li><li>Orientierung, keine Genehmigung. Vor einem Pilot mit echten Kunden prüft eine Fachperson das Regelwerk.</li></ul></div>
+<div class="cta"><div><b>Beispiel ausprobieren (eine Minute, ohne Anmeldung)</b><br>{{DEMO_URL}}</div><div style="text-align:right">{{ABSENDER_NAME}}<br>{{ABSENDER_MAIL}} · {{ABSENDER_TEL}}</div></div>
+<div class="foot">Beispiel mit fiktivem Grundstück und fiktivem Wohnhaus (Herkunft: Demo). Datenquelle: Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (CC BY 4.0). {{ABSENDER_FIRMA}} · {{ABSENDER_ANSCHRIFT}}</div>
+</body></html>

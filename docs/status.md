@@ -857,3 +857,10 @@ Lokal zuerst, aber hinter einer **Speicher-Schnittstelle**, damit später nur di
 - Pultdach und andere Dachformen fehlen (nur Flach- und Satteldach).
 - Abstandsflächen von Nachbargebäuden werden nicht geprüft (nur die des eigenen Hauses).
 - Kein Undo für verschobene Objekte, kein Speichern.
+
+## Vertriebstest: Händler-Modus und Vertriebspaket (Oktober 2026)
+
+Neu: `app/src/haendler.ts` (Build `npm run build:haendler`) und der Ordner `vertrieb/`. Der Händler-Modus zeigt ein fiktives Mustergrundstück mit fiktivem Wohnhaus (Label `Demo`) und fünf Beispielmodellen mit Ampel. Keine Wortmarke, keine Adresssuche, keine Fremdanfragen (geprüft: 0 externe Aufrufe), Luftbild aus mitgelieferten DOP20-Kacheln. Regelwerk und Herkunfts-Labels sind dieselben wie in der App.
+
+Geprüft: Typecheck, Build, Playwright-Durchlauf (Modelle wählen, Position, Zonen, „Hierhin setzen“), Video-Aufnahme, Landingseite, One-Pager. **Nicht geprüft:** Ladezeit im Mobilfunk, Safari/iPhone, echte Hosting-Umgebung.
+Annahmen: Arbeitstitel „Platzcheck“; Ansprache „du“ wie in der App; Beispielmodelle erfunden.

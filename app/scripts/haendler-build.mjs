@@ -4,18 +4,19 @@
  *  - Daten auf das Mustergrundstück beschneiden: alles, was die Vorführung nicht lädt, wird entfernt
  *    (Foto-Mesh, Mess-Gebiete, Regen, Oberfläche, Beispieldateien, Geräteliste)
  *  - Grundrisse und Bestand nur im Umkreis des Mustergrundstücks
- * Aufruf: npm run build:haendler
+ * Aufruf: npm run build:haendler   (Aufnahme-Build fürs Video: node scripts/haendler-build.mjs --debug)
  */
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const OUT = 'dist-haendler';
+const DEBUG = process.argv.includes('--debug'); // Aufnahme-Build für das Video: mit Test-Schnittstelle (?debug)
+const OUT = DEBUG ? 'dist-haendler-debug' : 'dist-haendler';
 const MITTE = [-114, -432];
 const RADIUS = 260;
 
 rmSync(OUT, { recursive: true, force: true });
-execSync(`npx vite build --mode haendler --outDir ${OUT}`, { stdio: 'inherit' });
+execSync(`npx vite build --mode haendler --outDir ${OUT}`, { stdio: 'inherit', env: { ...process.env, ...(DEBUG ? { VITE_HAENDLER_DEBUG: '1' } : {}) } });
 
 for (const p of ['sw.js', 'precache.json', 'offline-files.json', 'beispiele', 'data/mesh', 'data/gebiete', 'data/regen', 'data/oberflaeche', 'data/waermepumpen.json', 'data/parzellar']) {
   rmSync(join(OUT, p), { recursive: true, force: true });

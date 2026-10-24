@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{PRODUKTNAME}} – Passt das Modell auf das Grundstück?</title>
+<meta name="description" content="Zusatzfunktion für Online-Shops von Gartenhaus-, Carport- und Terrassendach-Anbietern: Der Kunde sieht in Sekunden, ob das Modell auf sein Grundstück darf.">
+<style>
+:root{--bg:#F4F5F1;--ink:#16201B;--muted:#5B6862;--card:#fff;--line:rgba(22,32,27,.12);--ok:#2E7D5B;--bad:#C9302A;--warn:#B07A1C;--accent:#16201B}
+@media (prefers-color-scheme:dark){:root{--bg:#101512;--ink:#E7ECE8;--muted:#9AA59F;--card:#1A1F1C;--line:rgba(231,236,232,.14);--ok:#4CC38A;--bad:#F0605A;--warn:#E3A43C;--accent:#E7ECE8}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+header.top{padding:18px 0;font-weight:700;font-size:20px;letter-spacing:-.02em}
+h1{font-size:clamp(30px,5.2vw,52px);line-height:1.1;letter-spacing:-.025em;margin:28px 0 14px;max-width:18ch}
+h2{font-size:clamp(22px,3vw,30px);line-height:1.2;letter-spacing:-.015em;margin:0 0 14px}
+p{margin:0 0 12px}
+.lead{font-size:clamp(18px,2.2vw,22px);color:var(--muted);max-width:44ch}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0 8px}
+.btn{display:inline-block;padding:14px 22px;border-radius:12px;font-weight:600;text-decoration:none;border:1.5px solid var(--accent)}
+.btn.pri{background:var(--accent);color:var(--bg)}
+.btn.sec{color:var(--ink)}
+.hero{display:grid;gap:28px;grid-template-columns:1fr;padding-bottom:36px}
+@media(min-width:880px){.hero{grid-template-columns:1.05fr 1fr;align-items:center}}
+video,.shot{width:100%;border-radius:16px;border:1px solid var(--line);background:#0F1F1A;display:block}
+section{padding:34px 0;border-top:1px solid var(--line)}
+.grid3{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:760px){.grid3{grid-template-columns:repeat(3,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+.card h3{margin:0 0 6px;font-size:18px}
+.card p{color:var(--muted);margin:0}
+.step{counter-increment:s}
+.step h3::before{content:counter(s) ' · ';color:var(--muted)}
+.steps{counter-reset:s}
+.phones{display:grid;gap:14px;grid-template-columns:repeat(3,1fr);max-width:760px}
+.phones img{width:100%;border-radius:14px;border:1px solid var(--line);display:block}
+.cap{font-size:14px;color:var(--muted);margin-top:8px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.ok{background:var(--ok)}.bad{background:var(--bad)}.warn{background:var(--warn)}
+ul.l{padding-left:20px;margin:0}
+ul.l li{margin:4px 0}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:600}
+details p{margin:10px 0 0;color:var(--muted)}
+footer{padding:28px 0 48px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+footer a{color:inherit}
+.note{font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">{{PRODUKTNAME}}</header>
+
+  <div class="hero">
+    <div>
+      <h1>Darf ich das hier hinstellen?</h1>
+      <p class="lead">Ihre Kunden sehen in Sekunden, ob das Gartenhaus, der Carport oder das Terrassendach auf ihr Grundstück darf – direkt in Ihrem Shop, mit Ihren Modellen.</p>
+      <div class="btns">
+        <a class="btn pri" href="{{DEMO_URL}}">Beispiel ausprobieren</a>
+        <a class="btn sec" href="mailto:{{ABSENDER_MAIL}}?subject=Pilot%20{{PRODUKTNAME}}">Gespräch vereinbaren</a>
+      </div>
+      <p class="note">Das Beispiel nutzt ein fiktives Grundstück. Es dauert eine Minute und braucht keine Anmeldung.</p>
+    </div>
+    <div>
+      <video controls preload="metadata" poster="assets/poster.jpg" playsinline>
+        <source src="assets/demo.mp4" type="video/mp4">
+        Ihr Browser kann das Video nicht abspielen. <a href="assets/demo.mp4">Video herunterladen</a>.
+      </video>
+      <p class="cap">45 Sekunden: vom Grundstück zur Antwort.</p>
+    </div>
+  </div>
+
+  <section>
+    <h2>Warum das im Shop hilft</h2>
+    <div class="grid3">
+      <div class="card"><h3>Weniger Unsicherheit beim Kauf</h3><p>Viele Kunden fragen sich vor dem Kauf: „Brauche ich dafür eine Genehmigung? Wie nah darf ich an den Zaun?“ Die Antwort steht sofort da, nicht erst nach einem Anruf beim Bauamt.</p></div>
+      <div class="card"><h3>Weniger Rückfragen und Retouren</h3><p>Wer vorher sieht, was passt, bestellt das richtige Modell. Ob das bei Ihnen messbar ist, zeigen wir gemeinsam in einem Pilot – mit Zahlen, nicht mit Versprechen.</p></div>
+      <div class="card"><h3>Ein Grund, bei Ihnen zu bleiben</h3><p>Der Kunde plant in Ihrem Shop weiter, statt Maße und Regeln auf anderen Seiten zu suchen. Das Werkzeug trägt Ihr Design und Ihre Sortimentsdaten.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>So funktioniert es</h2>
+    <div class="grid3 steps">
+      <div class="card step"><h3>Grundstück</h3><p>Der Kunde sucht seine Adresse und bestätigt die Grenze. Gelände, Luftbild und Nachbarhäuser kommen aus amtlichen Daten.</p></div>
+      <div class="card step"><h3>Modell ziehen</h3><p>Er wählt ein Modell aus Ihrem Sortiment und zieht es an die Stelle, wo es stehen soll. Maße, Wandhöhe und Dach sind echt.</p></div>
+      <div class="card step"><h3>Antwort</h3><p>Ampel, ein Satz und der gemessene Abstand. Auf Wunsch zeigt eine Karte, wo das Modell überhaupt stehen darf.</p></div>
+    </div>
+    <div class="phones" style="margin-top:22px">
+      <div><img src="assets/handy-rot.jpg" alt="Gartenhaus an der Grenze: Ampel rot, noch 2,85 m zu nah" loading="lazy"><p class="cap"><span class="dot bad"></span>Zu nah an der Grenze</p></div>
+      <div><img src="assets/handy-zonen.jpg" alt="Karte zeigt, wo das Modell stehen darf" loading="lazy"><p class="cap">Die Karte zeigt, wo es geht</p></div>
+      <div><img src="assets/handy-gruen.jpg" alt="Gartenhaus an passender Stelle: Ampel grün" loading="lazy"><p class="cap"><span class="dot ok"></span>Passt so</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Was geprüft wird – und woher es kommt</h2>
+    <div class="grid3">
+      <div class="card"><h3>Regeln</h3><ul class="l"><li>Verfahrensfreiheit (Rauminhalt, Fläche)</li><li>Abstand zur Grenze, Abstandsflächen</li><li>Bebauung an der Grenze (Wandhöhe, Länge)</li><li>Gartenhaus mit Ofen oder Aufenthaltsraum</li></ul></div>
+      <div class="card"><h3>Daten</h3><ul class="l"><li>Gelände, Luftbild, Gebäude: amtliche Daten der Vermessungsverwaltung</li><li>Jede Angabe trägt ein Herkunfts-Label: amtlich, berechnet, Annahme, offen</li></ul></div>
+      <div class="card"><h3>Grenzen, offen gesagt</h3><ul class="l"><li>Orientierung, keine Genehmigung. Verbindlich entscheidet die Behörde.</li><li>Derzeit gelten die Regeln der Bayerischen Bauordnung. Weitere Länder folgen je Landesbauordnung.</li><li>Ein Prototyp: Wir bauen ihn mit Ihnen weiter.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pilot: 8 Wochen, ein Produktbereich</h2>
+    <p>Wir binden das Werkzeug für eine Produktgruppe in Ihren Shop ein (zum Beispiel Gartenhäuser) und messen gemeinsam:</p>
+    <ul class="l">
+      <li>Wie viele Besucher das Werkzeug nutzen</li>
+      <li>Ob sie danach häufiger in den Warenkorb legen</li>
+      <li>Ob Rückfragen zu Genehmigung und Abstand sinken</li>
+    </ul>
+    <p style="margin-top:12px">Sie liefern Maße und Sortimentsdaten der Modelle. Wir übernehmen Einbindung und Betrieb. Kosten und Ablauf besprechen wir im Gespräch.</p>
+    <div class="btns"><a class="btn pri" href="mailto:{{ABSENDER_MAIL}}?subject=Pilot%20{{PRODUKTNAME}}">20 Minuten sprechen</a></div>
+  </section>
+
+  <section>
+    <h2>Häufige Fragen</h2>
+    <details><summary>Ist das eine rechtsverbindliche Auskunft?</summary><p>Nein. Das Werkzeug gibt eine Orientierung nach festen Regeln, keine Genehmigung. Das steht unter jedem Ergebnis. Entscheidungen trifft ein festes Regelwerk, keine KI; jede Zeile nennt ihre Rechtsgrundlage.</p></details>
+    <details><summary>Gilt das für ganz Deutschland?</summary><p>Aktuell für Bayern (BayBO). Jedes Bundesland hat eigene Regeln. Wir ergänzen sie Land für Land; für Grundstücke außerhalb der abgedeckten Länder zeigt das Werkzeug einen Hinweis statt einer Ampel.</p></details>
+    <details><summary>Wie aufwendig ist die Einbindung?</summary><p>Das Werkzeug läuft im Browser und lässt sich als Seite oder Einbettung (iframe) in Ihren Shop einbinden. Die Modelle kommen aus einer einfachen Liste (Name, Maße, Wandhöhe, Dachneigung).</p></details>
+    <details><summary>Welche Daten werden erhoben?</summary><p>Im Beispiel keine: Es werden weder Cookies gesetzt noch Dienste Dritter geladen. Im Pilot legen wir gemeinsam fest, was gemessen wird, und beschränken uns auf anonyme Nutzungszahlen.</p></details>
+    <details><summary>Wer steckt dahinter?</summary><p>{{ABSENDER_NAME}}, {{ABSENDER_FIRMA}}. Kontakt: <a href="mailto:{{ABSENDER_MAIL}}">{{ABSENDER_MAIL}}</a>.</p></details>
+  </section>
+
+  <footer>
+    <p><strong>Orientierung, keine Genehmigung.</strong> Verbindlich entscheidet die zuständige Behörde. Das Beispiel nutzt ein fiktives Grundstück und ein fiktives Wohnhaus (Herkunft: Demo).</p>
+    <p>Datenquelle: Bayerische Vermessungsverwaltung – <a href="https://www.geodaten.bayern.de" rel="noopener">www.geodaten.bayern.de</a> (CC BY 4.0). Rechtstexte: Bayerische Bauordnung (gesetze-bayern.de).</p>
+    <p>{{ABSENDER_FIRMA}} · {{ABSENDER_ANSCHRIFT}} · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
+  </footer>
+</div>
+</body>
+</html>
