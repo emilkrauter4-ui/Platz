@@ -78,7 +78,7 @@ const pos = () => page.evaluate(() => window.passt.st.objs[window.passt.st.selec
 await tilesFertig(); await page.waitForTimeout(2000);
 
 // 0 Titel
-await card(`<h1>Passt das Gartenhaus auf mein Grundstück?</h1><p>Die Antwort in Sekunden – direkt im Online-Shop.</p>`);
+await card(`<h1>Passt das Gartenhaus auf mein Grundstück?</h1><p>Eine Idee, als Prototyp umgesetzt. Kein fertiges Produkt.</p>`);
 await bild(3.2);
 await card('');
 
@@ -133,9 +133,9 @@ await bild(4.4);
 
 // Schluss
 await caption('');
-await card(`<h1>Als Zusatzfunktion für Ihren Online-Shop</h1><p>Weniger Rückfragen. Mehr sichere Käufe. Ihre Modelle, Ihr Design.</p>
-<p class="klein">Orientierung, keine Genehmigung. Verbindlich entscheidet die zuständige Behörde.<br>Beispiel mit fiktivem Grundstück · Datenquelle: Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (CC BY 4.0)</p>`);
-await bild(5.5);
+await card(`<h1>Kommt das bei Ihnen vor?</h1><p>Wie oft fragen Kunden nach Genehmigung und Grenzabstand?<br>Wäre eine schnelle Antwort im Shop hilfreich, egal oder ein Risiko?</p>
+<p class="klein">Prototyp, kein Angebot. Orientierung, keine Genehmigung: Verbindlich entscheidet die zuständige Behörde.<br>Beispiel mit fiktivem Grundstück und Wohnhaus · Regeln der Bayerischen Bauordnung · Datenquelle: Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (CC BY 4.0)</p>`);
+await bild(6.5);
 
 await page.screenshot({ path: join(OUT, 'poster-ende.png') });
 await card('');

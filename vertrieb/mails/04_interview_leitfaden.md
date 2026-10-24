@@ -10,7 +10,7 @@ Prinzip: nach **Vergangenem und Zahlen** fragen, nicht nach Meinungen zur Zukunf
 2. **Heutiger Weg:** Wie klären Kunden das bisher (Bauamt, Internet, Sie)? Wie viel Zeit kostet das Sie?
 3. **Schaden:** Ist deshalb schon ein Kauf gescheitert, ein Modell zurückgekommen oder falsch bestellt worden? Grob: wie oft pro Jahr?
 4. **Bayern/bundesweit:** Wie viel Ihrer Kunden sitzt in Bayern?
-5. **Reaktion auf die Idee** (jetzt erst zeigen, 2 min, Handy-Demo): Was ist Ihr erster Eindruck? Was würde Sie daran stören?
+5. **Reaktion auf die Idee** (jetzt erst zeigen, 2 min, Video auf dem Handy): Was ist Ihr erster Eindruck? Was würde Sie daran stören?
 6. **Risiko:** Würde Sie eine Aussage wie „Passt“ oder „Passt nicht“ im Shop eher beruhigen oder eher beunruhigen (Haftung, Abschreckung)?
 7. **Entscheider:** Wer entscheidet bei Ihnen über neue Shop-Funktionen?
 8. **Abschluss:** Wer sonst sollte das beurteilen? Darf ich Ihnen die Ergebnisse meiner Umfrage schicken? (Nur bei Ja: Adresse im Tracker mit „Einwilligung Ergebnisse“ vermerken.)

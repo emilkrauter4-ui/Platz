@@ -15,7 +15,7 @@ Stand: Alles, was ich vorbereiten konnte, ist fertig. Offen ist, was nur du tun 
   4. E-Mail nur nach Anwaltsrat, und dann an die allgemeine Firmenadresse oder an die öffentlich im Impressum genannte Person
 - [ ] **Datenschutz-Information (Art. 14 DSGVO)** steht im Fuß jeder Mail: Quelle der Adresse, Hinweis „Antwort genügt zum Löschen“. Eine ausführliche Datenschutzerklärung liegt unter `landing/datenschutz.html`.
 - [ ] **Löschroutine:** Wer absagt oder sich abmeldet, bekommt keine weitere Mail. In `tracker.csv` Spalte „Löschen bis“ pflegen und nach Ablauf wirklich löschen.
-- [ ] **Impressum und Datenschutz** auf der Landingseite ausgefüllt (Vorlagen sind Entwürfe: mit Generator oder Anwalt prüfen). Kein „{{...}}“ darf stehen bleiben.
+- [ ] **Signatur der Mail** mit Name, Anschrift und Kontakt (ist in den Texten vorgesehen). Eine Landingseite mit Impressum brauchst du nur, wenn du später eine veröffentlichst.
 - [ ] **Nutzungsbedingungen / Haftungshinweis:** „Orientierung, keine Genehmigung“ steht sichtbar in Demo, Video und Landingseite (ist umgesetzt). Für einen echten Pilot braucht es zusätzlich einen kurzen Vertrag (Haftungsbegrenzung, Datenschutz). Das kommt nach dem ersten Gespräch.
 - [ ] **Fachprüfung der Regeln** durch Bauamt oder Architekt vor jedem Pilot mit echten Kunden (nicht nötig für die Vorführung mit fiktivem Grundstück, aber im Gespräch ehrlich sagen, dass sie noch aussteht).
 
@@ -23,8 +23,7 @@ Stand: Alles, was ich vorbereiten konnte, ist fertig. Offen ist, was nur du tun 
 
 - [ ] **Eigene Domain** (nicht gmail.com): z. B. `deinname.de` oder ein Projektname. Mailadresse darauf einrichten.
 - [ ] **SPF, DKIM, DMARC** für die Domain gesetzt (bei Google Workspace, Microsoft 365, IONOS, Strato jeweils eine Anleitung). Test: mail-tester.com, Ziel 9/10 oder besser.
-- [ ] **Landingseite und Demo veröffentlicht** (`vertrieb/bauen.mjs`, dann Deploy, siehe `README.md`). Danach auf Handy **und** Laptop selbst aufrufen; Video abspielen; Impressum-Link prüfen.
-- [ ] **Demo-Link in allen Mails ersetzt** (macht `bauen.mjs` aus `konfig.json`).
+- [ ] **Video hochgeladen** (YouTube „Nicht gelistet“), Link auf Handy **und** Laptop geprüft, ohne Anmeldung abspielbar.
 - [ ] **Konfiguration geprüft:** In den Texten unter `vertrieb/ausgabe/mails/` steht keine `{{...}}` mehr. Alles in `[eckigen Klammern]` füllst du pro Empfänger.
 
 ## 3. Versandregeln

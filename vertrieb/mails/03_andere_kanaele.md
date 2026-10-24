@@ -6,17 +6,17 @@ Reihenfolge nach Sicherheit und Antwortchance: persönliches Netzwerk, Messen un
 Frag Bekannte, ob jemand einen Gartenhaus-Händler, Zimmerer oder Baumarkt-Mitarbeiter kennt. Eine Vorstellung per Nachricht ersetzt zehn Kaltmails und ist rechtlich unproblematisch.
 
 ## 2. Messen, Gartenmärkte, Gründer-Events
-Gespräch am Stand mit Handy-Demo. Visitenkarte tauschen, später Danke-Mail an alle, die ihre Karte gegeben haben (das gilt als Einwilligung für den Kontakt, nicht für Werbung: nur Dank und Ergebnisse schicken).
+Gespräch am Stand mit Video auf dem Handy. Visitenkarte tauschen, später Danke-Mail an alle, die ihre Karte gegeben haben (das gilt als Einwilligung für den Kontakt, nicht für Werbung: nur Dank und Ergebnisse schicken).
 
 ## 3. LinkedIn (Kontaktanfrage, höchstens 300 Zeichen)
 > Hallo [Vorname], ich bereite mich auf Gründer-Pitches vor und entwickle ein Werkzeug, das beim Gartenhaus-Kauf zeigt, ob das Modell aufs Grundstück darf. Ich verkaufe nichts, ich möchte nur wissen, ob das Problem in Ihrem Alltag vorkommt. Hätten Sie zwei Sätze Einschätzung für mich?
 
 Nach Annahme:
-> Danke fürs Vernetzen. Drei Fragen: Wie oft fragen Kunden nach Genehmigung/Grenzabstand? Ist deshalb schon ein Kauf geplatzt? Wäre eine Antwort im Shop hilfreich, egal oder ein Risiko? Zwei Sätze genügen. Beispiel mit fiktivem Grundstück: {{DEMO_URL}}
+> Danke fürs Vernetzen. Drei Fragen: Wie oft fragen Kunden nach Genehmigung/Grenzabstand? Ist deshalb schon ein Kauf geplatzt? Wäre eine Antwort im Shop hilfreich, egal oder ein Risiko? Zwei Sätze genügen. Video des Prototyps (45 Sekunden, fiktives Grundstück): {{VIDEO_URL}}
 
 ## 4. Kontaktformular der Firma
 > Betreff: Kurze Praxisfrage von einem Gründer
-> Guten Tag, ich entwickle ein Werkzeug, das beim Gartenhaus-/Carport-Kauf zeigt, ob das Modell aufs Grundstück darf, und bereite mich auf Gründer-Pitches vor. Ich verkaufe nichts. Wie oft fragen Ihre Kunden nach Genehmigung und Grenzabstand, und wäre eine schnelle Antwort im Shop für Sie hilfreich, egal oder ein Risiko? Zwei Sätze genügen. Beispiel mit fiktivem Grundstück: {{DEMO_URL}}. Danke, {{ABSENDER_NAME}}, {{ABSENDER_MAIL}}
+> Guten Tag, ich entwickle ein Werkzeug, das beim Gartenhaus-/Carport-Kauf zeigt, ob das Modell aufs Grundstück darf, und bereite mich auf Gründer-Pitches vor. Ich verkaufe nichts. Wie oft fragen Ihre Kunden nach Genehmigung und Grenzabstand, und wäre eine schnelle Antwort im Shop für Sie hilfreich, egal oder ein Risiko? Zwei Sätze genügen. Video des Prototyps (45 Sekunden, fiktives Grundstück): {{VIDEO_URL}}. Danke, {{ABSENDER_NAME}}, {{ABSENDER_MAIL}}
 
 Das Formular ist die sauberste Form: Die Firma entscheidet selbst, wer antwortet.
 

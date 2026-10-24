@@ -1,15 +1,10 @@
 {
-  "_hinweis": "Einmal ausfüllen, dann `node vertrieb/bauen.mjs`. Alle {{...}} in Landingseite, Mails und One-Pager werden ersetzt.",
-  "PRODUKTNAME": "Platzcheck",
+  "_hinweis": "Nur noch das Video wird verschickt: Pflicht sind Absender-Angaben und VIDEO_URL. Landingseite/Demo sind optional und nicht nötig.",
   "ABSENDER_NAME": "{{Vor- und Nachname}}",
   "ABSENDER_FIRMA": "{{Firma / Einzelunternehmen}}",
   "ABSENDER_MAIL": "{{name@eigene-domain.de}}",
   "ABSENDER_TEL": "{{Telefon}}",
   "ABSENDER_ANSCHRIFT": "{{Straße Nr., PLZ Ort}}",
-  "UST_ID": "{{USt-IdNr. oder: Kleinunternehmer nach § 19 UStG}}",
-  "LANDING_URL": "{{https://eigene-domain.de}}",
-  "DEMO_URL": "{{https://eigene-domain.de/demo/}}",
-  "VIDEO_URL": "{{https://eigene-domain.de/}}",
-  "HOSTER": "{{Hoster und Anschrift, z. B. Cloudflare Inc., San Francisco, USA; Auftragsverarbeitung prüfen}}",
+  "VIDEO_URL": "{{Link zum Video, z. B. YouTube (nicht gelistet)}}",
   "WETTBEWERB": " (unter anderem beim Amberger Gründungswettbewerb)"
 }

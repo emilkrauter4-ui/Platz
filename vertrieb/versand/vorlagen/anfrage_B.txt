@@ -6,7 +6,7 @@ ich entwickle ein Werkzeug, das beim Gartenhaus- oder Carport-Kauf zeigt, ob das
 
 Ich verkaufe nichts. Drei kurze Fragen: Wie oft fragen Kunden nach Genehmigung und Grenzabstand? Ist deshalb schon ein Auftrag geplatzt? Und: Wäre eine schnelle Antwort im Beratungsgespräch für Sie nützlich oder überflüssig?
 
-Zwei Sätze per Mail oder 15 Minuten Telefon genügen. Zur Veranschaulichung ein Beispiel (fiktives Grundstück, 45-Sekunden-Video und Ausprobieren): {DEMO_URL}
+Zwei Sätze per Mail oder 15 Minuten Telefon genügen. Zur Veranschaulichung ein 45-Sekunden-Video des Prototyps (fiktives Grundstück): {VIDEO_URL}
 
 Danke und freundliche Grüße
 {ABSENDER_NAME}

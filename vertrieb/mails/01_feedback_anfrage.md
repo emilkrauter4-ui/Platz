@@ -28,7 +28,7 @@ Regeln: Reintext, kein Logo, kein Tracking-Pixel, keine Anhänge, ein Link (Beis
 >
 > Zwei Sätze zurück genügen, gern auch ein offenes „kein Thema bei uns“. Wenn Sie lieber sprechen, reichen 15 Minuten.
 >
-> Zur Veranschaulichung ein Beispiel mit fiktivem Grundstück: {{DEMO_URL}}
+> Zur Veranschaulichung ein 45-Sekunden-Video des Prototyps (fiktives Grundstück): {{VIDEO_URL}}
 >
 > Danke und freundliche Grüße
 > {{ABSENDER_NAME}}, {{ABSENDER_FIRMA}}
@@ -51,7 +51,7 @@ Regeln: Reintext, kein Logo, kein Tracking-Pixel, keine Anhänge, ein Link (Beis
 >
 > Ich verkaufe nichts. Drei kurze Fragen: Wie oft fragen Kunden nach Genehmigung und Grenzabstand? Ist deshalb schon ein Auftrag geplatzt? Und: Wäre eine schnelle Antwort im Beratungsgespräch für Sie nützlich oder überflüssig?
 >
-> Zwei Sätze per Mail oder 15 Minuten Telefon genügen. Ein Beispiel mit fiktivem Grundstück, falls Sie sich ein Bild machen möchten: {{DEMO_URL}}
+> Zwei Sätze per Mail oder 15 Minuten Telefon genügen. Ein Video des Prototyps (45 Sekunden, fiktives Grundstück): {{VIDEO_URL}}
 >
 > Danke und freundliche Grüße
 > {{ABSENDER_NAME}} · {{ABSENDER_TEL}}

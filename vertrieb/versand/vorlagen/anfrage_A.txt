@@ -11,7 +11,7 @@ Ich verkaufe nichts und suche keinen Auftrag. Es geht um drei Fragen:
 
 Zwei Sätze zurück genügen, gern auch ein offenes "kein Thema bei uns". Wenn Sie lieber sprechen, reichen 15 Minuten.
 
-Zur Veranschaulichung ein Beispiel (fiktives Grundstück, 45-Sekunden-Video und Ausprobieren): {DEMO_URL}
+Zur Veranschaulichung ein 45-Sekunden-Video des Prototyps (fiktives Grundstück): {VIDEO_URL}
 
 Danke und freundliche Grüße
 {ABSENDER_NAME}
