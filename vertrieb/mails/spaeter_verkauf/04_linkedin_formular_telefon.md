@@ -1,3 +1,5 @@
+> **Zurückgestellt.** Diese Texte sind für einen späteren Verkaufsversuch gedacht (wenn aus der Meinungsumfrage Interesse entstanden ist). Für die jetzige Umfrage gelten die Texte eine Ebene höher.
+
 # Andere Kanäle
 
 Kaltmails an Firmen sind rechtlich heikel (siehe `../versand_checkliste.md`). Diese Kanäle sind oft besser und sicherer.

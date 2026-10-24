@@ -1,6 +1,6 @@
 # Vertriebspaket: Test mit Herstellern und Händlern
 
-Ziel: herausfinden, ob Anbieter von Gartenhäusern, Carports und Terrassendächern den Grundstücks-Check als Zusatz in ihrem Online-Shop wollen. **Ohne Marke** (Arbeitstitel „Platzcheck“, in `konfig.json` änderbar), mit **einem** kuratierten Beispiel statt dem ganzen Werkzeug.
+Ziel: **Meinungen einholen** von Anbietern von Gartenhäusern und Carports: Kommt das Problem vor, wäre eine Antwort im Shop hilfreich? Kein Verkauf, kein Pilot-Angebot (für Gründer-Pitches). **Ohne Marke** (Arbeitstitel „Platzcheck“, in `konfig.json` änderbar), mit **einem** kuratierten Beispiel statt dem ganzen Werkzeug.
 
 ## Was drin ist
 
@@ -10,7 +10,7 @@ Ziel: herausfinden, ob Anbieter von Gartenhäusern, Carports und Terrassendäche
 | Video (45 s) | `landing/assets/demo.mp4`, Aufnahme-Skript `video/aufnahme.mjs` | Ablauf in 7 Schritten mit Untertiteln, ohne Ton |
 | Landingseite | `landing/index.html` + Impressum/Datenschutz (Entwürfe) | Neutral, mit Video, Demo-Link, Pilot, FAQ |
 | One-Pager | `landing/onepager.html` → PDF | Eine A4-Seite zum Anhängen oder Ausdrucken |
-| Mails | `mails/` | 3 Erstmail-Fassungen, 2× Nachfassen, LinkedIn, Formular, Telefon, Einwände, Pilot-Angebot, Gesprächsleitfaden |
+| Mails | `mails/` | Anfrage um Einschätzung (2 Fassungen), eine Erinnerung, andere Kanäle, Interview-Leitfaden mit Auswertung; zurückgestellt: Verkaufstexte in `mails/spaeter_verkauf/` |
 | Kontakte | `kontakte/` | 27 Start-Ziele (ungeprüft), Tracker für 150, Recherche-Anleitung |
 | Versand | `versand_checkliste.md` | Go/No-Go mit Rechtlichem, Technik, Versandregeln, Messung |
 

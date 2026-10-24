@@ -1,3 +1,5 @@
+> **Zurückgestellt.** Diese Texte sind für einen späteren Verkaufsversuch gedacht (wenn aus der Meinungsumfrage Interesse entstanden ist). Für die jetzige Umfrage gelten die Texte eine Ebene höher.
+
 # Nachfassen 1 (Tag 4 bis 5, nur wenn keine Antwort)
 
 Antworte in **demselben Mail-Thread** (Re: Betreff), damit die erste Mail sichtbar bleibt. Neuer Nutzen statt „wollte nur nachfragen“.

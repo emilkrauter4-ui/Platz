@@ -1,3 +1,5 @@
+> **Zurückgestellt.** Diese Texte sind für einen späteren Verkaufsversuch gedacht (wenn aus der Meinungsumfrage Interesse entstanden ist). Für die jetzige Umfrage gelten die Texte eine Ebene höher.
+
 # Pilot-Angebot (zum Anhängen oder Vorlesen im Gespräch)
 
 ## Ziel

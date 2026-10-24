@@ -1,3 +1,5 @@
+> **Zurückgestellt.** Diese Texte sind für einen späteren Verkaufsversuch gedacht (wenn aus der Meinungsumfrage Interesse entstanden ist). Für die jetzige Umfrage gelten die Texte eine Ebene höher.
+
 # Erste Mail (Tag 0)
 
 Drei Fassungen. Nimm je Empfänger die passende. Alles in `[eckigen Klammern]` füllst du pro Empfänger aus, Platzhalter in doppelten geschweiften Klammern ersetzt `bauen.mjs` einmalig aus `konfig.json`.

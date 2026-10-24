@@ -1,3 +1,5 @@
+> **Zurückgestellt.** Diese Texte sind für einen späteren Verkaufsversuch gedacht (wenn aus der Meinungsumfrage Interesse entstanden ist). Für die jetzige Umfrage gelten die Texte eine Ebene höher.
+
 # Nachfassen 2 (Tag 10 bis 12, letzte Mail)
 
 Ebenfalls im Thread. Danach nicht mehr schreiben (Ausnahme: Antwort kommt).

@@ -1,12 +1,14 @@
 # Versand-Checkliste: Go / No-Go
 
+**Ausrichtung:** Meinungsumfrage von einem Gründer, kein Verkauf, kein Pilot-Angebot (Texte in `mails/`; die Verkaufstexte liegen zurückgestellt in `mails/spaeter_verkauf/`). Das senkt das Risiko, beseitigt es aber nicht: Gerichte können auch Umfrage-Mails als Werbung werten, wenn dahinter erkennbar Kundengewinnung steht.
+
 Stand: Alles, was ich vorbereiten konnte, ist fertig. Offen ist, was nur du tun kannst. **Erst wenn alle Punkte unter „Muss“ abgehakt sind, werden Mails verschickt.**
 
 ## 1. Muss: Rechtliches (vor der ersten Mail)
 
 - [ ] **Unternehmen vorhanden?** Wer Angebote an Firmen schickt, handelt gewerblich: Gewerbeanmeldung (Einzelunternehmen genügt) bzw. Firma. Absenderangaben in Mail und Impressum müssen stimmen.
-- [ ] **Kaltmail-Risiko verstanden.** Nach § 7 Abs. 2 Nr. 3 UWG ist Werbung per E-Mail ohne vorherige ausdrückliche Einwilligung unzulässig – **das gilt nach herrschender Meinung auch gegenüber Unternehmen**. Eine Ausnahme für Bestandskunden (§ 7 Abs. 3) greift hier nicht. Die Folge ist im Regelfall eine Abmahnung mit Anwaltskosten und Unterlassungserklärung, in der Praxis oft mehrere hundert bis über tausend Euro. Mach vor dem Versand **eine Stunde Beratung bei einem Anwalt für Wettbewerbsrecht (IT-Recht)** und lass dir diese Frage beantworten: *„Darf ich Hersteller und Händler mit einer einmaligen, sachlichen Produktvorstellung per E-Mail anschreiben, und unter welchen Bedingungen?“* Das ist das Geld wert.
-- [ ] **Sicherere Reihenfolge der Kanäle** (siehe `mails/04_linkedin_formular_telefon.md`):
+- [ ] **Kaltmail-Risiko verstanden.** Nach § 7 Abs. 2 Nr. 3 UWG ist Werbung per E-Mail ohne vorherige ausdrückliche Einwilligung unzulässig – **das gilt nach herrschender Meinung auch gegenüber Unternehmen**. Eine Ausnahme für Bestandskunden (§ 7 Abs. 3) greift hier nicht. Die Folge ist im Regelfall eine Abmahnung mit Anwaltskosten und Unterlassungserklärung, in der Praxis oft mehrere hundert bis über tausend Euro. Mach vor dem Versand **eine Stunde Beratung bei einem Anwalt für Wettbewerbsrecht (IT-Recht)** und lass dir diese Frage beantworten: *„Darf ich Hersteller und Händler mit einer einmaligen Bitte um eine Branchen-Einschätzung für meine Gründer-Pitches per E-Mail anschreiben (kein Angebot, keine Werbung), und was muss in der Mail stehen?“* Das ist das Geld wert.
+- [ ] **Sicherere Reihenfolge der Kanäle** (siehe `mails/03_andere_kanaele.md`):
   1. Kontaktformular auf der Firmen-Website (Firma entscheidet selbst, keine personenbezogene Adresse nötig)
   2. LinkedIn-Kontaktanfrage und Nachricht
   3. Telefonische Erstansprache B2B: bei mutmaßlichem Interesse nach § 7 Abs. 2 Nr. 2 UWG eher vertretbar, aber nicht frei von Risiko
@@ -31,7 +33,8 @@ Stand: Alles, was ich vorbereiten konnte, ist fertig. Offen ist, was nur du tun 
 - **Eine Person je Mail**, nie mehrere Empfänger im Verteiler.
 - **20 bis 30 Mails pro Tag**, wochentags zwischen 8 und 10 Uhr oder 13 und 15 Uhr. Die ersten Tage nur 10 bis 15 (Aufwärmen der neuen Domain).
 - Jede Mail einzeln anpassen: Firmenname und ein konkreter Bezug (ein Modell aus dem Sortiment, der Standort). Das erhöht die Antwortquote und senkt das Spam-Risiko.
-- Zeitplan je Kontakt: Tag 0 Erstmail, Tag 4 bis 5 Nachfassen 1, Tag 10 bis 12 Nachfassen 2, dann Schluss.
+- Zeitplan je Kontakt: Tag 0 Anfrage, Tag 7 eine kurze Erinnerung, dann Schluss.
+- **Wahrheit:** Pitch-Wettbewerbe nur nennen, wenn du dich beworben hast oder angemeldet bist. Nach einem Gespräch **keine Verkaufsmail** an dieselbe Adresse, außer die Person hat ausdrücklich zugestimmt.
 - Antworten innerhalb von 4 Stunden, bei „Ja“ am selben Tag.
 
 ## 4. Messen (damit du nach 3 Wochen entscheiden kannst)
