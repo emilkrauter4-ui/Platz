@@ -29,7 +29,11 @@ node vertrieb\bauen.mjs        # erzeugt vertrieb\ausgabe\seite (Landing + Demo)
 ```
 
 - **Lokal ansehen:** `cd vertrieb\ausgabe\seite` und `npx serve .` (oder `python -m http.server 8080`), dann `http://localhost:8080/` und `.../demo/`.
-- **Online stellen:** Ordner `vertrieb\ausgabe\seite` bei Cloudflare Pages (Direct Upload) oder Netlify (Drag & Drop) hochladen, eigene Domain verbinden. Reines Static-Hosting, kein Server nötig. Größe etwa 55 MB, rund 3.700 Dateien.
+- **Online stellen (kostenlos, ohne eigene Domain):** Der Ordner `vertrieb\ausgabe\seite` (rund 830 Dateien, 40 MB) ist eine reine statische Seite. Zwei einfache Wege:
+  1. **Cloudflare Pages:** Konto anlegen (kostenlos), dann *Workers & Pages* > *Create* > *Pages* > *Upload assets*. Projektname **vorher** festlegen, z. B. `platzcheck-demo` (neutral, ohne „Passt“). Ordner `seite` hineinziehen, *Deploy*. Adresse: `https://platzcheck-demo.pages.dev/`, die Demo liegt unter `/demo/`.
+  2. **Netlify:** `app.netlify.com/drop`, Ordner `seite` hineinziehen (Konto nötig, damit die Seite bleibt). Adresse: `https://<zufallsname>.netlify.app/`, Namen unter *Site settings* änderbar.
+  Reihenfolge: Projektnamen festlegen, daraus `LANDING_URL` und `DEMO_URL` in `konfig.json` eintragen, `node vertrieb\bauen.mjs`, dann hochladen. Danach Demo und Video auf dem Handy testen.
+  Nicht GitHub Pages nutzen: Es würde das Repository öffentlich machen und damit das ganze Werkzeug.
 - **One-Pager als PDF:** `vertrieb\ausgabe\seite\onepager.html` im Chrome öffnen, Drucken, „Als PDF speichern“, Hintergrundgrafiken an. (Alternativ `node vertrieb\onepager.mjs` mit installiertem Playwright.)
 - **Video neu aufnehmen** (nur wenn sich die Demo ändert): `video/aufnahme.mjs`, siehe Kopfkommentar.
 

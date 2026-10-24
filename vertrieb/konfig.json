@@ -10,5 +10,6 @@
   "LANDING_URL": "{{https://eigene-domain.de}}",
   "DEMO_URL": "{{https://eigene-domain.de/demo/}}",
   "VIDEO_URL": "{{https://eigene-domain.de/}}",
-  "HOSTER": "{{Hoster und Anschrift, z. B. Cloudflare Inc., San Francisco, USA; Auftragsverarbeitung prüfen}}"
+  "HOSTER": "{{Hoster und Anschrift, z. B. Cloudflare Inc., San Francisco, USA; Auftragsverarbeitung prüfen}}",
+  "WETTBEWERB": " (unter anderem beim Amberger Gründungswettbewerb)"
 }
