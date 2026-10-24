@@ -93,6 +93,7 @@ import {
   STICHTAG_NAME,
   VORHABEN_NAME,
   fussbodenHoehe,
+  grundriss as vorhabenGrundriss,
   vorhabenAusPlan,
   type BPlanTreffer,
   type GemeindeAbschnitt,
@@ -126,6 +127,7 @@ import { RegenDaten, RegenLayer } from './scene/regen';
 import { baueGitter, gitterGeometrie, kostraHn, parameterVariante, KOSTRA_WIEDERKEHR, type FliessSenken, type Gitter, type SimErgebnis, type Variante } from './rules/regen';
 import { MESS_ARTEN, bilanzText, grenzenHtml, messText, szenarioText, type MessAnzeige } from './ui/regenSheet';
 import type { FensterWelt, RaumSonne } from './rules/raumsonne';
+import { HAENDLER, HAENDLER_TEXT, MUSTER, MUSTER_HAUS, MUSTER_HAUS_FIRST, MUSTER_HAUS_ID, MUSTER_HAUS_TRAUFE, PRODUKTE, istProdukt, mitProdukt } from './haendler';
 import { endOffline, localImagery, offlineMode, offlineStatus, prepareOffline, registerServiceWorker } from './offline';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -571,10 +573,12 @@ async function confirmPlot() {
   const a = area(b);
   if (a < 40 || a > 8000) return updateGrenzeUI(`Die Fläche von ${fmt(a, 0)} m² wirkt nicht wie ein Wohngrundstück. Prüf die Punkte.`);
   st.plot = b;
-  tippVorbereiten(b);
+  if (!HAENDLER) tippVorbereiten(b);
   const c = centroid(b);
   await terrain.ensure([c[0] - 90, c[1] - 90], [c[0] + 90, c[1] + 90]);
   st.buildings = classifyBuildings(b, near(data.buildings, c, 90));
+  // Das erfundene Wohnhaus des Mustergrundstücks ist keine amtliche Angabe
+  st.buildings.forEach((x) => { if (x.id === MUSTER_HAUS_ID) x.provenance = 'Demo'; });
   if (!st.buildings.some((x) => x.own)) {
     // Kein Haus im Grundstück: Hauptgebäude mit der größten Überdeckung nehmen
     const touching = st.buildings.filter((x) => x.footprint.some((p) => pointInPolygon(p, b)));
@@ -600,32 +604,37 @@ async function confirmPlot() {
   pflanzLayer?.weg();
   st.step = 'pruefen';
   st.view = '3d';
-  void gartenblickPruefen();
+  if (!HAENDLER) void gartenblickPruefen();
   syncViewButtons();
   scene.parzellar.show = false;
   st.wsg = undefined;
   st.denkmal = undefined;
-  wasserschutz(c).then((w) => {
-    st.wsg = w;
-    if (st.step === 'pruefen') renderSheet();
-  });
-  denkmaeler([c, ...b]).then((d) => {
-    st.denkmal = d;
-    if (st.step === 'pruefen') renderSheet();
-  });
+  // Mustergrundstück (fiktiv): keine Abfragen bei fremden Diensten, das Ergebnis soll jedes Mal gleich sein
+  if (!HAENDLER) {
+    wasserschutz(c).then((w) => {
+      st.wsg = w;
+      if (st.step === 'pruefen') renderSheet();
+    });
+    denkmaeler([c, ...b]).then((d) => {
+      st.denkmal = d;
+      if (st.step === 'pruefen') renderSheet();
+    });
+  }
   hlLayer?.weg();
   hlSt.modell = null;
   hlSt.raster = null;
   hlAusnahme = null;
   grLayer?.weg();
   Object.assign(grSt, { v: null, res: null, zufahrt: null, schatten: null, gemeinde: null, fragen: [], plaene: undefined, zonen: false, zonenErg: null, benutzt: false, offen: false });
-  bebauungsplaene([c, ...b.slice(0, 7)]).then((pl) => {
-    grSt.plaene = pl;
-    if (st.step !== 'pruefen') return;
-    buildSite();
-    update();
-    if (st.modus === 'gross') void grRechnen();
-  });
+  if (!HAENDLER) {
+    bebauungsplaene([c, ...b.slice(0, 7)]).then((pl) => {
+      grSt.plaene = pl;
+      if (st.step !== 'pruefen') return;
+      buildSite();
+      update();
+      if (st.modus === 'gross') void grRechnen();
+    });
+  }
   buildSite();
   renderer.syncDraftPoints();
   renderer.syncPlot(badSegments);
@@ -703,6 +712,7 @@ function renderVerdict() {
   if (st.modus === 'pflanzen') pflanzInfo();
   document.querySelector('[data-modus="gross"]')?.setAttribute('aria-selected', String(st.modus === 'gross'));
   if (st.modus === 'gross') grVerdict();
+  if (HAENDLER) hdPunkte();
 }
 
 const CTL: Record<ObjectKind, { k: keyof Placed | 'deg'; l: string; min: number; max: number; step: number }[]> = {
@@ -762,6 +772,7 @@ function renderSheet() {
       return `<div class="ctl"><label for="s${i}"><span>${s.l}</span><output data-k="${s.k}" for="s${i}"></output></label><input id="s${i}" type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${v}" data-k="${s.k}"></div>`;
     })
     .join('');
+  if (HAENDLER) return renderHaendlerSheet();
   if (st.ansicht === 'nachbar') return nbSt.v ? renderNachbarSheet() : undefined;
   if (st.kante || st.zeichnen || tippSt) return renderEditSheet();
   if (st.modus === 'pflanzen') return renderPflanzenSheet();
@@ -894,6 +905,138 @@ function renderSheet() {
     plotFrame();
   });
   $('newBtn').addEventListener('click', () => showStart());
+  update();
+}
+
+/* ---------- Händler-Modus (Vorführung für Hersteller und Händler, siehe haendler.ts) ---------- */
+let hdLayer: VorhabenLayer | null = null;
+
+/** Neutrale Beschriftung statt der Wortmarke; schon in boot.ts ist body.haendler gesetzt. */
+function haendlerMarke() {
+  document.body.classList.add('haendler');
+  document.title = HAENDLER_TEXT.titel;
+  const w = document.querySelector('.brand .word');
+  const t = document.querySelector('.brand .tagline');
+  if (w) w.textContent = HAENDLER_TEXT.wort;
+  if (t) t.textContent = HAENDLER_TEXT.tagline;
+}
+
+/** Das erfundene Wohnhaus als Körper mit Satteldach (Label Demo). */
+function hdHaus() {
+  if (!HAENDLER || !st.plot) return;
+  hdLayer ??= new VorhabenLayer(scene.viewer);
+  const fp = MUSTER_HAUS.fp;
+  const xs = fp.map((p) => p[0]);
+  const ys = fp.map((p) => p[1]);
+  const v: GVorhaben = {
+    art: 'wohnhaus',
+    center: centroid(fp),
+    w: Math.max(...xs) - Math.min(...xs),
+    d: Math.max(...ys) - Math.min(...ys),
+    angle: 0,
+    geschosse: MUSTER_HAUS.geschosse,
+    geschosshoehe: MUSTER_HAUS.geschosshoehe,
+    dachform: 'sattel',
+    neigung: MUSTER_HAUS.neigung,
+  };
+  const g = vorhabenGrundriss(site!, v);
+  if (!g) return;
+  const base = Math.max(...g.fp.map((p) => terrain.heightOrCoarse(p)));
+  hdLayer.zeige({ flaechen: vorhabenModell(v, g, base), af: [], afSchlecht: false, status: null, zufahrt: null, showAF: false, dark: st.dark, mesh: false });
+}
+
+async function haendlerStart() {
+  await details;
+  data.buildings.push({ id: MUSTER_HAUS_ID, fp: MUSTER_HAUS.fp, trauf: MUSTER_HAUS_TRAUFE, first: MUSTER_HAUS_FIRST, q: 'Demo', c: centroid(MUSTER_HAUS.fp) });
+  await startDemo(MUSTER);
+  const o = st.objs!;
+  // Nur das gewählte Modell ist sichtbar; die anderen stehen weit weg von den Grenzen und zählen nicht mit
+  st.sichtbar = [st.selected];
+  buildSite();
+  hdHaus();
+  hint('Zieh das Modell im Garten dorthin, wo es stehen soll.');
+  frame([-113, -434], 14, '3d', false);
+  o.gartenhaus = mitProdukt(o.gartenhaus, PRODUKTE[0]);
+  update();
+  renderSheet();
+}
+
+/** Ergebnis eines Modells an der Stelle des gerade gewählten Objekts (Ampel auf dem Knopf). */
+function hdStatus(p: (typeof PRODUKTE)[number]): 'ok' | 'warn' | 'bad' {
+  const cur = st.objs![st.selected];
+  const o = mitProdukt({ ...st.objs![p.kind], center: cur.center, angle: cur.angle }, p);
+  // Das gerade gewählte Modell wird für die Rechnung beiseitegestellt, sonst kollidiert es mit dem Vergleichsmodell
+  const objs = { ...st.objs!, [p.kind]: o };
+  if (p.kind !== st.selected) objs[st.selected] = { ...objs[st.selected], center: [1e5, 1e5] };
+  const s = { ...site!, ...hdAusstattung(p) };
+  return evaluate(s, objs)[p.kind].status;
+}
+
+/** Ausstattung des Modells als Annahmen der Prüfung: Ofen bedeutet Feuerstätte und Aufenthaltsraum (Label nutzerbestätigt, weil der Händler es so ausweist). */
+function hdAusstattung(p: (typeof PRODUKTE)[number]): Pick<Site, 'aufenthaltsraum' | 'feuerstaette'> {
+  const ja = p.kind === 'gartenhaus' && !!p.mitOfen;
+  return {
+    aufenthaltsraum: { value: ja, provenance: ja ? 'nutzerbestätigt' : 'Annahme' },
+    feuerstaette: { value: ja, provenance: ja ? 'nutzerbestätigt' : 'Annahme' },
+  };
+}
+
+function hdWaehle(id: string) {
+  const p = PRODUKTE.find((x) => x.id === id);
+  if (!p || !st.objs) return;
+  const cur = st.objs[st.selected];
+  const ziel = mitProdukt({ ...st.objs[p.kind], center: cur.center, angle: cur.angle }, p);
+  if (p.kind !== st.selected) {
+    // das bisherige Objekt wandert aus dem Weg, damit es keine Grenze belegt
+    const andere = st.selected;
+    const hindernisse = [...st.buildings.map((b) => b.footprint), ...st.bestand.map((b) => b.footprint)];
+    st.objs[andere] = awayFromBoundary(st.objs[andere], st.plot!, hindernisse);
+  }
+  st.objs[p.kind] = ziel;
+  st.selected = p.kind;
+  st.sichtbar = [p.kind];
+  Object.assign(st, hdAusstattung(p));
+  buildSite();
+  zonenSt.erg = null;
+  renderSheet();
+}
+
+/** Ampelpunkte der Modelle an der jetzigen Stelle (beim Ziehen mitgeführt). */
+function hdPunkte() {
+  if (!st.objs || !site) return;
+  document.querySelectorAll<HTMLButtonElement>('[data-produkt]').forEach((b) => {
+    const p = PRODUKTE.find((x) => x.id === b.dataset.produkt);
+    if (!p) return;
+    const s = hdStatus(p);
+    b.querySelector('.d')!.className = `d ${s}`;
+    b.setAttribute('aria-label', `${p.name}, ${WORD[s]}`);
+    b.setAttribute('aria-selected', String(istProdukt(st.objs![p.kind], p) && st.selected === p.kind));
+  });
+}
+
+function renderHaendlerSheet() {
+  if (!st.objs) return;
+  const chips = PRODUKTE.map((p) => {
+    const aktiv = istProdukt(st.objs![p.kind], p) && st.selected === p.kind;
+    return `<button class="obj" role="tab" type="button" data-produkt="${p.id}" aria-selected="${aktiv}"><span class="d ${hdStatus(p)}"></span>${esc(p.name)}<small class="hd-mass">${fmt(p.w, 1)} × ${fmt(p.d, 1)} m</small></button>`;
+  }).join('');
+  $('stepBody').innerHTML = `
+    <p class="fine hd-adresse" style="text-align:left;margin:10px 0 0">${esc(MUSTER.adresse)} · Grenze und Wohnhaus ${tag('Demo', 'Demo')}</p>
+    <div class="objects hd-modelle" role="tablist" aria-label="Welches Modell?">${chips}</div>
+    <div class="btnrow" style="margin-top:6px"><button class="sec" id="zonenBtn" type="button" aria-pressed="${zonenSt.an}">${zonenSt.an ? 'Zonen ausblenden' : 'Wo darf es hin?'}</button></div>
+    <div id="zonenInfo"></div>
+    <details open>
+      <summary>So haben wir geprüft</summary>
+      <ul class="rows" id="rows"></ul>
+    </details>
+    <p class="fine hd-hinweis" style="text-align:left">Die Punkte an den Modellen zeigen, ob das Modell an der jetzigen Stelle passt. Zieh das Modell im Garten, dann ändern sie sich.</p>`;
+  document.querySelectorAll<HTMLButtonElement>('[data-produkt]').forEach((b) => b.addEventListener('click', () => hdWaehle(b.dataset.produkt!)));
+  document.getElementById('zonenBtn')?.addEventListener('click', () => {
+    if (zonenSt.an) zonenAus();
+    else { zonenSt.an = true; zonenSt.erg = null; zonenNeu(true); }
+    renderSheet();
+  });
+  zonenInfo();
   update();
 }
 
@@ -3358,11 +3501,13 @@ async function renderOfflineControls() {
 
 /* ---------- Start ---------- */
 async function main() {
-  registerServiceWorker();
+  if (HAENDLER) haendlerMarke();
+  else registerServiceWorker();
   if (offlineMode()) $('infoBtn').lastChild!.textContent = ' Offline-Demo';
   try {
     const site = await loadSite();
     data = { site, buildings: [], bestand: [] };
+    if (HAENDLER) { site.demos = []; site.messadressen = []; }
     setOrigin(site.origin);
     // Lage-Annahme des Gebiets (Mess-Adresse im Außenbereich): Label Annahme, im Formular änderbar
     if (site.lage) st.bereich = { value: site.lage.bereich, provenance: 'Annahme' };
@@ -3382,6 +3527,7 @@ async function main() {
     renderer.syncDraftPoints();
     if (st.plot) renderer.syncPlot(badSegments);
     renderer.syncContext();
+    if (HAENDLER) hdHaus();
   };
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onTheme);
   new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -3417,7 +3563,8 @@ async function main() {
     $('loading').hidden = true;
     hideLoading();
   });
-  if (location.hash.startsWith('#n=')) void startNachbar(location.hash.slice(3));
+  if (HAENDLER) void haendlerStart();
+  else if (location.hash.startsWith('#n=')) void startNachbar(location.hash.slice(3));
   else showStart();
 
   // Test-Schnittstelle für automatisierte Durchläufe (nur mit ?debug)

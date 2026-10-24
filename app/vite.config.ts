@@ -46,11 +46,14 @@ function nachbarApiDev() {
  * - offline-files.json: alles, was die Offline-Demo braucht (Daten der Kachel, Kacheln, restliche Cesium-Dateien)
  */
 function offlineManifest() {
+  let dist = 'dist';
   return {
     name: 'passt-offline-manifest',
     apply: 'build' as const,
+    configResolved(c: { build: { outDir: string } }) {
+      dist = c.build.outDir;
+    },
     closeBundle() {
-      const dist = 'dist';
       const files = walk(dist).map((f) => relative(dist, f).split('\\').join('/'));
       const used: string[] = JSON.parse(readFileSync('scripts/cesium-used.json', 'utf8'));
       const shell = [

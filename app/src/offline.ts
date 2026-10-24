@@ -5,6 +5,7 @@
  */
 import type { LocalImagery } from './scene/viewer';
 import { DATA_URL } from './data';
+import { HAENDLER } from './haendler';
 
 const FLAG = 'passt-offline-demo';
 const DATA_CACHE = 'passt-daten';
@@ -37,7 +38,8 @@ export function offlineMode(): boolean {
 }
 
 export async function localImagery(): Promise<LocalImagery | null> {
-  if (!offlineMode()) return null;
+  // Händler-Modus: Luftbild immer aus den mitgelieferten Kacheln (kein Dienst nötig, jedes Mal gleiches Bild)
+  if (!offlineMode() && !HAENDLER) return null;
   try {
     const m = await (await fetch(`${DATA_URL}/offline.json`)).json();
     return { minLevel: m.dop.minLevel, maxLevel: m.dop.maxLevel, parzMinLevel: m.parzellar.minLevel, parzMaxLevel: m.parzellar.maxLevel, rect: m.rect };
