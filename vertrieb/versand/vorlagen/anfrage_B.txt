@@ -2,7 +2,7 @@ Betreff: Kurze Frage an {FIRMA}: Genehmigung und Grenzabstand beim Gartenhauskau
 
 {GRUSS}
 
-ich entwickle ein Werkzeug, das beim Gartenhaus- oder Carport-Kauf zeigt, ob das Modell auf das Grundstück darf (amtliche Daten, feste Regeln der Bayerischen Bauordnung). Es ist ein Prototyp, kein fertiges Produkt. Bevor ich damit bei Gründer-Pitches antrete{WETTBEWERB}, will ich von Betrieben wie {FIRMA} wissen, ob das Problem im Alltag wirklich auftritt.
+ich entwickle ein Werkzeug, das beim Gartenhaus- oder Carport-Kauf zeigt, ob das Modell auf das Grundstück darf (amtliche Daten, feste Regeln der Bayerischen Bauordnung). Es ist ein Prototyp, kein fertiges Produkt. Bevor ich mich mit der Idee bei Gründer-Pitches bewerbe{WETTBEWERB}, will ich von Betrieben wie {FIRMA} wissen, ob das Problem im Alltag wirklich auftritt.
 
 Ich verkaufe nichts. Drei kurze Fragen: Wie oft fragen Kunden nach Genehmigung und Grenzabstand? Ist deshalb schon ein Auftrag geplatzt? Und: Wäre eine schnelle Antwort im Beratungsgespräch für Sie nützlich oder überflüssig?
 
@@ -10,7 +10,7 @@ Zwei Sätze per Mail oder 15 Minuten Telefon genügen. Zur Veranschaulichung ein
 
 Danke und freundliche Grüße
 {ABSENDER_NAME}
-{ABSENDER_FIRMA} · {ABSENDER_ANSCHRIFT}
-{ABSENDER_TEL}
+Gründer (Prototyp-Projekt)
+Tel. {ABSENDER_TEL} · {ABSENDER_MAIL}
 
 Ihre Adresse habe ich von {QUELLE}. Ich nutze sie nur für diese Anfrage. Eine kurze Antwort "bitte nicht mehr" genügt, dann lösche ich sie.

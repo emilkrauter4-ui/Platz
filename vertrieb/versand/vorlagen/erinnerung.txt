@@ -6,6 +6,6 @@ falls meine Frage untergegangen ist: Ein Wort genügt, "relevant" oder "kein The
 
 Freundliche Grüße
 {ABSENDER_NAME}
-{ABSENDER_FIRMA} · {ABSENDER_ANSCHRIFT}
+Tel. {ABSENDER_TEL} · {ABSENDER_MAIL}
 
 Eine kurze Antwort "bitte nicht mehr" genügt, dann lösche ich Ihre Adresse.

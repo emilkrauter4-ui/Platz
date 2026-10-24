@@ -1,10 +1,8 @@
 {
   "_hinweis": "Nur noch das Video wird verschickt: Pflicht sind Absender-Angaben und VIDEO_URL. Landingseite/Demo sind optional und nicht nötig.",
-  "ABSENDER_NAME": "{{Vor- und Nachname}}",
-  "ABSENDER_FIRMA": "{{Firma / Einzelunternehmen}}",
-  "ABSENDER_MAIL": "{{name@eigene-domain.de}}",
-  "ABSENDER_TEL": "{{Telefon}}",
-  "ABSENDER_ANSCHRIFT": "{{Straße Nr., PLZ Ort}}",
+  "ABSENDER_NAME": "Emil Kräuter",
+  "ABSENDER_MAIL": "emilkrauter4@gmail.com",
+  "ABSENDER_TEL": "+49 177 1883874",
   "VIDEO_URL": "https://youtu.be/NkJ7aGjhyFM",
-  "WETTBEWERB": " (unter anderem beim Amberger Gründungswettbewerb)"
+  "WETTBEWERB": " (unter anderem plane ich eine Teilnahme am Amberger Gründungswettbewerb)"
 }

@@ -15,7 +15,7 @@ Zur Veranschaulichung ein 45-Sekunden-Video des Prototyps (fiktives Grundstück)
 
 Danke und freundliche Grüße
 {ABSENDER_NAME}
-{ABSENDER_FIRMA} · {ABSENDER_ANSCHRIFT}
-{ABSENDER_TEL}
+Gründer (Prototyp-Projekt)
+Tel. {ABSENDER_TEL} · {ABSENDER_MAIL}
 
 Ihre Adresse habe ich von {QUELLE}. Ich nutze sie nur für diese Anfrage. Eine kurze Antwort "bitte nicht mehr" genügt, dann lösche ich sie.

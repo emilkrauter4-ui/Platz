@@ -35,7 +35,7 @@ def lies_konfig():
     k = json.loads(KONFIG.read_text(encoding="utf-8"))
     k.pop("_hinweis", None)
     k.setdefault("WETTBEWERB", "")
-    pflicht = ["ABSENDER_NAME", "ABSENDER_FIRMA", "ABSENDER_MAIL", "ABSENDER_TEL", "ABSENDER_ANSCHRIFT", "VIDEO_URL"]
+    pflicht = ["ABSENDER_NAME", "ABSENDER_MAIL", "ABSENDER_TEL", "VIDEO_URL"]
     offen = [n for n in pflicht if n not in k or "{{" in str(k[n])]
     if offen:
         sys.exit("konfig.json ist nicht ausgefüllt: " + ", ".join(offen))
