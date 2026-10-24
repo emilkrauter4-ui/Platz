@@ -5,6 +5,6 @@
   "ABSENDER_MAIL": "{{name@eigene-domain.de}}",
   "ABSENDER_TEL": "{{Telefon}}",
   "ABSENDER_ANSCHRIFT": "{{Straße Nr., PLZ Ort}}",
-  "VIDEO_URL": "{{Link zum Video, z. B. YouTube (nicht gelistet)}}",
+  "VIDEO_URL": "https://youtu.be/NkJ7aGjhyFM",
   "WETTBEWERB": " (unter anderem beim Amberger Gründungswettbewerb)"
 }
