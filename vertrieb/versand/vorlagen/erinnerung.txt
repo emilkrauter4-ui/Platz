@@ -1,0 +1,11 @@
+Betreff: Re: {BETREFF_ORIGINAL}
+
+{GRUSS}
+
+falls meine Frage untergegangen ist: Ein Wort genügt, "relevant" oder "kein Thema". Beides hilft mir bei der Einschätzung, ob das Problem real ist.
+
+Freundliche Grüße
+{ABSENDER_NAME}
+{ABSENDER_FIRMA} · {ABSENDER_ANSCHRIFT}
+
+Eine kurze Antwort "bitte nicht mehr" genügt, dann lösche ich Ihre Adresse.

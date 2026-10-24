@@ -20,3 +20,6 @@ data/reference/vor_ort_fotos/
 app/dist-haendler/
 app/dist-haendler-debug/
 vertrieb/ausgabe/
+vertrieb/versand/empfaenger.csv
+vertrieb/versand/versand_log.csv
+vertrieb/versand/abmeldungen.txt

@@ -1,0 +1,21 @@
+Betreff: Kurze Frage: Fragen Ihre Kunden nach Genehmigung und Grenzabstand?
+
+{GRUSS}
+
+ich entwickle ein Werkzeug, das Hausbesitzern zeigt, ob ein Gartenhaus oder Carport auf ihr Grundstück darf (amtliche Daten, feste Regeln der Bayerischen Bauordnung). Es ist ein Prototyp, kein fertiges Produkt. Ich bereite mich auf Gründer-Pitches vor{WETTBEWERB} und möchte vorher von Leuten aus der Praxis wissen, ob das Problem überhaupt existiert. Sie kennen Ihre Kunden besser als ich.
+
+Ich verkaufe nichts und suche keinen Auftrag. Es geht um drei Fragen:
+1. Wie oft fragen Kunden bei Ihnen nach Genehmigung oder Grenzabstand?
+2. Ist deshalb schon ein Kauf gescheitert oder ein Modell zurückgekommen?
+3. Wäre eine Antwort direkt im Shop für Sie hilfreich, egal oder eher ein Risiko?
+
+Zwei Sätze zurück genügen, gern auch ein offenes "kein Thema bei uns". Wenn Sie lieber sprechen, reichen 15 Minuten.
+
+Zur Veranschaulichung ein Beispiel (fiktives Grundstück, 45-Sekunden-Video und Ausprobieren): {DEMO_URL}
+
+Danke und freundliche Grüße
+{ABSENDER_NAME}
+{ABSENDER_FIRMA} · {ABSENDER_ANSCHRIFT}
+{ABSENDER_TEL}
+
+Ihre Adresse habe ich von {QUELLE}. Ich nutze sie nur für diese Anfrage. Eine kurze Antwort "bitte nicht mehr" genügt, dann lösche ich sie.

@@ -13,6 +13,7 @@ Ziel: **Meinungen einholen** von Anbietern von Gartenhäusern und Carports: Komm
 | Mails | `mails/` | Anfrage um Einschätzung (2 Fassungen), eine Erinnerung, andere Kanäle, Interview-Leitfaden mit Auswertung; zurückgestellt: Verkaufstexte in `mails/spaeter_verkauf/` |
 | Kontakte | `kontakte/` | 27 Start-Ziele (ungeprüft), Tracker für 150, Recherche-Anleitung |
 | Versand | `versand_checkliste.md` | Go/No-Go mit Rechtlichem, Technik, Versandregeln, Messung |
+| Serienversand | `versand/` | Skript für personalisierte Einzelmails aus deinem Postfach (Trockenlauf als Standard, Freigabe je Empfänger, Tageslimit, Protokoll) |
 
 ## So gehst du vor (Windows PowerShell)
 
